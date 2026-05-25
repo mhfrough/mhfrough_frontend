@@ -1,0 +1,157 @@
+<!-- ─── Hero ─────────────────────────────────────────────────────────────────── -->
+<section class="hero-section" id="hero">
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-7">
+        <div class="hero-badge">
+          <i class="bi bi-circle-fill me-1" style="font-size:0.5rem;color:#22c55e;vertical-align:middle"></i>
+          Available for opportunities
+        </div>
+        <h1 class="hero-title mb-3">
+          Hi, I'm <span class="text-indigo">Mohammad<br>Hamza</span>
+        </h1>
+        <p class="hero-subtitle mb-4">
+          Senior Frontend Developer with {{ yearsExp }}+ years building scalable web applications — Angular, React, Node.js, fintech &amp; SaaS products.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="#projects" class="btn btn-indigo btn-lg px-4">
+            <i class="bi bi-grid me-2"></i>View Projects
+          </a>
+          <a routerLink="/contact" class="btn btn-outline-secondary btn-lg px-4">
+            <i class="bi bi-envelope me-2"></i>Hire Me
+          </a>
+        </div>
+        <div class="d-flex flex-wrap gap-4 mt-5">
+          <div>
+            <div class="fw-bold fs-4 text-indigo">{{ yearsExp }}+</div>
+            <div class="text-body-secondary small">Years Experience</div>
+          </div>
+          <div>
+            <div class="fw-bold fs-4 text-indigo">20+</div>
+            <div class="text-body-secondary small">Projects Delivered</div>
+          </div>
+          <div>
+            <div class="fw-bold fs-4 text-indigo">4</div>
+            <div class="text-body-secondary small">Major Fintech Apps</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5 text-center">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-body-secondary" style="width:300px;height:300px;max-width:100%;font-size:8rem">
+          👨‍💻
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── About ─────────────────────────────────────────────────────────────────── -->
+<section class="py-6" id="about" style="padding:5rem 0">
+  <div class="container">
+    <div class="row gy-4 align-items-center">
+      <div class="col-lg-6">
+        <h2 class="section-title mb-4">About Me</h2>
+        <p class="lead mb-3">
+          I'm a <strong>Senior Frontend Developer</strong> at Arittek Solutions, Karachi — specializing in Angular, React, micro-frontend architecture, and scalable UI/UX systems.
+        </p>
+        <p class="text-body-secondary">
+          Over {{ yearsExp }} years I've built and shipped major fintech products including <strong>Befiler</strong>, <strong>Emlaak Financials</strong>, <strong>Asaan Hisab</strong>, and the <strong>KPMC Portal</strong>. I hold a BSc in Computer Science from KIET Karachi and am passionate about performance, accessibility, and clean design systems.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <a href="https://github.com/mhfrough" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary"><i class="bi bi-github me-1"></i>GitHub</a>
+          <a href="https://www.linkedin.com/in/mhfrough/" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary"><i class="bi bi-linkedin me-1"></i>LinkedIn</a>
+          <a href="https://www.instagram.com/mhfrough1" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary"><i class="bi bi-instagram me-1"></i>Instagram</a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <h5 class="fw-semibold mb-3">Skills</h5>
+        @for (skill of skills; track skill.name) {
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small mb-1">
+              <span>{{ skill.name }}</span><span class="text-body-secondary">{{ skill.level }}%</span>
+            </div>
+            <div class="skill-bar">
+              <div class="skill-fill" [style.width.%]="skill.level"></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Projects ──────────────────────────────────────────────────────────────── -->
+<section class="py-5 bg-body-secondary" id="projects" style="padding:5rem 0">
+  <div class="container">
+    <h2 class="section-title mb-5">Projects</h2>
+    @if (loadingProjects()) {
+      <div class="d-flex justify-content-center py-5">
+        <div class="spinner-border text-indigo" role="status"><span class="visually-hidden">Loading…</span></div>
+      </div>
+    } @else if (projects().length === 0) {
+      <div class="text-center text-body-secondary py-5">No projects yet. Check back soon!</div>
+    } @else {
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @for (project of projects(); track project.id) {
+          <div class="col">
+            <div class="project-card card h-100 border-0 bg-body">
+              @if (project.thumbnail) {
+                <img [src]="project.thumbnail" [alt]="project.title" class="card-img-top">
+              } @else {
+                <div class="card-img-top d-flex align-items-center justify-content-center bg-body-tertiary" style="height:200px;font-size:3rem">🚀</div>
+              }
+              <div class="card-body">
+                <h5 class="card-title fw-bold">{{ project.title }}</h5>
+                <p class="card-text text-body-secondary small">{{ project.description }}</p>
+                @if (project.techStack?.length) {
+                  <div class="d-flex flex-wrap gap-1 mb-3">
+                    @for (tech of project.techStack; track tech) {
+                      <span class="tech-badge">{{ tech }}</span>
+                    }
+                  </div>
+                }
+                <div class="d-flex gap-2">
+                  @if (project.liveUrl) {
+                    <a [href]="project.liveUrl" target="_blank" rel="noopener" class="btn btn-sm btn-indigo"><i class="bi bi-box-arrow-up-right me-1"></i>Live</a>
+                  }
+                  @if (project.githubUrl) {
+                    <a [href]="project.githubUrl" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary"><i class="bi bi-github me-1"></i>Code</a>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ─── Experience ────────────────────────────────────────────────────────────── -->
+<section class="py-5" style="padding:5rem 0" id="experience">
+  <div class="container">
+    <h2 class="section-title mb-5">Experience</h2>
+    <div class="timeline">
+      @for (exp of experience; track exp.company) {
+        <div class="timeline-item">
+          <div class="fw-bold fs-5">{{ exp.role }}</div>
+          <div class="text-indigo fw-semibold">{{ exp.company }}</div>
+          <div class="text-body-secondary small mb-2">{{ exp.period }}</div>
+          <p class="text-body-secondary">{{ exp.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ───────────────────────────────────────────────────────────────────── -->
+<section class="py-5 bg-body-secondary text-center" style="padding:5rem 0">
+  <div class="container">
+    <h2 class="fw-bold fs-1 mb-3">Let's Work Together</h2>
+    <p class="text-body-secondary lead mb-4">Have a project in mind or want to say hello? I'd love to hear from you.</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a routerLink="/contact" class="btn btn-indigo btn-lg px-5">Get In Touch</a>
+      <a routerLink="/feedback" class="btn btn-outline-secondary btn-lg px-5">Leave a Review</a>
+    </div>
+  </div>
+</section>

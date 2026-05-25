@@ -1,0 +1,88 @@
+<div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">Blog Posts</h2>
+    <button class="btn btn-indigo" (click)="openNew()"><i class="bi bi-plus-lg me-1"></i>New Post</button>
+  </div>
+
+  @if (showForm()) {
+    <div class="card border-0 shadow-sm mb-4 p-4">
+      <h5 class="fw-semibold mb-4">{{ editing() ? 'Edit Post' : 'New Post' }}</h5>
+      <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label">Title *</label>
+            <input ngModel [ngModel]="editing()?.title" name="title" required class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Slug *</label>
+            <input ngModel [ngModel]="editing()?.slug" name="slug" required class="form-control" placeholder="my-post-slug">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Excerpt *</label>
+            <textarea ngModel [ngModel]="editing()?.excerpt" name="excerpt" required rows="2" class="form-control"></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Content * <span class="text-body-secondary small">(HTML supported)</span></label>
+            <textarea ngModel [ngModel]="editing()?.content" name="content" required rows="10" class="form-control font-monospace" style="font-size:0.85rem"></textarea>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Tags (comma-separated)</label>
+            <input ngModel [ngModel]="editing()?.tags" name="tags" class="form-control" placeholder="Angular, Web Dev">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Read Time (mins)</label>
+            <input ngModel [ngModel]="editing()?.readTimeMinutes ?? 5" name="readTimeMinutes" type="number" min="1" class="form-control">
+          </div>
+          <div class="col-md-3 d-flex align-items-end pb-1">
+            <div class="form-check">
+              <input ngModel [ngModel]="editing()?.isPublished ?? false" name="isPublished" type="checkbox" class="form-check-input" id="bpub">
+              <label class="form-check-label" for="bpub">Publish now</label>
+            </div>
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-indigo" [disabled]="saving()">
+              @if (saving()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              {{ editing() ? 'Update' : 'Create' }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="d-flex justify-content-center py-5"><div class="spinner-border text-indigo"></div></div>
+  } @else if (blogs().length === 0) {
+    <div class="text-center text-body-secondary py-5">No blog posts yet.</div>
+  } @else {
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr><th>Title</th><th>Slug</th><th>Status</th><th>Read Time</th><th>Date</th><th></th></tr>
+          </thead>
+          <tbody>
+            @for (b of blogs(); track b.id) {
+              <tr>
+                <td class="fw-medium">{{ b.title }}</td>
+                <td class="small text-body-secondary font-monospace">{{ b.slug }}</td>
+                <td>
+                  <span class="badge" [class.bg-success]="b.isPublished" [class.bg-secondary]="!b.isPublished">
+                    {{ b.isPublished ? 'Published' : 'Draft' }}
+                  </span>
+                </td>
+                <td class="small">{{ b.readTimeMinutes }}m</td>
+                <td class="small text-body-secondary">{{ b.createdAt | date:'MMM d, y' }}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-secondary me-1" (click)="edit(b)"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="remove(b.id)"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

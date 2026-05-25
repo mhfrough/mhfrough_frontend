@@ -1,0 +1,288 @@
+// Bootstrap 5.3
+@import "bootstrap/scss/bootstrap";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+// ─── CSS Custom Properties ───────────────────────────────────────────────────
+:root {
+  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --transition: 0.25s ease;
+}
+
+// ─── Base ────────────────────────────────────────────────────────────────────
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  transition: background-color var(--transition), color var(--transition);
+  overflow-x: hidden;
+}
+
+// ─── Ticker / Marquee ────────────────────────────────────────────────────────
+.ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  background: #0d0d0d;
+  color: #fff;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  padding: 6px 0;
+
+  [data-bs-theme="light"] & {
+    background: #111827;
+  }
+}
+
+.ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker-scroll 40s linear infinite;
+  will-change: transform;
+
+  span {
+    padding: 0 3rem;
+    opacity: 0.85;
+    &::before { content: '✦'; margin-right: 3rem; opacity: 0.4; }
+  }
+}
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+// ─── Navbar ───────────────────────────────────────────────────────────────────
+.navbar-brand { font-weight: 700; letter-spacing: -0.03em; font-size: 1.25rem; }
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+
+  .hero-title {
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    opacity: 0.7;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(99,102,241,0.12);
+    color: #6366f1;
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 100px;
+    padding: 4px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 1.25rem;
+  }
+}
+
+// ─── Section Titles ───────────────────────────────────────────────────────────
+.section-title {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+
+  &::after {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 3px;
+    background: #6366f1;
+    border-radius: 2px;
+    margin-top: 0.5rem;
+  }
+}
+
+// ─── Project Cards ────────────────────────────────────────────────────────────
+.project-card {
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+
+  .card-img-top { height: 200px; object-fit: cover; }
+
+  [data-bs-theme="dark"] & {
+    border-color: rgba(255,255,255,0.08);
+    &:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+  }
+}
+
+// ─── Tech Badge ───────────────────────────────────────────────────────────────
+.tech-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: rgba(99,102,241,0.1);
+  color: #6366f1;
+  border: 1px solid rgba(99,102,241,0.2);
+}
+
+// ─── Back to Top ──────────────────────────────────────────────────────────────
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--transition), transform var(--transition);
+  pointer-events: none;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+}
+
+// ─── Chat Widget ──────────────────────────────────────────────────────────────
+.chat-widget-btn {
+  position: fixed;
+  bottom: 5.5rem;
+  right: 2rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+  transition: transform var(--transition);
+
+  &:hover { transform: scale(1.08); }
+}
+
+.chat-popup {
+  position: fixed;
+  bottom: 9.5rem;
+  right: 2rem;
+  width: 320px;
+  border-radius: 16px;
+  z-index: 1049;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  overflow: hidden;
+
+  @media (max-width: 480px) {
+    width: calc(100vw - 2rem);
+    right: 1rem;
+  }
+}
+
+// ─── Stars Rating ─────────────────────────────────────────────────────────────
+.stars { color: #f59e0b; letter-spacing: 2px; }
+
+// ─── Admin Sidebar ────────────────────────────────────────────────────────────
+.admin-sidebar {
+  width: 240px;
+  min-height: 100vh;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    min-height: auto;
+    position: static;
+  }
+}
+
+.admin-content { flex: 1; min-width: 0; }
+
+// ─── Timeline ─────────────────────────────────────────────────────────────────
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0.45rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(99,102,241,0.25);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -1.68rem;
+      top: 0.35rem;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+    }
+  }
+}
+
+// ─── Skill Bar ────────────────────────────────────────────────────────────────
+.skill-bar {
+  height: 6px;
+  border-radius: 100px;
+  background: rgba(0,0,0,0.08);
+  overflow: hidden;
+
+  .skill-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    transition: width 1s ease;
+  }
+
+  [data-bs-theme="dark"] & { background: rgba(255,255,255,0.08); }
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+footer {
+  border-top: 1px solid rgba(0,0,0,0.08);
+
+  [data-bs-theme="dark"] & { border-color: rgba(255,255,255,0.08); }
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+.btn-indigo {
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  &:hover { background: #4f46e5; color: #fff; }
+}
+
+.text-indigo { color: #6366f1 !important; }
+.border-indigo { border-color: #6366f1 !important; }
+
+a { transition: color var(--transition); }

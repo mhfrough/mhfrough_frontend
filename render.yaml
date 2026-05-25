@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mhfrough-frontend
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run serve:ssr
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4223

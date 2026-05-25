@@ -1,0 +1,40 @@
+<div>
+  <h2 class="fw-bold mb-4">Feedback & Reviews</h2>
+
+  @if (loading()) {
+    <div class="d-flex justify-content-center py-5"><div class="spinner-border text-indigo"></div></div>
+  } @else if (feedback().length === 0) {
+    <div class="text-center text-body-secondary py-5">No feedback yet.</div>
+  } @else {
+    <div class="d-flex flex-column gap-3">
+      @for (fb of feedback(); track fb.id) {
+        <div class="card border-0 shadow-sm p-4">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+              <div class="fw-bold">{{ fb.name }}</div>
+              @if (fb.role || fb.company) {
+                <div class="text-body-secondary small">{{ fb.role }}{{ fb.role && fb.company ? ' · ' : '' }}{{ fb.company }}</div>
+              }
+              <div class="stars mt-1">
+                @for (s of [1,2,3,4,5]; track s) {
+                  {{ s <= fb.rating ? '★' : '☆' }}
+                }
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge" [class.bg-success]="fb.isApproved" [class.bg-warning]="!fb.isApproved" [class.text-dark]="!fb.isApproved">
+                {{ fb.isApproved ? 'Approved' : 'Pending' }}
+              </span>
+              <span class="text-body-secondary small">{{ fb.createdAt | date:'MMM d, y' }}</span>
+              @if (!fb.isApproved) {
+                <button class="btn btn-sm btn-success" (click)="approve(fb.id)">Approve</button>
+              }
+              <button class="btn btn-sm btn-outline-danger" (click)="remove(fb.id)"><i class="bi bi-trash"></i></button>
+            </div>
+          </div>
+          <p class="mb-0 mt-3 text-body-secondary fst-italic">"{{ fb.review }}"</p>
+        </div>
+      }
+    </div>
+  }
+</div>

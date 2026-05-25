@@ -1,0 +1,61 @@
+<div class="container py-5 mt-4" style="max-width:680px">
+  <h1 class="section-title mb-2">Leave a Review</h1>
+  <p class="text-body-secondary mb-5">Worked with me? I'd love to hear your feedback!</p>
+
+  @if (sent()) {
+    <div class="alert alert-success d-flex align-items-center gap-2">
+      <i class="bi bi-check-circle-fill fs-5"></i>
+      <div>Thank you! Your review has been submitted for approval.</div>
+    </div>
+  }
+  @if (error()) {
+    <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  <form #f="ngForm" (ngSubmit)="submit(f)" novalidate>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-medium">Name <span class="text-danger">*</span></label>
+        <input ngModel name="name" required minlength="2" maxlength="100"
+               class="form-control" [class.is-invalid]="f.submitted && f.controls['name']?.invalid"
+               placeholder="Your name">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-medium">Company</label>
+        <input ngModel name="company" class="form-control" placeholder="Company name">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-medium">Your Role</label>
+        <input ngModel name="role" class="form-control" placeholder="CTO, Product Manager…">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-medium d-block">Rating <span class="text-danger">*</span></label>
+        <div class="d-flex gap-1 mt-1">
+          @for (star of stars; track star) {
+            <button type="button" class="btn btn-link p-0 fs-4 text-decoration-none"
+                    [style.color]="star <= selectedRating ? '#f59e0b' : '#dee2e6'"
+                    (click)="selectedRating = star">
+              <i class="bi bi-star-fill"></i>
+            </button>
+          }
+        </div>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-medium">Review <span class="text-danger">*</span></label>
+        <textarea ngModel name="review" required minlength="10" maxlength="1000" rows="5"
+                  class="form-control" [class.is-invalid]="f.submitted && f.controls['review']?.invalid"
+                  placeholder="Share your experience working with me…"></textarea>
+        <div class="invalid-feedback">Please write a review (min 10 characters).</div>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-indigo btn-lg px-5" [disabled]="sending()">
+          @if (sending()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>Submitting…
+          } @else {
+            <i class="bi bi-star me-2"></i>Submit Review
+          }
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,98 @@
+<div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">Projects</h2>
+    <button class="btn btn-indigo" (click)="openNew()"><i class="bi bi-plus-lg me-1"></i>Add Project</button>
+  </div>
+
+  @if (showForm()) {
+    <div class="card border-0 shadow-sm mb-4 p-4">
+      <h5 class="fw-semibold mb-4">{{ editing() ? 'Edit Project' : 'New Project' }}</h5>
+      <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Title *</label>
+            <input ngModel [ngModel]="editing()?.title" name="title" required class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Tech Stack (comma-separated)</label>
+            <input ngModel [ngModel]="editing()?.techStack" name="techStack" class="form-control" placeholder="Angular, NestJS, PostgreSQL">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description *</label>
+            <textarea ngModel [ngModel]="editing()?.description" name="description" required rows="3" class="form-control"></textarea>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Live URL</label>
+            <input ngModel [ngModel]="editing()?.liveUrl" name="liveUrl" class="form-control" type="url">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">GitHub URL</label>
+            <input ngModel [ngModel]="editing()?.githubUrl" name="githubUrl" class="form-control" type="url">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Thumbnail URL</label>
+            <input ngModel [ngModel]="editing()?.thumbnail" name="thumbnail" class="form-control">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Sort Order</label>
+            <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number" class="form-control">
+          </div>
+          <div class="col-md-3 d-flex align-items-end gap-3 pb-1">
+            <div class="form-check">
+              <input ngModel [ngModel]="editing()?.isPublished ?? true" name="isPublished" type="checkbox" class="form-check-input" id="pub">
+              <label class="form-check-label" for="pub">Published</label>
+            </div>
+            <div class="form-check">
+              <input ngModel [ngModel]="editing()?.featured ?? false" name="featured" type="checkbox" class="form-check-input" id="feat">
+              <label class="form-check-label" for="feat">Featured</label>
+            </div>
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-indigo" [disabled]="saving()">
+              @if (saving()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              {{ editing() ? 'Update' : 'Create' }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="d-flex justify-content-center py-5"><div class="spinner-border text-indigo"></div></div>
+  } @else if (projects().length === 0) {
+    <div class="text-center text-body-secondary py-5">No projects yet.</div>
+  } @else {
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Title</th><th>Tech</th><th>Status</th><th>Featured</th><th>Order</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of projects(); track p.id) {
+              <tr>
+                <td class="fw-medium">{{ p.title }}</td>
+                <td class="small text-body-secondary">{{ p.techStack?.slice(0,3).join(', ') }}</td>
+                <td>
+                  <span class="badge" [class.bg-success]="p.isPublished" [class.bg-secondary]="!p.isPublished">
+                    {{ p.isPublished ? 'Published' : 'Draft' }}
+                  </span>
+                </td>
+                <td><i class="bi" [class.bi-star-fill]="p.featured" [class.bi-star]="!p.featured" [class.text-warning]="p.featured"></i></td>
+                <td>{{ p.sortOrder }}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-secondary me-1" (click)="edit(p)"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="remove(p.id)"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

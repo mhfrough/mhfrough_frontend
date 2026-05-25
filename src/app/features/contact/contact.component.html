@@ -1,0 +1,73 @@
+<div class="container py-5 mt-4" style="max-width:760px">
+  <h1 class="section-title mb-2">Get In Touch</h1>
+  <p class="text-body-secondary mb-5">Have a project, opportunity, or just want to say hello? Fill out the form below.</p>
+
+  @if (sent()) {
+    <div class="alert alert-success d-flex align-items-center gap-2">
+      <i class="bi bi-check-circle-fill fs-5"></i>
+      <div>Message sent! I'll get back to you soon.</div>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  <form #f="ngForm" (ngSubmit)="submit(f)" novalidate>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-medium">Name <span class="text-danger">*</span></label>
+        <input ngModel name="name" required minlength="2" maxlength="100"
+               class="form-control" [class.is-invalid]="f.submitted && f.controls['name']?.invalid"
+               placeholder="Your full name">
+        <div class="invalid-feedback">Please enter your name.</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-medium">Email <span class="text-danger">*</span></label>
+        <input ngModel name="email" required email type="email"
+               class="form-control" [class.is-invalid]="f.submitted && f.controls['email']?.invalid"
+               placeholder="you@example.com">
+        <div class="invalid-feedback">Please enter a valid email.</div>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-medium">Subject</label>
+        <input ngModel name="subject" maxlength="200" class="form-control" placeholder="Project inquiry, collaboration…">
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-medium">Message <span class="text-danger">*</span></label>
+        <textarea ngModel name="message" required minlength="10" maxlength="2000" rows="6"
+                  class="form-control" [class.is-invalid]="f.submitted && f.controls['message']?.invalid"
+                  placeholder="Tell me about your project…"></textarea>
+        <div class="invalid-feedback">Please enter a message (min 10 characters).</div>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-indigo btn-lg px-5" [disabled]="sending()">
+          @if (sending()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>Sending…
+          } @else {
+            <i class="bi bi-send me-2"></i>Send Message
+          }
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <hr class="my-5">
+  <div class="row g-4 text-center">
+    <div class="col-md-4">
+      <i class="bi bi-envelope-fill fs-3 text-indigo mb-2 d-block"></i>
+      <div class="fw-medium">Email</div>
+      <a href="mailto:mhfrough@yahoo.com" class="text-body-secondary small">mhfrough&#64;yahoo.com</a>
+    </div>
+    <div class="col-md-4">
+      <i class="bi bi-linkedin fs-3 text-indigo mb-2 d-block"></i>
+      <div class="fw-medium">LinkedIn</div>
+      <a href="https://www.linkedin.com/in/mhfrough/" target="_blank" rel="noopener" class="text-body-secondary small">in/mhfrough</a>
+    </div>
+    <div class="col-md-4">
+      <i class="bi bi-geo-alt-fill fs-3 text-indigo mb-2 d-block"></i>
+      <div class="fw-medium">Location</div>
+      <span class="text-body-secondary small">Karachi, Pakistan</span>
+    </div>
+  </div>
+</div>
