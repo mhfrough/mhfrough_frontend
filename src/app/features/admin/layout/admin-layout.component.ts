@@ -1,6 +1,8 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { AdminNotificationService } from '../../../core/services/admin-notification.service';
 
@@ -13,9 +15,24 @@ import { AdminNotificationService } from '../../../core/services/admin-notificat
 export class AdminLayoutComponent implements OnInit, OnDestroy {
     readonly auth = inject(AuthService);
     readonly notif = inject(AdminNotificationService);
+    private readonly router = inject(Router);
+    readonly menuOpen = signal(false);
+    private subs = new Subscription();
 
-    ngOnInit() { this.notif.init(); }
-    ngOnDestroy() { this.notif.disconnect(); }
+    ngOnInit() {
+        this.notif.init();
+        this.subs.add(
+            this.router.events.pipe(filter(e => e instanceof NavigationEnd))
+                .subscribe(() => this.menuOpen.set(false))
+        );
+    }
 
+    ngOnDestroy() {
+        this.notif.disconnect();
+        this.subs.unsubscribe();
+    }
+
+    toggleMenu() { this.menuOpen.update(v => !v); }
+    closeMenu() { this.menuOpen.set(false); }
     logout() { this.auth.logout().subscribe(); }
 }

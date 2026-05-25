@@ -1,7 +1,25 @@
-<div class="admin-wrap">
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
+<div class="admin-wrap" [class.admin-wrap--menu-open]="menuOpen()">
+
+    <!-- Mobile top bar -->
+    <header class="admin-mobile-bar">
         <p class="admin-sidebar-logo"><span>MHFrough</span><span style="color:var(--indigo)">.</span></p>
+        <button class="admin-hamburger" (click)="toggleMenu()"
+            [attr.aria-label]="menuOpen() ? 'Close menu' : 'Open menu'">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
+
+    <!-- Overlay (mobile only) -->
+    <div class="admin-drawer-overlay" (click)="closeMenu()"></div>
+
+    <!-- Sidebar / Drawer -->
+    <aside class="admin-sidebar" [class.admin-sidebar--open]="menuOpen()">
+        <div class="admin-sidebar-head">
+            <p class="admin-sidebar-logo"><span>MHFrough</span><span style="color:var(--indigo)">.</span></p>
+            <button class="admin-drawer-close" (click)="closeMenu()" aria-label="Close menu">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
         <ul class="admin-nav">
             <li>
                 <a class="admin-nav-link" routerLink="/admin/dashboard" routerLinkActive="is-active">
@@ -65,8 +83,7 @@
         <div class="admin-toast" [class.admin-toast--inquiry]="toast.type === 'inquiry'"
             [class.admin-toast--feedback]="toast.type === 'feedback'"
             [class.admin-toast--comment]="toast.type === 'comment'">
-            <i class="bi" [class.bi-envelope]="toast.type === 'inquiry'"
-                [class.bi-star]="toast.type === 'feedback'"
+            <i class="bi" [class.bi-envelope]="toast.type === 'inquiry'" [class.bi-star]="toast.type === 'feedback'"
                 [class.bi-chat-left-text]="toast.type === 'comment'"></i>
             <span>{{ toast.message }}</span>
             <button class="admin-toast-close" (click)="notif.dismissToast(toast.id)">
