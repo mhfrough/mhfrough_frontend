@@ -2,7 +2,7 @@
 @import "bootstrap/scss/bootstrap";
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
-// --- Local Fonts (from @fontsource — no external CDN) ------------------------
+// --- Local Fonts (from @fontsource ï¿½ no external CDN) ------------------------
 @import "@fontsource/inconsolata/300.css";
 @import "@fontsource/inconsolata/400.css";
 @import "@fontsource/inconsolata/500.css";
@@ -20,7 +20,7 @@
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
     --dur: 220ms;
 
-    // Main site palette — paper
+    // Main site palette ï¿½ paper
     --bg: #edebe7;
     --bg-alt: #edebe7;
     --text: #2e2c29;
@@ -3226,13 +3226,17 @@ body::before {
     &--inquiry {
         border-left: 3px solid #dc2626;
 
-        i { color: #dc2626; }
+        i {
+            color: #dc2626;
+        }
     }
 
     &--feedback {
         border-left: 3px solid #d97706;
 
-        i { color: #d97706; }
+        i {
+            color: #d97706;
+        }
     }
 }
 
@@ -3247,12 +3251,21 @@ body::before {
     font-size: 1rem;
     transition: color var(--dur) var(--ease);
 
-    &:hover { color: var(--text); }
+    &:hover {
+        color: var(--text);
+    }
 }
 
 @keyframes toast-in {
-    from { opacity: 0; transform: translateX(1rem); }
-    to   { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(1rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 // --- Admin Confirm Delete Modal -----------------------------------------------
@@ -3320,11 +3333,23 @@ body::before {
 }
 
 @keyframes overlay-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes modal-in {
-    from { opacity: 0; transform: translateY(-0.5rem); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-0.5rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
