@@ -1,60 +1,47 @@
-<div>
-  <h2 class="fw-bold mb-1">Dashboard</h2>
-  <p class="text-body-secondary mb-4">Welcome back, Mohammad Hamza 👋</p>
-
-  @if (stats()) {
-    <div class="row g-3 mb-5">
-      <div class="col-6 col-lg-3">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body text-center py-4">
-            <div class="fs-1 text-indigo fw-bold">{{ stats().projects.total }}</div>
-            <div class="text-body-secondary small mt-1"><i class="bi bi-grid me-1"></i>Projects</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body text-center py-4">
-            <div class="fs-1 text-indigo fw-bold">{{ stats().blogs.total }}</div>
-            <div class="text-body-secondary small mt-1"><i class="bi bi-pencil me-1"></i>Blog Posts</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body text-center py-4">
-            <div class="fs-1 text-indigo fw-bold">{{ stats().inquiries.total }}</div>
-            <div class="text-body-secondary small mt-1"><i class="bi bi-envelope me-1"></i>Inquiries</div>
-            @if (stats().inquiries.new > 0) {
-              <span class="badge bg-danger mt-1">{{ stats().inquiries.new }} new</span>
-            }
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body text-center py-4">
-            <div class="fs-1 text-indigo fw-bold">{{ stats().feedback.total }}</div>
-            <div class="text-body-secondary small mt-1"><i class="bi bi-star me-1"></i>Reviews</div>
-            @if (stats().feedback.pending > 0) {
-              <span class="badge bg-warning text-dark mt-1">{{ stats().feedback.pending }} pending</span>
-            }
-          </div>
-        </div>
-      </div>
+<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">Dashboard</h1>
+        <p class="admin-page-sub">Welcome back, Mohammad Hamza.</p>
     </div>
-
-    <div class="card border-0 shadow-sm p-4">
-      <h5 class="fw-semibold mb-0">Quick Links</h5>
-      <div class="d-flex flex-wrap gap-2 mt-3">
-        <a routerLink="/admin/projects" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus me-1"></i>Add Project</a>
-        <a routerLink="/admin/blogs" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus me-1"></i>New Post</a>
-        <a routerLink="/admin/inquiries" class="btn btn-outline-secondary btn-sm"><i class="bi bi-envelope me-1"></i>View Inquiries</a>
-      </div>
-    </div>
-  } @else {
-    <div class="d-flex justify-content-center py-5">
-      <div class="spinner-border text-indigo"></div>
-    </div>
-  }
 </div>
+
+@if (stats()) {
+<div class="admin-stats-grid">
+    <div class="admin-stat-card">
+        <div class="admin-stat-value">{{ stats().projects.total }}</div>
+        <div class="admin-stat-label">Projects</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-value">{{ stats().blogs.total }}</div>
+        <div class="admin-stat-label">Blog Posts</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-value">{{ stats().inquiries.total }}</div>
+        <div class="admin-stat-label">Inquiries</div>
+        @if (stats().inquiries.new > 0) {
+        <div class="admin-stat-badge admin-stat-badge--danger">{{ stats().inquiries.new }} new</div>
+        }
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-value">{{ stats().feedback.total }}</div>
+        <div class="admin-stat-label">Reviews</div>
+        @if (stats().feedback.pending > 0) {
+        <div class="admin-stat-badge admin-stat-badge--warn">{{ stats().feedback.pending }} pending</div>
+        }
+    </div>
+</div>
+
+<div class="admin-quick-links">
+    <p class="admin-quick-links-title">Quick Links</p>
+    <div class="admin-quick-links-row">
+        <a routerLink="/admin/projects" class="btn-ghost">Add Project</a>
+        <a routerLink="/admin/blogs" class="btn-ghost">New Post</a>
+        <a routerLink="/admin/inquiries" class="btn-ghost">View Inquiries</a>
+        <a routerLink="/admin/feedback" class="btn-ghost">View Feedback</a>
+    </div>
+</div>
+} @else {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+}

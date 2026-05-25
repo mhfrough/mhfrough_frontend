@@ -1,12 +1,17 @@
 {
+  "id": "/",
   "name": "Mohammad Hamza — Senior Frontend Developer",
   "short_name": "mhfrough.dev",
   "description": "Personal portfolio of Mohammad Hamza, Senior Frontend Developer based in Karachi, Pakistan.",
   "theme_color": "#6366f1",
   "background_color": "#ffffff",
   "display": "standalone",
-  "scope": "./",
-  "start_url": "./",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "scope": "/",
+  "start_url": "/",
   "icons": [
     {
       "src": "icons/icon-72x72.png",

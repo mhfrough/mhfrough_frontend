@@ -1,35 +1,69 @@
-<div class="d-flex flex-column flex-md-row min-vh-100 bg-body-secondary">
-  <!-- Sidebar -->
-  <aside class="admin-sidebar bg-body border-end py-4 px-3">
-    <div class="fw-bold fs-5 text-indigo mb-4 px-2">⚡ MH Admin</div>
-    <nav class="nav flex-column gap-1">
-      <a class="nav-link rounded-2 px-3 py-2" routerLink="/admin/dashboard" routerLinkActive="bg-indigo text-white fw-semibold">
-        <i class="bi bi-speedometer2 me-2"></i>Dashboard
-      </a>
-      <a class="nav-link rounded-2 px-3 py-2" routerLink="/admin/projects" routerLinkActive="bg-indigo text-white fw-semibold">
-        <i class="bi bi-grid-3x3-gap me-2"></i>Projects
-      </a>
-      <a class="nav-link rounded-2 px-3 py-2" routerLink="/admin/blogs" routerLinkActive="bg-indigo text-white fw-semibold">
-        <i class="bi bi-pencil-square me-2"></i>Blogs
-      </a>
-      <a class="nav-link rounded-2 px-3 py-2" routerLink="/admin/inquiries" routerLinkActive="bg-indigo text-white fw-semibold">
-        <i class="bi bi-envelope me-2"></i>Inquiries
-      </a>
-      <a class="nav-link rounded-2 px-3 py-2" routerLink="/admin/feedback" routerLinkActive="bg-indigo text-white fw-semibold">
-        <i class="bi bi-star me-2"></i>Feedback
-      </a>
-      <hr class="my-2">
-      <a class="nav-link rounded-2 px-3 py-2" routerLink="/" target="_blank">
-        <i class="bi bi-box-arrow-up-right me-2"></i>View Site
-      </a>
-      <button class="nav-link rounded-2 px-3 py-2 text-start text-danger border-0 bg-transparent w-100" (click)="logout()">
-        <i class="bi bi-box-arrow-right me-2"></i>Logout
-      </button>
-    </nav>
-  </aside>
+<div class="admin-wrap">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <p class="admin-sidebar-logo"><span>MHFrough</span><span style="color:var(--indigo)">.</span></p>
+        <ul class="admin-nav">
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/dashboard" routerLinkActive="is-active">
+                    <i class="bi bi-speedometer2"></i>Dashboard
+                </a>
+            </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/projects" routerLinkActive="is-active">
+                    <i class="bi bi-grid-3x3-gap"></i>Projects
+                </a>
+            </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/blogs" routerLinkActive="is-active">
+                    <i class="bi bi-pencil-square"></i>Blogs
+                </a>
+            </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/inquiries" routerLinkActive="is-active">
+                    <i class="bi bi-envelope"></i>Inquiries
+                    @if (notif.unreadInquiries() > 0) {
+                    <span class="admin-nav-badge admin-nav-badge--danger">{{ notif.unreadInquiries() }}</span>
+                    }
+                </a>
+            </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/feedback" routerLinkActive="is-active">
+                    <i class="bi bi-star"></i>Feedback
+                    @if (notif.pendingFeedback() > 0) {
+                    <span class="admin-nav-badge admin-nav-badge--warn">{{ notif.pendingFeedback() }}</span>
+                    }
+                </a>
+            </li>
+        </ul>
+        <div class="admin-nav-bottom">
+            <a class="admin-nav-link" routerLink="/" target="_blank">
+                <i class="bi bi-box-arrow-up-right"></i>View Site
+            </a>
+            <button class="admin-nav-link" (click)="logout()">
+                <i class="bi bi-box-arrow-right"></i>Logout
+            </button>
+        </div>
+    </aside>
 
-  <!-- Content -->
-  <main class="admin-content p-4">
-    <router-outlet />
-  </main>
+    <!-- Content -->
+    <main class="admin-content">
+        <router-outlet />
+    </main>
+
+    <!-- Toast notifications -->
+    @if (notif.toasts().length > 0) {
+    <div class="admin-toasts">
+        @for (toast of notif.toasts(); track toast.id) {
+        <div class="admin-toast" [class.admin-toast--inquiry]="toast.type === 'inquiry'"
+            [class.admin-toast--feedback]="toast.type === 'feedback'">
+            <i class="bi" [class.bi-envelope]="toast.type === 'inquiry'"
+                [class.bi-star]="toast.type === 'feedback'"></i>
+            <span>{{ toast.message }}</span>
+            <button class="admin-toast-close" (click)="notif.dismissToast(toast.id)">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+        }
+    </div>
+    }
 </div>

@@ -1,34 +1,40 @@
-<div>
-  <h2 class="fw-bold mb-4">Inquiries</h2>
-
-  @if (loading()) {
-    <div class="d-flex justify-content-center py-5"><div class="spinner-border text-indigo"></div></div>
-  } @else if (inquiries().length === 0) {
-    <div class="text-center text-body-secondary py-5">No inquiries yet.</div>
-  } @else {
-    <div class="d-flex flex-column gap-3">
-      @for (inq of inquiries(); track inq.id) {
-        <div class="card border-0 shadow-sm p-4" [class.opacity-75]="inq.status !== 'new'">
-          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-            <div>
-              <div class="fw-bold">{{ inq.name }} <span class="text-body-secondary fw-normal small">— {{ inq.email }}</span></div>
-              @if (inq.subject) { <div class="text-body-secondary small">{{ inq.subject }}</div> }
-            </div>
-            <div class="d-flex align-items-center gap-2">
-              <span class="badge rounded-pill"
-                    [class.bg-danger]="inq.status==='new'"
-                    [class.bg-secondary]="inq.status!=='new'">
-                {{ inq.status }}
-              </span>
-              <span class="text-body-secondary small">{{ inq.createdAt | date:'MMM d, y' }}</span>
-              @if (inq.status === 'new') {
-                <button class="btn btn-sm btn-outline-secondary" (click)="markRead(inq.id)">Mark Read</button>
-              }
-            </div>
-          </div>
-          <p class="mb-0 mt-3 text-body-secondary" style="white-space:pre-wrap">{{ inq.message }}</p>
-        </div>
-      }
-    </div>
-  }
+<div class="admin-page-header">
+    <h1 class="admin-page-title">Inquiries</h1>
 </div>
+
+@if (loading()) {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+} @else if (inquiries().length === 0) {
+<p class="empty-state">No inquiries yet.</p>
+} @else {
+<div class="admin-card-list">
+    @for (inq of inquiries(); track inq.id) {
+    <div class="admin-card" [class.admin-card--muted]="inq.status !== 'new'">
+        <div class="admin-card-header">
+            <div>
+                <div>
+                    <span class="admin-card-name">{{ inq.name }}</span>
+                    <span class="admin-card-email">&mdash; {{ inq.email }}</span>
+                </div>
+                @if (inq.subject) {
+                <p class="admin-card-subject">{{ inq.subject }}</p>
+                }
+            </div>
+            <div class="admin-card-actions">
+                <span class="admin-badge" [class.admin-badge--danger]="inq.status === 'new'">
+                    {{ inq.status }}
+                </span>
+                <span class="admin-card-date">{{ inq.createdAt | date:'MMM d, y' }}</span>
+                @if (inq.status === 'new') {
+                <button class="btn-ghost" (click)="markRead(inq.id)" style="font-size:0.68rem;padding:0.45rem 1rem">Mark
+                    Read</button>
+                }
+            </div>
+        </div>
+        <p class="admin-card-message">{{ inq.message }}</p>
+    </div>
+    }
+</div>
+}

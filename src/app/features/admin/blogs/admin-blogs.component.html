@@ -1,88 +1,154 @@
-<div>
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold mb-0">Blog Posts</h2>
-    <button class="btn btn-indigo" (click)="openNew()"><i class="bi bi-plus-lg me-1"></i>New Post</button>
-  </div>
-
-  @if (showForm()) {
-    <div class="card border-0 shadow-sm mb-4 p-4">
-      <h5 class="fw-semibold mb-4">{{ editing() ? 'Edit Post' : 'New Post' }}</h5>
-      <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
-        <div class="row g-3">
-          <div class="col-md-8">
-            <label class="form-label">Title *</label>
-            <input ngModel [ngModel]="editing()?.title" name="title" required class="form-control">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Slug *</label>
-            <input ngModel [ngModel]="editing()?.slug" name="slug" required class="form-control" placeholder="my-post-slug">
-          </div>
-          <div class="col-12">
-            <label class="form-label">Excerpt *</label>
-            <textarea ngModel [ngModel]="editing()?.excerpt" name="excerpt" required rows="2" class="form-control"></textarea>
-          </div>
-          <div class="col-12">
-            <label class="form-label">Content * <span class="text-body-secondary small">(HTML supported)</span></label>
-            <textarea ngModel [ngModel]="editing()?.content" name="content" required rows="10" class="form-control font-monospace" style="font-size:0.85rem"></textarea>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Tags (comma-separated)</label>
-            <input ngModel [ngModel]="editing()?.tags" name="tags" class="form-control" placeholder="Angular, Web Dev">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">Read Time (mins)</label>
-            <input ngModel [ngModel]="editing()?.readTimeMinutes ?? 5" name="readTimeMinutes" type="number" min="1" class="form-control">
-          </div>
-          <div class="col-md-3 d-flex align-items-end pb-1">
-            <div class="form-check">
-              <input ngModel [ngModel]="editing()?.isPublished ?? false" name="isPublished" type="checkbox" class="form-check-input" id="bpub">
-              <label class="form-check-label" for="bpub">Publish now</label>
-            </div>
-          </div>
-          <div class="col-12 d-flex gap-2">
-            <button type="submit" class="btn btn-indigo" [disabled]="saving()">
-              @if (saving()) { <span class="spinner-border spinner-border-sm me-1"></span> }
-              {{ editing() ? 'Update' : 'Create' }}
-            </button>
-            <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  }
-
-  @if (loading()) {
-    <div class="d-flex justify-content-center py-5"><div class="spinner-border text-indigo"></div></div>
-  } @else if (blogs().length === 0) {
-    <div class="text-center text-body-secondary py-5">No blog posts yet.</div>
-  } @else {
-    <div class="card border-0 shadow-sm">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-            <tr><th>Title</th><th>Slug</th><th>Status</th><th>Read Time</th><th>Date</th><th></th></tr>
-          </thead>
-          <tbody>
-            @for (b of blogs(); track b.id) {
-              <tr>
-                <td class="fw-medium">{{ b.title }}</td>
-                <td class="small text-body-secondary font-monospace">{{ b.slug }}</td>
-                <td>
-                  <span class="badge" [class.bg-success]="b.isPublished" [class.bg-secondary]="!b.isPublished">
-                    {{ b.isPublished ? 'Published' : 'Draft' }}
-                  </span>
-                </td>
-                <td class="small">{{ b.readTimeMinutes }}m</td>
-                <td class="small text-body-secondary">{{ b.createdAt | date:'MMM d, y' }}</td>
-                <td class="text-end">
-                  <button class="btn btn-sm btn-outline-secondary me-1" (click)="edit(b)"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger" (click)="remove(b.id)"><i class="bi bi-trash"></i></button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
+<div class="admin-page-header">
+    <h1 class="admin-page-title">Blog Posts</h1>
+    <button class="btn-primary" (click)="openNew()">New Post</button>
 </div>
+
+@if (showForm()) {
+<div class="admin-form-panel">
+    <p class="admin-form-title">{{ editing() ? 'Edit Post' : 'New Post' }}</p>
+    <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+        <div class="admin-form-grid">
+            <div class="admin-form-field">
+                <label class="admin-form-label">Title *</label>
+                <input ngModel [ngModel]="editing()?.title" name="title" required class="admin-form-input"
+                    placeholder="Post title">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Slug *</label>
+                <input ngModel [ngModel]="editing()?.slug" name="slug" required class="admin-form-input"
+                    placeholder="my-post-slug">
+            </div>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Excerpt *</label>
+            <textarea ngModel [ngModel]="editing()?.excerpt" name="excerpt" required rows="2"
+                class="admin-form-textarea"></textarea>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Content *</label>
+            <div class="rte-wrap">
+                <div class="rte-toolbar">
+                    <button type="button" class="rte-btn" title="Bold"
+                        (click)="format(contentArea, '<strong>', '</strong>')"><i class="bi bi-type-bold"></i></button>
+                    <button type="button" class="rte-btn" title="Italic"
+                        (click)="format(contentArea, '<em>', '</em>')"><i class="bi bi-type-italic"></i></button>
+                    <button type="button" class="rte-btn" title="Underline"
+                        (click)="format(contentArea, '<u>', '</u>')"><i class="bi bi-type-underline"></i></button>
+                    <button type="button" class="rte-btn" title="Strikethrough"
+                        (click)="format(contentArea, '<s>', '</s>')"><i class="bi bi-type-strikethrough"></i></button>
+                    <span class="rte-divider"></span>
+                    <button type="button" class="rte-btn" title="Heading 1"
+                        (click)="format(contentArea, '<h1>', '</h1>')">H1</button>
+                    <button type="button" class="rte-btn" title="Heading 2"
+                        (click)="format(contentArea, '<h2>', '</h2>')">H2</button>
+                    <button type="button" class="rte-btn" title="Heading 3"
+                        (click)="format(contentArea, '<h3>', '</h3>')">H3</button>
+                    <span class="rte-divider"></span>
+                    <button type="button" class="rte-btn" title="Paragraph"
+                        (click)="format(contentArea, '<p>', '</p>')"><i class="bi bi-paragraph"></i></button>
+                    <button type="button" class="rte-btn" title="Blockquote"
+                        (click)="format(contentArea, '<blockquote>', '</blockquote>')"><i
+                            class="bi bi-blockquote-left"></i></button>
+                    <span class="rte-divider"></span>
+                    <button type="button" class="rte-btn" title="Inline Code"
+                        (click)="format(contentArea, '<code>', '</code>')"><i class="bi bi-code"></i></button>
+                    <button type="button" class="rte-btn" title="Code Block"
+                        (click)="format(contentArea, '<pre><code>', '</code></pre>')"><i
+                            class="bi bi-code-slash"></i></button>
+                    <span class="rte-divider"></span>
+                    <button type="button" class="rte-btn" title="Link" (click)="insertLink(contentArea)"><i
+                            class="bi bi-link-45deg"></i></button>
+                    <button type="button" class="rte-btn" title="Unordered List"
+                        (click)="format(contentArea, '<ul>\n  <li>', '</li>\n</ul>')"><i
+                            class="bi bi-list-ul"></i></button>
+                    <button type="button" class="rte-btn" title="Ordered List"
+                        (click)="format(contentArea, '<ol>\n  <li>', '</li>\n</ol>')"><i
+                            class="bi bi-list-ol"></i></button>
+                    <span class="rte-divider"></span>
+                    <button type="button" class="rte-btn" title="Image"
+                        (click)="format(contentArea, '<img src=&quot;&quot; alt=&quot;', '&quot;>')"><i
+                            class="bi bi-image"></i></button>
+                    <button type="button" class="rte-btn" title="Horizontal Rule"
+                        (click)="format(contentArea, '\n<hr>\n', '')">—</button>
+                </div>
+                <textarea #contentArea ngModel [ngModel]="editing()?.content" name="content" required rows="12"
+                    class="admin-form-textarea rte-textarea"
+                    style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
+            </div>
+        </div>
+        <div class="admin-form-grid">
+            <div class="admin-form-field">
+                <label class="admin-form-label">Tags <span
+                        style="opacity:.5;font-size:.75em">(comma-separated)</span></label>
+                <input ngModel [ngModel]="editing()?.tags" name="tags" class="admin-form-input"
+                    placeholder="Angular, Web Dev">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Read Time (mins)</label>
+                <input ngModel [ngModel]="editing()?.readTimeMinutes ?? 5" name="readTimeMinutes" type="number" min="1"
+                    class="admin-form-input">
+            </div>
+        </div>
+        <div class="admin-form-checks">
+            <div class="admin-form-check">
+                <input ngModel [ngModel]="editing()?.isPublished ?? false" name="isPublished" type="checkbox" id="bpub">
+                <label for="bpub">Publish now</label>
+            </div>
+        </div>
+        <div class="admin-form-actions">
+            <button type="submit" class="btn-primary" [disabled]="saving()">
+                @if (saving()) { <span class="contact-spinner"></span>&nbsp; }
+                {{ editing() ? 'Update' : 'Create' }}
+            </button>
+            <button type="button" class="btn-ghost" (click)="cancel()">Cancel</button>
+        </div>
+    </form>
+</div>
+}
+
+@if (loading()) {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+} @else if (blogs().length === 0) {
+<p class="empty-state">No blog posts yet.</p>
+} @else {
+<div class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Slug</th>
+                <th>Status</th>
+                <th>Read Time</th>
+                <th>Date</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (b of blogs(); track b.id) {
+            <tr>
+                <td style="font-weight:600">{{ b.title }}</td>
+                <td style="color:var(--text-muted);font-size:0.78rem;font-family:var(--font-mono)">{{ b.slug }}</td>
+                <td>
+                    <span class="admin-badge" [class.admin-badge--on]="b.isPublished">
+                        {{ b.isPublished ? 'Published' : 'Draft' }}
+                    </span>
+                </td>
+                <td style="color:var(--text-muted);font-size:0.78rem">{{ b.readTimeMinutes }}m</td>
+                <td style="color:var(--text-muted);font-size:0.78rem;font-family:var(--font-mono)">{{ b.createdAt |
+                    date:'MMM d, y' }}</td>
+                <td style="text-align:right;white-space:nowrap">
+                    <button class="btn-text" (click)="edit(b)" style="margin-right:1.25rem">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button class="btn-text-danger" (click)="remove(b.id)">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+}

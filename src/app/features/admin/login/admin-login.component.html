@@ -1,34 +1,36 @@
-<div class="min-vh-100 d-flex align-items-center justify-content-center bg-body-secondary">
-  <div class="card border-0 shadow-sm p-4 w-100" style="max-width:420px">
-    <div class="text-center mb-4">
-      <div class="fw-bold fs-3 text-indigo mb-1">MH Admin</div>
-      <div class="text-body-secondary small">Sign in to your dashboard</div>
-    </div>
+<div class="admin-login-page">
+    <div class="admin-login-box">
+        <p class="admin-login-logo">MHFrough &mdash; Admin</p>
+        <h1 class="admin-login-heading">Sign in</h1>
+        <p class="admin-login-sub">Enter your credentials to access the dashboard.</p>
 
-    @if (error()) {
-      <div class="alert alert-danger py-2 small">{{ error() }}</div>
-    }
-
-    <form #f="ngForm" (ngSubmit)="login(f)" novalidate>
-      <div class="mb-3">
-        <label class="form-label fw-medium">Email</label>
-        <input ngModel name="email" required email type="email" class="form-control"
-               [class.is-invalid]="f.submitted && f.controls['email']?.invalid"
-               placeholder="mhfrough@yahoo.com" autocomplete="username">
-      </div>
-      <div class="mb-4">
-        <label class="form-label fw-medium">Password</label>
-        <input ngModel name="password" required type="password" class="form-control"
-               [class.is-invalid]="f.submitted && f.controls['password']?.invalid"
-               placeholder="••••••••" autocomplete="current-password">
-      </div>
-      <button type="submit" class="btn btn-indigo w-100" [disabled]="loading()">
-        @if (loading()) {
-          <span class="spinner-border spinner-border-sm me-2"></span>Signing in…
-        } @else {
-          Sign In
+        @if (error()) {
+        <div class="admin-alert admin-alert--error">{{ error() }}</div>
         }
-      </button>
-    </form>
-  </div>
+
+        <form #f="ngForm" (ngSubmit)="login(f)" novalidate>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Email</label>
+                <input ngModel name="email" required email type="email" class="admin-form-input"
+                    [class.is-invalid]="f.submitted && f.controls['email']?.invalid"
+                    placeholder="mhfrough&#64;yahoo.com" autocomplete="username">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Password</label>
+                <input ngModel name="password" required type="password" class="admin-form-input"
+                    [class.is-invalid]="f.submitted && f.controls['password']?.invalid"
+                    placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
+            </div>
+            <div style="margin-top: 2rem;">
+                <button type="submit" class="btn-primary" [disabled]="loading()"
+                    style="width:100%; justify-content:center;">
+                    @if (loading()) {
+                    <span class="contact-spinner"></span>Signing in…
+                    } @else {
+                    Sign In
+                    }
+                </button>
+            </div>
+        </form>
+    </div>
 </div>

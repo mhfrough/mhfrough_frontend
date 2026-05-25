@@ -1,0 +1,386 @@
+﻿<div class="page-container">
+
+    <!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+    <section class="section brand-hero">
+        <div class="section-container">
+            <div class="brand-hero-inner">
+                <div class="brand-logo-lockup">
+                    <span class="brand-logo-mark">MHFrough</span><span class="brand-logo-dot">.</span>
+                </div>
+                <div class="brand-hero-meta">
+                    <p class="brand-tagline">Brand &amp; Design System</p>
+                    <p class="brand-desc">
+                        A living reference for colors, typography, spacing, and components
+                        that define the visual language of mhfrough.dev.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Colors — Light ───────────────────────────────────────────────────── -->
+    <section class="section">
+        <div class="section-container">
+            <header class="section-header">
+                <h2 class="section-title">Color — Light</h2>
+                <p class="brand-section-caption">Paper-white palette. Default theme.</p>
+            </header>
+            <div class="brand-swatches">
+                @for (c of lightColors; track c.variable) {
+                <button class="brand-swatch" [style.background]="c.hex" [style.color]="c.textColor"
+                    [title]="'Copy ' + c.hex" (click)="copy(c.hex)">
+                    <span class="swatch-name">{{ c.name }}</span>
+                    <span class="swatch-var">{{ c.variable }}</span>
+                    <span class="swatch-hex">{{ c.hex }}</span>
+                    @if (copied === c.hex) {
+                    <span class="swatch-copied">Copied!</span>
+                    }
+                </button>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Colors — Dark ────────────────────────────────────────────────────── -->
+    <section class="section">
+        <div class="section-container">
+            <header class="section-header">
+                <h2 class="section-title">Color — Dark</h2>
+                <p class="brand-section-caption">Ink palette. Applied via <code>[data-bs-theme="dark"]</code>.</p>
+            </header>
+            <div class="brand-swatches brand-swatches--dark">
+                @for (c of darkColors; track c.variable) {
+                <button class="brand-swatch" [style.background]="c.hex" [style.color]="c.textColor"
+                    [title]="'Copy ' + c.hex" (click)="copy(c.hex)">
+                    <span class="swatch-name">{{ c.name }}</span>
+                    <span class="swatch-var">{{ c.variable }}</span>
+                    <span class="swatch-hex">{{ c.hex }}</span>
+                    @if (copied === c.hex) {
+                    <span class="swatch-copied">Copied!</span>
+                    }
+                </button>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Typography ───────────────────────────────────────────────────────── -->
+    <section class="section">
+        <div class="section-container">
+            <header class="section-header">
+                <h2 class="section-title">Typography</h2>
+                <p class="brand-section-caption">Inconsolata — monospaced humanist typeface used across all text.</p>
+            </header>
+
+            <!-- Font specimen -->
+            <div class="brand-font-specimen">
+                <div class="brand-font-info">
+                    <span class="brand-font-name">Inconsolata</span>
+                    <span class="brand-font-meta">Monospace · Primary &amp; only typeface</span>
+                    <span class="brand-font-stack"><code>--font: "Inconsolata", "Courier New", monospace</code></span>
+                </div>
+                <p class="brand-specimen-text">
+                    AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz<br>
+                    0123456789 !&#64;#$%^&amp;*()_+-=[]&#123;&#125;|;':",./&lt;&gt;?
+                </p>
+            </div>
+
+            <!-- Weight showcase -->
+            <div class="brand-weights">
+                @for (w of fontWeights; track w.value) {
+                <div class="brand-weight-row">
+                    <span class="brand-weight-label">{{ w.label }} / {{ w.value }}</span>
+                    <span class="brand-weight-sample" [style.font-weight]="w.value">
+                        The quick brown fox jumps over the lazy dog.
+                    </span>
+                </div>
+                }
+            </div>
+
+            <!-- Type scale -->
+            <div class="brand-type-scale">
+                @for (t of typeScale; track t.label) {
+                <div class="brand-type-row">
+                    <div class="brand-type-meta">
+                        <span class="brand-type-tag">{{ t.label }}</span>
+                        <span class="brand-type-specs">{{ t.size }} / {{ t.weight }} / lh {{ t.lineHeight }}</span>
+                    </div>
+                    <p class="brand-type-sample" [style.font-size]="t.size" [style.font-weight]="t.weight"
+                        [style.line-height]="t.lineHeight">{{ t.sample }}</p>
+                </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Spacing ───────────────────────────────────────────────────────────── -->
+    <section class="section">
+        <div class="section-container">
+            <header class="section-header">
+                <h2 class="section-title">Spacing</h2>
+                <p class="brand-section-caption">4-point base grid. All spacing is a multiple of 4 px.</p>
+            </header>
+            <div class="brand-spacing-list">
+                @for (s of spacingTokens; track s.name) {
+                <div class="brand-spacing-row">
+                    <span class="brand-spacing-name">{{ s.name }}</span>
+                    <div class="brand-spacing-bar-wrap">
+                        <div class="brand-spacing-bar" [style.width.px]="s.px"></div>
+                    </div>
+                    <span class="brand-spacing-value">{{ s.value }}</span>
+                    <span class="brand-spacing-px">{{ s.px }}px</span>
+                </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Border Radius ────────────────────────────────────────────────────── -->
+    <section class="section">
+        <div class="section-container">
+            <header class="section-header">
+                <h2 class="section-title">Border Radius</h2>
+                <p class="brand-section-caption">Corner rounding scale.</p>
+            </header>
+            <div class="brand-radii">
+                @for (r of borderRadii; track r.name) {
+                <div class="brand-radius-item">
+                    <div class="brand-radius-box" [style.border-radius]="r.value"></div>
+                    <span class="brand-radius-name">{{ r.name }}</span>
+                    <span class="brand-radius-value">{{ r.value }}</span>
+                </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Shadows ───────────────────────────────────────────────────────────── -->
+    <section class="section">
+        <div class="section-container">
+            <header class="section-header">
+                <h2 class="section-title">Shadows</h2>
+                <p class="brand-section-caption">Elevation system — subtle depth layering.</p>
+            </header>
+            <div class="brand-shadows">
+                @for (s of shadows; track s.name) {
+                <div class="brand-shadow-item" [style.box-shadow]="s.value">
+                    <span class="brand-shadow-name">shadow-{{ s.name }}</span>
+                    <code class="brand-shadow-value">{{ s.value }}</code>
+                </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Motion ────────────────────────────────────────────────────────────── -->
+    <section class="section">
+        <div class="section-container">
+            <header class="section-header">
+                <h2 class="section-title">Motion</h2>
+                <p class="brand-section-caption">Transition tokens — snappy and intentional.</p>
+            </header>
+            <div class="brand-motion-grid">
+                <div class="brand-motion-token">
+                    <span class="brand-motion-label">Duration</span>
+                    <code class="brand-motion-value">--dur: 220ms</code>
+                </div>
+                <div class="brand-motion-token">
+                    <span class="brand-motion-label">Easing</span>
+                    <code class="brand-motion-value">--ease: cubic-bezier(0.4, 0, 0.2, 1)</code>
+                </div>
+                <div class="brand-motion-demo">
+                    <span class="brand-motion-label">Demo — hover the box</span>
+                    <div class="brand-motion-box"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Components ────────────────────────────────────────────────────────── -->
+    <section class="section">
+        <div class="section-container">
+            <header class="section-header">
+                <h2 class="section-title">Components</h2>
+                <p class="brand-section-caption">Core UI building blocks used across the site.</p>
+            </header>
+
+            <!-- Buttons -->
+            <div class="brand-component-group">
+                <h3 class="brand-component-label">Buttons</h3>
+                <div class="brand-component-row">
+                    <button class="btn-primary">Primary</button>
+                    <button class="btn-ghost">Ghost</button>
+                    <button class="btn-primary" disabled style="opacity:0.4;cursor:not-allowed">Disabled</button>
+                </div>
+            </div>
+
+            <!-- Link arrow -->
+            <div class="brand-component-group">
+                <h3 class="brand-component-label">Link Arrow</h3>
+                <div class="brand-component-row">
+                    <a href="#" class="link-arrow" (click)="$event.preventDefault()">
+                        View project <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                    <a href="#" class="link-arrow" (click)="$event.preventDefault()">
+                        Read article <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                    <a href="#" class="link-arrow" (click)="$event.preventDefault()">
+                        Live site <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tech badges — .tech-list > span pattern from project cards -->
+            <div class="brand-component-group">
+                <h3 class="brand-component-label">Tech Badges</h3>
+                <div class="brand-component-row">
+                    <div class="tech-list">
+                        <span>Angular</span>
+                        <span>NestJS</span>
+                        <span>TypeScript</span>
+                        <span>PostgreSQL</span>
+                        <span>Docker</span>
+                        <span>Redis</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section title label -->
+            <div class="brand-component-group">
+                <h3 class="brand-component-label">Section Title Label</h3>
+                <div class="brand-component-row">
+                    <p class="section-title" style="margin:0">Selected Projects</p>
+                </div>
+            </div>
+
+            <!-- Hero info list -->
+            <div class="brand-component-group">
+                <h3 class="brand-component-label">Info List</h3>
+                <div class="brand-component-row">
+                    <ul class="hero-info-list" style="list-style:none;padding:0;margin:0">
+                        <li><span class="hero-info-label">Role</span><span>Lead Developer</span></li>
+                        <li><span class="hero-info-label">Stack</span><span>Angular · NestJS · React</span></li>
+                        <li><span class="hero-info-label">Based</span><span>Karachi, Pakistan</span></li>
+                        <li><span class="hero-info-label">Avail.</span><span>Open to work</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Form fields — mirrors contact page -->
+            <div class="brand-component-group">
+                <h3 class="brand-component-label">Form Fields</h3>
+                <div class="brand-form-demo">
+                    <div class="contact-row">
+                        <div class="contact-field">
+                            <label class="contact-label">Name</label>
+                            <input class="contact-input" placeholder="Your full name" readonly>
+                        </div>
+                        <div class="contact-field">
+                            <label class="contact-label">Email</label>
+                            <input class="contact-input" placeholder="you@example.com" readonly>
+                        </div>
+                    </div>
+                    <div class="contact-field">
+                        <label class="contact-label">Subject <span class="contact-optional">(optional)</span></label>
+                        <select class="contact-input contact-select">
+                            <option>— Select a subject —</option>
+                            <option>Project Inquiry</option>
+                            <option>Freelance Collaboration</option>
+                        </select>
+                    </div>
+                    <div class="contact-field">
+                        <label class="contact-label">Message</label>
+                        <textarea rows="4" class="contact-input contact-textarea"
+                            placeholder="Tell me about your project…" readonly></textarea>
+                    </div>
+                    <div class="contact-field">
+                        <label class="contact-label">Error state</label>
+                        <input class="contact-input is-error" placeholder="Invalid input" readonly>
+                        <span class="contact-error">This field is required.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact meta -->
+            <div class="brand-component-group">
+                <h3 class="brand-component-label">Contact Meta</h3>
+                <div class="contact-meta" style="margin-top:0">
+                    <div class="contact-meta-item">
+                        <span class="contact-meta-label">Email</span>
+                        <span class="contact-meta-value">mhfrough&#64;yahoo.com</span>
+                    </div>
+                    <div class="contact-meta-divider"></div>
+                    <div class="contact-meta-item">
+                        <span class="contact-meta-label">LinkedIn</span>
+                        <span class="contact-meta-value">in/mhfrough</span>
+                    </div>
+                    <div class="contact-meta-divider"></div>
+                    <div class="contact-meta-item">
+                        <span class="contact-meta-label">Based in</span>
+                        <span class="contact-meta-value">Karachi, Pakistan</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lightbox -->
+            <div class="brand-component-group">
+                <h3 class="brand-component-label">Lightbox</h3>
+                <p class="brand-section-caption" style="margin-bottom:1rem">Click a project thumbnail to open a full-size image overlay. Closes on backdrop click, close button, or <kbd style="font-family:var(--font-mono);font-size:0.72rem;padding:1px 5px;border:1px solid var(--border)">Esc</kbd>.</p>
+                <div class="brand-component-row">
+                    <div style="display:flex;flex-direction:column;gap:0.5rem">
+                        <div class="project-thumb" style="width:180px;height:120px;cursor:zoom-in;pointer-events:none;opacity:0.7">
+                            <div style="width:100%;height:100%;background:var(--border);display:flex;align-items:center;justify-content:center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                            </div>
+                        </div>
+                        <span style="font-family:var(--font-sans);font-size:0.68rem;color:var(--text-muted);letter-spacing:0.08em">Thumbnail → zoom-in cursor</span>
+                    </div>
+                    <div style="font-family:var(--font-sans);font-size:0.82rem;color:var(--text-muted);line-height:1.7;max-width:320px">
+                        The overlay uses <code style="font-family:var(--font-mono);font-size:0.78rem">.lightbox-overlay</code> fixed backdrop, <code style="font-family:var(--font-mono);font-size:0.78rem">.lightbox-img</code> constrained to 90vw / 88vh, and <code style="font-family:var(--font-mono);font-size:0.78rem">.lightbox-close</code> fixed button in the top-right corner.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Badges -->
+            <div class="brand-component-group">
+                <h3 class="brand-component-label">Admin Badges</h3>
+                <div class="brand-component-row" style="gap:0.5rem;flex-wrap:wrap">
+                    <span class="admin-badge admin-badge--on">Published</span>
+                    <span class="admin-badge">Draft</span>
+                    <span class="admin-badge admin-badge--on">Approved</span>
+                    <span class="admin-badge admin-badge--warn">Pending</span>
+                    <span class="admin-badge admin-badge--danger">New</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <section class="section">
+        <div class="section-container">
+            <header class="section-header">
+                <h2 class="section-title">Logo</h2>
+                <p class="brand-section-caption">Text-based wordmark. Inconsolata SemiBold, tracked tight.</p>
+            </header>
+            <div class="brand-logos">
+                <div class="brand-logo-sample brand-logo-sample--light">
+                    <a class="nav-logo" style="position:static;pointer-events:none">MHFrough</a>
+                    <p class="brand-logo-context">On light · nav size</p>
+                </div>
+                <div class="brand-logo-sample brand-logo-sample--dark">
+                    <a class="nav-logo" style="position:static;pointer-events:none;color:#e4e0d8">MHFrough</a>
+                    <p class="brand-logo-context" style="color:#7a7770">On dark · nav size</p>
+                </div>
+                <div class="brand-logo-sample brand-logo-sample--indigo">
+                    <a class="nav-logo" style="position:static;pointer-events:none;color:#fff">MHFrough</a>
+                    <p class="brand-logo-context" style="color:rgba(255,255,255,0.6)">On indigo · nav size</p>
+                </div>
+            </div>
+
+            <!-- Display size lockup -->
+            <div class="brand-logo-display">
+                <span class="brand-logo-mark">MHFrough</span><span class="brand-logo-dot">.</span>
+            </div>
+        </div>
+    </section>
+
+</div>

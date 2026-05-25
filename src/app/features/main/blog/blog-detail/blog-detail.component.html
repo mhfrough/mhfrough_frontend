@@ -1,0 +1,36 @@
+<div class="container py-5 mt-4" style="max-width:800px">
+    @if (loading()) {
+    <div class="d-flex justify-content-center py-5">
+        <div class="spinner-border text-indigo" role="status"></div>
+    </div>
+    } @else if (notFound()) {
+    <div class="text-center py-5">
+        <h2>Post not found</h2>
+        <a routerLink="/blog" class="btn btn-indigo mt-3">← Back to Blog</a>
+    </div>
+    } @else if (blog()) {
+    <a routerLink="/blog"
+        class="text-body-secondary text-decoration-none small mb-4 d-inline-flex align-items-center gap-1">
+        <i class="bi bi-arrow-left"></i> All Posts
+    </a>
+
+    @if (blog().coverImage) {
+    <img [src]="blog().coverImage" [alt]="blog().title" class="rounded-3 w-100 mb-4"
+        style="max-height:400px;object-fit:cover">
+    }
+
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        @for (tag of blog().tags; track tag) {
+        <span class="badge rounded-pill" style="background:rgba(99,102,241,0.12);color:#6366f1">{{ tag }}</span>
+        }
+    </div>
+
+    <h1 class="fw-bold mb-3" style="letter-spacing:-0.025em">{{ blog().title }}</h1>
+    <div class="text-body-secondary small mb-5 d-flex gap-3 flex-wrap">
+        <span><i class="bi bi-calendar3 me-1"></i>{{ blog().publishedAt | date:'MMMM d, y' }}</span>
+        <span><i class="bi bi-clock me-1"></i>{{ blog().readTimeMinutes }} min read</span>
+    </div>
+
+    <div class="blog-content lh-lg" [innerHTML]="blog().content"></div>
+    }
+</div>

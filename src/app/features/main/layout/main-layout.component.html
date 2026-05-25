@@ -1,0 +1,77 @@
+<!-- ─── Navbar ──────────────────────────────────────────────────────────────── -->
+<header class="site-header" [class.scrolled]="showBackToTop()">
+    <nav>
+        <a class="nav-logo" routerLink="/" (click)="scrollTop()">MHFrough<span class="nav-logo-dot">.</span></a>
+        <!-- Desktop nav -->
+        <ul class="nav-links">
+            <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">About</a></li>
+            <li><a href="/#projects">Projects</a></li>
+            <li><a routerLink="/blog" routerLinkActive="active">Writing</a></li>
+            <li><a routerLink="/contact" routerLinkActive="active">Work with me</a></li>
+            <li><a routerLink="/brand" routerLinkActive="active">Brand</a></li>
+        </ul>
+
+        <div class="nav-actions">
+            <!-- Clock + theme panel -->
+            <div class="clock-widget">
+                <span class="clock-time">{{ currentTime() }}</span>
+                <div class="clock-panel">
+                    <div class="clock-panel-time">{{ currentTime() }}</div>
+                    <div class="clock-panel-divider"></div>
+                    <div class="clock-panel-row">
+                        <span class="clock-panel-label">Auto theme</span>
+                        <button class="toggle-switch" [class.on]="theme.autoSwitch()" (click)="theme.toggleAutoSwitch()"
+                            [attr.aria-label]="theme.autoSwitch() ? 'Disable auto theme' : 'Enable auto theme (dark after 7 pm)'">
+                            <span class="toggle-thumb"></span>
+                        </button>
+                    </div>
+                    <div class="clock-panel-row">
+                        <span class="clock-panel-label">{{ theme.isDark() ? 'Dark' : 'Light' }} mode</span>
+                        <button class="theme-btn" (click)="theme.toggle()"
+                            [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+                            <i class="bi" [class.bi-sun]="theme.isDark()" [class.bi-moon]="!theme.isDark()"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button class="menu-btn" (click)="toggleNav()" aria-label="Menu">
+                <i class="bi" [class.bi-list]="!navOpen()" [class.bi-x-lg]="navOpen()"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile menu -->
+    @if (navOpen()) {
+    <div class="mobile-menu">
+        <a routerLink="/" (click)="navOpen.set(false)">About</a>
+        <a href="/#projects" (click)="navOpen.set(false)">Projects</a>
+        <a routerLink="/blog" (click)="navOpen.set(false)">Writing</a>
+        <a routerLink="/contact" (click)="navOpen.set(false)">Work with me</a>
+        <a routerLink="/brand" (click)="navOpen.set(false)">Brand</a>
+    </div>
+    }
+</header>
+
+<!-- ─── Page Content ────────────────────────────────────────────────────────── -->
+<main class="site-main">
+    <router-outlet />
+</main>
+<!-- ─── Footer ──────────────────────────────────────────────────────────────── -->
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-bottom">
+            <span>© {{ year }} mhfrough.dev &nbsp;·&nbsp; Made with ♥ in Karachi</span>
+            <button class="back-to-top" (click)="scrollTop()">Back to top ↑</button>
+            <div class="footer-social">
+                <a href="https://github.com/mhfrough" target="_blank" rel="noopener" aria-label="GitHub"><i
+                        class="bi bi-github"></i></a>
+                <a href="https://www.linkedin.com/in/mhfrough/" target="_blank" rel="noopener" aria-label="LinkedIn"><i
+                        class="bi bi-linkedin"></i></a>
+                <a href="mailto:mhfrough&#64;yahoo.com" aria-label="Email"><i class="bi bi-envelope"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ─── WhatsApp Widget ──────────────────────────────────────────────────────── -->
+<app-whatsapp-widget />

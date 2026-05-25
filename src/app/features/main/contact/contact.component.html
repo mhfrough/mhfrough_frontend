@@ -1,0 +1,140 @@
+<section class="contact-page">
+    <div class="contact-inner">
+
+        <!-- ─── Header ──────────────────────────────────────────────── -->
+        <div class="contact-header">
+            <p class="contact-eyebrow">Contact</p>
+            <h1 class="contact-heading">Let's work together</h1>
+            <p class="contact-subtext">Have a project, opportunity, or just want to say hello?<br>Fill out the form and
+                I'll get back to you.</p>
+        </div>
+
+        <!-- ─── Success / Error banners ─────────────────────────────── -->
+        @if (sent()) {
+        <div class="contact-banner contact-banner--success">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd" />
+            </svg>
+            Message sent — I'll get back to you soon.
+        </div>
+        }
+        @if (error()) {
+        <div class="contact-banner contact-banner--error">{{ error() }}</div>
+        }
+
+        <!-- ─── Form ─────────────────────────────────────────────────── -->
+        <form #f="ngForm" (ngSubmit)="submit(f)" novalidate class="contact-form">
+
+            <!-- Name + Email -->
+            <div class="contact-row">
+                <div class="contact-field">
+                    <label class="contact-label">Name</label>
+                    <input [(ngModel)]="formData.name" name="name" required minlength="2" maxlength="100"
+                        class="contact-input" [class.is-error]="f.submitted && f.controls['name']?.invalid"
+                        placeholder="Your full name">
+                    @if (f.submitted && f.controls['name']?.invalid) {
+                    <span class="contact-error">Please enter your name.</span>
+                    }
+                </div>
+                <div class="contact-field">
+                    <label class="contact-label">Email</label>
+                    <input [(ngModel)]="formData.email" name="email" required email type="email" class="contact-input"
+                        [class.is-error]="f.submitted && f.controls['email']?.invalid" placeholder="you@example.com">
+                    @if (f.submitted && f.controls['email']?.invalid) {
+                    <span class="contact-error">Please enter a valid email.</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Phone + Subject -->
+            <div class="contact-row">
+                <div class="contact-field">
+                    <label class="contact-label">Phone <span class="contact-optional">(optional)</span></label>
+                    <input [(ngModel)]="formData.phone" name="phone" type="tel" maxlength="20" class="contact-input"
+                        placeholder="+92 300 0000000">
+                </div>
+                <div class="contact-field">
+                    <label class="contact-label">Subject <span class="contact-optional">(optional)</span></label>
+                    <select [(ngModel)]="formData.subject" name="subject" class="contact-input contact-select">
+                        <option value="">— Select a subject —</option>
+                        <option value="Project Inquiry">Project Inquiry</option>
+                        <option value="Freelance Collaboration">Freelance Collaboration</option>
+                        <option value="Job Opportunity">Job Opportunity</option>
+                        <option value="Website Design">Website Design</option>
+                        <option value="Web Development">Web Development</option>
+                        <option value="UI/UX Design">UI/UX Design</option>
+                        <option value="Product Design">Product Design</option>
+                        <option value="Consulting">Consulting</option>
+                        <option value="Just Saying Hello">Just Saying Hello</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Message -->
+            <div class="contact-field">
+                <label class="contact-label">Message</label>
+                <div class="rte-wrap">
+                    <div class="rte-toolbar">
+                        <button type="button" class="rte-btn" title="Bold"
+                            (click)="format(msgArea, '<strong>', '</strong>')"><i class="bi bi-type-bold"></i></button>
+                        <button type="button" class="rte-btn" title="Italic"
+                            (click)="format(msgArea, '<em>', '</em>')"><i class="bi bi-type-italic"></i></button>
+                        <button type="button" class="rte-btn" title="Underline"
+                            (click)="format(msgArea, '<u>', '</u>')"><i class="bi bi-type-underline"></i></button>
+                        <span class="rte-divider"></span>
+                        <button type="button" class="rte-btn" title="Blockquote"
+                            (click)="format(msgArea, '<blockquote>', '</blockquote>')"><i
+                                class="bi bi-blockquote-left"></i></button>
+                        <button type="button" class="rte-btn" title="Bullet List"
+                            (click)="format(msgArea, '<ul>\n  <li>', '</li>\n</ul>')"><i
+                                class="bi bi-list-ul"></i></button>
+                    </div>
+                    <textarea #msgArea [(ngModel)]="formData.message" name="message" required minlength="10"
+                        maxlength="2000" rows="6" class="contact-input contact-textarea rte-textarea"
+                        [class.is-error]="f.submitted && f.controls['message']?.invalid"
+                        placeholder="Tell me about your project…"></textarea>
+                </div>
+                @if (f.submitted && f.controls['message']?.invalid) {
+                <span class="contact-error">Please enter a message (min 10 characters).</span>
+                }
+            </div>
+
+            <!-- Actions -->
+            <div class="contact-actions">
+                <button type="submit" class="btn-primary" [disabled]="sending()">
+                    @if (sending()) {
+                    <span class="contact-spinner"></span>Sending…
+                    } @else {
+                    Send Message
+                    }
+                </button>
+                <button type="button" class="btn-ghost" (click)="reset(f)">
+                    Reset
+                </button>
+            </div>
+
+        </form>
+
+        <!-- ─── Contact Meta ─────────────────────────────────────────── -->
+        <div class="contact-meta">
+            <div class="contact-meta-item">
+                <span class="contact-meta-label">Email</span>
+                <a href="mailto:mhfrough@yahoo.com" class="contact-meta-value">mhfrough&#64;yahoo.com</a>
+            </div>
+            <div class="contact-meta-divider"></div>
+            <div class="contact-meta-item">
+                <span class="contact-meta-label">LinkedIn</span>
+                <a href="https://www.linkedin.com/in/mhfrough/" target="_blank" rel="noopener"
+                    class="contact-meta-value">in/mhfrough</a>
+            </div>
+            <div class="contact-meta-divider"></div>
+            <div class="contact-meta-item">
+                <span class="contact-meta-label">Based in</span>
+                <span class="contact-meta-value">Karachi, Pakistan</span>
+            </div>
+        </div>
+
+    </div>
+</section>

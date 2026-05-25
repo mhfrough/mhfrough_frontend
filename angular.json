@@ -76,6 +76,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 4223
+          },
           "configurations": {
             "production": {
               "buildTarget": "mhfrough_frontend:build:production"

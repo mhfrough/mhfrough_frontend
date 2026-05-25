@@ -1,0 +1,42 @@
+<section class="blog-page">
+    <header class="blog-header">
+        <p class="blog-eyebrow">Writing</p>
+        <h1 class="blog-heading">Thoughts &amp; Notes</h1>
+        <p class="blog-subtext">Ideas on development, design, and building things.</p>
+    </header>
+
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+    </div>
+    } @else if (blogs().length === 0) {
+    <p class="empty-state">No posts published yet. Come back soon!</p>
+    } @else {
+    <div class="blog-grid">
+        @for (blog of blogs(); track blog.id) {
+        <a [routerLink]="['/blog', blog.slug]" class="blog-card">
+            @if (blog.coverImage) {
+            <div class="blog-thumb">
+                <img [src]="blog.coverImage" [alt]="blog.title" loading="lazy" />
+            </div>
+            }
+            <div class="blog-body">
+                @if (blog.tags?.length) {
+                <div class="blog-tags">
+                    @for (tag of blog.tags.slice(0,3); track tag) {
+                    <span class="blog-tag">{{ tag }}</span>
+                    }
+                </div>
+                }
+                <h2 class="blog-title">{{ blog.title }}</h2>
+                <p class="blog-excerpt">{{ blog.excerpt }}</p>
+                <div class="blog-meta">
+                    <span>{{ blog.readTimeMinutes }} min read</span>
+                    <span>{{ blog.publishedAt | date:'MMM d, y' }}</span>
+                </div>
+            </div>
+        </a>
+        }
+    </div>
+    }
+</section>
