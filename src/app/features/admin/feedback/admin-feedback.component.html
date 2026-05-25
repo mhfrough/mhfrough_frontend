@@ -45,7 +45,13 @@
         </div>
         <p class="admin-card-quote">{{ fb.review }}</p>
         @if (fb.adminNote) {
-        <p class="admin-card-note"><i class="bi bi-sticky"></i> {{ fb.adminNote }}</p>
+        <div class="admin-unapprove-note">
+            <span class="admin-unapprove-note__label">
+                <i class="bi bi-exclamation-circle"></i>
+                Unapproved — reason
+            </span>
+            <span class="admin-unapprove-note__text" [title]="fb.adminNote">{{ fb.adminNote }}</span>
+        </div>
         }
     </div>
     }

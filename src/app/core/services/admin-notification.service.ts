@@ -57,7 +57,10 @@ export class AdminNotificationService {
 
         this.eventSource.onmessage = (e: MessageEvent) => {
             try {
-                const event = JSON.parse(e.data) as { type: 'new_inquiry' | 'new_feedback' | 'new_comment' };
+                const event = JSON.parse(e.data) as {
+                    type: 'new_inquiry' | 'new_feedback' | 'new_comment'
+                        | 'feedback_updated' | 'comment_updated' | 'inquiry_updated';
+                };
                 this.fetchCounts();
                 if (event.type === 'new_inquiry') {
                     this._inquiriesChanged$.next();
@@ -68,6 +71,12 @@ export class AdminNotificationService {
                 } else if (event.type === 'new_comment') {
                     this._commentsChanged$.next();
                     this.pushToast('comment', 'New blog comment received');
+                } else if (event.type === 'feedback_updated') {
+                    this._feedbackChanged$.next();
+                } else if (event.type === 'comment_updated') {
+                    this._commentsChanged$.next();
+                } else if (event.type === 'inquiry_updated') {
+                    this._inquiriesChanged$.next();
                 }
             } catch { /* ignore malformed */ }
         };

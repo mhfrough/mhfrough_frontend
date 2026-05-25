@@ -29,6 +29,96 @@
         <div class="admin-stat-badge admin-stat-badge--warn">{{ stats().feedback.pending }} pending</div>
         }
     </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-value">{{ stats().comments.total }}</div>
+        <div class="admin-stat-label">Comments</div>
+        @if (stats().comments.pending > 0) {
+        <div class="admin-stat-badge admin-stat-badge--warn">{{ stats().comments.pending }} pending</div>
+        }
+    </div>
+</div>
+
+<!-- Pending Reviews -->
+<div class="admin-dashboard-section">
+    <div class="admin-dashboard-section-header">
+        <p class="admin-dashboard-section-title">
+            <i class="bi bi-star"></i> Pending Reviews
+            @if (recentReviews().length > 0) {
+            <span class="admin-nav-badge admin-nav-badge--warn">{{ recentReviews().length }}</span>
+            }
+        </p>
+        <a routerLink="/admin/feedback" class="admin-dashboard-section-link">View all</a>
+    </div>
+    @if (recentReviews().length === 0) {
+    <p class="admin-dashboard-empty">No pending reviews.</p>
+    } @else {
+    <div class="admin-card-list">
+        @for (fb of recentReviews(); track fb.id) {
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <span class="admin-card-name">{{ fb.name }}</span>
+                    @if (fb.role || fb.company) {
+                    <p class="admin-card-role">{{ fb.role }}{{ fb.role && fb.company ? ' · ' : '' }}{{ fb.company }}</p>
+                    }
+                    <p class="admin-card-stars">
+                        @for (s of [1,2,3,4,5]; track s) {
+                        {{ s <= fb.rating ? '★' : '☆' }}
+                        }
+                    </p>
+                </div>
+                <div class="admin-card-actions">
+                    <span class="admin-badge admin-badge--warn">Pending</span>
+                    <span class="admin-card-date">{{ fb.createdAt | date:'MMM d, y' }}</span>
+                    <button class="btn-text" (click)="approveReview(fb.id)">
+                        <i class="bi bi-check2"></i> Approve
+                    </button>
+                    <a routerLink="/admin/feedback" class="btn-text">View</a>
+                </div>
+            </div>
+            <p class="admin-card-quote">{{ fb.review }}</p>
+        </div>
+        }
+    </div>
+    }
+</div>
+
+<!-- Pending Comments -->
+<div class="admin-dashboard-section">
+    <div class="admin-dashboard-section-header">
+        <p class="admin-dashboard-section-title">
+            <i class="bi bi-chat-left-text"></i> Pending Comments
+            @if (recentComments().length > 0) {
+            <span class="admin-nav-badge admin-nav-badge--warn">{{ recentComments().length }}</span>
+            }
+        </p>
+        <a routerLink="/admin/comments" class="admin-dashboard-section-link">View all</a>
+    </div>
+    @if (recentComments().length === 0) {
+    <p class="admin-dashboard-empty">No pending comments.</p>
+    } @else {
+    <div class="admin-card-list">
+        @for (c of recentComments(); track c.id) {
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <span class="admin-card-name">{{ c.authorName }}</span>
+                    <span class="admin-card-email"> — {{ c.authorEmail }}</span>
+                </div>
+                <div class="admin-card-actions">
+                    <span class="admin-badge admin-badge--warn">Pending</span>
+                    <span class="admin-card-date">{{ c.createdAt | date:'MMM d, y' }}</span>
+                    <button class="btn-text" (click)="approveComment(c.id)">
+                        <i class="bi bi-check2"></i> Approve
+                    </button>
+                    <a routerLink="/admin/comments" class="btn-text">View</a>
+                </div>
+            </div>
+            <p class="admin-card-message">{{ c.content }}</p>
+        </div>
+        }
+    </div>
+    }
 </div>
 
 <div class="admin-quick-links">

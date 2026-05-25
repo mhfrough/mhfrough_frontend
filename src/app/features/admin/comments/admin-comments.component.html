@@ -52,7 +52,13 @@
         </div>
         <p class="admin-card-message">{{ c.content }}</p>
         @if (c.adminNote) {
-        <p class="admin-card-note"><i class="bi bi-sticky"></i> {{ c.adminNote }}</p>
+        <div class="admin-unapprove-note">
+            <span class="admin-unapprove-note__label">
+                <i class="bi bi-exclamation-circle"></i>
+                Unapproved — reason
+            </span>
+            <span class="admin-unapprove-note__text" [title]="c.adminNote">{{ c.adminNote }}</span>
+        </div>
         }
     </div>
     }
