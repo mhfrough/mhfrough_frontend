@@ -3,8 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { InquiriesService } from '../../../core/services/inquiry-feedback.service';
-
-const LS_KEY = 'mhf_contact_user';
+import { UserInfoService } from '../../../core/services/user-info.service';
 
 @Component({
     selector: 'app-contact',
@@ -16,6 +15,7 @@ export class ContactComponent implements OnInit {
     private service = inject(InquiriesService);
     private route = inject(ActivatedRoute);
     private platformId = inject(PLATFORM_ID);
+    private userInfo = inject(UserInfoService);
 
     readonly sending = signal(false);
     readonly sent = signal(false);
@@ -25,13 +25,10 @@ export class ContactComponent implements OnInit {
 
     ngOnInit() {
         if (isPlatformBrowser(this.platformId)) {
-            try {
-                const saved = localStorage.getItem(LS_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    this.formData = { ...this.formData, ...parsed };
-                }
-            } catch { /* ignore corrupt data */ }
+            const saved = this.userInfo.get();
+            if (saved) {
+                this.formData = { ...this.formData, ...saved };
+            }
         }
 
         this.route.queryParams.subscribe(params => {
@@ -53,13 +50,7 @@ export class ContactComponent implements OnInit {
 
         this.service.submit(payload).subscribe({
             next: () => {
-                if (isPlatformBrowser(this.platformId)) {
-                    localStorage.setItem(LS_KEY, JSON.stringify({
-                        name: raw.name,
-                        email: raw.email,
-                        phone: raw.phone,
-                    }));
-                }
+                this.userInfo.save({ name: raw.name, email: raw.email, phone: raw.phone });
                 this.sent.set(true);
                 this.sending.set(false);
                 this.formData = { ...this.formData, subject: '', message: '' };

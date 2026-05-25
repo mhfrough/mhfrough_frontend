@@ -4,9 +4,10 @@
         <a class="nav-logo" routerLink="/" (click)="scrollTop()">MHFrough<span class="nav-logo-dot">.</span></a>
         <!-- Desktop nav -->
         <ul class="nav-links">
-            <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">About</a></li>
-            <li><a href="/#projects">Projects</a></li>
+            <li><a routerLink="/" fragment="about">About</a></li>
+            <li><a routerLink="/" fragment="projects">Projects</a></li>
             <li><a routerLink="/blog" routerLinkActive="active">Writing</a></li>
+            <li><a routerLink="/feedback" routerLinkActive="active">Reviews</a></li>
             <li><a routerLink="/contact" routerLinkActive="active">Work with me</a></li>
             <li><a routerLink="/brand" routerLinkActive="active">Brand</a></li>
         </ul>
@@ -43,9 +44,10 @@
     <!-- Mobile menu -->
     @if (navOpen()) {
     <div class="mobile-menu">
-        <a routerLink="/" (click)="navOpen.set(false)">About</a>
-        <a href="/#projects" (click)="navOpen.set(false)">Projects</a>
+        <a routerLink="/" fragment="about" (click)="navOpen.set(false)">About</a>
+        <a routerLink="/" fragment="projects" (click)="navOpen.set(false)">Projects</a>
         <a routerLink="/blog" (click)="navOpen.set(false)">Writing</a>
+        <a routerLink="/feedback" (click)="navOpen.set(false)">Reviews</a>
         <a routerLink="/contact" (click)="navOpen.set(false)">Work with me</a>
         <a routerLink="/brand" (click)="navOpen.set(false)">Brand</a>
     </div>

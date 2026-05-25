@@ -6,11 +6,26 @@ import { environment } from '../../../environments/environment';
 export class BlogsService {
     private readonly http = inject(HttpClient);
     private readonly base = `${environment.apiUrl}/blogs`;
+    private readonly commentsBase = `${environment.apiUrl}/blog-comments`;
 
     getAll() { return this.http.get<any[]>(this.base); }
     getAllAdmin() { return this.http.get<any[]>(`${this.base}/all`); }
     getBySlug(slug: string) { return this.http.get<any>(`${this.base}/${slug}`); }
     create(data: any) { return this.http.post<any>(this.base, data); }
     update(id: string, data: any) { return this.http.put<any>(`${this.base}/${id}`, data); }
+    unpublish(id: string, adminNote?: string) { return this.http.patch<any>(`${this.base}/${id}/unpublish`, { adminNote }); }
     remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
+
+    // Comments
+    getComments(blogId: string) { return this.http.get<any[]>(`${this.commentsBase}/post/${blogId}`); }
+    getCommentCount(blogId: string) { return this.http.get<{ count: number }>(`${this.commentsBase}/post/${blogId}/count`); }
+    submitComment(blogId: string, data: { authorName: string; authorEmail: string; content: string }) {
+        return this.http.post<any>(`${this.commentsBase}/post/${blogId}`, data);
+    }
+    // Admin comments
+    getPendingComments() { return this.http.get<any[]>(`${this.commentsBase}/pending`); }
+    getAllComments() { return this.http.get<any[]>(`${this.commentsBase}`); }
+    approveComment(id: string) { return this.http.patch(`${this.commentsBase}/${id}/approve`, {}); }
+    unapproveComment(id: string, adminNote?: string) { return this.http.patch(`${this.commentsBase}/${id}/unapprove`, { adminNote }); }
+    deleteComment(id: string) { return this.http.delete(`${this.commentsBase}/${id}`); }
 }

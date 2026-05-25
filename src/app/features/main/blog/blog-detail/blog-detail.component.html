@@ -1,36 +1,168 @@
-<div class="container py-5 mt-4" style="max-width:800px">
+<div class="blog-detail-page">
+
     @if (loading()) {
-    <div class="d-flex justify-content-center py-5">
-        <div class="spinner-border text-indigo" role="status"></div>
+    <div class="loading-state">
+        <div class="spinner"></div>
     </div>
     } @else if (notFound()) {
-    <div class="text-center py-5">
-        <h2>Post not found</h2>
-        <a routerLink="/blog" class="btn btn-indigo mt-3">← Back to Blog</a>
+    <div class="blog-detail-notfound">
+        <p class="blog-detail-notfound-code">404</p>
+        <p class="blog-detail-notfound-msg">Post not found.</p>
+        <a routerLink="/blog" class="btn-ghost">← Back to Blog</a>
     </div>
     } @else if (blog()) {
-    <a routerLink="/blog"
-        class="text-body-secondary text-decoration-none small mb-4 d-inline-flex align-items-center gap-1">
-        <i class="bi bi-arrow-left"></i> All Posts
-    </a>
 
-    @if (blog().coverImage) {
-    <img [src]="blog().coverImage" [alt]="blog().title" class="rounded-3 w-100 mb-4"
-        style="max-height:400px;object-fit:cover">
-    }
+    <!-- ─── Article ─────────────────────────────────────────────────── -->
+    <article class="blog-detail-article">
 
-    <div class="d-flex flex-wrap gap-2 mb-3">
-        @for (tag of blog().tags; track tag) {
-        <span class="badge rounded-pill" style="background:rgba(99,102,241,0.12);color:#6366f1">{{ tag }}</span>
+        <a routerLink="/blog" class="blog-detail-back">
+            <i class="bi bi-arrow-left"></i> All Posts
+        </a>
+
+        @if (blog().coverImage) {
+        <div class="blog-detail-cover">
+            <img [src]="blog().coverImage" [alt]="blog().title" loading="lazy" />
+        </div>
         }
-    </div>
 
-    <h1 class="fw-bold mb-3" style="letter-spacing:-0.025em">{{ blog().title }}</h1>
-    <div class="text-body-secondary small mb-5 d-flex gap-3 flex-wrap">
-        <span><i class="bi bi-calendar3 me-1"></i>{{ blog().publishedAt | date:'MMMM d, y' }}</span>
-        <span><i class="bi bi-clock me-1"></i>{{ blog().readTimeMinutes }} min read</span>
-    </div>
+        @if (blog().tags?.length) {
+        <div class="blog-tags" style="margin-bottom:1.25rem">
+            @for (tag of blog().tags; track tag) {
+            <span class="blog-tag">{{ tag }}</span>
+            }
+        </div>
+        }
 
-    <div class="blog-content lh-lg" [innerHTML]="blog().content"></div>
+        <h1 class="blog-detail-title">{{ blog().title }}</h1>
+
+        <div class="blog-detail-meta">
+            <span><i class="bi bi-calendar3"></i> {{ blog().publishedAt | date:'MMMM d, y' }}</span>
+            <span><i class="bi bi-clock"></i> {{ blog().readTimeMinutes }} min read</span>
+            <span><i class="bi bi-chat"></i> {{ commentCount() }} comment{{ commentCount() !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="blog-detail-content" [innerHTML]="blog().content"></div>
+    </article>
+
+    <!-- ─── Comments ────────────────────────────────────────────────── -->
+    <section class="blog-comments">
+
+        <div class="blog-comments-header">
+            <p class="blog-eyebrow">Discussion</p>
+            <h2 class="blog-comments-title">
+                {{ commentCount() }} Comment{{ commentCount() !== 1 ? 's' : '' }}
+            </h2>
+        </div>
+
+        <!-- Approved comments list -->
+        @if (comments().length > 0) {
+        <div class="blog-comments-list">
+            @for (c of comments(); track c.id) {
+            <div class="blog-comment-card">
+                <div class="blog-comment-avatar">
+                    {{ c.authorName.charAt(0).toUpperCase() }}
+                </div>
+                <div class="blog-comment-body">
+                    <div class="blog-comment-meta">
+                        <span class="blog-comment-author">{{ c.authorName }}</span>
+                        <span class="blog-comment-date">{{ c.createdAt | date:'MMM d, y' }}</span>
+                    </div>
+                    <p class="blog-comment-text" [innerHTML]="c.content"></p>
+                </div>
+            </div>
+            }
+        </div>
+        }
+
+        <!-- Submit form -->
+        <div class="blog-comment-form-wrap">
+            <p class="blog-comment-form-title">Leave a Comment</p>
+            <p class="blog-comment-form-note">Comments are reviewed before publishing.</p>
+
+            @if (commentSent()) {
+            <div class="contact-banner contact-banner--success">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clip-rule="evenodd" />
+                </svg>
+                Comment submitted — it will appear after review.
+            </div>
+            }
+            @if (commentError()) {
+            <div class="contact-banner contact-banner--error">{{ commentError() }}</div>
+            }
+
+            @if (!commentSent()) {
+            <form #cf="ngForm" (ngSubmit)="submitComment(cf)" novalidate class="contact-form">
+
+                <div class="contact-row">
+                    <div class="contact-field">
+                        <label class="contact-label">Name *</label>
+                        <input [(ngModel)]="commentData.authorName" name="authorName" required minlength="2"
+                            maxlength="100" class="contact-input"
+                            [class.is-error]="cf.submitted && cf.controls['authorName']?.invalid"
+                            placeholder="Your name">
+                        @if (cf.submitted && cf.controls['authorName']?.invalid) {
+                        <span class="contact-error">Name is required.</span>
+                        }
+                    </div>
+                    <div class="contact-field">
+                        <label class="contact-label">Email *</label>
+                        <input [(ngModel)]="commentData.authorEmail" name="authorEmail" required email type="email"
+                            maxlength="254" class="contact-input"
+                            [class.is-error]="cf.submitted && cf.controls['authorEmail']?.invalid"
+                            placeholder="you@example.com">
+                        @if (cf.submitted && cf.controls['authorEmail']?.invalid) {
+                        <span class="contact-error">Valid email is required.</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="contact-field">
+                    <label class="contact-label">Comment *</label>
+                    <div class="rte-wrap">
+                        <div class="rte-toolbar">
+                            <button type="button" class="rte-btn" title="Bold"
+                                (click)="format(commentArea, '<strong>', '</strong>')"><i
+                                    class="bi bi-type-bold"></i></button>
+                            <button type="button" class="rte-btn" title="Italic"
+                                (click)="format(commentArea, '<em>', '</em>')"><i
+                                    class="bi bi-type-italic"></i></button>
+                            <button type="button" class="rte-btn" title="Underline"
+                                (click)="format(commentArea, '<u>', '</u>')"><i
+                                    class="bi bi-type-underline"></i></button>
+                            <span class="rte-divider"></span>
+                            <button type="button" class="rte-btn" title="Blockquote"
+                                (click)="format(commentArea, '<blockquote>', '</blockquote>')"><i
+                                    class="bi bi-blockquote-left"></i></button>
+                            <button type="button" class="rte-btn" title="Bullet List"
+                                (click)="format(commentArea, '<ul>\n  <li>', '</li>\n</ul>')"><i
+                                    class="bi bi-list-ul"></i></button>
+                        </div>
+                        <textarea #commentArea [(ngModel)]="commentData.content" name="content" required minlength="2"
+                            maxlength="2000" rows="4" class="contact-input contact-textarea rte-textarea"
+                            [class.is-error]="cf.submitted && cf.controls['content']?.invalid"
+                            placeholder="Share your thoughts…"></textarea>
+                    </div>
+                    @if (cf.submitted && cf.controls['content']?.invalid) {
+                    <span class="contact-error">Comment is required.</span>
+                    }
+                </div>
+
+                <div class="contact-actions">
+                    <button type="submit" class="btn-primary" [disabled]="commentSending()">
+                        @if (commentSending()) {
+                        <span class="contact-spinner"></span>Posting…
+                        } @else {
+                        Post Comment
+                        }
+                    </button>
+                </div>
+            </form>
+            }
+        </div>
+    </section>
+
     }
 </div>

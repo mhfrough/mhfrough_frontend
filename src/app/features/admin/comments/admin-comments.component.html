@@ -1,0 +1,93 @@
+<div class="admin-page-header">
+    <h1 class="admin-page-title">Blog Comments</h1>
+    <div class="admin-filter-tabs">
+        <button class="admin-filter-tab" [class.is-active]="filter() === 'pending'" (click)="setFilter('pending')">
+            Pending
+            @if (notif.pendingComments() > 0) {
+            <span class="admin-nav-badge admin-nav-badge--warn">{{ notif.pendingComments() }}</span>
+            }
+        </button>
+        <button class="admin-filter-tab" [class.is-active]="filter() === 'all'" (click)="setFilter('all')">
+            All
+        </button>
+    </div>
+</div>
+
+@if (loading()) {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+} @else if (comments().length === 0) {
+<p class="empty-state">No {{ filter() === 'pending' ? 'pending' : '' }} comments.</p>
+} @else {
+<div class="admin-card-list">
+    @for (c of comments(); track c.id) {
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <div>
+                <span class="admin-card-name">{{ c.authorName }}</span>
+                <span class="admin-card-email"> — {{ c.authorEmail }}</span>
+                <p class="admin-card-subject" style="opacity:.6;font-size:.75rem">Post ID: {{ c.blogId }}</p>
+            </div>
+            <div class="admin-card-actions">
+                <span class="admin-badge" [class.admin-badge--on]="c.isApproved"
+                    [class.admin-badge--warn]="!c.isApproved">
+                    {{ c.isApproved ? 'Approved' : 'Pending' }}
+                </span>
+                <span class="admin-card-date">{{ c.createdAt | date:'MMM d, y' }}</span>
+                @if (!c.isApproved) {
+                <button class="btn-text" (click)="approve(c.id)">
+                    <i class="bi bi-check2"></i> Approve
+                </button>
+                }
+                @if (c.isApproved) {
+                <button class="btn-text" (click)="openStatusModal(c.id)">
+                    <i class="bi bi-eye-slash"></i> Unapprove
+                </button>
+                }
+                <button class="btn-text-danger" (click)="confirmDelete(c.id)">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+        <p class="admin-card-message">{{ c.content }}</p>
+        @if (c.adminNote) {
+        <p class="admin-card-note"><i class="bi bi-sticky"></i> {{ c.adminNote }}</p>
+        }
+    </div>
+    }
+</div>
+}
+
+<!-- Confirm Delete Modal -->
+@if (deleteTargetId()) {
+<div class="admin-modal-overlay" (click)="cancelDelete()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Delete Comment</p>
+        <p class="admin-modal-body">This action cannot be undone. Are you sure you want to delete this comment?</p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelDelete()">Cancel</button>
+            <button class="btn-danger" (click)="executeDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Unapprove with Reason Modal -->
+@if (statusModal()) {
+<div class="admin-modal-overlay" (click)="cancelStatus()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">{{ statusModal()!.title }}</p>
+        <p class="admin-modal-body">This comment will be hidden from the public site. You can optionally add a note.</p>
+        <div class="admin-form-field" style="margin-bottom:1.5rem">
+            <label class="admin-form-label">Reason / Note <span class="admin-form-hint">(optional)</span></label>
+            <textarea class="admin-form-textarea admin-modal-textarea" rows="3" [value]="statusModal()!.reason"
+                (input)="setStatusReason($event)" placeholder="e.g. Violates community guidelines..."></textarea>
+        </div>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelStatus()">Cancel</button>
+            <button class="btn-primary" (click)="executeStatus()">Confirm</button>
+        </div>
+    </div>
+</div>
+}

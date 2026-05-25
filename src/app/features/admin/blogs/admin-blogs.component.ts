@@ -16,6 +16,8 @@ export class AdminBlogsComponent implements OnInit {
     readonly saving = signal(false);
     readonly editing = signal<any>(null);
     readonly showForm = signal(false);
+    readonly deleteTargetId = signal<string | null>(null);
+    readonly statusModal = signal<{ id: string; title: string; reason: string } | null>(null);
 
     ngOnInit() { this.load(); }
 
@@ -37,9 +39,27 @@ export class AdminBlogsComponent implements OnInit {
         obs.subscribe({ next: () => { this.load(); this.cancel(); this.saving.set(false); } });
     }
 
-    remove(id: string) {
-        if (!confirm('Delete this post?')) return;
+    confirmDelete(id: string) { this.deleteTargetId.set(id); }
+    cancelDelete() { this.deleteTargetId.set(null); }
+
+    executeDelete() {
+        const id = this.deleteTargetId();
+        if (!id) return;
+        this.deleteTargetId.set(null);
         this.service.remove(id).subscribe(() => this.load());
+    }
+
+    openStatusModal(id: string) { this.statusModal.set({ id, title: 'Unpublish Blog Post', reason: '' }); }
+    cancelStatus() { this.statusModal.set(null); }
+    setStatusReason(e: Event) {
+        const val = (e.target as HTMLTextAreaElement).value;
+        this.statusModal.update(m => m ? { ...m, reason: val } : null);
+    }
+    executeStatus() {
+        const m = this.statusModal();
+        if (!m) return;
+        this.statusModal.set(null);
+        this.service.unpublish(m.id, m.reason || undefined).subscribe(() => this.load());
     }
 
     format(el: HTMLTextAreaElement, open: string, close: string): void {

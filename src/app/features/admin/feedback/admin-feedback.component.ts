@@ -16,6 +16,7 @@ export class AdminFeedbackComponent implements OnInit, OnDestroy {
     readonly feedback = signal<any[]>([]);
     readonly loading = signal(true);
     readonly deleteTargetId = signal<string | null>(null);
+    readonly statusModal = signal<{ id: string; title: string; reason: string } | null>(null);
     private subs = new Subscription();
 
     ngOnInit() {
@@ -44,5 +45,21 @@ export class AdminFeedbackComponent implements OnInit, OnDestroy {
         if (!id) return;
         this.deleteTargetId.set(null);
         this.service.remove(id).subscribe(() => this.load());
+    }
+
+    openStatusModal(id: string) { this.statusModal.set({ id, title: 'Unapprove Review', reason: '' }); }
+    cancelStatus() { this.statusModal.set(null); }
+    setStatusReason(e: Event) {
+        const val = (e.target as HTMLTextAreaElement).value;
+        this.statusModal.update(m => m ? { ...m, reason: val } : null);
+    }
+    executeStatus() {
+        const m = this.statusModal();
+        if (!m) return;
+        this.statusModal.set(null);
+        this.service.unapprove(m.id, m.reason || undefined).subscribe(() => {
+            this.load();
+            this.notif.fetchCounts();
+        });
     }
 }

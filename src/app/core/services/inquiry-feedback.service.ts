@@ -21,5 +21,6 @@ export class FeedbackService {
     getAll() { return this.http.get<any[]>(`${this.base}/all`); }
     submit(data: any) { return this.http.post<any>(this.base, data); }
     approve(id: string) { return this.http.patch(`${this.base}/${id}/approve`, {}); }
+    unapprove(id: string, adminNote?: string) { return this.http.patch(`${this.base}/${id}/unapprove`, { adminNote }); }
     remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
 }

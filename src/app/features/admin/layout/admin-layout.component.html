@@ -19,6 +19,14 @@
                 </a>
             </li>
             <li>
+                <a class="admin-nav-link" routerLink="/admin/comments" routerLinkActive="is-active">
+                    <i class="bi bi-chat-left-text"></i>Comments
+                    @if (notif.pendingComments() > 0) {
+                    <span class="admin-nav-badge admin-nav-badge--warn">{{ notif.pendingComments() }}</span>
+                    }
+                </a>
+            </li>
+            <li>
                 <a class="admin-nav-link" routerLink="/admin/inquiries" routerLinkActive="is-active">
                     <i class="bi bi-envelope"></i>Inquiries
                     @if (notif.unreadInquiries() > 0) {
@@ -55,9 +63,11 @@
     <div class="admin-toasts">
         @for (toast of notif.toasts(); track toast.id) {
         <div class="admin-toast" [class.admin-toast--inquiry]="toast.type === 'inquiry'"
-            [class.admin-toast--feedback]="toast.type === 'feedback'">
+            [class.admin-toast--feedback]="toast.type === 'feedback'"
+            [class.admin-toast--comment]="toast.type === 'comment'">
             <i class="bi" [class.bi-envelope]="toast.type === 'inquiry'"
-                [class.bi-star]="toast.type === 'feedback'"></i>
+                [class.bi-star]="toast.type === 'feedback'"
+                [class.bi-chat-left-text]="toast.type === 'comment'"></i>
             <span>{{ toast.message }}</span>
             <button class="admin-toast-close" (click)="notif.dismissToast(toast.id)">
                 <i class="bi bi-x"></i>

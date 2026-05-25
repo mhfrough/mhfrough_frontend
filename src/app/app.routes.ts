@@ -65,6 +65,10 @@ export const routes: Routes = [
                 path: 'feedback',
                 loadComponent: () => import('./features/admin/feedback/admin-feedback.component').then(m => m.AdminFeedbackComponent),
             },
+            {
+                path: 'comments',
+                loadComponent: () => import('./features/admin/comments/admin-comments.component').then(m => m.AdminCommentsComponent),
+            },
         ],
     },
 

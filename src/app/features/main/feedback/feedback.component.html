@@ -1,59 +1,136 @@
-<div class="container py-5 mt-4" style="max-width:680px">
-    <h1 class="section-title mb-2">Leave a Review</h1>
-    <p class="text-body-secondary mb-5">Worked with me? I'd love to hear your feedback!</p>
+<div class="feedback-page">
 
-    @if (sent()) {
-    <div class="alert alert-success d-flex align-items-center gap-2">
-        <i class="bi bi-check-circle-fill fs-5"></i>
-        <div>Thank you! Your review has been submitted for approval.</div>
+    <!-- ─── Page Header ──────────────────────────────────────────────── -->
+    <div class="feedback-page-header">
+        <p class="feedback-eyebrow">Reviews</p>
+        <h1 class="feedback-heading">What people say</h1>
+        <p class="feedback-subtext">
+            Feedback from clients and collaborators I've had the pleasure of working with.
+        </p>
+    </div>
+
+    <!-- ─── Approved Reviews Grid ────────────────────────────────────── -->
+    @if (loadingReviews()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+    </div>
+    } @else if (reviews().length === 0) {
+    <p class="empty-state" style="text-align:left;padding:3rem 0 0">No reviews yet — be the first to leave one below.
+    </p>
+    } @else {
+    <div class="reviews-grid">
+        @for (r of reviews(); track r.id) {
+        <article class="review-card">
+            <div class="review-stars">
+                @for (s of stars; track s) {
+                <i class="bi" [class.bi-star-fill]="s <= r.rating" [class.bi-star]="s > r.rating"
+                    [class.star--filled]="s <= r.rating"></i>
+                }
+            </div>
+            <p class="review-quote">{{ r.review }}</p>
+            <div class="review-author">
+                <p class="review-author-name">{{ r.name }}</p>
+                @if (r.role || r.company) {
+                <p class="review-author-role">
+                    {{ r.role }}{{ r.role && r.company ? ' · ' : '' }}{{ r.company }}
+                </p>
+                }
+            </div>
+        </article>
+        }
     </div>
     }
-    @if (error()) {
-    <div class="alert alert-danger">{{ error() }}</div>
-    }
 
-    <form #f="ngForm" (ngSubmit)="submit(f)" novalidate>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label fw-medium">Name <span class="text-danger">*</span></label>
-                <input ngModel name="name" required minlength="2" maxlength="100" class="form-control"
-                    [class.is-invalid]="f.submitted && f.controls['name']?.invalid" placeholder="Your name">
+    <!-- ─── Submit Form ──────────────────────────────────────────────── -->
+    <div class="feedback-submit-section">
+        <div class="feedback-submit-header">
+            <p class="feedback-submit-eyebrow">Share your experience</p>
+            <h2 class="feedback-submit-heading">Leave a review</h2>
+            <p class="feedback-submit-subtext">Worked with me? I'd love to hear your feedback.<br>All reviews are
+                moderated before publishing.</p>
+        </div>
+
+        @if (sent()) {
+        <div class="contact-banner contact-banner--success">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd" />
+            </svg>
+            Thank you! Your review has been submitted for approval.
+        </div>
+        }
+        @if (error()) {
+        <div class="contact-banner contact-banner--error">{{ error() }}</div>
+        }
+
+        @if (!sent()) {
+        <form #f="ngForm" (ngSubmit)="submit(f)" novalidate class="contact-form">
+
+            <!-- Name + Company -->
+            <div class="contact-row">
+                <div class="contact-field">
+                    <label class="contact-label">Name *</label>
+                    <input [(ngModel)]="formData.name" name="name" required minlength="2" maxlength="100"
+                        class="contact-input" [class.is-error]="f.submitted && f.controls['name']?.invalid"
+                        placeholder="Your full name">
+                    @if (f.submitted && f.controls['name']?.invalid) {
+                    <span class="contact-error">Please enter your name.</span>
+                    }
+                </div>
+                <div class="contact-field">
+                    <label class="contact-label">Company <span class="contact-optional">(optional)</span></label>
+                    <input [(ngModel)]="formData.company" name="company" maxlength="100" class="contact-input"
+                        placeholder="Company name">
+                </div>
             </div>
-            <div class="col-md-6">
-                <label class="form-label fw-medium">Company</label>
-                <input ngModel name="company" class="form-control" placeholder="Company name">
+
+            <!-- Role -->
+            <div class="contact-field">
+                <label class="contact-label">Your Role <span class="contact-optional">(optional)</span></label>
+                <input [(ngModel)]="formData.role" name="role" maxlength="100" class="contact-input"
+                    placeholder="CTO, Product Manager…">
             </div>
-            <div class="col-md-6">
-                <label class="form-label fw-medium">Your Role</label>
-                <input ngModel name="role" class="form-control" placeholder="CTO, Product Manager…">
-            </div>
-            <div class="col-md-6">
-                <label class="form-label fw-medium d-block">Rating <span class="text-danger">*</span></label>
-                <div class="d-flex gap-1 mt-1">
+
+            <!-- Star Rating -->
+            <div class="contact-field">
+                <label class="contact-label">Rating *</label>
+                <div class="star-picker">
                     @for (star of stars; track star) {
-                    <button type="button" class="btn btn-link p-0 fs-4 text-decoration-none"
-                        [style.color]="star <= selectedRating ? '#f59e0b' : '#dee2e6'" (click)="selectedRating = star">
-                        <i class="bi bi-star-fill"></i>
+                    <button type="button" class="star-picker-btn" [class.is-active]="star <= selectedRating"
+                        (click)="selectedRating = star" [attr.aria-label]="star + ' star' + (star > 1 ? 's' : '')">
+                        <i class="bi" [class.bi-star-fill]="star <= selectedRating"
+                            [class.bi-star]="star > selectedRating"></i>
                     </button>
                     }
                 </div>
             </div>
-            <div class="col-12">
-                <label class="form-label fw-medium">Review <span class="text-danger">*</span></label>
-                <textarea ngModel name="review" required minlength="10" maxlength="1000" rows="5" class="form-control"
-                    [class.is-invalid]="f.submitted && f.controls['review']?.invalid"
+
+            <!-- Review -->
+            <div class="contact-field">
+                <label class="contact-label">Review *</label>
+                <textarea ngModel name="review" required minlength="10" maxlength="1000" rows="5"
+                    class="contact-input contact-textarea"
+                    [class.is-error]="f.submitted && f.controls['review']?.invalid"
                     placeholder="Share your experience working with me…"></textarea>
-                <div class="invalid-feedback">Please write a review (min 10 characters).</div>
+                @if (f.submitted && f.controls['review']?.invalid) {
+                <span class="contact-error">Please write a review (min 10 characters).</span>
+                }
             </div>
-            <div class="col-12">
-                <button type="submit" class="btn btn-indigo btn-lg px-5" [disabled]="sending()">
+
+            <!-- Actions -->
+            <div class="contact-actions">
+                <button type="submit" class="btn-primary" [disabled]="sending()">
                     @if (sending()) {
-                    <span class="spinner-border spinner-border-sm me-2"></span>Submitting…
+                    <span class="contact-spinner"></span>Submitting…
                     } @else {
-                    <i class="bi bi-star me-2"></i>Submit Review
+                    Submit Review
                     }
                 </button>
             </div>
-        </div>
-    </form>
+
+        </form>
+        }
+    </div>
+
 </div>

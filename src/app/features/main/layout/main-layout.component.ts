@@ -1,5 +1,6 @@
 import { Component, HostListener, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { ViewportScroller } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../../core/services/theme.service';
 import { WhatsappWidgetComponent } from '../../../shared/whatsapp-widget/whatsapp-widget.component';
@@ -19,7 +20,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
     private timeInterval?: ReturnType<typeof setInterval>;
 
+    private readonly scroller = inject(ViewportScroller);
+
     ngOnInit() {
+        this.scroller.setOffset([0, 80]);
         this.updateTime();
         this.timeInterval = setInterval(() => this.updateTime(), 1000);
     }

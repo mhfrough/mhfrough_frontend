@@ -29,15 +29,24 @@
                 </span>
                 <span class="admin-card-date">{{ fb.createdAt | date:'MMM d, y' }}</span>
                 @if (!fb.isApproved) {
-                <button class="btn-primary" (click)="approve(fb.id)"
-                    style="font-size:0.68rem;padding:0.45rem 1rem">Approve</button>
+                <button class="btn-text" (click)="approve(fb.id)">
+                    <i class="bi bi-check2"></i> Approve
+                </button>
+                }
+                @if (fb.isApproved) {
+                <button class="btn-text" (click)="openStatusModal(fb.id)">
+                    <i class="bi bi-eye-slash"></i> Unapprove
+                </button>
                 }
                 <button class="btn-text-danger" (click)="confirmDelete(fb.id)">
-                    <i class="bi bi-trash"></i>
+                    <i class="bi bi-trash"></i> Delete
                 </button>
             </div>
         </div>
         <p class="admin-card-quote">{{ fb.review }}</p>
+        @if (fb.adminNote) {
+        <p class="admin-card-note"><i class="bi bi-sticky"></i> {{ fb.adminNote }}</p>
+        }
     </div>
     }
 </div>
@@ -52,6 +61,25 @@
         <div class="admin-modal-actions">
             <button class="btn-ghost" (click)="cancelDelete()">Cancel</button>
             <button class="btn-danger" (click)="executeDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Unapprove with Reason Modal -->
+@if (statusModal()) {
+<div class="admin-modal-overlay" (click)="cancelStatus()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">{{ statusModal()!.title }}</p>
+        <p class="admin-modal-body">This review will be hidden from the public site. You can optionally add a note.</p>
+        <div class="admin-form-field" style="margin-bottom:1.5rem">
+            <label class="admin-form-label">Reason / Note <span class="admin-form-hint">(optional)</span></label>
+            <textarea class="admin-form-textarea admin-modal-textarea" rows="3" [value]="statusModal()!.reason"
+                (input)="setStatusReason($event)" placeholder="e.g. Does not meet guidelines..."></textarea>
+        </div>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelStatus()">Cancel</button>
+            <button class="btn-primary" (click)="executeStatus()">Confirm</button>
         </div>
     </div>
 </div>

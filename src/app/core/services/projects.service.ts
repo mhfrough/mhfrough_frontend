@@ -12,5 +12,6 @@ export class ProjectsService {
     getOne(id: string) { return this.http.get<any>(`${this.base}/${id}`); }
     create(data: any) { return this.http.post<any>(this.base, data); }
     update(id: string, data: any) { return this.http.put<any>(`${this.base}/${id}`, data); }
+    unpublish(id: string, adminNote?: string) { return this.http.patch<any>(`${this.base}/${id}/unpublish`, { adminNote }); }
     remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
 }

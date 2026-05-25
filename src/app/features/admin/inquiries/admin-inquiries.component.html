@@ -28,8 +28,9 @@
                 </span>
                 <span class="admin-card-date">{{ inq.createdAt | date:'MMM d, y' }}</span>
                 @if (inq.status === 'new') {
-                <button class="btn-ghost" (click)="markRead(inq.id)" style="font-size:0.68rem;padding:0.45rem 1rem">Mark
-                    Read</button>
+                <button class="btn-text" (click)="markRead(inq.id)">
+                    <i class="bi bi-envelope-open"></i> Mark Read
+                </button>
                 }
             </div>
         </div>
