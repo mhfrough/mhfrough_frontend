@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, signal, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProjectsService } from '../../../core/services/projects.service';
 
@@ -11,6 +11,7 @@ import { ProjectsService } from '../../../core/services/projects.service';
 })
 export class HomeComponent implements OnInit, OnDestroy {
     private projectsService = inject(ProjectsService);
+    private platformId = inject(PLATFORM_ID);
     readonly projects = signal<any[]>([]);
     readonly loadingProjects = signal(true);
     readonly greeting = signal('');
@@ -31,12 +32,16 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     openLightbox(src: string) {
         this.lightboxSrc.set(src);
-        document.body.style.overflow = 'hidden';
+        if (isPlatformBrowser(this.platformId)) {
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     closeLightbox() {
         this.lightboxSrc.set(null);
-        document.body.style.overflow = '';
+        if (isPlatformBrowser(this.platformId)) {
+            document.body.style.overflow = '';
+        }
     }
 
     @HostListener('document:keydown.escape')

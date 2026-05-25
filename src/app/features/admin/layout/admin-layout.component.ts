@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, HostBinding } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
@@ -13,6 +13,7 @@ import { AdminNotificationService } from '../../../core/services/admin-notificat
     templateUrl: './admin-layout.component.html',
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
+    @HostBinding('attr.data-bs-theme') readonly darkTheme = 'dark';
     readonly auth = inject(AuthService);
     readonly notif = inject(AdminNotificationService);
     private readonly router = inject(Router);

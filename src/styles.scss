@@ -105,6 +105,12 @@ body::before {
     top: 0;
     z-index: 100;
     background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    transition: box-shadow var(--dur) var(--ease);
+
+    &.scrolled {
+        box-shadow: 0 1px 16px rgba(0, 0, 0, 0.07);
+    }
 
     [data-bs-theme="dark"] & {
         background: #212529;
@@ -776,28 +782,29 @@ body::before {
 
     .hero-heading {
         font-family: var(--font-mono);
-        font-size: clamp(1.5rem, 3vw, 2rem);
-        font-weight: 600;
-        line-height: 1.2;
+        font-size: clamp(2.8rem, 6.5vw, 4.5rem);
+        font-weight: 700;
+        line-height: 1.1;
         color: var(--text);
-        margin: 0 0 0.4rem;
-        letter-spacing: -0.01em;
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.03em;
     }
 
     .hero-roles {
         font-family: var(--font-mono);
-        font-size: 0.82rem;
+        font-size: 0.92rem;
         color: var(--text-muted);
         font-weight: 400;
         margin: 0 0 1.5rem;
+        letter-spacing: 0.02em;
     }
 
     .hero-tagline {
         font-family: var(--font-mono);
-        font-size: 0.82rem;
+        font-size: 0.92rem;
         color: var(--text-muted);
         font-weight: 400;
-        line-height: 1.8;
+        line-height: 1.9;
         margin: 0 0 2.5rem;
     }
 
@@ -861,11 +868,12 @@ body::before {
     text-transform: uppercase;
     text-decoration: none;
     cursor: pointer;
-    transition: opacity var(--dur) var(--ease);
+    transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
 
     &:hover {
-        opacity: 0.8;
+        opacity: 0.82;
         color: var(--bg);
+        transform: translateY(-2px);
     }
 }
 
@@ -884,11 +892,12 @@ body::before {
     text-transform: uppercase;
     text-decoration: none;
     cursor: pointer;
-    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease), transform var(--dur) var(--ease);
 
     &:hover {
         background: var(--text);
         color: var(--bg);
+        transform: translateY(-2px);
     }
 }
 
@@ -1162,11 +1171,11 @@ body::before {
 
     .project-name {
         font-family: var(--font-serif);
-        font-size: 1.4rem;
-        font-weight: 500;
+        font-size: 1.6rem;
+        font-weight: 600;
         line-height: 1.2;
         margin-bottom: 0.75rem;
-        letter-spacing: 0.01em;
+        letter-spacing: -0.01em;
         color: var(--text);
     }
 
@@ -1298,23 +1307,24 @@ body::before {
 // --- Writing ------------------------------------------------------------------
 .writing-intro {
     font-family: var(--font-serif);
-    font-size: clamp(1.4rem, 3vw, 2rem);
-    font-weight: 400;
+    font-size: clamp(1.8rem, 4vw, 2.75rem);
+    font-weight: 500;
     font-style: italic;
-    color: var(--text-muted);
-    line-height: 1.5;
-    max-width: 600px;
+    color: var(--text);
+    line-height: 1.4;
+    max-width: 680px;
+    letter-spacing: -0.01em;
 }
 
 // --- Contact CTA -------------------------------------------------------------
 .contact-cta {
     h2 {
         font-family: var(--font-sans);
-        font-size: clamp(1.1rem, 2vw, 1.3rem);
-        font-weight: 500;
-        letter-spacing: 0.01em;
-        line-height: 1.4;
-        margin-bottom: 0.75rem;
+        font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1rem;
         color: var(--text);
     }
 
@@ -1407,12 +1417,10 @@ body::before {
 
     .blog-heading {
         font-family: var(--font-serif);
-        font-size: clamp(2rem, 5vw, 3.25rem);
-        font-weight: 500;
-        line-height: 1.1;
-        letter-spacing: -0.01em;
-        color: var(--text);
-        margin: 0 0 0.75rem;
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
     }
 
     .blog-subtext {
@@ -1789,6 +1797,15 @@ button.admin-nav-link:last-child:hover {
     background: rgba(220, 38, 38, 0.07);
 }
 
+.admin-theme-toggle {
+    color: var(--text-muted) !important;
+
+    &:hover {
+        color: var(--text) !important;
+        background: var(--border) !important;
+    }
+}
+
 // --- Admin Nav Badge (unread/pending counter) ---------------------------------
 
 .admin-nav-badge {
@@ -2125,7 +2142,7 @@ button.admin-nav-link:last-child:hover {
     background: transparent;
     border: none;
     border-bottom: 1px solid var(--border);
-    padding: 0.55rem 0;
+    padding: 0.65rem 0.5rem;
     outline: none;
     width: 100%;
     transition: border-color var(--dur) var(--ease);
@@ -2156,8 +2173,8 @@ button.admin-nav-link:last-child:hover {
     cursor: pointer;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23918e87' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0 center;
-    padding-right: 1.25rem;
+    background-position: right 0.5rem center;
+    padding-right: 1.75rem;
     background-color: var(--bg);
 
     option {
@@ -2171,6 +2188,38 @@ button.admin-nav-link:last-child:hover {
     gap: 2rem;
     flex-wrap: wrap;
     padding: 0.5rem 0;
+}
+
+// --- Admin Password Wrap (eye toggle) ----------------------------------------
+
+.admin-pw-wrap {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+
+    input {
+        padding-right: 2rem;
+        flex: 1;
+    }
+}
+
+.admin-pw-toggle {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0 0.25rem;
+    font-size: 0.9rem;
+    line-height: 1;
+    transition: color var(--dur) var(--ease);
+
+    &:hover {
+        color: var(--text);
+    }
 }
 
 .admin-form-check {
@@ -2422,12 +2471,56 @@ button.admin-nav-link:last-child:hover {
 // --- Admin Login Page ---------------------------------------------------------
 
 .admin-login-page {
+    position: relative;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--bg);
     padding: 2rem;
+}
+
+.admin-login-topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-login-back {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: color var(--dur) var(--ease);
+
+    &:hover {
+        color: var(--text);
+    }
+}
+
+.admin-login-theme-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 1rem;
+    padding: 0.25rem;
+    line-height: 1;
+    transition: color var(--dur) var(--ease);
+
+    &:hover {
+        color: var(--text);
+    }
 }
 
 .admin-login-box {
@@ -2592,10 +2685,10 @@ button.admin-nav-link:last-child:hover {
 
     .contact-heading {
         font-family: var(--font-serif);
-        font-size: clamp(2rem, 5vw, 3.25rem);
-        font-weight: 500;
-        line-height: 1.1;
-        letter-spacing: -0.01em;
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
         color: var(--text);
         margin: 0 0 1rem;
     }
@@ -2867,10 +2960,10 @@ button.admin-nav-link:last-child:hover {
 
     .feedback-heading {
         font-family: var(--font-serif);
-        font-size: clamp(2rem, 5vw, 3.25rem);
-        font-weight: 500;
-        line-height: 1.1;
-        letter-spacing: -0.01em;
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
         color: var(--text);
         margin: 0 0 1rem;
     }
@@ -2927,8 +3020,8 @@ button.admin-nav-link:last-child:hover {
 
 .review-quote {
     font-family: var(--font-sans);
-    font-size: 0.9rem;
-    line-height: 1.8;
+    font-size: 1rem;
+    line-height: 1.85;
     color: var(--text-muted);
     font-style: italic;
     flex: 1;
@@ -2936,18 +3029,22 @@ button.admin-nav-link:last-child:hover {
 
     &::before {
         content: '\201C';
-        color: var(--text);
+        color: var(--indigo);
         font-style: normal;
-        font-size: 1.1em;
+        font-size: 1.5em;
         margin-right: 0.05em;
+        line-height: 0;
+        vertical-align: -0.2em;
     }
 
     &::after {
         content: '\201D';
-        color: var(--text);
+        color: var(--indigo);
         font-style: normal;
-        font-size: 1.1em;
+        font-size: 1.5em;
         margin-left: 0.05em;
+        line-height: 0;
+        vertical-align: -0.2em;
     }
 }
 
@@ -2993,9 +3090,10 @@ button.admin-nav-link:last-child:hover {
 
     .feedback-submit-heading {
         font-family: var(--font-serif);
-        font-size: clamp(1.5rem, 3vw, 2rem);
-        font-weight: 500;
-        line-height: 1.2;
+        font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
         color: var(--text);
         margin: 0 0 0.75rem;
     }
