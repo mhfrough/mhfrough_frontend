@@ -63,9 +63,7 @@
                     }
                     <p class="admin-card-stars">
                         @for (s of [1,2,3,4,5]; track s) {
-                        {{ s <= fb.rating ? '★' : '☆' }}
-                        }
-                    </p>
+                        {{ s <= fb.rating ? '★' : '☆' }} } </p>
                 </div>
                 <div class="admin-card-actions">
                     <span class="admin-badge admin-badge--warn">Pending</span>

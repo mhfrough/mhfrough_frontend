@@ -59,7 +59,7 @@ export class AdminNotificationService {
             try {
                 const event = JSON.parse(e.data) as {
                     type: 'new_inquiry' | 'new_feedback' | 'new_comment'
-                        | 'feedback_updated' | 'comment_updated' | 'inquiry_updated';
+                    | 'feedback_updated' | 'comment_updated' | 'inquiry_updated';
                 };
                 this.fetchCounts();
                 if (event.type === 'new_inquiry') {
