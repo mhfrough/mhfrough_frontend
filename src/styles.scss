@@ -25,7 +25,7 @@
     --bg: #1a1917;
     --bg-alt: #242220;
     --text: #e4e0d8;
-    --text-muted: #7a7770;
+    --text-muted: #928e87;
     --border: rgba(228, 224, 216, 0.10);
     --accent: #e4e0d8;
     --paper: #1a1917;
@@ -787,7 +787,7 @@ body::before {
         margin: 0 0 0.35rem;
 
         .hero-greeting-suffix {
-            opacity: 0.55;
+            color: var(--text-muted);
         }
     }
 
@@ -1232,7 +1232,6 @@ body::before {
     font-weight: 500;
     letter-spacing: 0.06em;
     color: var(--text-muted);
-    opacity: 0.5;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
@@ -2339,7 +2338,6 @@ button.admin-nav-link:last-child:hover {
     font-family: var(--font-sans);
     font-size: 0.7rem;
     color: var(--text-muted);
-    opacity: 0.6;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2357,7 +2355,6 @@ button.admin-nav-link:last-child:hover {
     font-family: var(--font-mono);
     font-size: 0.65rem;
     color: var(--text-muted);
-    opacity: 0.5;
     margin: 0;
 }
 
@@ -2416,7 +2413,6 @@ button.admin-nav-link:last-child:hover {
     font-family: var(--font-sans);
     font-size: 0.65rem;
     color: var(--text-muted);
-    opacity: 0.55;
 }
 
 // activity feed
@@ -2471,7 +2467,6 @@ button.admin-nav-link:last-child:hover {
     font-family: var(--font-mono);
     font-size: 0.62rem;
     color: var(--text-muted);
-    opacity: 0.45;
 }
 
 .admin-activity-badge {
@@ -2550,7 +2545,6 @@ button.admin-nav-link:last-child:hover {
     font-family: var(--font-mono);
     font-size: 0.6rem;
     color: var(--text-muted);
-    opacity: 0.55;
     letter-spacing: 0.04em;
 }
 
@@ -2558,7 +2552,6 @@ button.admin-nav-link:last-child:hover {
     font-family: var(--font-mono);
     font-size: 0.65rem;
     color: var(--text-muted);
-    opacity: 0.5;
     white-space: nowrap;
 }
 

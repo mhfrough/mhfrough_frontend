@@ -1,10 +1,10 @@
 {
   "id": "/",
-  "name": "Mohammad Hamza — Senior Frontend Developer",
+  "name": "Mohammad Hamza — Lead Developer",
   "short_name": "mhfrough.dev",
-  "description": "Personal portfolio of Mohammad Hamza, Senior Frontend Developer based in Karachi, Pakistan.",
-  "theme_color": "#6366f1",
-  "background_color": "#ffffff",
+  "description": "Personal portfolio of Mohammad Hamza, Application Developer & Product Designer based in Karachi, Pakistan.",
+  "theme_color": "#1a1917",
+  "background_color": "#1a1917",
   "display": "standalone",
   "display_override": [
     "window-controls-overlay",
@@ -12,54 +12,88 @@
   ],
   "scope": "/",
   "start_url": "/",
+  "protocol_handlers": [
+    {
+      "protocol": "web+mhfrough",
+      "url": "/?action=%s"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Mohammad Hamza — Portfolio (Desktop)"
+    },
+    {
+      "src": "screenshots/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mohammad Hamza — Portfolio (Mobile)"
+    }
+  ],
   "icons": [
     {
       "src": "icons/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-96x96.png",
       "sizes": "96x96",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192x192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512x512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

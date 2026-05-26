@@ -20,6 +20,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     @ViewChild('messagesEl') messagesEl!: ElementRef<HTMLDivElement>;
 
     readonly open = signal(false);
+    readonly visible = signal(false);
     readonly started = signal(false);
     readonly unreadCount = signal(0);
     readonly messages = this.chatService.visitorMessages;
@@ -33,6 +34,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     holdMessage = '';
 
     private typingTimeout?: ReturnType<typeof setTimeout>;
+    private _visibleTimer?: ReturnType<typeof setTimeout>;
     private _shouldScroll = signal(false);
     private _prevMsgCount = -1;
 
@@ -80,11 +82,17 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
                 this.visitorName = visitorName;
                 this.started.set(true);
                 this.chatService.connectAsVisitor(visitorName);
+                // Already in an active session — show widget immediately
+                this.visible.set(true);
+            } else {
+                // Delay trigger appearance by 7 seconds
+                this._visibleTimer = setTimeout(() => this.visible.set(true), 7000);
             }
         }
     }
 
     ngOnDestroy() {
+        clearTimeout(this._visibleTimer);
         this.chatService.disconnectVisitor();
     }
 

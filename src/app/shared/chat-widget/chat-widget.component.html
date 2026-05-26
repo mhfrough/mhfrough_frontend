@@ -113,6 +113,7 @@
 }
 
 <!-- ─── Floating Trigger ───────────────────────────────────────────────────── -->
+@if (visible()) {
 <button class="cw-trigger" (click)="toggle()" [attr.aria-label]="open() ? 'Close chat' : 'Chat with me'">
     @if (open()) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18"
@@ -133,3 +134,4 @@
     }
     }
 </button>
+}
