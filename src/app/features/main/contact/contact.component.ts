@@ -35,6 +35,9 @@ export class ContactComponent implements OnInit {
             if (params['subject']) {
                 this.formData = { ...this.formData, subject: params['subject'] };
             }
+            if (params['message']) {
+                this.formData = { ...this.formData, message: params['message'] };
+            }
         });
     }
 

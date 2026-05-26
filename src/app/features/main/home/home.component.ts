@@ -1,7 +1,9 @@
 import { Component, OnInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
 
 @Component({
     selector: 'app-home',
@@ -12,11 +14,13 @@ import { ProjectsService } from '../../../core/services/projects.service';
 export class HomeComponent implements OnInit, OnDestroy {
     private projectsService = inject(ProjectsService);
     private platformId = inject(PLATFORM_ID);
+    private readonly realtime = inject(RealtimeService);
     readonly projects = signal<any[]>([]);
     readonly loadingProjects = signal(true);
     readonly greeting = signal('');
     readonly holidayGreeting = signal('');
     readonly lightboxSrc = signal<string | null>(null);
+    private subs = new Subscription();
 
     ngOnInit() {
         this.projectsService.getAll().subscribe({
@@ -24,9 +28,37 @@ export class HomeComponent implements OnInit, OnDestroy {
             error: () => this.loadingProjects.set(false),
         });
         this.buildGreeting();
+
+        // project:created → append if published
+        this.subs.add(this.realtime.on<any>('project:created').subscribe(project => {
+            if (project.isPublished) {
+                this.projects.update(list => [...list, project]);
+            }
+        }));
+
+        // project:updated → update in-place (remove if no longer published)
+        this.subs.add(this.realtime.on<any>('project:updated').subscribe(project => {
+            if (project.isPublished) {
+                this.projects.update(list => {
+                    const exists = list.some(p => p.id === project.id);
+                    return exists ? list.map(p => p.id === project.id ? project : p) : [...list, project];
+                });
+            } else {
+                this.projects.update(list => list.filter(p => p.id !== project.id));
+            }
+        }));
+
+        // project:unpublished / deleted → remove from public list
+        this.subs.add(this.realtime.on<{ id: string }>('project:unpublished').subscribe(({ id }) => {
+            this.projects.update(list => list.filter(p => p.id !== id));
+        }));
+        this.subs.add(this.realtime.on<{ id: string }>('project:deleted').subscribe(({ id }) => {
+            this.projects.update(list => list.filter(p => p.id !== id));
+        }));
     }
 
     ngOnDestroy() {
+        this.subs.unsubscribe();
         this.closeLightbox();
     }
 

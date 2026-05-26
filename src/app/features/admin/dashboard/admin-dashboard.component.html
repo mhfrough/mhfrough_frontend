@@ -6,6 +6,8 @@
 </div>
 
 @if (stats()) {
+
+<!-- ── Stats ──────────────────────────────────────────────────────────────── -->
 <div class="admin-stats-grid">
     <div class="admin-stat-card">
         <div class="admin-stat-value">{{ stats().projects.total }}</div>
@@ -38,96 +40,176 @@
     </div>
 </div>
 
-<!-- Pending Reviews -->
-<div class="admin-dashboard-section">
-    <div class="admin-dashboard-section-header">
-        <p class="admin-dashboard-section-title">
-            <i class="bi bi-star"></i> Pending Reviews
-            @if (recentReviews().length > 0) {
-            <span class="admin-nav-badge admin-nav-badge--warn">{{ recentReviews().length }}</span>
-            }
-        </p>
-        <a routerLink="/admin/feedback" class="admin-dashboard-section-link">View all</a>
+<!-- ── Modules ────────────────────────────────────────────────────────────── -->
+
+<!-- ── Key Metrics ───────────────────────────────────────────────────────── -->
+<div class="admin-key-metrics">
+    <div class="admin-key-metric">
+        <span class="admin-key-metric-label">Total Interactions</span>
+        <span class="admin-key-metric-value">{{ totalInteractions }}</span>
+        <span class="admin-key-metric-sub">inquiries · reviews · comments</span>
     </div>
-    @if (recentReviews().length === 0) {
-    <p class="admin-dashboard-empty">No pending reviews.</p>
-    } @else {
-    <div class="admin-card-list">
-        @for (fb of recentReviews(); track fb.id) {
-        <div class="admin-card">
-            <div class="admin-card-header">
-                <div>
-                    <span class="admin-card-name">{{ fb.name }}</span>
-                    @if (fb.role || fb.company) {
-                    <p class="admin-card-role">{{ fb.role }}{{ fb.role && fb.company ? ' · ' : '' }}{{ fb.company }}</p>
-                    }
-                    <p class="admin-card-stars">
-                        @for (s of [1,2,3,4,5]; track s) {
-                        {{ s <= fb.rating ? '★' : '☆' }} } </p>
-                </div>
-                <div class="admin-card-actions">
-                    <span class="admin-badge admin-badge--warn">Pending</span>
-                    <span class="admin-card-date">{{ fb.createdAt | date:'MMM d, y' }}</span>
-                    <button class="btn-text" (click)="approveReview(fb.id)">
-                        <i class="bi bi-check2"></i> Approve
-                    </button>
-                    <a routerLink="/admin/feedback" class="btn-text">View</a>
-                </div>
+    <div class="admin-key-metric">
+        <span class="admin-key-metric-label">Needs Attention</span>
+        <span class="admin-key-metric-value">{{ pendingActions }}</span>
+        <span class="admin-key-metric-sub">pending approvals &amp; new contacts</span>
+    </div>
+    <div class="admin-key-metric">
+        <span class="admin-key-metric-label">Avg Rating</span>
+        <span class="admin-key-metric-value">{{ avgRating() || '—' }}</span>
+        <span class="admin-key-metric-sub">from {{ stats().feedback.total }} reviews</span>
+    </div>
+    <div class="admin-key-metric">
+        <span class="admin-key-metric-label">Content Published</span>
+        <span class="admin-key-metric-value">{{ stats().projects.total + stats().blogs.total }}</span>
+        <span class="admin-key-metric-sub">projects &amp; blog posts</span>
+    </div>
+</div>
+
+<!-- ── Analytics ─────────────────────────────────────────────────────────── -->
+<div class="admin-analytics-split">
+
+    <!-- Engagement metrics -->
+    <div class="admin-analytics-panel">
+        <p class="admin-analytics-panel-title">Content Health</p>
+        <div class="admin-analytics-metric">
+            <div class="admin-analytics-metric-head">
+                <span>Comment Approval</span>
+                <span class="admin-analytics-pct">{{ approvalPct(stats().comments.total, stats().comments.pending)
+                    }}%</span>
             </div>
-            <p class="admin-card-quote">{{ fb.review }}</p>
+            <div class="admin-analytics-track">
+                <div class="admin-analytics-fill"
+                    [style.width.%]="approvalPct(stats().comments.total, stats().comments.pending)"></div>
+            </div>
+        </div>
+        <div class="admin-analytics-metric">
+            <div class="admin-analytics-metric-head">
+                <span>Review Approval</span>
+                <span class="admin-analytics-pct">{{ approvalPct(stats().feedback.total, stats().feedback.pending)
+                    }}%</span>
+            </div>
+            <div class="admin-analytics-track">
+                <div class="admin-analytics-fill"
+                    [style.width.%]="approvalPct(stats().feedback.total, stats().feedback.pending)"></div>
+            </div>
+        </div>
+        <div class="admin-analytics-metric">
+            <div class="admin-analytics-metric-head">
+                <span>Inquiries Actioned</span>
+                <span class="admin-analytics-pct">{{ approvalPct(stats().inquiries.total, stats().inquiries.new)
+                    }}%</span>
+            </div>
+            <div class="admin-analytics-track">
+                <div class="admin-analytics-fill"
+                    [style.width.%]="approvalPct(stats().inquiries.total, stats().inquiries.new)"></div>
+            </div>
+        </div>
+
+        <!-- Rating distribution -->
+        <p class="admin-analytics-panel-title" style="margin-top:2rem">Rating Distribution</p>
+        @for (count of ratingDist(); track $index) {
+        <div class="admin-rating-row">
+            <span class="admin-rating-label">{{ 5 - $index }}★</span>
+            <div class="admin-analytics-track">
+                <div class="admin-rating-fill" [style.width.%]="ratingBarPct(count)"></div>
+            </div>
+            <span class="admin-rating-count">{{ count }}</span>
+        </div>
+        }
+        <p class="admin-rating-avg">
+            avg&nbsp;<strong>{{ avgRating() }}</strong>&nbsp;·&nbsp;{{ stats().feedback.total }}&nbsp;reviews
+        </p>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="admin-analytics-panel">
+        <p class="admin-analytics-panel-title">Recent Activity</p>
+        @if (activityFeed.length === 0) {
+        <p class="admin-dashboard-empty">No activity yet.</p>
+        } @else {
+        <div class="admin-activity-feed">
+            @for (item of activityFeed; track item.id) {
+            <div class="admin-activity-item">
+                <i class="bi {{ item.icon }} admin-activity-icon"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text"><strong>{{ item.name }}</strong> — {{ item.text }}</span>
+                    <span class="admin-activity-time">{{ item.time | date:'MMM d, y · h:mm a' }}</span>
+                </div>
+                <span class="admin-activity-badge {{ 'admin-activity-badge' + item.badgeMod }}">{{ item.badge }}</span>
+            </div>
+            }
         </div>
         }
     </div>
-    }
+
 </div>
 
-<!-- Pending Comments -->
-<div class="admin-dashboard-section">
-    <div class="admin-dashboard-section-header">
-        <p class="admin-dashboard-section-title">
-            <i class="bi bi-chat-left-text"></i> Pending Comments
-            @if (recentComments().length > 0) {
-            <span class="admin-nav-badge admin-nav-badge--warn">{{ recentComments().length }}</span>
+<!-- ── Blog Content ───────────────────────────────────────────────────────── -->
+<div class="admin-analytics-split">
+
+    <!-- Recent published posts -->
+    <div class="admin-analytics-panel">
+        <div class="admin-analytics-panel-header">
+            <p class="admin-analytics-panel-title">Recent Posts</p>
+            <a routerLink="/admin/blogs" class="admin-dashboard-section-link">Manage</a>
+        </div>
+        @if (recentBlogs().length === 0) {
+        <p class="admin-dashboard-empty">No published posts yet.</p>
+        } @else {
+        <div class="admin-blog-list">
+            @for (blog of recentBlogs(); track blog.id) {
+            <a class="admin-blog-row" [routerLink]="['/admin/blogs', blog.id, 'edit']">
+                <div class="admin-blog-meta">
+                    <span class="admin-blog-title">{{ blog.title }}</span>
+                    <div class="admin-blog-tags">
+                        @for (tag of (blog.tags ?? []).slice(0, 3); track tag) {
+                        <span class="admin-blog-tag">{{ tag }}</span>
+                        }
+                    </div>
+                </div>
+                <div class="admin-inquiry-right">
+                    <span class="admin-blog-read">{{ blog.readTimeMinutes }}m read</span>
+                    <span class="admin-inquiry-date">{{ (blog.publishedAt ?? blog.createdAt) | date:'MMM d' }}</span>
+                </div>
+            </a>
             }
-        </p>
-        <a routerLink="/admin/comments" class="admin-dashboard-section-link">View all</a>
-    </div>
-    @if (recentComments().length === 0) {
-    <p class="admin-dashboard-empty">No pending comments.</p>
-    } @else {
-    <div class="admin-card-list">
-        @for (c of recentComments(); track c.id) {
-        <div class="admin-card">
-            <div class="admin-card-header">
-                <div>
-                    <span class="admin-card-name">{{ c.authorName }}</span>
-                    <span class="admin-card-email"> — {{ c.authorEmail }}</span>
-                </div>
-                <div class="admin-card-actions">
-                    <span class="admin-badge admin-badge--warn">Pending</span>
-                    <span class="admin-card-date">{{ c.createdAt | date:'MMM d, y' }}</span>
-                    <button class="btn-text" (click)="approveComment(c.id)">
-                        <i class="bi bi-check2"></i> Approve
-                    </button>
-                    <a routerLink="/admin/comments" class="btn-text">View</a>
-                </div>
-            </div>
-            <p class="admin-card-message">{{ c.content }}</p>
         </div>
         }
     </div>
-    }
+
+    <!-- Drafts -->
+    <div class="admin-analytics-panel">
+        <div class="admin-analytics-panel-header">
+            <p class="admin-analytics-panel-title">Drafts</p>
+            <a routerLink="/admin/blogs" class="admin-dashboard-section-link">Manage</a>
+        </div>
+        @if (draftBlogs().length === 0) {
+        <p class="admin-dashboard-empty">No drafts.</p>
+        } @else {
+        <div class="admin-blog-list">
+            @for (blog of draftBlogs(); track blog.id) {
+            <a class="admin-blog-row" [routerLink]="['/admin/blogs', blog.id, 'edit']">
+                <div class="admin-blog-meta">
+                    <span class="admin-blog-title">{{ blog.title }}</span>
+                    <div class="admin-blog-tags">
+                        @for (tag of (blog.tags ?? []).slice(0, 3); track tag) {
+                        <span class="admin-blog-tag">{{ tag }}</span>
+                        }
+                    </div>
+                </div>
+                <div class="admin-inquiry-right">
+                    <span class="admin-nav-badge">draft</span>
+                    <span class="admin-inquiry-date">{{ blog.updatedAt | date:'MMM d' }}</span>
+                </div>
+            </a>
+            }
+        </div>
+        }
+    </div>
+
 </div>
 
-<div class="admin-quick-links">
-    <p class="admin-quick-links-title">Quick Links</p>
-    <div class="admin-quick-links-row">
-        <a routerLink="/admin/projects" class="btn-ghost">Add Project</a>
-        <a routerLink="/admin/blogs" class="btn-ghost">New Post</a>
-        <a routerLink="/admin/inquiries" class="btn-ghost">View Inquiries</a>
-        <a routerLink="/admin/feedback" class="btn-ghost">View Feedback</a>
-    </div>
-</div>
 } @else {
 <div class="loading-state">
     <div class="spinner"></div>

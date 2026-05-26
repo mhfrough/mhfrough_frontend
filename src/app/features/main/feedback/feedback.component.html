@@ -23,9 +23,8 @@
         <article class="review-card">
             <div class="review-stars">
                 @for (s of stars; track s) {
-                <i class="bi" [class.bi-star-fill]="s <= r.rating" [class.bi-star]="s > r.rating"
-                    [class.star--filled]="s <= r.rating"></i>
-                }
+                <span [class.star--filled]="s <= r.rating">{{ s <= r.rating ? '★' : '☆' }}</span>
+                        }
             </div>
             <p class="review-quote">{{ r.review }}</p>
             <div class="review-author">

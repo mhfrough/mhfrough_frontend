@@ -1,0 +1,134 @@
+﻿:host {
+    display: contents;
+}
+
+.cookie-consent {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: calc(100% - 2rem);
+    max-width: 560px;
+    animation: cookie-slide-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes cookie-slide-up {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(1.5rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.cookie-consent__inner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+    @media (max-width: 540px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.875rem;
+    }
+}
+
+@keyframes cookie-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.cookie-consent__icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    animation: cookie-spin 7s linear infinite;
+}
+
+.cookie-consent__text {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin: 0;
+    flex: 1;
+}
+
+.cookie-consent__link {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+
+    &:hover {
+        opacity: 0.75;
+    }
+}
+
+.cookie-consent__actions {
+    display: flex;
+    gap: 0.625rem;
+    flex-shrink: 0;
+
+    @media (max-width: 540px) {
+        width: 100%;
+    }
+}
+
+.cookie-consent__btn {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 0;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    transition:
+        opacity var(--dur) var(--ease),
+        background var(--dur) var(--ease),
+        color var(--dur) var(--ease),
+        transform var(--dur) var(--ease);
+
+    @media (max-width: 540px) {
+        flex: 1;
+    }
+
+    &--accept {
+        background: var(--text, #e8e6e0);
+        color: var(--bg, #111);
+
+        &:hover {
+            opacity: 0.82;
+            transform: translateY(-2px);
+        }
+    }
+
+    &--decline {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+
+        &:hover {
+            background: var(--text);
+            color: var(--bg);
+            transform: translateY(-2px);
+        }
+    }
+}

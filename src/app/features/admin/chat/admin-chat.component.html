@@ -1,0 +1,189 @@
+<div class="ac-wrap">
+
+    <!-- ─── Sidebar: sessions list ─────────────────────────────────────────── -->
+    <aside class="ac-sidebar">
+        <div class="ac-sidebar-head">
+            <h2 class="ac-sidebar-title">
+                <i class="bi bi-chat-dots"></i> Live Chat
+            </h2>
+            <button class="ac-icon-btn" title="Settings" (click)="openSettings()"
+                [class.is-active]="activeTab === 'settings'">
+                <i class="bi bi-gear"></i>
+            </button>
+        </div>
+
+        @if (activeTab === 'chat') {
+        <ul class="ac-session-list">
+            @if (sessions().length === 0) {
+            <li class="ac-session-empty">No active sessions</li>
+            }
+            @for (session of sessions(); track trackBySessionId($index, session)) {
+            <li class="ac-session-item" [class.is-active]="activeSessionId() === session.id"
+                [class.is-closed]="session.status === 'closed'" (click)="selectSession(session)">
+                <div class="ac-session-avatar">
+                    {{ (session.visitorName || 'V').charAt(0).toUpperCase() }}
+                </div>
+                <div class="ac-session-info">
+                    <span class="ac-session-name">{{ session.visitorName || 'Visitor' }}</span>
+                    <span class="ac-session-time">{{ session.lastActivityAt | date:'MMM d, HH:mm' }}</span>
+                </div>
+                <div class="ac-session-meta">
+                    @if (session.unreadCount > 0) {
+                    <span class="ac-unread">{{ session.unreadCount }}</span>
+                    }
+                    @if (session.status === 'closed') {
+                    <span class="ac-closed-badge">closed</span>
+                    }
+                    <button class="ac-delete-btn" (click)="deleteSession(session.id, $event)" title="Delete">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </div>
+            </li>
+            }
+        </ul>
+        }
+
+        @if (activeTab === 'settings') {
+        <!-- Settings panel embedded in sidebar slot on mobile, not shown here -->
+        }
+    </aside>
+
+    <!-- ─── Main: chat view or settings ───────────────────────────────────── -->
+    <main class="ac-main">
+
+        @if (activeTab === 'settings') {
+        <!-- Settings -->
+        <div class="ac-settings">
+            <div class="ac-settings-header">
+                <h3>Chat Settings</h3>
+                <button class="ac-icon-btn" (click)="activeTab = 'chat'"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <section class="ac-settings-section">
+                <label class="ac-settings-label">
+                    <i class="bi bi-chat-quote"></i> Greeting Messages
+                    <span class="ac-settings-hint">Shown when a visitor opens the chat</span>
+                </label>
+                @for (msg of greetingMessages; track trackIdx($index); let i = $index) {
+                <div class="ac-settings-row">
+                    <input class="ac-settings-input" [(ngModel)]="greetingMessages[i]"
+                        placeholder="e.g. Hi there! 👋 How can I help?" />
+                    <button class="ac-icon-btn ac-icon-btn--danger" (click)="removeGreeting(i)">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                }
+                <button class="ac-add-btn" (click)="addGreeting()">
+                    <i class="bi bi-plus"></i> Add Greeting
+                </button>
+            </section>
+
+            <section class="ac-settings-section">
+                <label class="ac-settings-label">
+                    <i class="bi bi-hourglass-split"></i> Hold / Waiting Messages
+                    <span class="ac-settings-hint">Shown after visitor sends first message</span>
+                </label>
+                @for (msg of holdMessages; track trackIdx($index); let i = $index) {
+                <div class="ac-settings-row">
+                    <input class="ac-settings-input" [(ngModel)]="holdMessages[i]"
+                        placeholder="e.g. We'll get back to you shortly…" />
+                    <button class="ac-icon-btn ac-icon-btn--danger" (click)="removeHold(i)">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                }
+                <button class="ac-add-btn" (click)="addHold()">
+                    <i class="bi bi-plus"></i> Add Hold Message
+                </button>
+            </section>
+
+            <section class="ac-settings-section">
+                <label class="ac-settings-label">
+                    <i class="bi bi-activity"></i> Status Message
+                    <span class="ac-settings-hint">Shown below your name in the widget header</span>
+                </label>
+                <input class="ac-settings-input" [(ngModel)]="statusMessage"
+                    placeholder="e.g. Typically replies within a few minutes" />
+            </section>
+
+            <div class="ac-settings-footer">
+                <button class="ac-save-btn" (click)="saveSettings()">
+                    <i class="bi bi-check2-all"></i> Save Settings
+                </button>
+                @if (settingsSaved) {
+                <span class="ac-saved-msg"><i class="bi bi-check2"></i> Saved!</span>
+                }
+            </div>
+        </div>
+        }
+
+        @if (activeTab === 'chat') {
+
+        @if (!activeSessionId()) {
+        <!-- Empty state -->
+        <div class="ac-empty">
+            <i class="bi bi-chat-dots"></i>
+            <p>Select a conversation to start chatting</p>
+        </div>
+        }
+
+        @if (activeSessionId()) {
+        <!-- Chat header -->
+        <div class="ac-chat-header">
+            <div class="ac-chat-visitor-info">
+                <div class="ac-session-avatar ac-session-avatar--lg">
+                    {{ getActiveSession()?.visitorName?.charAt(0)?.toUpperCase() ?? 'V' }}
+                </div>
+                <div>
+                    <p class="ac-chat-visitor-name">{{ getActiveSession()?.visitorName ?? 'Visitor' }}</p>
+                    <p class="ac-chat-visitor-since">Since {{ getActiveSession()?.createdAt | date:'MMM d, HH:mm' }}</p>
+                </div>
+            </div>
+            @if (getActiveSession()?.status === 'active') {
+            <button class="ac-close-btn" (click)="closeSession()" title="End chat">
+                <i class="bi bi-x-circle"></i> End Chat
+            </button>
+            }
+        </div>
+
+        <!-- Messages -->
+        <div class="ac-messages" #msgsEl>
+            @for (msg of activeMsgs(); track trackById($index, msg)) {
+            <div class="ac-msg" [class.ac-msg--admin]="msg.sender === 'admin'"
+                [class.ac-msg--visitor]="msg.sender === 'visitor'">
+                <span class="ac-msg-bubble">{{ msg.content }}</span>
+                <span class="ac-msg-time">{{ msg.createdAt | date:'HH:mm' }}</span>
+            </div>
+            }
+
+            <!-- Visitor typing indicator -->
+            @if (isVisitorTyping()) {
+            <div class="ac-msg ac-msg--visitor ac-typing">
+                <span class="ac-msg-bubble ac-typing-bubble">
+                    <span></span><span></span><span></span>
+                </span>
+            </div>
+            }
+        </div>
+
+        <!-- Input -->
+        @if (getActiveSession()?.status === 'active') {
+        <div class="ac-input-row">
+            <textarea class="ac-textarea" [(ngModel)]="messageText" (keydown)="onKeydown($event)" (input)="onInput()"
+                (input)="autoResize($event)" placeholder="Type a reply…" rows="1"></textarea>
+            <button class="ac-send-btn" (click)="sendMessage()" [disabled]="!messageText.trim()">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+        } @else {
+        <div class="ac-chat-closed-notice">
+            <i class="bi bi-lock"></i> This session has ended
+        </div>
+        }
+        }
+
+        }
+
+    </main>
+
+</div>

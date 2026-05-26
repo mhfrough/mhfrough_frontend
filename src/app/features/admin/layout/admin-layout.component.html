@@ -60,6 +60,29 @@
                     }
                 </a>
             </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/chat" routerLinkActive="is-active">
+                    <i class="bi bi-chat-dots"></i>Live Chat
+                    @if (chat.unreadChatCount() > 0) {
+                    <span class="admin-nav-badge admin-nav-badge--danger">{{ chat.unreadChatCount() }}</span>
+                    }
+                </a>
+            </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/push" routerLinkActive="is-active">
+                    <i class="bi bi-megaphone"></i>Push Notifications
+                </a>
+            </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/notification-logs" routerLinkActive="is-active">
+                    <i class="bi bi-journal-text"></i>Notification Logs
+                </a>
+            </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/invoices" routerLinkActive="is-active">
+                    <i class="bi bi-receipt"></i>Invoices
+                </a>
+            </li>
         </ul>
         <div class="admin-nav-bottom">
             <a class="admin-nav-link" routerLink="/" target="_blank">

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ThemeService } from './core/services/theme.service';
+import { FcmService } from './core/services/fcm.service';
 
 @Component({
   selector: 'app-root',
@@ -10,5 +11,9 @@ import { ThemeService } from './core/services/theme.service';
 })
 export class App implements OnInit {
   private theme = inject(ThemeService);
-  ngOnInit() { this.theme.init(); }
+  private fcm = inject(FcmService);
+  ngOnInit() {
+    this.theme.init();
+    this.fcm.init();
+  }
 }

@@ -1,0 +1,103 @@
+﻿<div class="admin-page-header">
+    <h1 class="admin-page-title">Invoices</h1>
+    <a routerLink="/admin/invoices/new" class="btn-primary">New Invoice</a>
+</div>
+
+@if (loading()) {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+} @else if (invoices().length === 0) {
+<p class="empty-state">No invoices yet. Create your first one.</p>
+} @else {
+
+<div class="admin-stats-grid">
+    <div class="admin-stat-card">
+        <div class="admin-stat-value">{{ invoices().length }}</div>
+        <div class="admin-stat-label">Total Invoices</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-value">{{ paidCount() }}</div>
+        <div class="admin-stat-label">Paid</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-value">{{ formatCurrency(totalBilled()) }}</div>
+        <div class="admin-stat-label">Total Billed</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-value">{{ formatCurrency(outstanding()) }}</div>
+        <div class="admin-stat-label">Outstanding</div>
+        @if (outstanding() > 0) {
+        <div class="admin-stat-badge admin-stat-badge--warn">unpaid</div>
+        }
+    </div>
+</div>
+
+<div class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Invoice #</th>
+                <th>Client</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (inv of invoices(); track inv.id) {
+            <tr>
+                <td style="font-family:var(--font-mono);font-size:0.82rem;font-weight:600">
+                    {{ inv.invoiceNumber }}
+                </td>
+                <td>
+                    <span style="font-weight:600">{{ inv.clientName }}</span>
+                    <br>
+                    <span style="color:var(--text-muted);font-size:0.78rem">{{ inv.clientEmail }}</span>
+                </td>
+                <td style="color:var(--text-muted);font-size:0.78rem;font-family:var(--font-mono)">
+                    {{ formatDate(inv.issueDate) }}
+                </td>
+                <td style="color:var(--text-muted);font-size:0.78rem;font-family:var(--font-mono)">
+                    {{ formatDate(inv.dueDate) }}
+                </td>
+                <td style="font-weight:600">{{ formatCurrency(inv.total) }}</td>
+                <td>
+                    <span class="admin-badge" [class.admin-badge--on]="inv.status === 'paid'"
+                        [class.admin-badge--warn]="inv.status === 'sent'">
+                        {{ statusLabel(inv.status) }}
+                    </span>
+                </td>
+                <td style="text-align:right;white-space:nowrap">
+                    <a [routerLink]="['/admin/invoices', inv.id]" class="btn-text" style="margin-right:1.25rem">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                    <a [routerLink]="['/admin/invoices', inv.id, 'edit']" class="btn-text" style="margin-right:1.25rem">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <button class="btn-text-danger" (click)="confirmDelete(inv.id)">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+}
+
+@if (deleteTargetId()) {
+<div class="admin-modal-overlay" (click)="cancelDelete()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Delete Invoice</p>
+        <p class="admin-modal-body">This action cannot be undone. The invoice will be permanently deleted.</p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelDelete()">Cancel</button>
+            <button class="btn-danger" (click)="executeDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+}

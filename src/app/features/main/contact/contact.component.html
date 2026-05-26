@@ -59,15 +59,25 @@
                     <label class="contact-label">Subject <span class="contact-optional">(optional)</span></label>
                     <select [(ngModel)]="formData.subject" name="subject" class="contact-input contact-select">
                         <option value="">— Select a subject —</option>
-                        <option value="Project Inquiry">Project Inquiry</option>
-                        <option value="Freelance Collaboration">Freelance Collaboration</option>
-                        <option value="Job Opportunity">Job Opportunity</option>
-                        <option value="Website Design">Website Design</option>
-                        <option value="Web Development">Web Development</option>
-                        <option value="UI/UX Design">UI/UX Design</option>
-                        <option value="Product Design">Product Design</option>
-                        <option value="Consulting">Consulting</option>
-                        <option value="Just Saying Hello">Just Saying Hello</option>
+                        <optgroup label="Services">
+                            <option value="Web Side Design">Web Side Design</option>
+                            <option value="Application Development">Application Development</option>
+                            <option value="Mobile Development">Mobile Development</option>
+                            <option value="Website Development">Website Development</option>
+                            <option value="Programming Troubleshooting">Programming Troubleshooting</option>
+                            <option value="Logo Design">Logo Design</option>
+                            <option value="Adobe XD Design">Adobe XD Design</option>
+                            <option value="Canva Design">Canva Design</option>
+                        </optgroup>
+                        <optgroup label="General">
+                            <option value="Project Inquiry">Project Inquiry</option>
+                            <option value="Freelance Collaboration">Freelance Collaboration</option>
+                            <option value="Job Opportunity">Job Opportunity</option>
+                            <option value="UI/UX Design">UI/UX Design</option>
+                            <option value="Product Design">Product Design</option>
+                            <option value="Consulting">Consulting</option>
+                            <option value="Just Saying Hello">Just Saying Hello</option>
+                        </optgroup>
                     </select>
                 </div>
             </div>
@@ -114,6 +124,12 @@
                     Reset
                 </button>
             </div>
+
+            <p class="contact-terms-note">
+                By submitting this form you accept our
+                <a href="/terms" target="_blank" rel="noopener">Terms &amp; Conditions</a>
+                and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+            </p>
 
         </form>
 

@@ -1,0 +1,175 @@
+﻿<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">Invoice</h1>
+        @if (!loading() && invoice()) {
+        <p class="admin-page-sub" style="font-family:var(--font-mono)">{{ invoice()!.invoiceNumber }}</p>
+        }
+    </div>
+    @if (!loading() && invoice()) {
+    <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+        <a routerLink="/admin/invoices" class="btn-ghost"><i class="bi bi-arrow-left"></i> Back</a>
+        <a [routerLink]="['/admin/invoices', invoice()!.id, 'edit']" class="btn-ghost">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        <button class="btn-ghost" (click)="updateStatus('draft')"
+            [class.btn-primary]="invoice()!.status==='draft'">Draft</button>
+        <button class="btn-ghost" (click)="updateStatus('sent')"
+            [class.btn-primary]="invoice()!.status==='sent'">Sent</button>
+        <button class="btn-ghost" (click)="updateStatus('paid')"
+            [class.btn-primary]="invoice()!.status==='paid'">Paid</button>
+        <button class="btn-primary inv-view-actions" (click)="print()">
+            <i class="bi bi-download"></i> Download PDF
+        </button>
+        <button class="btn-ghost inv-view-actions" disabled title="Coming soon">
+            <i class="bi bi-envelope"></i> Send Email <span style="font-size:.65rem;opacity:.6">(soon)</span>
+        </button>
+    </div>
+    }
+</div>
+
+@if (loading()) {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+}
+
+@if (!loading() && invoice(); as inv) {
+<div class="inv-doc" style="max-width:800px;margin:0 auto">
+    <div style="background:#fff;color:#1a1917;border-radius:10px;padding:3rem;box-shadow:0 2px 20px rgba(0,0,0,.15)">
+
+        <!-- Header -->
+        <div style="display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;margin-bottom:3rem">
+            <div>
+                <p style="font-size:1.4rem;font-weight:700;margin-bottom:.4rem;letter-spacing:.03em">
+                    MHFrough<span style="color:#6366f1">.</span>
+                </p>
+                <p style="font-size:.82rem;color:#6b7280;margin-bottom:.15rem">mhfrough.dev</p>
+                <p style="font-size:.82rem;color:#6b7280;margin:0">hello&#64;mhfrough.dev</p>
+            </div>
+            <div style="text-align:right">
+                <p
+                    style="font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:#6366f1;font-weight:600;margin-bottom:.3rem">
+                    Invoice</p>
+                <p style="font-size:1.1rem;font-weight:700;margin-bottom:.75rem;font-family:monospace">{{
+                    inv.invoiceNumber }}</p>
+                <div style="display:flex;gap:1.5rem;justify-content:flex-end;flex-wrap:wrap">
+                    <div>
+                        <p
+                            style="font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:.15rem">
+                            Issued</p>
+                        <p style="font-size:.82rem;font-weight:500;color:#374151;margin:0">{{ formatDate(inv.issueDate)
+                            }}</p>
+                    </div>
+                    <div>
+                        <p
+                            style="font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:.15rem">
+                            Due</p>
+                        <p style="font-size:.82rem;font-weight:500;color:#374151;margin:0">{{ formatDate(inv.dueDate) }}
+                        </p>
+                    </div>
+                </div>
+                <div style="margin-top:.75rem">
+                    <span
+                        style="display:inline-block;padding:.2rem .7rem;border-radius:4px;font-size:.7rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase"
+                        [style.background]="inv.status==='paid' ? '#dcfce7' : inv.status==='sent' ? '#dbeafe' : '#f3f4f6'"
+                        [style.color]="inv.status==='paid' ? '#166534' : inv.status==='sent' ? '#1d4ed8' : '#6b7280'">
+                        {{ inv.status }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accent line -->
+        <div style="height:2px;background:linear-gradient(to right,#6366f1,transparent);margin-bottom:2.5rem"></div>
+
+        <!-- Bill To -->
+        <div style="margin-bottom:2.5rem">
+            <p
+                style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;font-weight:600;margin-bottom:.6rem">
+                Bill To</p>
+            <p style="font-size:1.05rem;font-weight:700;color:#111827;margin-bottom:.25rem">{{ inv.clientName }}</p>
+            @if (inv.clientPhone) { <p style="font-size:.82rem;color:#6b7280;margin-bottom:.15rem">{{ inv.clientPhone }}
+            </p> }
+            <p style="font-size:.82rem;color:#6b7280;margin-bottom:.15rem">{{ inv.clientEmail }}</p>
+            <p style="font-size:.82rem;color:#6b7280;margin:0;white-space:pre-line">{{ inv.clientAddress }}</p>
+        </div>
+
+        <!-- Items Table -->
+        <table style="width:100%;border-collapse:collapse;margin-bottom:2rem">
+            <thead>
+                <tr style="border-bottom:2px solid #e5e7eb">
+                    <th
+                        style="text-align:left;padding:.5rem 0;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;font-weight:600">
+                        Item</th>
+                    <th
+                        style="text-align:left;padding:.5rem 0;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;font-weight:600">
+                        Sub-item</th>
+                    <th
+                        style="text-align:left;padding:.5rem 0;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;font-weight:600">
+                        Category</th>
+                    <th
+                        style="text-align:right;padding:.5rem 0;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;font-weight:600">
+                        Qty</th>
+                    <th
+                        style="text-align:right;padding:.5rem 0;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;font-weight:600">
+                        Unit Price</th>
+                    <th
+                        style="text-align:right;padding:.5rem 0;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;font-weight:600">
+                        Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of sortedItems; track (item.id ?? $index)) {
+                <tr style="border-bottom:1px solid #f3f4f6">
+                    <td style="padding:.75rem 0;font-weight:500;color:#111827">{{ item.itemName }}</td>
+                    <td style="padding:.75rem 0;font-size:.82rem;color:#6b7280">{{ item.subItem || '—' }}</td>
+                    <td style="padding:.75rem 0;font-size:.82rem;color:#6b7280">{{ item.category || '—' }}</td>
+                    <td style="padding:.75rem 0;font-size:.82rem;color:#374151;text-align:right">{{ item.quantity }}
+                    </td>
+                    <td style="padding:.75rem 0;font-size:.82rem;color:#374151;text-align:right">{{
+                        formatCurrency(item.unitPrice) }}</td>
+                    <td style="padding:.75rem 0;font-weight:600;color:#111827;text-align:right">{{
+                        formatCurrency(lineTotal(item.quantity, item.unitPrice)) }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:2.5rem">
+            <div style="min-width:220px">
+                <div style="display:flex;justify-content:space-between;padding:.3rem 0;font-size:.88rem;color:#6b7280">
+                    <span>Subtotal</span><span>{{ formatCurrency(inv.subtotal) }}</span>
+                </div>
+                @if (+inv.taxRate > 0) {
+                <div style="display:flex;justify-content:space-between;padding:.3rem 0;font-size:.88rem;color:#6b7280">
+                    <span>Tax ({{ inv.taxRate }}%)</span><span>{{ formatCurrency(inv.taxAmount) }}</span>
+                </div>
+                }
+                <div
+                    style="display:flex;justify-content:space-between;padding:.6rem 0;margin-top:.25rem;border-top:2px solid #111827;font-weight:700;font-size:1.1rem;color:#111827">
+                    <span>Total</span><span>{{ formatCurrency(inv.total) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        @if (inv.notes) {
+        <div style="border-top:1px solid #e5e7eb;padding-top:1.5rem">
+            <p
+                style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;font-weight:600;margin-bottom:.5rem">
+                Notes</p>
+            <p style="font-size:.82rem;color:#6b7280;white-space:pre-line;margin:0">{{ inv.notes }}</p>
+        </div>
+        }
+
+        <!-- Footer -->
+        <div style="text-align:center;margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid #e5e7eb">
+            <p style="font-size:.75rem;color:#9ca3af;margin:0">
+                Generated by mhfrough.dev &middot; {{ inv.invoiceNumber }}
+            </p>
+        </div>
+
+    </div>
+</div>
+}

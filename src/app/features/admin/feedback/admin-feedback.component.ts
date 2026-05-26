@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { FeedbackService } from '../../../core/services/inquiry-feedback.service';
 import { AdminNotificationService } from '../../../core/services/admin-notification.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
 
 @Component({
     selector: 'app-admin-feedback',
@@ -13,6 +14,7 @@ import { AdminNotificationService } from '../../../core/services/admin-notificat
 export class AdminFeedbackComponent implements OnInit, OnDestroy {
     private readonly service = inject(FeedbackService);
     private readonly notif = inject(AdminNotificationService);
+    private readonly realtime = inject(RealtimeService);
     readonly feedback = signal<any[]>([]);
     readonly loading = signal(true);
     readonly deleteTargetId = signal<string | null>(null);
@@ -21,7 +23,30 @@ export class AdminFeedbackComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.load();
-        this.subs.add(this.notif.feedbackChanged$.subscribe(() => this.load()));
+
+        // feedback:new → prepend to list
+        this.subs.add(this.realtime.on<any>('feedback:new').subscribe(item => {
+            this.feedback.update(list => [item, ...list]);
+            this.notif.fetchCounts();
+        }));
+
+        // feedback:approved → update item in-place
+        this.subs.add(this.realtime.on<any>('feedback:approved').subscribe(item => {
+            this.feedback.update(list => list.map(f => f.id === item.id ? item : f));
+            this.notif.fetchCounts();
+        }));
+
+        // feedback:unapproved → update item in-place (mark as unapproved)
+        this.subs.add(this.realtime.on<{ id: string }>('feedback:unapproved').subscribe(({ id }) => {
+            this.feedback.update(list => list.map(f => f.id === id ? { ...f, isApproved: false } : f));
+            this.notif.fetchCounts();
+        }));
+
+        // feedback:deleted → remove from list
+        this.subs.add(this.realtime.on<{ id: string }>('feedback:deleted').subscribe(({ id }) => {
+            this.feedback.update(list => list.filter(f => f.id !== id));
+            this.notif.fetchCounts();
+        }));
     }
 
     ngOnDestroy() { this.subs.unsubscribe(); }
@@ -32,7 +57,6 @@ export class AdminFeedbackComponent implements OnInit, OnDestroy {
 
     approve(id: string) {
         this.service.approve(id).subscribe(() => {
-            this.load();
             this.notif.fetchCounts();
         });
     }
@@ -44,7 +68,7 @@ export class AdminFeedbackComponent implements OnInit, OnDestroy {
         const id = this.deleteTargetId();
         if (!id) return;
         this.deleteTargetId.set(null);
-        this.service.remove(id).subscribe(() => this.load());
+        this.service.remove(id).subscribe();
     }
 
     openStatusModal(id: string) { this.statusModal.set({ id, title: 'Unapprove Review', reason: '' }); }
@@ -58,7 +82,6 @@ export class AdminFeedbackComponent implements OnInit, OnDestroy {
         if (!m) return;
         this.statusModal.set(null);
         this.service.unapprove(m.id, m.reason || undefined).subscribe(() => {
-            this.load();
             this.notif.fetchCounts();
         });
     }

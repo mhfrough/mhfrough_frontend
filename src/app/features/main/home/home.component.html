@@ -18,13 +18,34 @@
         </div>
     </div>
     <div class="hero-right">
-        <ul class="hero-info-list">
-            <li><span class="hero-info-label">Role</span><span>Lead Developer</span></li>
-            <li><span class="hero-info-label">Also</span><span>Product Designer</span></li>
-            <li><span class="hero-info-label">Stack</span><span>Angular · NestJS · React</span></li>
-            <li><span class="hero-info-label">Based</span><span>Karachi, Pakistan</span></li>
-            <li><span class="hero-info-label">Avail.</span><span>Open to work</span></li>
-        </ul>
+        <!-- prettier-ignore -->
+        <div class="hero-code">
+            <span class="hc-line" style="--i:0"><span class="hc-cmt">// mhfrough.config.ts</span></span>
+            <span class="hc-line" style="--i:1"><span class="hc-kw">const</span>&nbsp;<span
+                    class="hc-var">developer</span>&nbsp;<span class="hc-punct">=</span>&nbsp;<span
+                    class="hc-punct">&#123;</span></span>
+            <span class="hc-line" style="--i:2">&nbsp;&nbsp;<span class="hc-prop">role</span><span
+                    class="hc-punct">:</span>&nbsp;<span class="hc-str">"Lead Developer"</span><span
+                    class="hc-punct">,</span></span>
+            <span class="hc-line" style="--i:3">&nbsp;&nbsp;<span class="hc-prop">also</span><span
+                    class="hc-punct">:</span>&nbsp;<span class="hc-str">"Product Designer"</span><span
+                    class="hc-punct">,</span></span>
+            <span class="hc-line" style="--i:4">&nbsp;&nbsp;<span class="hc-prop">stack</span><span
+                    class="hc-punct">:</span>&nbsp;<span class="hc-punct">[</span><span
+                    class="hc-str">"Angular"</span><span class="hc-punct">,</span>&nbsp;<span
+                    class="hc-str">"NestJS"</span><span class="hc-punct">,</span>&nbsp;<span
+                    class="hc-str">"PostgreSQL"</span><span class="hc-punct">,</span>&nbsp;<span
+                    class="hc-str">"...&amp;&nbsp;whatever&nbsp;it&nbsp;takes"</span><span
+                    class="hc-punct">],</span></span>
+            <span class="hc-line" style="--i:5">&nbsp;&nbsp;<span class="hc-prop">based</span><span
+                    class="hc-punct">:</span>&nbsp;<span class="hc-str">"Karachi,&nbsp;Pakistan"</span><span
+                    class="hc-punct">,</span></span>
+            <span class="hc-line" style="--i:6">&nbsp;&nbsp;<span class="hc-prop">status</span><span
+                    class="hc-punct">:</span>&nbsp;<span class="hc-val">open_to_work</span><span
+                    class="hc-punct">,</span></span>
+            <span class="hc-line" style="--i:7"><span class="hc-punct">&#125;;</span></span>
+            <span class="hc-line hc-cursor" style="--i:8">▋</span>
+        </div>
     </div>
 </section>
 
@@ -104,6 +125,109 @@
                 <a href="https://www.linkedin.com/in/mhfrough/" target="_blank" rel="noopener">LinkedIn <i
                         class="bi bi-arrow-up-right"></i></a>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Services ────────────────────────────────────────────────────────── -->
+<section class="section" id="services">
+    <div class="section-container">
+        <h2 class="section-title">My Services</h2>
+        <div class="services-grid">
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Web Side Design', message: 'Hi, I\'m interested in your Web Side Design service. I\'d love to discuss my project and get a custom design proposal.'}">
+                <i class="bi bi-layout-text-window-reverse service-icon"></i>
+                <h3 class="service-name">Web Side Design</h3>
+                <p class="service-desc">Pixel-perfect UI layouts and visual web designs tailored to your brand identity.
+                </p>
+                <div class="service-footer">
+                    <div class="service-tags"><span class="service-tag">UI/UX</span></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Application Development', message: 'Hi, I\'m interested in your Application Development service. I\'d like to discuss building a full-stack application for my project.'}">
+                <i class="bi bi-app service-icon"></i>
+                <h3 class="service-name">Application Development</h3>
+                <p class="service-desc">Full-stack web applications built with modern frameworks — Angular, NestJS,
+                    React and more.</p>
+                <div class="service-footer">
+                    <div class="service-tags"></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Mobile Development', message: 'Hi, I\'m interested in your Mobile Development service. I\'d like to build a mobile app and would love to discuss the details.'}">
+                <i class="bi bi-phone service-icon"></i>
+                <h3 class="service-name">Mobile Development</h3>
+                <p class="service-desc">Cross-platform mobile apps that deliver a native feel across iOS and Android.
+                </p>
+                <div class="service-footer">
+                    <div class="service-tags"></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Website Development', message: 'Hi, I\'m interested in your Website Development service. I need a professional website and would love to discuss my requirements.'}">
+                <i class="bi bi-globe service-icon"></i>
+                <h3 class="service-name">Website Development</h3>
+                <p class="service-desc">Fast, responsive, and SEO-ready websites from landing pages to full portals.</p>
+                <div class="service-footer">
+                    <div class="service-tags"></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Programming Troubleshooting', message: 'Hi, I\'m facing some technical issues and need help with debugging. I\'d like to discuss the problem and find a solution together.'}">
+                <i class="bi bi-bug service-icon"></i>
+                <h3 class="service-name">Programming Troubleshooting</h3>
+                <p class="service-desc">Diagnosing and fixing bugs, performance issues, and broken builds across any
+                    stack.</p>
+                <div class="service-footer">
+                    <div class="service-tags"></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Logo Design', message: 'Hi, I\'m interested in your Logo Design service. I need a unique logo for my brand and would like to discuss the design process.'}">
+                <i class="bi bi-pen service-icon"></i>
+                <h3 class="service-name">Logo Design</h3>
+                <p class="service-desc">Memorable logos and visual identities that communicate the essence of your
+                    brand.</p>
+                <div class="service-footer">
+                    <div class="service-tags"></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Adobe XD Design', message: 'Hi, I\'m interested in your Adobe XD Design service. I need high-fidelity wireframes and interactive prototypes and would love to discuss the project.'}">
+                <i class="bi bi-bezier2 service-icon"></i>
+                <h3 class="service-name">Adobe XD Design</h3>
+                <p class="service-desc">High-fidelity wireframes and interactive prototypes crafted in Adobe XD.</p>
+                <div class="service-footer">
+                    <div class="service-tags"><span class="service-tag">UI/UX</span></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Canva Design', message: 'Hi, I\'m interested in your Canva Design service. I need design assets for my brand and would like to discuss what I\'m looking for.'}">
+                <i class="bi bi-palette service-icon"></i>
+                <h3 class="service-name">Canva Design</h3>
+                <p class="service-desc">Social media assets, presentations, and marketing visuals designed in Canva.</p>
+                <div class="service-footer">
+                    <div class="service-tags"></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
         </div>
     </div>
 </section>

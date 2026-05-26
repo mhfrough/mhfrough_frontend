@@ -28,9 +28,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/main/feedback/feedback.component').then(m => m.FeedbackComponent),
             },
             {
-                path: 'brand',
-                loadComponent: () => import('./features/main/brand/brand.component').then(m => m.BrandComponent),
+                path: 'privacy',
+                loadComponent: () => import('./features/main/privacy/privacy.component').then(m => m.PrivacyComponent),
             },
+            {
+                path: 'terms',
+                loadComponent: () => import('./features/main/terms/terms.component').then(m => m.TermsComponent),
+            },
+
         ],
     },
 
@@ -68,6 +73,34 @@ export const routes: Routes = [
             {
                 path: 'comments',
                 loadComponent: () => import('./features/admin/comments/admin-comments.component').then(m => m.AdminCommentsComponent),
+            },
+            {
+                path: 'chat',
+                loadComponent: () => import('./features/admin/chat/admin-chat.component').then(m => m.AdminChatComponent),
+            },
+            {
+                path: 'push',
+                loadComponent: () => import('./features/admin/push/admin-push.component').then(m => m.AdminPushComponent),
+            },
+            {
+                path: 'notification-logs',
+                loadComponent: () => import('./features/admin/notification-logs/admin-notification-logs.component').then(m => m.AdminNotificationLogsComponent),
+            },
+            {
+                path: 'invoices',
+                loadComponent: () => import('./features/admin/invoices/admin-invoices.component').then(m => m.AdminInvoicesComponent),
+            },
+            {
+                path: 'invoices/new',
+                loadComponent: () => import('./features/admin/invoices/admin-invoice-form/admin-invoice-form.component').then(m => m.AdminInvoiceFormComponent),
+            },
+            {
+                path: 'invoices/:id/edit',
+                loadComponent: () => import('./features/admin/invoices/admin-invoice-form/admin-invoice-form.component').then(m => m.AdminInvoiceFormComponent),
+            },
+            {
+                path: 'invoices/:id',
+                loadComponent: () => import('./features/admin/invoices/admin-invoice-view/admin-invoice-view.component').then(m => m.AdminInvoiceViewComponent),
             },
         ],
     },

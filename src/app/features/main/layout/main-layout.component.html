@@ -9,32 +9,9 @@
             <li><a routerLink="/blog" routerLinkActive="active">Writing</a></li>
             <li><a routerLink="/feedback" routerLinkActive="active">Reviews</a></li>
             <li><a routerLink="/contact" routerLinkActive="active">Work with me</a></li>
-            <li><a routerLink="/brand" routerLinkActive="active">Brand</a></li>
         </ul>
 
         <div class="nav-actions">
-            <!-- Clock + theme panel -->
-            <div class="clock-widget">
-                <span class="clock-time">{{ currentTime() }}</span>
-                <div class="clock-panel">
-                    <div class="clock-panel-time">{{ currentTime() }}</div>
-                    <div class="clock-panel-divider"></div>
-                    <div class="clock-panel-row">
-                        <span class="clock-panel-label">Auto theme</span>
-                        <button class="toggle-switch" [class.on]="theme.autoSwitch()" (click)="theme.toggleAutoSwitch()"
-                            [attr.aria-label]="theme.autoSwitch() ? 'Disable auto theme' : 'Enable auto theme (dark after 7 pm)'">
-                            <span class="toggle-thumb"></span>
-                        </button>
-                    </div>
-                    <div class="clock-panel-row">
-                        <span class="clock-panel-label">{{ theme.isDark() ? 'Dark' : 'Light' }} mode</span>
-                        <button class="theme-btn" (click)="theme.toggle()"
-                            [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
-                            <i class="bi" [class.bi-sun]="theme.isDark()" [class.bi-moon]="!theme.isDark()"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
             <button class="menu-btn" (click)="toggleNav()" aria-label="Menu">
                 <i class="bi" [class.bi-list]="!navOpen()" [class.bi-x-lg]="navOpen()"></i>
             </button>
@@ -49,7 +26,6 @@
         <a routerLink="/blog" (click)="navOpen.set(false)">Writing</a>
         <a routerLink="/feedback" (click)="navOpen.set(false)">Reviews</a>
         <a routerLink="/contact" (click)="navOpen.set(false)">Work with me</a>
-        <a routerLink="/brand" (click)="navOpen.set(false)">Brand</a>
     </div>
     }
 </header>
@@ -75,5 +51,8 @@
     </div>
 </footer>
 
-<!-- ─── WhatsApp Widget ──────────────────────────────────────────────────────── -->
-<app-whatsapp-widget />
+<!-- ─── Live Chat Widget ──────────────────────────────────────────────────────── -->
+<app-chat-widget />
+
+<!-- ─── Cookie Consent ───────────────────────────────────────────────────────── -->
+<app-cookie-consent />

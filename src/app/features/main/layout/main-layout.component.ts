@@ -1,42 +1,45 @@
-import { Component, HostListener, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, HostListener, inject, signal, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { ViewportScroller } from '@angular/common';
+import { ViewportScroller, isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
-import { ThemeService } from '../../../core/services/theme.service';
-import { WhatsappWidgetComponent } from '../../../shared/whatsapp-widget/whatsapp-widget.component';
+import { ChatWidgetComponent } from '../../../shared/chat-widget/chat-widget.component';
+import { RealtimeService } from '../../../core/services/realtime.service';
+import { FcmService } from '../../../core/services/fcm.service';
+import { CookieConsentComponent } from '../../../shared/cookie-consent/cookie-consent.component';
 
 @Component({
     selector: 'app-main-layout',
     standalone: true,
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, WhatsappWidgetComponent],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ChatWidgetComponent, CookieConsentComponent],
     templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
-    readonly theme = inject(ThemeService);
     readonly showBackToTop = signal(false);
     readonly navOpen = signal(false);
     readonly year = new Date().getFullYear();
-    readonly currentTime = signal('');
-
-    private timeInterval?: ReturnType<typeof setInterval>;
 
     private readonly scroller = inject(ViewportScroller);
+    private readonly realtime = inject(RealtimeService);
+    private readonly fcm = inject(FcmService);
+    private readonly platformId = inject(PLATFORM_ID);
+    private permissionTimer: ReturnType<typeof setTimeout> | null = null;
 
     ngOnInit() {
         this.scroller.setOffset([0, 80]);
-        this.updateTime();
-        this.timeInterval = setInterval(() => this.updateTime(), 1000);
+        this.realtime.connect();
+
+        if (isPlatformBrowser(this.platformId)) {
+            this.permissionTimer = setTimeout(() => {
+                if (this.fcm.permissionState === 'default') {
+                    this.fcm.requestPermissionAndRegister();
+                }
+            }, 10000);
+        }
     }
 
     ngOnDestroy() {
-        if (this.timeInterval) clearInterval(this.timeInterval);
-    }
-
-    private updateTime() {
-        const now = new Date();
-        const h = now.getHours().toString().padStart(2, '0');
-        const m = now.getMinutes().toString().padStart(2, '0');
-        this.currentTime.set(`${h}:${m}`);
+        if (this.permissionTimer !== null) clearTimeout(this.permissionTimer);
+        // realtime stays connected across navigation; disconnect only when leaving the site
     }
 
     @HostListener('window:scroll')

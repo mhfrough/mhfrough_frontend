@@ -1,0 +1,83 @@
+<div class="admin-page-header">
+    <h1 class="admin-page-title"><i class="bi bi-journal-text"></i> Notification Logs</h1>
+    <button class="btn-ghost" (click)="refresh()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+</div>
+
+@if (loading()) {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+} @else if (logs().length === 0) {
+<p class="empty-state">No notification logs yet.</p>
+} @else {
+<div class="admin-card" style="padding:0;overflow:hidden">
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Source</th>
+                    <th>Title</th>
+                    <th>Body</th>
+                    <th>Status</th>
+                    <th>Sent</th>
+                    <th>Failed</th>
+                    <th>URL</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (log of logs(); track log.id) {
+                <tr>
+                    <td class="admin-table-date" style="white-space:nowrap">
+                        {{ log.createdAt | date:'MMM d, y · HH:mm' }}
+                    </td>
+                    <td>
+                        <span class="admin-source-badge">
+                            <i class="bi {{ sourceIcons[log.source] }}"></i>
+                            {{ sourceLabels[log.source] || log.source }}
+                        </span>
+                    </td>
+                    <td class="admin-table-title">{{ log.title }}</td>
+                    <td class="admin-table-body" style="max-width:260px">
+                        <span class="text-ellipsis" [title]="log.body">{{ log.body }}</span>
+                    </td>
+                    <td>
+                        <span class="admin-badge" [class.admin-badge--on]="log.status === 'success'"
+                            [class.admin-badge--warn]="log.status === 'partial' || log.status === 'skipped'"
+                            [class.admin-badge--danger]="log.status === 'failed'">
+                            {{ log.status }}
+                        </span>
+                    </td>
+                    <td class="text-center">{{ log.sentCount }}</td>
+                    <td class="text-center">
+                        @if (log.failedCount > 0) {
+                        <span style="color:var(--red)">{{ log.failedCount }}</span>
+                        } @else {
+                        0
+                        }
+                    </td>
+                    <td>
+                        @if (log.url) {
+                        <a [href]="log.url" target="_blank" class="btn-text" style="font-size:.8rem">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </a>
+                        }
+                    </td>
+                </tr>
+                @if (log.errorMessage) {
+                <tr class="admin-table-error-row">
+                    <td colspan="8">
+                        <span class="admin-error-msg">
+                            <i class="bi bi-exclamation-circle"></i> {{ log.errorMessage }}
+                        </span>
+                    </td>
+                </tr>
+                }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+}

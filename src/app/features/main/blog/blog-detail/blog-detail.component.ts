@@ -1,9 +1,11 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { BlogsService } from '../../../../core/services/blogs.service';
 import { UserInfoService } from '../../../../core/services/user-info.service';
+import { RealtimeService } from '../../../../core/services/realtime.service';
 
 @Component({
     selector: 'app-blog-detail',
@@ -11,10 +13,11 @@ import { UserInfoService } from '../../../../core/services/user-info.service';
     imports: [CommonModule, RouterLink, FormsModule],
     templateUrl: './blog-detail.component.html',
 })
-export class BlogDetailComponent implements OnInit {
+export class BlogDetailComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private service = inject(BlogsService);
     private userInfo = inject(UserInfoService);
+    private readonly realtime = inject(RealtimeService);
 
     readonly blog = signal<any>(null);
     readonly loading = signal(true);
@@ -27,6 +30,7 @@ export class BlogDetailComponent implements OnInit {
     readonly commentError = signal('');
 
     commentData = { authorName: '', authorEmail: '', content: '' };
+    private subs = new Subscription();
 
     ngOnInit() {
         const saved = this.userInfo.get();
@@ -41,9 +45,37 @@ export class BlogDetailComponent implements OnInit {
                 this.blog.set(data);
                 this.loading.set(false);
                 this.loadComments(data.id);
+                this.subscribeToCommentEvents(data.id);
             },
             error: () => { this.notFound.set(true); this.loading.set(false); },
         });
+    }
+
+    ngOnDestroy() { this.subs.unsubscribe(); }
+
+    private subscribeToCommentEvents(blogId: string) {
+        // Admin approved a comment → append to visible comments
+        this.subs.add(this.realtime.on<any>('comment:approved').subscribe(comment => {
+            if (comment.blogId !== blogId) return;
+            this.comments.update(list => {
+                const exists = list.some(c => c.id === comment.id);
+                return exists ? list.map(c => c.id === comment.id ? comment : c) : [...list, comment];
+            });
+            this.commentCount.set(this.comments().length);
+        }));
+
+        // Admin unapproved or deleted → remove from visible list
+        this.subs.add(this.realtime.on<{ id: string; blogId: string }>('comment:unapproved').subscribe(({ id, blogId: bid }) => {
+            if (bid !== blogId) return;
+            this.comments.update(list => list.filter(c => c.id !== id));
+            this.commentCount.set(this.comments().length);
+        }));
+
+        this.subs.add(this.realtime.on<{ id: string; blogId: string }>('comment:deleted').subscribe(({ id, blogId: bid }) => {
+            if (bid !== blogId) return;
+            this.comments.update(list => list.filter(c => c.id !== id));
+            this.commentCount.set(this.comments().length);
+        }));
     }
 
     private loadComments(blogId: string) {

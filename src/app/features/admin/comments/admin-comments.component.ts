@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BlogsService } from '../../../core/services/blogs.service';
 import { AdminNotificationService } from '../../../core/services/admin-notification.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -13,6 +14,7 @@ import { Subscription } from 'rxjs';
 export class AdminCommentsComponent implements OnInit, OnDestroy {
     private service = inject(BlogsService);
     readonly notif = inject(AdminNotificationService);
+    private readonly realtime = inject(RealtimeService);
 
     readonly comments = signal<any[]>([]);
     readonly loading = signal(true);
@@ -20,14 +22,45 @@ export class AdminCommentsComponent implements OnInit, OnDestroy {
     readonly deleteTargetId = signal<string | null>(null);
     readonly statusModal = signal<{ id: string; title: string; reason: string } | null>(null);
 
-    private sub?: Subscription;
+    private subs = new Subscription();
 
     ngOnInit() {
         this.load();
-        this.sub = this.notif.commentsChanged$.subscribe(() => this.load());
+
+        // comment:new → prepend to list (admin submitted a new pending comment)
+        this.subs.add(this.realtime.on<any>('comment:new').subscribe(comment => {
+            if (this.filter() === 'pending') {
+                this.comments.update(list => [comment, ...list]);
+            } else {
+                this.comments.update(list => [comment, ...list]);
+            }
+            this.notif.fetchCounts();
+        }));
+
+        // comment:approved → remove from pending, update in all-view
+        this.subs.add(this.realtime.on<any>('comment:approved').subscribe(comment => {
+            if (this.filter() === 'pending') {
+                this.comments.update(list => list.filter(c => c.id !== comment.id));
+            } else {
+                this.comments.update(list => list.map(c => c.id === comment.id ? comment : c));
+            }
+            this.notif.fetchCounts();
+        }));
+
+        // comment:unapproved → reload (moves to pending, need full data)
+        this.subs.add(this.realtime.on<{ id: string; blogId: string }>('comment:unapproved').subscribe(() => {
+            this.load();
+            this.notif.fetchCounts();
+        }));
+
+        // comment:deleted → remove from list immediately
+        this.subs.add(this.realtime.on<{ id: string }>('comment:deleted').subscribe(({ id }) => {
+            this.comments.update(list => list.filter(c => c.id !== id));
+            this.notif.fetchCounts();
+        }));
     }
 
-    ngOnDestroy() { this.sub?.unsubscribe(); }
+    ngOnDestroy() { this.subs.unsubscribe(); }
 
     setFilter(f: 'pending' | 'all') {
         this.filter.set(f);
@@ -48,6 +81,7 @@ export class AdminCommentsComponent implements OnInit, OnDestroy {
     approve(id: string) {
         this.service.approveComment(id).subscribe(() => {
             this.notif.fetchCounts();
+            // Optimistic update already handled via socket event; reload for safety
             this.load();
         });
     }
@@ -60,7 +94,6 @@ export class AdminCommentsComponent implements OnInit, OnDestroy {
         this.deleteTargetId.set(null);
         this.service.deleteComment(id).subscribe(() => {
             this.notif.fetchCounts();
-            this.load();
         });
     }
 
@@ -76,14 +109,12 @@ export class AdminCommentsComponent implements OnInit, OnDestroy {
         this.statusModal.set(null);
         this.service.unapproveComment(m.id, m.reason || undefined).subscribe(() => {
             this.notif.fetchCounts();
-            this.load();
         });
     }
 
     remove(id: string) {
         this.service.deleteComment(id).subscribe(() => {
             this.notif.fetchCounts();
-            this.load();
         });
     }
 }

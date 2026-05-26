@@ -1,0 +1,180 @@
+﻿<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">{{ editId() ? 'Edit Invoice' : 'New Invoice' }}</h1>
+        <p class="admin-page-sub">{{ editId() ? 'Update invoice details' : 'Fill in the details to create a new invoice'
+            }}</p>
+    </div>
+    <a routerLink="/admin/invoices" class="btn-ghost"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+@if (loading()) {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+} @else {
+
+<form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <div class="admin-form-panel">
+
+        <p class="admin-form-title">Invoice Info</p>
+        <div class="admin-form-grid">
+            <div class="admin-form-field">
+                <label class="admin-form-label">Issue Date *</label>
+                <input type="date" class="admin-form-input" formControlName="issueDate">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Due Date *</label>
+                <input type="date" class="admin-form-input" formControlName="dueDate">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Status</label>
+                <select class="admin-form-select" formControlName="status">
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="paid">Paid</option>
+                </select>
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Tax Rate (%) <span class="admin-form-hint">optional</span></label>
+                <input type="number" class="admin-form-input" formControlName="taxRate" min="0" max="100" step="0.01"
+                    placeholder="0">
+            </div>
+        </div>
+
+        <p class="admin-form-title" style="margin-top:2rem">Bill To</p>
+        <div class="admin-form-grid">
+            <div class="admin-form-field">
+                <label class="admin-form-label">Client Name *</label>
+                <input type="text" class="admin-form-input" formControlName="clientName"
+                    placeholder="Jane Doe / Acme Corp">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Email Address *</label>
+                <input type="email" class="admin-form-input" formControlName="clientEmail"
+                    placeholder="client@example.com">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Phone <span class="admin-form-hint">optional</span></label>
+                <input type="tel" class="admin-form-input" formControlName="clientPhone"
+                    placeholder="+1 (555) 000-0000">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Address *</label>
+                <textarea class="admin-form-textarea" formControlName="clientAddress" rows="2"
+                    placeholder="123 Main St&#10;City, State, ZIP, Country"></textarea>
+            </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2rem;margin-bottom:1rem">
+            <p class="admin-form-title" style="margin:0">Line Items</p>
+            <button type="button" class="btn-ghost" (click)="addItem()" style="font-size:0.82rem;padding:.3rem .75rem">
+                <i class="bi bi-plus-lg"></i> Add Item
+            </button>
+        </div>
+
+        <div class="admin-table-wrap" formArrayName="items">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="min-width:150px">Item *</th>
+                        <th style="min-width:130px">Sub-item</th>
+                        <th style="min-width:110px">Category</th>
+                        <th style="width:70px">Qty</th>
+                        <th style="width:120px">Unit Price ($)</th>
+                        <th style="width:100px;text-align:right">Total</th>
+                        <th style="width:32px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (ctrl of items.controls; track $index; let i = $index) {
+                    <tr [formGroupName]="i">
+                        <td><input type="text" class="admin-form-input" formControlName="itemName"
+                                placeholder="e.g. Web Design" style="width:100%"></td>
+                        <td><input type="text" class="admin-form-input" formControlName="subItem"
+                                placeholder="e.g. Homepage" style="width:100%"></td>
+                        <td><input type="text" class="admin-form-input" formControlName="category"
+                                placeholder="e.g. Design" style="width:100%"></td>
+                        <td><input type="number" class="admin-form-input" formControlName="quantity" min="0"
+                                placeholder="1" style="width:100%"></td>
+                        <td><input type="number" class="admin-form-input" formControlName="unitPrice" min="0"
+                                step="0.01" placeholder="0.00" style="width:100%"></td>
+                        <td style="text-align:right;font-weight:600;font-size:0.88rem">{{
+                            formatCurrency(lineTotal(ctrl)) }}</td>
+                        <td>
+                            <button type="button" class="btn-text-danger" (click)="removeItem(i)"
+                                [disabled]="items.length === 1" style="font-size:0.75rem;padding:0">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:1.5rem">
+            <div style="min-width:240px">
+                <div
+                    style="display:flex;justify-content:space-between;padding:.3rem 0;font-size:0.88rem;color:var(--text-muted)">
+                    <span>Subtotal</span>
+                    <span>{{ formatCurrency(subtotal) }}</span>
+                </div>
+                <div
+                    style="display:flex;justify-content:space-between;padding:.3rem 0;font-size:0.88rem;color:var(--text-muted)">
+                    <span>Tax ({{ form.get('taxRate')?.value || 0 }}%)</span>
+                    <span>{{ formatCurrency(taxAmount) }}</span>
+                </div>
+                <div
+                    style="display:flex;justify-content:space-between;padding:.5rem 0;margin-top:.25rem;border-top:1px solid var(--border);font-weight:700;font-size:1rem">
+                    <span>Total</span>
+                    <span>{{ formatCurrency(grandTotal) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <p class="admin-form-title" style="margin-top:2rem">
+            Notes / Additional Info
+            <span class="admin-form-hint" style="font-size:0.75rem;font-weight:400">optional</span>
+        </p>
+        <div class="admin-form-field">
+            <div class="rte-wrap">
+                <div class="rte-toolbar">
+                    <button type="button" class="rte-btn" title="Bold"
+                        (click)="format(notesArea, '<strong>', '</strong>')"><i class="bi bi-type-bold"></i></button>
+                    <button type="button" class="rte-btn" title="Italic" (click)="format(notesArea, '<em>', '</em>')"><i
+                            class="bi bi-type-italic"></i></button>
+                    <button type="button" class="rte-btn" title="Underline"
+                        (click)="format(notesArea, '<u>', '</u>')"><i class="bi bi-type-underline"></i></button>
+                    <span class="rte-divider"></span>
+                    <button type="button" class="rte-btn" title="Bullet List"
+                        (click)="format(notesArea, '<ul>\n  <li>', '</li>\n</ul>')"><i
+                            class="bi bi-list-ul"></i></button>
+                    <button type="button" class="rte-btn" title="Ordered List"
+                        (click)="format(notesArea, '<ol>\n  <li>', '</li>\n</ol>')"><i
+                            class="bi bi-list-ol"></i></button>
+                    <span class="rte-divider"></span>
+                    <button type="button" class="rte-btn" title="Link" (click)="insertLink(notesArea)"><i
+                            class="bi bi-link-45deg"></i></button>
+                </div>
+                <textarea #notesArea class="admin-form-textarea rte-textarea" formControlName="notes" rows="5"
+                    placeholder="Payment terms, thank you note, additional details…"
+                    style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
+            </div>
+        </div>
+
+        <div class="admin-form-actions">
+            <button type="button" class="btn-primary" (click)="save(true)" [disabled]="saving()">
+                @if (saving()) { <span class="contact-spinner"></span>&nbsp; }
+                <i class="bi bi-eye"></i> Save &amp; Preview
+            </button>
+            <button type="submit" class="btn-ghost" [disabled]="saving()">
+                @if (saving()) { <span class="contact-spinner"></span>&nbsp; }
+                Save Draft
+            </button>
+            <a routerLink="/admin/invoices" class="btn-ghost">Cancel</a>
+        </div>
+
+    </div>
+</form>
+
+}

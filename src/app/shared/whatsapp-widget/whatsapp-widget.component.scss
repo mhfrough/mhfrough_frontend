@@ -1,4 +1,4 @@
-:host {
+﻿:host {
     position: fixed;
     bottom: 1.75rem;
     right: 1.75rem;
@@ -46,7 +46,7 @@
     animation: wa-slide-up 180ms ease;
 
     @media (max-width: 400px) {
-        width: calc(100vw - 2rem);
+        width: calc(100dvw - 2rem);
     }
 }
 
@@ -268,7 +268,7 @@
     animation: wa-slide-up 180ms ease;
 
     @media (max-width: 400px) {
-        width: calc(100vw - 2rem);
+        width: calc(100dvw - 2rem);
     }
 }
 
