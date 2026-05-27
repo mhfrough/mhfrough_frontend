@@ -251,18 +251,20 @@
             <h2 class="settings-card-title"><i class="bi bi-pc-display"></i> Active Login Sessions</h2>
             <p class="settings-card-sub">All devices that have signed in. Revoke any session to force a sign-out.</p>
         </div>
-        <button class="btn-danger-sm" (click)="revokeAll()" [disabled]="revokeLoading() === 'all'">
-            @if (revokeLoading() === 'all') { <span class="contact-spinner"></span> } @else { <i
-                class="bi bi-slash-circle"></i> }
-            Revoke Others
-        </button>
-        @if (hasRevokedSessions) {
-        <button class="btn-ghost-sm" (click)="clearRevoked()" [disabled]="clearRevokedLoading()">
-            @if (clearRevokedLoading()) { <span class="contact-spinner"></span> } @else { <i
-                class="bi bi-trash3"></i> }
-            Clear History
-        </button>
-        }
+        <div class="settings-card-actions">
+            <button class="btn-danger-sm" (click)="revokeAll()" [disabled]="revokeLoading() === 'all'">
+                @if (revokeLoading() === 'all') { <span class="contact-spinner"></span> } @else { <i
+                    class="bi bi-slash-circle"></i> }
+                Revoke Others
+            </button>
+            @if (hasRevokedSessions) {
+            <button class="btn-ghost-sm" (click)="clearRevoked()" [disabled]="clearRevokedLoading()">
+                @if (clearRevokedLoading()) { <span class="contact-spinner"></span> } @else { <i
+                    class="bi bi-trash3"></i> }
+                Clear History
+            </button>
+            }
+        </div>
     </div>
 
     @if (sessionsLoading()) {
@@ -518,7 +520,7 @@
             <h2 class="settings-card-title"><i class="bi bi-journal-text"></i> Activity Logs</h2>
             <p class="settings-card-sub">Paginated audit trail of admin actions, auth events and errors.</p>
         </div>
-        <div style="display:flex;align-items:center;gap:.5rem">
+        <div class="settings-card-actions">
             <button class="btn-ghost" (click)="loadActivityLogs()" [disabled]="activityLogsLoading()">
                 <i class="bi bi-arrow-clockwise"></i> Refresh
             </button>

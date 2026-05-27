@@ -303,56 +303,22 @@
         <div class="clients-marquee">
             <!-- Track duplicated for seamless infinite loop -->
             <div class="clients-track">
-                <span class="client-item">Arittek Solutions</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">TechNest</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">PixelForge</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">BrandCraft</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">Launchify</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">QodeBase</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">Arittek Solutions</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">TechNest</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">PixelForge</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">BrandCraft</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">Launchify</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">QodeBase</span>
-                <span class="client-sep">—</span>
+                @for (client of marqueeClients; track $index) {
+                <a class="client-item" [href]="client.url" target="_blank" rel="noopener noreferrer"
+                    [attr.aria-label]="'Open ' + client.name + ' website'">
+                    <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'">
+                    <span class="client-name">{{ client.name }}</span>
+                </a>
+                }
             </div>
             <div class="clients-track" aria-hidden="true">
-                <span class="client-item">Arittek Solutions</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">TechNest</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">PixelForge</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">BrandCraft</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">Launchify</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">QodeBase</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">Arittek Solutions</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">TechNest</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">PixelForge</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">BrandCraft</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">Launchify</span>
-                <span class="client-sep">—</span>
-                <span class="client-item">QodeBase</span>
-                <span class="client-sep">—</span>
+                @for (client of marqueeClients; track $index) {
+                <a class="client-item" [href]="client.url" target="_blank" rel="noopener noreferrer" tabindex="-1"
+                    [attr.aria-label]="'Open ' + client.name + ' website'">
+                    <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'">
+                    <span class="client-name">{{ client.name }}</span>
+                </a>
+                }
             </div>
         </div>
     </div>

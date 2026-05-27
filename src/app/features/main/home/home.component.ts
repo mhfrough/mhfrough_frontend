@@ -23,6 +23,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     readonly greeting = signal('');
     readonly holidayGreeting = signal('');
     readonly lightboxSrc = signal<string | null>(null);
+    readonly clients = [
+        { name: 'Arittek Solutions (Pvt.) Ltd.', logo: '/clients/arittek.png', url: 'https://arittek.com/' },
+        { name: 'Befiler', logo: '/clients/befiler.png', url: 'https://www.befiler.com/' },
+        { name: 'Bloomstone Private Resort', logo: '/clients/bloomstone.png', url: 'https://bloomstone-frontend.onrender.com/' },
+        { name: 'Finclore', logo: '/clients/finclore.png', url: 'https://www.finclore.com/' },
+    ];
+    readonly marqueeClients = [...this.clients, ...this.clients];
     private subs = new Subscription();
 
     ngOnInit() {

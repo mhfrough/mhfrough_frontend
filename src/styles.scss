@@ -1329,7 +1329,7 @@ body::before {
 .clients-marquee {
     display: flex;
     width: max-content;
-    animation: clients-scroll 28s linear infinite;
+    animation: clients-scroll 56s linear infinite;
 
     &:hover {
         animation-play-state: paused;
@@ -1339,30 +1339,51 @@ body::before {
 .clients-track {
     display: flex;
     align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
 }
 
 .client-item {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 140px;
+    padding: 0.85rem 1rem;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+
+    &:hover {
+        border-color: var(--border);
+        background: color-mix(in srgb, var(--bg) 92%, var(--bg-soft) 8%);
+    }
+}
+
+.client-logo {
+    width: 5rem;
+    height: 3rem;
+    object-fit: contain;
+    filter: brightness(0) saturate(100%) invert(100%);
+    opacity: 0.5;
+}
+
+.client-name {
     font-family: var(--font-mono);
-    font-size: 0.82rem;
+    font-size: 0.72rem;
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-muted);
-    white-space: nowrap;
-    padding: 0 2.25rem;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
     transition: color var(--dur) var(--ease);
 
-    &:hover {
+    .client-item:hover & {
         color: var(--text);
     }
-}
-
-.client-sep {
-    color: var(--border);
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    line-height: 1;
-    flex-shrink: 0;
 }
 
 @keyframes clients-scroll {
@@ -5833,6 +5854,13 @@ button.admin-nav-link:last-child:hover {
     justify-content: space-between;
     gap: 1rem;
     margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.settings-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     flex-wrap: wrap;
 }
 
