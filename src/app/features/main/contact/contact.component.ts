@@ -42,6 +42,7 @@ export class ContactComponent implements OnInit {
     }
 
     submit(form: NgForm) {
+        form.form.markAllAsTouched();
         if (form.invalid) return;
         this.sending.set(true);
         this.error.set('');

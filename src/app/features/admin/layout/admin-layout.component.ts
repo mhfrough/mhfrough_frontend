@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { AdminNotificationService } from '../../../core/services/admin-notification.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
+import { InactivityService } from '../../../core/services/inactivity.service';
 
 @Component({
     selector: 'app-admin-layout',
@@ -19,6 +20,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     readonly auth = inject(AuthService);
     readonly notif = inject(AdminNotificationService);
     readonly chat = inject(ChatService);
+    readonly inactivity = inject(InactivityService);
     private readonly router = inject(Router);
     private readonly realtime = inject(RealtimeService);
     readonly menuOpen = signal(false);
@@ -28,6 +30,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         this.notif.init();
         this.chat.connectAsAdmin();
         this.realtime.connect().then(() => this.realtime.joinAdmin());
+        this.inactivity.start();
         this.subs.add(
             this.router.events.pipe(filter(e => e instanceof NavigationEnd))
                 .subscribe(() => this.menuOpen.set(false))
@@ -38,6 +41,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         this.notif.disconnect();
         this.chat.disconnectAdmin();
         this.realtime.disconnect();
+        this.inactivity.stop();
         this.subs.unsubscribe();
     }
 

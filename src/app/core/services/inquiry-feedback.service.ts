@@ -10,6 +10,7 @@ export class InquiriesService {
     submit(data: any) { return this.http.post<any>(this.base, data); }
     getAll() { return this.http.get<any[]>(this.base); }
     markRead(id: string) { return this.http.patch(`${this.base}/${id}/read`, {}); }
+    remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
 }
 
 @Injectable({ providedIn: 'root' })

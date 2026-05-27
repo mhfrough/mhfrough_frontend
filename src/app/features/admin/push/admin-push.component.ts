@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { PushNotificationAdminService } from '../../../core/services/push-notification-admin.service';
 import { FcmService } from '../../../core/services/fcm.service';
 
@@ -33,8 +33,9 @@ export class AdminPushComponent {
         });
     }
 
-    send() {
-        if (!this.title.trim() || !this.body.trim()) return;
+    send(f: NgForm) {
+        f.form.markAllAsTouched();
+        if (f.invalid) return;
         this.sending.set(true);
         this.success.set(null);
         this.error.set(null);

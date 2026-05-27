@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { BlogsService } from '../../../../core/services/blogs.service';
@@ -15,6 +15,7 @@ import { RealtimeService } from '../../../../core/services/realtime.service';
 })
 export class BlogDetailComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
+    private router = inject(Router);
     private service = inject(BlogsService);
     private userInfo = inject(UserInfoService);
     private readonly realtime = inject(RealtimeService);
@@ -47,7 +48,13 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
                 this.loadComments(data.id);
                 this.subscribeToCommentEvents(data.id);
             },
-            error: () => { this.notFound.set(true); this.loading.set(false); },
+            error: () => {
+                const originalUrl = this.route.snapshot.url.map(s => s.path).join('/');
+                this.router.navigate(['/not-found'], {
+                    replaceUrl: true,
+                    state: { from: `/${originalUrl}` },
+                });
+            },
         });
     }
 
@@ -88,6 +95,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     }
 
     submitComment(form: NgForm) {
+        form.form.markAllAsTouched();
         if (form.invalid) return;
         this.commentSending.set(true);
         this.commentError.set('');

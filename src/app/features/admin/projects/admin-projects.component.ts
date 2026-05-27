@@ -60,6 +60,7 @@ export class AdminProjectsComponent implements OnInit, OnDestroy {
     cancel() { this.showForm.set(false); this.editing.set(null); }
 
     save(form: NgForm) {
+        form.form.markAllAsTouched();
         if (form.invalid) return;
         this.saving.set(true);
         const payload = { ...form.value, techStack: form.value.techStack?.split(',').map((s: string) => s.trim()).filter(Boolean) };

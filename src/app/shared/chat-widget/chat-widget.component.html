@@ -91,6 +91,7 @@
         @if (sessionClosed()) {
         <div class="cw-closed-notice">
             <i class="bi bi-check2-all"></i> Chat ended. Thanks for reaching out!
+            <button class="cw-new-chat-btn" (click)="startNewChat()">Start New Chat</button>
         </div>
         }
     </div>

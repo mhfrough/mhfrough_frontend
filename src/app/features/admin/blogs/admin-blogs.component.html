@@ -11,18 +11,20 @@
             <div class="admin-form-field">
                 <label class="admin-form-label">Title *</label>
                 <input ngModel [ngModel]="editing()?.title" name="title" required class="admin-form-input"
+                    [class.is-invalid]="(f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid"
                     placeholder="Post title">
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label">Slug *</label>
                 <input ngModel [ngModel]="editing()?.slug" name="slug" required class="admin-form-input"
+                    [class.is-invalid]="(f.submitted || f.controls['slug']?.touched) && f.controls['slug']?.invalid"
                     placeholder="my-post-slug">
             </div>
         </div>
         <div class="admin-form-field">
             <label class="admin-form-label">Excerpt *</label>
             <textarea ngModel [ngModel]="editing()?.excerpt" name="excerpt" required rows="2"
-                class="admin-form-textarea"></textarea>
+                class="admin-form-textarea" [class.is-invalid]="(f.submitted || f.controls['excerpt']?.touched) && f.controls['excerpt']?.invalid"></textarea>
         </div>
         <div class="admin-form-field">
             <label class="admin-form-label">Content *</label>
@@ -73,18 +75,18 @@
                 </div>
                 <textarea #contentArea ngModel [ngModel]="editing()?.content" name="content" required rows="12"
                     class="admin-form-textarea rte-textarea"
+                    [class.is-invalid]="(f.submitted || f.controls['content']?.touched) && f.controls['content']?.invalid"
                     style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
             </div>
         </div>
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label">Tags <span
-                        style="opacity:.5;font-size:.75em">(comma-separated)</span></label>
+                <label class="admin-form-label">Tags <span class="admin-form-hint">(comma-separated, optional)</span></label>
                 <input ngModel [ngModel]="editing()?.tags" name="tags" class="admin-form-input"
                     placeholder="Angular, Web Dev">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Read Time (mins)</label>
+                <label class="admin-form-label">Read Time (mins) <span class="admin-form-hint">(optional)</span></label>
                 <input ngModel [ngModel]="editing()?.readTimeMinutes ?? 5" name="readTimeMinutes" type="number" min="1"
                     class="admin-form-input">
             </div>

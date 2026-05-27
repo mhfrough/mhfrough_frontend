@@ -25,7 +25,7 @@ messaging.onBackgroundMessage((payload) => {
     self.registration.showNotification(title ?? 'mhfrough.dev', {
         body: body ?? '',
         icon: icon ?? '/icons/icon-192x192.png',
-        badge: '/icons/icon-72x72.png',
+        badge: '/badge-icon.svg',
         data: { url: link },
         requireInteraction: false,
     });

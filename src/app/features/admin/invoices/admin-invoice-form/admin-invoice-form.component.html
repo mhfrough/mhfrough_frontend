@@ -20,14 +20,16 @@
         <div class="admin-form-grid">
             <div class="admin-form-field">
                 <label class="admin-form-label">Issue Date *</label>
-                <input type="date" class="admin-form-input" formControlName="issueDate">
+                <input type="date" class="admin-form-input" formControlName="issueDate"
+                    [class.is-invalid]="form.get('issueDate')?.invalid && form.get('issueDate')?.touched">
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label">Due Date *</label>
-                <input type="date" class="admin-form-input" formControlName="dueDate">
+                <input type="date" class="admin-form-input" formControlName="dueDate"
+                    [class.is-invalid]="form.get('dueDate')?.invalid && form.get('dueDate')?.touched">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Status</label>
+                <label class="admin-form-label">Status <span class="admin-form-hint">(optional)</span></label>
                 <select class="admin-form-select" formControlName="status">
                     <option value="draft">Draft</option>
                     <option value="sent">Sent</option>
@@ -46,11 +48,13 @@
             <div class="admin-form-field">
                 <label class="admin-form-label">Client Name *</label>
                 <input type="text" class="admin-form-input" formControlName="clientName"
+                    [class.is-invalid]="form.get('clientName')?.invalid && form.get('clientName')?.touched"
                     placeholder="Jane Doe / Acme Corp">
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label">Email Address *</label>
                 <input type="email" class="admin-form-input" formControlName="clientEmail"
+                    [class.is-invalid]="form.get('clientEmail')?.invalid && form.get('clientEmail')?.touched"
                     placeholder="client@example.com">
             </div>
             <div class="admin-form-field">
@@ -61,6 +65,7 @@
             <div class="admin-form-field">
                 <label class="admin-form-label">Address *</label>
                 <textarea class="admin-form-textarea" formControlName="clientAddress" rows="2"
+                    [class.is-invalid]="form.get('clientAddress')?.invalid && form.get('clientAddress')?.touched"
                     placeholder="123 Main St&#10;City, State, ZIP, Country"></textarea>
             </div>
         </div>

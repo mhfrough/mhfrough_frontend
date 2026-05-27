@@ -57,6 +57,7 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     ngOnDestroy() { this.subs.unsubscribe(); }
 
     submit(form: NgForm) {
+        form.form.markAllAsTouched();
         if (form.invalid) return;
         this.sending.set(true);
         this.error.set('');

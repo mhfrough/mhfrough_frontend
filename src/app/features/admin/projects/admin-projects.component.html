@@ -11,11 +11,11 @@
             <div class="admin-form-field">
                 <label class="admin-form-label">Title *</label>
                 <input ngModel [ngModel]="editing()?.title" name="title" required class="admin-form-input"
+                    [class.is-invalid]="(f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid"
                     placeholder="Project name">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Tech Stack <span
-                        style="opacity:.5;font-size:.75em">(comma-separated)</span></label>
+                <label class="admin-form-label">Tech Stack <span class="admin-form-hint">(comma-separated, optional)</span></label>
                 <input ngModel [ngModel]="editing()?.techStack" name="techStack" class="admin-form-input"
                     placeholder="Angular, NestJS, PostgreSQL">
             </div>
@@ -44,29 +44,29 @@
                             class="bi bi-list-ol"></i></button>
                 </div>
                 <textarea #descArea ngModel [ngModel]="editing()?.description" name="description" required rows="3"
-                    class="admin-form-textarea rte-textarea"></textarea>
+                    class="admin-form-textarea rte-textarea" [class.is-invalid]="(f.submitted || f.controls['description']?.touched) && f.controls['description']?.invalid"></textarea>
             </div>
         </div>
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label">Live URL</label>
+                <label class="admin-form-label">Live URL <span class="admin-form-hint">(optional)</span></label>
                 <input ngModel [ngModel]="editing()?.liveUrl" name="liveUrl" class="admin-form-input" type="url"
                     placeholder="https://…">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">GitHub URL</label>
+                <label class="admin-form-label">GitHub URL <span class="admin-form-hint">(optional)</span></label>
                 <input ngModel [ngModel]="editing()?.githubUrl" name="githubUrl" class="admin-form-input" type="url"
                     placeholder="https://github.com/…">
             </div>
         </div>
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label">Thumbnail URL</label>
+                <label class="admin-form-label">Thumbnail URL <span class="admin-form-hint">(optional)</span></label>
                 <input ngModel [ngModel]="editing()?.thumbnail" name="thumbnail" class="admin-form-input"
                     placeholder="https://…">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Sort Order</label>
+                <label class="admin-form-label">Sort Order <span class="admin-form-hint">(optional)</span></label>
                 <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number"
                     class="admin-form-input">
             </div>

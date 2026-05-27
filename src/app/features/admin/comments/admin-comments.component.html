@@ -50,7 +50,7 @@
                 </button>
             </div>
         </div>
-        <p class="admin-card-message">{{ c.content }}</p>
+        <p class="admin-card-message" [innerHTML]="c.content"></p>
         @if (c.adminNote) {
         <div class="admin-unapprove-note">
             <span class="admin-unapprove-note__label">

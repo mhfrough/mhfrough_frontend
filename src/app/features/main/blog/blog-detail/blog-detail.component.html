@@ -101,9 +101,9 @@
                         <label class="contact-label">Name *</label>
                         <input [(ngModel)]="commentData.authorName" name="authorName" required minlength="2"
                             maxlength="100" class="contact-input"
-                            [class.is-error]="cf.submitted && cf.controls['authorName']?.invalid"
+                            [class.is-error]="(cf.submitted || cf.controls['authorName']?.touched) && cf.controls['authorName']?.invalid"
                             placeholder="Your name">
-                        @if (cf.submitted && cf.controls['authorName']?.invalid) {
+                        @if ((cf.submitted || cf.controls['authorName']?.touched) && cf.controls['authorName']?.invalid) {
                         <span class="contact-error">Name is required.</span>
                         }
                     </div>
@@ -111,9 +111,9 @@
                         <label class="contact-label">Email *</label>
                         <input [(ngModel)]="commentData.authorEmail" name="authorEmail" required email type="email"
                             maxlength="254" class="contact-input"
-                            [class.is-error]="cf.submitted && cf.controls['authorEmail']?.invalid"
+                            [class.is-error]="(cf.submitted || cf.controls['authorEmail']?.touched) && cf.controls['authorEmail']?.invalid"
                             placeholder="you@example.com">
-                        @if (cf.submitted && cf.controls['authorEmail']?.invalid) {
+                        @if ((cf.submitted || cf.controls['authorEmail']?.touched) && cf.controls['authorEmail']?.invalid) {
                         <span class="contact-error">Valid email is required.</span>
                         }
                     </div>
@@ -142,10 +142,10 @@
                         </div>
                         <textarea #commentArea [(ngModel)]="commentData.content" name="content" required minlength="2"
                             maxlength="2000" rows="4" class="contact-input contact-textarea rte-textarea"
-                            [class.is-error]="cf.submitted && cf.controls['content']?.invalid"
+                            [class.is-error]="(cf.submitted || cf.controls['content']?.touched) && cf.controls['content']?.invalid"
                             placeholder="Share your thoughts…"></textarea>
                     </div>
-                    @if (cf.submitted && cf.controls['content']?.invalid) {
+                    @if ((cf.submitted || cf.controls['content']?.touched) && cf.controls['content']?.invalid) {
                     <span class="contact-error">Comment is required.</span>
                     }
                 </div>

@@ -27,6 +27,9 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     activeTab: 'chat' | 'settings' = 'chat';
     messageText = '';
 
+    readonly deleteTargetId = signal<string | null>(null);
+    readonly closeTargetId = signal<string | null>(null);
+
     // Settings form
     greetingMessages: string[] = [];
     holdMessages: string[] = [];
@@ -106,20 +109,43 @@ export class AdminChatComponent implements OnInit, OnDestroy {
         el.style.height = Math.min(el.scrollHeight, 120) + 'px';
     }
 
-    closeSession() {
-        const sessionId = this.activeSessionId();
-        if (sessionId) this.chatService.closeSession(sessionId);
+    closeSession(sessionId?: string) {
+        const id = sessionId ?? this.activeSessionId();
+        if (id) this.closeTargetId.set(id);
     }
 
-    deleteSession(sessionId: string, event: Event) {
+    cancelClose() { this.closeTargetId.set(null); }
+
+    executeClose() {
+        const id = this.closeTargetId();
+        if (!id) return;
+        this.closeTargetId.set(null);
+        this.chatService.closeSession(id);
+    }
+
+    confirmDelete(sessionId: string, event: Event) {
         event.stopPropagation();
-        if (!confirm('Delete this chat session?')) return;
-        this.chatService.deleteSession(sessionId).subscribe(() => {
-            if (this.activeSessionId() === sessionId) {
+        this.deleteTargetId.set(sessionId);
+    }
+
+    cancelDelete() { this.deleteTargetId.set(null); }
+
+    executeDelete() {
+        const id = this.deleteTargetId();
+        if (!id) return;
+        this.deleteTargetId.set(null);
+        this.chatService.deleteSession(id).subscribe(() => {
+            // Optimistic removal — session:deleted socket event will confirm for other tabs
+            this.chatService.sessions.update(list => list.filter(s => s.id !== id));
+            if (this.activeSessionId() === id) {
                 this.chatService.activeSessionId.set(null);
                 this.chatService.activeMsgs.set([]);
             }
         });
+    }
+
+    deleteSession(sessionId: string, event: Event) {
+        this.confirmDelete(sessionId, event);
     }
 
     isVisitorTyping(): boolean {

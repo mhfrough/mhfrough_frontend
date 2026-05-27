@@ -31,7 +31,8 @@ export class FcmService {
                 new Notification(title ?? 'mhfrough.dev', {
                     body: body ?? '',
                     icon: '/icons/icon-192x192.png',
-                });
+                    badge: '/badge-icon.svg',
+                } as NotificationOptions);
             }
         });
     }

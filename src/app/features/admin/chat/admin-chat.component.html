@@ -34,7 +34,7 @@
                     @if (session.status === 'closed') {
                     <span class="ac-closed-badge">closed</span>
                     }
-                    <button class="ac-delete-btn" (click)="deleteSession(session.id, $event)" title="Delete">
+                    <button class="ac-delete-btn" (click)="confirmDelete(session.id, $event)" title="Delete">
                         <i class="bi bi-trash3"></i>
                     </button>
                 </div>
@@ -187,3 +187,33 @@
     </main>
 
 </div>
+
+<!-- Confirm End Chat Modal -->
+@if (closeTargetId()) {
+<div class="admin-modal-overlay" (click)="cancelClose()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">End Chat Session</p>
+        <p class="admin-modal-body">This will close the session and the visitor will no longer be able to send messages.
+            Are you sure?</p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelClose()">Cancel</button>
+            <button class="btn-danger" (click)="executeClose()">End Chat</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Confirm Delete Session Modal -->
+@if (deleteTargetId()) {
+<div class="admin-modal-overlay" (click)="cancelDelete()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Delete Session</p>
+        <p class="admin-modal-body">This action cannot be undone. The entire chat history will be permanently deleted.
+        </p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelDelete()">Cancel</button>
+            <button class="btn-danger" (click)="executeDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+}

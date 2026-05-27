@@ -13,7 +13,7 @@
         <p class="hero-tagline">I create brands, design experiences, and build websites.<br>Programmer. Developer.
             Problem solver.</p>
         <div class="hero-actions">
-            <a routerLink="/" fragment="projects" class="btn-primary">View Projects</a>
+            <a routerLink="/projects" class="btn-primary">View Projects</a>
             <a routerLink="/contact" class="btn-ghost">Work with me</a>
         </div>
     </div>
@@ -61,7 +61,7 @@
         <p class="empty-state">No projects yet.</p>
         } @else {
         <div class="projects-grid">
-            @for (project of projects(); track project.id) {
+            @for (project of projects().slice(0, 2); track project.id) {
             <article class="project-card">
                 @if (project.thumbnail) {
                 <div class="project-thumb" (click)="openLightbox(project.thumbnail)" style="cursor:zoom-in"
@@ -105,6 +105,11 @@
             </article>
             }
         </div>
+        @if (projects().length > 0) {
+        <div class="section-cta">
+            <a routerLink="/projects" class="btn-ghost">View all projects <i class="bi bi-arrow-right"></i></a>
+        </div>
+        }
         }
     </div>
 </section>

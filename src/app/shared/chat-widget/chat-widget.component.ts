@@ -126,6 +126,12 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         this.chatService.connectAsVisitor(name);
     }
 
+    startNewChat() {
+        this.chatService.resetVisitorSession();
+        this.visitorName = '';
+        this.started.set(false);
+    }
+
     send() {
         const content = this.message.trim();
         if (!content || this.sessionClosed()) return;

@@ -47,17 +47,19 @@
     </div>
     }
 
-    <form (ngSubmit)="send()">
+    <form #f="ngForm" (ngSubmit)="send(f)" novalidate>
         <div class="admin-form-field">
             <label class="admin-form-label">Title <span class="required">*</span></label>
             <input class="admin-form-input" type="text" [(ngModel)]="title" name="title"
-                placeholder="e.g. New blog post published!" maxlength="100" required />
+                placeholder="e.g. New blog post published!" maxlength="100" required
+                [class.is-invalid]="(f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid" />
         </div>
 
         <div class="admin-form-field">
             <label class="admin-form-label">Body <span class="required">*</span></label>
             <textarea class="admin-form-textarea" rows="3" [(ngModel)]="body" name="body"
-                placeholder="Notification message text…" maxlength="300" required></textarea>
+                placeholder="Notification message text…" maxlength="300" required
+                [class.is-invalid]="(f.submitted || f.controls['body']?.touched) && f.controls['body']?.invalid"></textarea>
         </div>
 
         <div class="admin-form-field">
@@ -68,7 +70,7 @@
         </div>
 
         <div class="admin-form-actions">
-            <button type="submit" class="btn-primary" [disabled]="sending() || !title.trim() || !body.trim()">
+            <button type="submit" class="btn-primary" [disabled]="sending()">
                 @if (sending()) {
                 <span class="spinner-sm"></span> Sending…
                 } @else {

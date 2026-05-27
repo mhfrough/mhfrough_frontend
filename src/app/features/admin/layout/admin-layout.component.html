@@ -37,11 +37,8 @@
                 </a>
             </li>
             <li>
-                <a class="admin-nav-link" routerLink="/admin/comments" routerLinkActive="is-active">
-                    <i class="bi bi-chat-left-text"></i>Comments
-                    @if (notif.pendingComments() > 0) {
-                    <span class="admin-nav-badge admin-nav-badge--warn">{{ notif.pendingComments() }}</span>
-                    }
+                <a class="admin-nav-link" routerLink="/admin/invoices" routerLinkActive="is-active">
+                    <i class="bi bi-receipt"></i>Invoices
                 </a>
             </li>
             <li>
@@ -49,14 +46,6 @@
                     <i class="bi bi-envelope"></i>Inquiries
                     @if (notif.unreadInquiries() > 0) {
                     <span class="admin-nav-badge admin-nav-badge--danger">{{ notif.unreadInquiries() }}</span>
-                    }
-                </a>
-            </li>
-            <li>
-                <a class="admin-nav-link" routerLink="/admin/feedback" routerLinkActive="is-active">
-                    <i class="bi bi-star"></i>Feedback
-                    @if (notif.pendingFeedback() > 0) {
-                    <span class="admin-nav-badge admin-nav-badge--warn">{{ notif.pendingFeedback() }}</span>
                     }
                 </a>
             </li>
@@ -69,18 +58,29 @@
                 </a>
             </li>
             <li>
+                <a class="admin-nav-link" routerLink="/admin/comments" routerLinkActive="is-active">
+                    <i class="bi bi-chat-left-text"></i>Comments
+                    @if (notif.pendingComments() > 0) {
+                    <span class="admin-nav-badge admin-nav-badge--warn">{{ notif.pendingComments() }}</span>
+                    }
+                </a>
+            </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/feedback" routerLinkActive="is-active">
+                    <i class="bi bi-star"></i>Feedback
+                    @if (notif.pendingFeedback() > 0) {
+                    <span class="admin-nav-badge admin-nav-badge--warn">{{ notif.pendingFeedback() }}</span>
+                    }
+                </a>
+            </li>
+            <li>
                 <a class="admin-nav-link" routerLink="/admin/push" routerLinkActive="is-active">
                     <i class="bi bi-megaphone"></i>Push Notifications
                 </a>
             </li>
             <li>
                 <a class="admin-nav-link" routerLink="/admin/notification-logs" routerLinkActive="is-active">
-                    <i class="bi bi-journal-text"></i>Notification Logs
-                </a>
-            </li>
-            <li>
-                <a class="admin-nav-link" routerLink="/admin/invoices" routerLinkActive="is-active">
-                    <i class="bi bi-receipt"></i>Invoices
+                    <i class="bi bi-journal-text"></i>Activity Logs
                 </a>
             </li>
         </ul>
@@ -117,3 +117,20 @@
     </div>
     }
 </div>
+
+<!-- Inactivity Warning Modal -->
+@if (inactivity.showWarning()) {
+<div class="admin-modal-overlay">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Session Expiring Soon</p>
+        <p class="admin-modal-body">
+            You've been inactive. You will be logged out automatically in
+            <strong>{{ inactivity.countdown() }}</strong> second{{ inactivity.countdown() === 1 ? '' : 's' }}.
+        </p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="logout()">Logout Now</button>
+            <button class="btn-primary" (click)="inactivity.stayLoggedIn()">Stay Logged In</button>
+        </div>
+    </div>
+</div>
+}

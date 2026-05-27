@@ -1,0 +1,37 @@
+<div class="not-found-page">
+    <div class="nf-content">
+
+        <!-- Left: text content -->
+        <div class="nf-left">
+            <p class="nf-label">404 · not found</p>
+            <h1 class="nf-heading">Oops.</h1>
+            <p class="nf-roles">This page doesn't exist</p>
+            <p class="nf-tagline">
+                You've wandered into uncharted territory.<br>
+                The URL might be wrong, or this page was moved.
+            </p>
+            <div class="nf-actions">
+                <a routerLink="/" class="btn-primary">Back to Home</a>
+                <button class="btn-ghost" (click)="goBack()">Go Back</button>
+            </div>
+        </div>
+
+        <!-- Right: animated code block -->
+        <div class="nf-right">
+            <div class="hero-code nf-code-block">
+                <span class="hc-line" style="--i:0"><span class="hc-cmt">// error.handler.ts</span></span>
+                <span class="hc-line" style="--i:1"><span class="hc-kw">throw</span>&nbsp;<span class="hc-kw">new</span>&nbsp;<span class="hc-var">HttpException</span><span class="hc-punct">(&#123;</span></span>
+                <span class="hc-line" style="--i:2">&nbsp;&nbsp;<span class="hc-prop">status</span><span class="hc-punct">:</span>&nbsp;&nbsp;&nbsp;<span class="hc-val">404</span><span class="hc-punct">,</span></span>
+                <span class="hc-line" style="--i:3">&nbsp;&nbsp;<span class="hc-prop">error</span><span class="hc-punct">:</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hc-str">"page_not_found"</span><span class="hc-punct">,</span></span>
+                <span class="hc-line" style="--i:4">&nbsp;&nbsp;<span class="hc-prop">url</span><span class="hc-punct">:</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hc-str">"{{ currentUrl() }}"</span><span class="hc-punct">,</span></span>
+                <span class="hc-line" style="--i:5">&nbsp;&nbsp;<span class="hc-prop">hint</span><span class="hc-punct">:</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hc-str">"check the url →"</span><span class="hc-punct">,</span></span>
+                <span class="hc-line" style="--i:6"><span class="hc-punct">&#125;);</span></span>
+                <span class="hc-line" style="--i:7"></span>
+                <span class="hc-line" style="--i:8"><span class="hc-cmt">// Suggestion: navigate home</span></span>
+                <span class="hc-line" style="--i:9"><span class="hc-kw">const</span>&nbsp;<span class="hc-var">fix</span>&nbsp;<span class="hc-punct">=</span>&nbsp;<span class="hc-str">"/"</span><span class="hc-punct">;</span></span>
+                <span class="hc-line hc-cursor" style="--i:10">▋</span>
+            </div>
+        </div>
+
+    </div>
+</div>

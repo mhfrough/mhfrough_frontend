@@ -70,6 +70,10 @@ export class ChatService {
     async connectAsVisitor(visitorName: string) {
         if (!isPlatformBrowser(this.platformId)) return;
 
+        // Disconnect any existing socket before creating a new connection
+        this.socket?.disconnect();
+        this.socket = undefined;
+
         const sessionId = sessionStorage.getItem(SESSION_KEY);
         const { io } = await import('socket.io-client');
 
@@ -100,13 +104,24 @@ export class ChatService {
 
         this.socket.on('session:closed', () => {
             this.sessionClosed.set(true);
+            // Clear stored session so a refresh starts fresh
+            sessionStorage.removeItem(SESSION_KEY);
+            sessionStorage.removeItem(VISITOR_NAME_KEY);
+        });
+
+        this.socket.on('session:deleted', () => {
+            this.sessionClosed.set(true);
+            sessionStorage.removeItem(SESSION_KEY);
+            sessionStorage.removeItem(VISITOR_NAME_KEY);
         });
     }
 
     sendVisitorMessage(content: string) {
         const sessionId = this.visitorSessionId();
         if (!sessionId) return;
-        this.socket?.emit('visitor:message', { sessionId, content });
+        this.socket?.emit('visitor:message', { sessionId, content }, (msg: ChatMessage) => {
+            if (msg) this.visitorMessages.update(m => [...m, msg]);
+        });
     }
 
     sendVisitorTyping(isTyping: boolean) {
@@ -121,6 +136,17 @@ export class ChatService {
             sessionId: sessionStorage.getItem(SESSION_KEY),
             visitorName: sessionStorage.getItem(VISITOR_NAME_KEY),
         };
+    }
+
+    resetVisitorSession() {
+        this.socket?.disconnect();
+        this.socket = undefined;
+        sessionStorage.removeItem(SESSION_KEY);
+        sessionStorage.removeItem(VISITOR_NAME_KEY);
+        this.visitorSessionId.set(null);
+        this.visitorMessages.set([]);
+        this.adminIsTyping.set(false);
+        this.sessionClosed.set(false);
     }
 
     disconnectVisitor() {
@@ -160,6 +186,14 @@ export class ChatService {
 
         this.socket.on('visitor:typing', (data: { sessionId: string; isTyping: boolean }) => {
             this.visitorTyping.set(data);
+        });
+
+        this.socket.on('session:deleted', ({ sessionId }: { sessionId: string }) => {
+            this.sessions.update(s => s.filter(sess => sess.id !== sessionId));
+            if (this.activeSessionId() === sessionId) {
+                this.activeSessionId.set(null);
+                this.activeMsgs.set([]);
+            }
         });
     }
 

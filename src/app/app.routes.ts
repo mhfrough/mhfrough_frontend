@@ -2,44 +2,7 @@
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-    // --- Main site (wrapped in MainLayoutComponent) ---------------------------
-    {
-        path: '',
-        loadComponent: () => import('./features/main/layout/main-layout.component').then(m => m.MainLayoutComponent),
-        children: [
-            {
-                path: '',
-                loadComponent: () => import('./features/main/home/home.component').then(m => m.HomeComponent),
-            },
-            {
-                path: 'blog',
-                loadComponent: () => import('./features/main/blog/blog-list/blog-list.component').then(m => m.BlogListComponent),
-            },
-            {
-                path: 'blog/:slug',
-                loadComponent: () => import('./features/main/blog/blog-detail/blog-detail.component').then(m => m.BlogDetailComponent),
-            },
-            {
-                path: 'contact',
-                loadComponent: () => import('./features/main/contact/contact.component').then(m => m.ContactComponent),
-            },
-            {
-                path: 'feedback',
-                loadComponent: () => import('./features/main/feedback/feedback.component').then(m => m.FeedbackComponent),
-            },
-            {
-                path: 'privacy',
-                loadComponent: () => import('./features/main/privacy/privacy.component').then(m => m.PrivacyComponent),
-            },
-            {
-                path: 'terms',
-                loadComponent: () => import('./features/main/terms/terms.component').then(m => m.TermsComponent),
-            },
-
-        ],
-    },
-
-    // --- Admin portal (completely separate, own layout) ----------------------
+    // --- Admin portal FIRST (must come before the catch-all '' layout) -------
     {
         path: 'admin/login',
         loadComponent: () => import('./features/admin/login/admin-login.component').then(m => m.AdminLoginComponent),
@@ -102,8 +65,58 @@ export const routes: Routes = [
                 path: 'invoices/:id',
                 loadComponent: () => import('./features/admin/invoices/admin-invoice-view/admin-invoice-view.component').then(m => m.AdminInvoiceViewComponent),
             },
+            { path: '**', redirectTo: 'dashboard', pathMatch: 'full' },
         ],
     },
 
-    { path: '**', redirectTo: '' },
+    // --- Main site (wrapped in MainLayoutComponent) ---------------------------
+    // '' prefix matches everything not already matched above.
+    // The '**' child ensures unknown public URLs show the 404 page inside the layout.
+    {
+        path: '',
+        loadComponent: () => import('./features/main/layout/main-layout.component').then(m => m.MainLayoutComponent),
+        children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                loadComponent: () => import('./features/main/home/home.component').then(m => m.HomeComponent),
+            },
+            {
+                path: 'blog',
+                loadComponent: () => import('./features/main/blog/blog-list/blog-list.component').then(m => m.BlogListComponent),
+            },
+            {
+                path: 'blog/:slug',
+                loadComponent: () => import('./features/main/blog/blog-detail/blog-detail.component').then(m => m.BlogDetailComponent),
+            },
+            {
+                path: 'contact',
+                loadComponent: () => import('./features/main/contact/contact.component').then(m => m.ContactComponent),
+            },
+            {
+                path: 'feedback',
+                loadComponent: () => import('./features/main/feedback/feedback.component').then(m => m.FeedbackComponent),
+            },
+            {
+                path: 'privacy',
+                loadComponent: () => import('./features/main/privacy/privacy.component').then(m => m.PrivacyComponent),
+            },
+            {
+                path: 'terms',
+                loadComponent: () => import('./features/main/terms/terms.component').then(m => m.TermsComponent),
+            },
+            {
+                path: 'projects',
+                loadComponent: () => import('./features/main/projects/projects.component').then(m => m.ProjectsComponent),
+            },
+            {
+                path: 'not-found',
+                loadComponent: () => import('./features/main/not-found/not-found.component').then(m => m.NotFoundComponent),
+            },
+            {
+                path: '**',
+                loadComponent: () => import('./features/main/not-found/not-found.component').then(m => m.NotFoundComponent),
+            },
+        ],
+    },
 ];

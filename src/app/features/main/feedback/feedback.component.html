@@ -71,9 +71,9 @@
                 <div class="contact-field">
                     <label class="contact-label">Name *</label>
                     <input [(ngModel)]="formData.name" name="name" required minlength="2" maxlength="100"
-                        class="contact-input" [class.is-error]="f.submitted && f.controls['name']?.invalid"
+                        class="contact-input" [class.is-error]="(f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid"
                         placeholder="Your full name">
-                    @if (f.submitted && f.controls['name']?.invalid) {
+                    @if ((f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid) {
                     <span class="contact-error">Please enter your name.</span>
                     }
                 </div>
@@ -110,9 +110,9 @@
                 <label class="contact-label">Review *</label>
                 <textarea ngModel name="review" required minlength="10" maxlength="1000" rows="5"
                     class="contact-input contact-textarea"
-                    [class.is-error]="f.submitted && f.controls['review']?.invalid"
+                    [class.is-error]="(f.submitted || f.controls['review']?.touched) && f.controls['review']?.invalid"
                     placeholder="Share your experience working with me…"></textarea>
-                @if (f.submitted && f.controls['review']?.invalid) {
+                @if ((f.submitted || f.controls['review']?.touched) && f.controls['review']?.invalid) {
                 <span class="contact-error">Please write a review (min 10 characters).</span>
                 }
             </div>

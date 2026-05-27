@@ -39,6 +39,12 @@ export class AuthService {
         );
     }
 
+    forceLogout() {
+        sessionStorage.removeItem('admin_session');
+        this._loggedIn.set(false);
+        this.router.navigate(['/admin/login']);
+    }
+
     getProfile() {
         return this.http.get(`${environment.apiUrl}/auth/profile`);
     }

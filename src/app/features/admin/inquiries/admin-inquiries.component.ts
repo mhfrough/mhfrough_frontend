@@ -17,6 +17,7 @@ export class AdminInquiriesComponent implements OnInit, OnDestroy {
     private readonly realtime = inject(RealtimeService);
     readonly inquiries = signal<any[]>([]);
     readonly loading = signal(true);
+    readonly deleteTargetId = signal<string | null>(null);
     private subs = new Subscription();
 
     ngOnInit() {
@@ -43,6 +44,19 @@ export class AdminInquiriesComponent implements OnInit, OnDestroy {
 
     markRead(id: string) {
         this.service.markRead(id).subscribe(() => {
+            this.notif.fetchCounts();
+        });
+    }
+
+    confirmDelete(id: string) { this.deleteTargetId.set(id); }
+    cancelDelete() { this.deleteTargetId.set(null); }
+
+    executeDelete() {
+        const id = this.deleteTargetId();
+        if (!id) return;
+        this.deleteTargetId.set(null);
+        this.service.remove(id).subscribe(() => {
+            this.inquiries.update(list => list.filter(i => i.id !== id));
             this.notif.fetchCounts();
         });
     }

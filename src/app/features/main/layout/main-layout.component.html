@@ -5,7 +5,8 @@
         <!-- Desktop nav -->
         <ul class="nav-links">
             <li><a routerLink="/" fragment="about">About</a></li>
-            <li><a routerLink="/" fragment="projects">Projects</a></li>
+            <li><a routerLink="/projects" routerLinkActive="active">Projects</a></li>
+            <li><a routerLink="/" fragment="services">Services</a></li>
             <li><a routerLink="/blog" routerLinkActive="active">Writing</a></li>
             <li><a routerLink="/feedback" routerLinkActive="active">Reviews</a></li>
             <li><a routerLink="/contact" routerLinkActive="active">Work with me</a></li>
@@ -22,7 +23,8 @@
     @if (navOpen()) {
     <div class="mobile-menu">
         <a routerLink="/" fragment="about" (click)="navOpen.set(false)">About</a>
-        <a routerLink="/" fragment="projects" (click)="navOpen.set(false)">Projects</a>
+        <a routerLink="/projects" (click)="navOpen.set(false)">Projects</a>
+        <a routerLink="/" fragment="services" (click)="navOpen.set(false)">Services</a>
         <a routerLink="/blog" (click)="navOpen.set(false)">Writing</a>
         <a routerLink="/feedback" (click)="navOpen.set(false)">Reviews</a>
         <a routerLink="/contact" (click)="navOpen.set(false)">Work with me</a>

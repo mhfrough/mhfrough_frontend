@@ -30,19 +30,19 @@
             <!-- Name + Email -->
             <div class="contact-row">
                 <div class="contact-field">
-                    <label class="contact-label">Name</label>
+                    <label class="contact-label">Name *</label>
                     <input [(ngModel)]="formData.name" name="name" required minlength="2" maxlength="100"
-                        class="contact-input" [class.is-error]="f.submitted && f.controls['name']?.invalid"
+                        class="contact-input" [class.is-error]="(f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid"
                         placeholder="Your full name">
-                    @if (f.submitted && f.controls['name']?.invalid) {
+                    @if ((f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid) {
                     <span class="contact-error">Please enter your name.</span>
                     }
                 </div>
                 <div class="contact-field">
-                    <label class="contact-label">Email</label>
+                    <label class="contact-label">Email *</label>
                     <input [(ngModel)]="formData.email" name="email" required email type="email" class="contact-input"
-                        [class.is-error]="f.submitted && f.controls['email']?.invalid" placeholder="you@example.com">
-                    @if (f.submitted && f.controls['email']?.invalid) {
+                        [class.is-error]="(f.submitted || f.controls['email']?.touched) && f.controls['email']?.invalid" placeholder="you@example.com">
+                    @if ((f.submitted || f.controls['email']?.touched) && f.controls['email']?.invalid) {
                     <span class="contact-error">Please enter a valid email.</span>
                     }
                 </div>
@@ -84,7 +84,7 @@
 
             <!-- Message -->
             <div class="contact-field">
-                <label class="contact-label">Message</label>
+                <label class="contact-label">Message *</label>
                 <div class="rte-wrap">
                     <div class="rte-toolbar">
                         <button type="button" class="rte-btn" title="Bold"
@@ -103,10 +103,10 @@
                     </div>
                     <textarea #msgArea [(ngModel)]="formData.message" name="message" required minlength="10"
                         maxlength="2000" rows="6" class="contact-input contact-textarea rte-textarea"
-                        [class.is-error]="f.submitted && f.controls['message']?.invalid"
+                        [class.is-error]="(f.submitted || f.controls['message']?.touched) && f.controls['message']?.invalid"
                         placeholder="Tell me about your project…"></textarea>
                 </div>
-                @if (f.submitted && f.controls['message']?.invalid) {
+                @if ((f.submitted || f.controls['message']?.touched) && f.controls['message']?.invalid) {
                 <span class="contact-error">Please enter a message (min 10 characters).</span>
                 }
             </div>

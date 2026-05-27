@@ -9,23 +9,37 @@
         <h1 class="admin-login-heading">Sign in</h1>
         <p class="admin-login-sub">Enter your credentials to access the dashboard.</p>
 
-        @if (error()) {
+        @if (lockInfo()) {
+        <div class="admin-alert admin-alert--error">
+            <i class="bi bi-lock-fill" style="flex-shrink:0"></i>
+            <span>
+                <strong>Account locked.</strong> Too many failed attempts.<br>
+                Try again in <strong>{{ formatCountdown(lockInfo()!.remainingSeconds) }}</strong>
+                (unlocks at {{ lockInfo()!.lockedUntil | date:'shortTime' }}).
+            </span>
+        </div>
+        } @else if (warning()) {
+        <div class="admin-alert admin-alert--warning">
+            <i class="bi bi-exclamation-triangle-fill" style="flex-shrink:0"></i>
+            <span>{{ warning() }}</span>
+        </div>
+        } @else if (error()) {
         <div class="admin-alert admin-alert--error">{{ error() }}</div>
         }
 
         <form #f="ngForm" (ngSubmit)="login(f)" novalidate>
             <div class="admin-form-field">
-                <label class="admin-form-label">Email</label>
+                <label class="admin-form-label">Email *</label>
                 <input ngModel name="email" required email type="email" class="admin-form-input"
-                    [class.is-invalid]="f.submitted && f.controls['email']?.invalid"
+                    [class.is-invalid]="(f.submitted || f.controls['email']?.touched) && f.controls['email']?.invalid"
                     placeholder="mhfrough&#64;yahoo.com" autocomplete="username">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Password</label>
+                <label class="admin-form-label">Password *</label>
                 <div class="admin-pw-wrap">
                     <input ngModel name="password" required [type]="showPassword() ? 'text' : 'password'"
                         class="admin-form-input"
-                        [class.is-invalid]="f.submitted && f.controls['password']?.invalid"
+                        [class.is-invalid]="(f.submitted || f.controls['password']?.touched) && f.controls['password']?.invalid"
                         placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
                     <button type="button" class="admin-pw-toggle" (click)="showPassword.update(v => !v)"
                         [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
@@ -34,7 +48,7 @@
                 </div>
             </div>
             <div style="margin-top: 2rem;">
-                <button type="submit" class="btn-primary" [disabled]="loading()"
+                <button type="submit" class="btn-primary" [disabled]="loading() || !!lockInfo()"
                     style="width:100%; justify-content:center;">
                     @if (loading()) {
                     <span class="contact-spinner"></span>Signing in…
