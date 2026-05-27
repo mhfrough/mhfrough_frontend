@@ -4,11 +4,13 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { InquiriesService } from '../../../core/services/inquiry-feedback.service';
 import { UserInfoService } from '../../../core/services/user-info.service';
+import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
+import { FooterSettingsService } from '../../../core/services/footer-settings.service';
 
 @Component({
     selector: 'app-contact',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RteToolbarComponent],
     templateUrl: './contact.component.html',
 })
 export class ContactComponent implements OnInit {
@@ -16,14 +18,26 @@ export class ContactComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private platformId = inject(PLATFORM_ID);
     private userInfo = inject(UserInfoService);
+    readonly footerSettings = inject(FooterSettingsService);
+
+    isSocialVisible(key: string): boolean {
+        const vis = this.footerSettings.data().socialVisibility;
+        return vis?.[key]?.['contact'] !== false;
+    }
 
     readonly sending = signal(false);
     readonly sent = signal(false);
     readonly error = signal('');
+    readonly dynamicSubject = signal<string | null>(null);
+
+    private readonly knownSubjects = [
+        'Project Inquiry', 'Freelance Collaboration', 'Job Opportunity', 'Consulting', 'Just Saying Hello',
+    ];
 
     formData = { name: '', email: '', phone: '', subject: '', message: '' };
 
     ngOnInit() {
+        this.footerSettings.load();
         if (isPlatformBrowser(this.platformId)) {
             const saved = this.userInfo.get();
             if (saved) {
@@ -34,6 +48,9 @@ export class ContactComponent implements OnInit {
         this.route.queryParams.subscribe(params => {
             if (params['subject']) {
                 this.formData = { ...this.formData, subject: params['subject'] };
+                if (!this.knownSubjects.includes(params['subject'])) {
+                    this.dynamicSubject.set(params['subject']);
+                }
             }
             if (params['message']) {
                 this.formData = { ...this.formData, message: params['message'] };

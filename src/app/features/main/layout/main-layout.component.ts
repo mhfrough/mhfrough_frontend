@@ -6,6 +6,7 @@ import { ChatWidgetComponent } from '../../../shared/chat-widget/chat-widget.com
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { FcmService } from '../../../core/services/fcm.service';
 import { CookieConsentComponent } from '../../../shared/cookie-consent/cookie-consent.component';
+import { FooterSettingsService } from '../../../core/services/footer-settings.service';
 
 @Component({
     selector: 'app-main-layout',
@@ -22,11 +23,13 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     private readonly realtime = inject(RealtimeService);
     private readonly fcm = inject(FcmService);
     private readonly platformId = inject(PLATFORM_ID);
+    readonly footerSettings = inject(FooterSettingsService);
     private permissionTimer: ReturnType<typeof setTimeout> | null = null;
 
     ngOnInit() {
         this.scroller.setOffset([0, 80]);
         this.realtime.connect();
+        this.footerSettings.load();
 
         if (isPlatformBrowser(this.platformId)) {
             this.permissionTimer = setTimeout(() => {
@@ -47,4 +50,9 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
     scrollTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
     toggleNav() { this.navOpen.update(v => !v); }
+
+    isSocialVisible(key: string, place: 'footer' | 'contact' = 'footer'): boolean {
+        const vis = this.footerSettings.data().socialVisibility;
+        return vis?.[key]?.[place] !== false;
+    }
 }

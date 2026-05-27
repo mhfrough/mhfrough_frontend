@@ -52,63 +52,49 @@
 <!-- ─── Projects ─────────────────────────────────────────────────────────── -->
 <section class="section" id="projects">
     <div class="section-container">
-        <h2 class="section-title">Selected Projects</h2>
+        <div class="home-projects-header">
+            <h2 class="section-title" style="margin:0">Selected Work</h2>
+            <a routerLink="/projects" class="view-all">All Projects <i class="bi bi-arrow-right"></i></a>
+        </div>
+
         @if (loadingProjects()) {
         <div class="loading-state">
             <div class="spinner"></div>
         </div>
         } @else if (projects().length === 0) {
-        <p class="empty-state">No projects yet.</p>
+        <p class="empty-state" style="padding:3rem 0">No projects yet.</p>
         } @else {
-        <div class="projects-grid">
-            @for (project of projects().slice(0, 2); track project.id) {
-            <article class="project-card">
-                @if (project.thumbnail) {
-                <div class="project-thumb" (click)="openLightbox(project.thumbnail)" style="cursor:zoom-in"
-                    role="button" [attr.aria-label]="'View full image: ' + project.title">
-                    <img [src]="project.thumbnail" [alt]="'Screenshot of ' + project.title" loading="lazy" />
-                    <div class="project-thumb-overlay">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8" />
-                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                            <line x1="11" y1="8" x2="11" y2="14" />
-                            <line x1="8" y1="11" x2="14" y2="11" />
-                        </svg>
-                        <span class="project-thumb-title">{{ project.title }}</span>
-                    </div>
+        @for (project of projects(); track project.id; let i = $index) {
+        <a class="home-project-row"
+            [routerLink]="(project.content || project.slug) ? ['/projects', project.slug || project.id] : ['/projects']">
+            <span class="home-project-num">{{ (i + 1).toString().padStart(2, '0') }}</span>
+            <div class="home-project-info">
+                <h3 class="home-project-title">{{ project.title }}</h3>
+                <p class="home-project-desc">{{ project.description }}</p>
+                @if (project.techStack?.length) {
+                <div class="home-project-tags">
+                    @for (tech of project.techStack.slice(0, 5); track tech) {
+                    <span>{{ tech }}</span>
+                    }
                 </div>
                 }
-                <div class="project-body">
-                    <h3 class="project-name">{{ project.title }}</h3>
-                    <p class="project-desc">{{ project.description }}</p>
-                    <div class="project-footer">
-                        @if (project.techStack?.length) {
-                        <div class="tech-list">
-                            @for (tech of project.techStack; track tech) {
-                            <span>{{ tech }}</span>
-                            }
-                        </div>
-                        }
-                        <div class="project-links">
-                            @if (project.liveUrl) {
-                            <a [href]="project.liveUrl" target="_blank" rel="noopener" class="link-arrow">Live <i
-                                    class="bi bi-arrow-up-right"></i></a>
-                            }
-                            @if (project.githubUrl) {
-                            <a [href]="project.githubUrl" target="_blank" rel="noopener" class="link-arrow">Code <i
-                                    class="bi bi-arrow-up-right"></i></a>
-                            }
-                        </div>
-                    </div>
+            </div>
+            <div class="home-project-aside">
+                @if (project.thumbnail) {
+                <div class="home-project-thumb">
+                    <img [src]="project.thumbnail" [alt]="project.title" loading="lazy" />
                 </div>
-            </article>
-            }
-        </div>
-        @if (projects().length > 0) {
-        <div class="section-cta">
-            <a routerLink="/projects" class="btn-ghost">View all projects <i class="bi bi-arrow-right"></i></a>
-        </div>
+                }
+                <span class="home-project-arrow">
+                    @if (project.content || project.slug) {
+                    Case Study
+                    } @else {
+                    View
+                    }
+                    <i class="bi bi-arrow-up-right"></i>
+                </span>
+            </div>
+        </a>
         }
         }
     </div>
@@ -121,14 +107,41 @@
             <h2 class="section-title">About</h2>
         </div>
         <div class="about-right">
+            @if (footerSettings.data().aboutHtml) {
+            <div class="about-rte-content" [innerHTML]="footerSettings.data().aboutHtml"></div>
+            } @else {
             <p>Hello — I'm <strong>Mohammad Hamza</strong>, an application developer and product designer based in
-                Karachi, Pakistan. I currently hold the position of <strong>Lead Developer</strong> at Arittek
-                Solutions.</p>
+                Karachi, Pakistan. I hold the position of <strong>Lead Front-end Developer</strong> at
+                <strong>Arittek Solutions (Pvt.) Ltd.</strong> and hold a BS in Computer Science from
+                <strong>KIET</strong> (formerly PAF-KIET).
+            </p>
             <div class="about-links">
                 <a href="https://github.com/mhfrough" target="_blank" rel="noopener">GitHub <i
                         class="bi bi-arrow-up-right"></i></a>
                 <a href="https://www.linkedin.com/in/mhfrough/" target="_blank" rel="noopener">LinkedIn <i
                         class="bi bi-arrow-up-right"></i></a>
+            </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ─── Honors & Awards ─────────────────────────────────────────────────── -->
+<section class="section" id="honors">
+    <div class="section-container about-grid">
+        <div class="about-left">
+            <h2 class="section-title">Honors &amp; Awards</h2>
+        </div>
+        <div class="about-right">
+            <div class="honors-list">
+                <div class="honor-item">
+                    <h3 class="honor-title">UI / UX <span class="honor-role">(Competition Head)</span></h3>
+                    <p class="honor-issuer">Issued by <strong>Combat' 18</strong> · Feb 2018</p>
+                </div>
+                <div class="honor-item">
+                    <h3 class="honor-title">Web Designing</h3>
+                    <p class="honor-issuer">Issued by <strong>Flair' 17</strong> · Jan 2017</p>
+                </div>
             </div>
         </div>
     </div>
@@ -147,7 +160,8 @@
                 <p class="service-desc">Pixel-perfect UI layouts and visual web designs tailored to your brand identity.
                 </p>
                 <div class="service-footer">
-                    <div class="service-tags"><span class="service-tag">UI/UX</span></div>
+                    <div class="service-tags"><span class="service-tag">UI/UX</span><span
+                            class="service-tag">Mockups</span></div>
                     <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
                 </div>
             </a>
@@ -159,19 +173,32 @@
                 <p class="service-desc">Full-stack web applications built with modern frameworks — Angular, NestJS,
                     React and more.</p>
                 <div class="service-footer">
-                    <div class="service-tags"></div>
+                    <div class="service-tags"><span class="service-tag">Full-stack</span></div>
                     <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
                 </div>
             </a>
 
             <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Mobile Development', message: 'Hi, I\'m interested in your Mobile Development service. I\'d like to build a mobile app and would love to discuss the details.'}">
-                <i class="bi bi-phone service-icon"></i>
-                <h3 class="service-name">Mobile Development</h3>
-                <p class="service-desc">Cross-platform mobile apps that deliver a native feel across iOS and Android.
-                </p>
+                [queryParams]="{subject: 'PWA & SSR', message: 'Hi, I\'m interested in your PWA & SSR service. I\'d like to discuss making my app a Progressive Web App with server-side rendering.'}">
+                <i class="bi bi-lightning-charge service-icon"></i>
+                <h3 class="service-name">PWA &amp; SSR</h3>
+                <p class="service-desc">Progressive Web Apps and server-side rendered experiences for lightning-fast
+                    load times and offline capability.</p>
                 <div class="service-footer">
-                    <div class="service-tags"></div>
+                    <div class="service-tags"><span class="service-tag">PWA</span><span class="service-tag">SSR</span>
+                    </div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Hybrid App Development', message: 'Hi, I\'m interested in your Hybrid App Development service. I\'d like to build a cross-platform mobile app and would love to discuss the details.'}">
+                <i class="bi bi-phone service-icon"></i>
+                <h3 class="service-name">Hybrid App Development</h3>
+                <p class="service-desc">Cross-platform mobile apps built once, running natively on iOS and Android with
+                    a seamless user experience.</p>
+                <div class="service-footer">
+                    <div class="service-tags"><span class="service-tag">Hybrid</span></div>
                     <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
                 </div>
             </a>
@@ -180,7 +207,59 @@
                 [queryParams]="{subject: 'Website Development', message: 'Hi, I\'m interested in your Website Development service. I need a professional website and would love to discuss my requirements.'}">
                 <i class="bi bi-globe service-icon"></i>
                 <h3 class="service-name">Website Development</h3>
-                <p class="service-desc">Fast, responsive, and SEO-ready websites from landing pages to full portals.</p>
+                <p class="service-desc">Fast, responsive, and SEO-optimised websites — from landing pages to full
+                    portals, with clean frontend code throughout.</p>
+                <div class="service-footer">
+                    <div class="service-tags"><span class="service-tag">SEO</span><span
+                            class="service-tag">Full-stack</span></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Logo & Icon Design', message: 'Hi, I\'m interested in your Logo & Icon Design service. I need a unique logo and icons for my brand.'}">
+                <i class="bi bi-pen service-icon"></i>
+                <h3 class="service-name">Logo &amp; Icon Design</h3>
+                <p class="service-desc">Memorable logos, brand marks, and icon sets that communicate the essence of your
+                    identity.</p>
+                <div class="service-footer">
+                    <div class="service-tags"><span class="service-tag">Branding</span><span
+                            class="service-tag">Icons</span></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'UI/UX & Prototyping', message: 'Hi, I\'m interested in your UI/UX & Prototyping service. I need high-fidelity wireframes and interactive prototypes.'}">
+                <i class="bi bi-bezier2 service-icon"></i>
+                <h3 class="service-name">UI/UX &amp; Prototyping</h3>
+                <p class="service-desc">High-fidelity wireframes, mockups, and interactive prototypes crafted in Adobe
+                    XD and Figma.</p>
+                <div class="service-footer">
+                    <div class="service-tags"><span class="service-tag">UI/UX</span><span
+                            class="service-tag">Mockups</span></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'AI Integration', message: 'Hi, I\'m interested in your AI Integration service. I\'d like to discuss how AI can be applied to my project.'}">
+                <i class="bi bi-robot service-icon"></i>
+                <h3 class="service-name">AI Integration</h3>
+                <p class="service-desc">Integrating AI-powered features — from smart assistants to automated workflows —
+                    into your products.</p>
+                <div class="service-footer">
+                    <div class="service-tags"><span class="service-tag">AI</span></div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: 'Team Leadership', message: 'Hi, I\'m interested in your Team Leadership service. I\'d like to discuss how you can help lead or mentor my development team.'}">
+                <i class="bi bi-people service-icon"></i>
+                <h3 class="service-name">Team Leadership</h3>
+                <p class="service-desc">Technical leadership, mentoring, and team management to help your development
+                    squad deliver with confidence.</p>
                 <div class="service-footer">
                     <div class="service-tags"></div>
                     <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
@@ -200,39 +279,81 @@
             </a>
 
             <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Logo Design', message: 'Hi, I\'m interested in your Logo Design service. I need a unique logo for my brand and would like to discuss the design process.'}">
-                <i class="bi bi-pen service-icon"></i>
-                <h3 class="service-name">Logo Design</h3>
-                <p class="service-desc">Memorable logos and visual identities that communicate the essence of your
-                    brand.</p>
+                [queryParams]="{subject: 'Blogging', message: 'Hi, I\'m interested in your Blogging service. I\'d like to discuss content creation and technical writing for my platform.'}">
+                <i class="bi bi-pencil-square service-icon"></i>
+                <h3 class="service-name">Blogging</h3>
+                <p class="service-desc">Technical articles, tutorials, and thought-leadership content crafted to educate
+                    and engage your audience.</p>
                 <div class="service-footer">
                     <div class="service-tags"></div>
                     <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
                 </div>
             </a>
 
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Adobe XD Design', message: 'Hi, I\'m interested in your Adobe XD Design service. I need high-fidelity wireframes and interactive prototypes and would love to discuss the project.'}">
-                <i class="bi bi-bezier2 service-icon"></i>
-                <h3 class="service-name">Adobe XD Design</h3>
-                <p class="service-desc">High-fidelity wireframes and interactive prototypes crafted in Adobe XD.</p>
-                <div class="service-footer">
-                    <div class="service-tags"><span class="service-tag">UI/UX</span></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
+        </div>
+    </div>
+</section>
 
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Canva Design', message: 'Hi, I\'m interested in your Canva Design service. I need design assets for my brand and would like to discuss what I\'m looking for.'}">
-                <i class="bi bi-palette service-icon"></i>
-                <h3 class="service-name">Canva Design</h3>
-                <p class="service-desc">Social media assets, presentations, and marketing visuals designed in Canva.</p>
-                <div class="service-footer">
-                    <div class="service-tags"></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
+<!-- ─── Clients ─────────────────────────────────────────────────────────── -->
+<section class="section clients-section" id="clients">
+    <div class="section-container">
+        <h2 class="section-title">Clients I've Worked With</h2>
+    </div>
+    <div class="clients-marquee-wrap">
+        <div class="clients-marquee">
+            <!-- Track duplicated for seamless infinite loop -->
+            <div class="clients-track">
+                <span class="client-item">Arittek Solutions</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">TechNest</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">PixelForge</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">BrandCraft</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">Launchify</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">QodeBase</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">Arittek Solutions</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">TechNest</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">PixelForge</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">BrandCraft</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">Launchify</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">QodeBase</span>
+                <span class="client-sep">—</span>
+            </div>
+            <div class="clients-track" aria-hidden="true">
+                <span class="client-item">Arittek Solutions</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">TechNest</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">PixelForge</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">BrandCraft</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">Launchify</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">QodeBase</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">Arittek Solutions</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">TechNest</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">PixelForge</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">BrandCraft</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">Launchify</span>
+                <span class="client-sep">—</span>
+                <span class="client-item">QodeBase</span>
+                <span class="client-sep">—</span>
+            </div>
         </div>
     </div>
 </section>

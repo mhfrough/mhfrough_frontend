@@ -65,6 +65,19 @@ export const routes: Routes = [
                 path: 'invoices/:id',
                 loadComponent: () => import('./features/admin/invoices/admin-invoice-view/admin-invoice-view.component').then(m => m.AdminInvoiceViewComponent),
             },
+            {
+                path: 'settings',
+                redirectTo: 'settings/profile',
+                pathMatch: 'full',
+            },
+            {
+                path: 'settings/:tab',
+                loadComponent: () => import('./features/admin/settings/admin-settings.component').then(m => m.AdminSettingsComponent),
+            },
+            {
+                path: 'gallery',
+                loadComponent: () => import('./features/admin/gallery/admin-gallery.component').then(m => m.AdminGalleryComponent),
+            },
             { path: '**', redirectTo: 'dashboard', pathMatch: 'full' },
         ],
     },
@@ -108,6 +121,14 @@ export const routes: Routes = [
             {
                 path: 'projects',
                 loadComponent: () => import('./features/main/projects/projects.component').then(m => m.ProjectsComponent),
+            },
+            {
+                path: 'gallery',
+                loadComponent: () => import('./features/main/gallery/gallery.component').then(m => m.GalleryComponent),
+            },
+            {
+                path: 'projects/:slug',
+                loadComponent: () => import('./features/main/projects/project-detail/project-detail.component').then(m => m.ProjectDetailComponent),
             },
             {
                 path: 'not-found',

@@ -1,0 +1,187 @@
+<div class="rte-toolbar">
+
+    <!-- ── Bold / Italic / Underline — always ───────────────────────── -->
+    <button type="button" class="rte-btn" title="Bold" (click)="format('<strong>','</strong>')"><i
+            class="bi bi-type-bold"></i></button>
+    <button type="button" class="rte-btn" title="Italic" (click)="format('<em>','</em>')"><i
+            class="bi bi-type-italic"></i></button>
+    <button type="button" class="rte-btn" title="Underline" (click)="format('<u>','</u>')"><i
+            class="bi bi-type-underline"></i></button>
+
+    <!-- ── Strikethrough + Headings — full only ─────────────────────── -->
+    @if (mode === 'full') {
+    <button type="button" class="rte-btn" title="Strikethrough" (click)="format('<s>','</s>')"><i
+            class="bi bi-type-strikethrough"></i></button>
+    <span class="rte-divider"></span>
+    <button type="button" class="rte-btn" title="Heading 1" (click)="format('<h1>','</h1>')">H1</button>
+    <button type="button" class="rte-btn" title="Heading 2" (click)="format('<h2>','</h2>')">H2</button>
+    <button type="button" class="rte-btn" title="Heading 3" (click)="format('<h3>','</h3>')">H3</button>
+    <span class="rte-divider"></span>
+    <button type="button" class="rte-btn" title="Paragraph" (click)="format('<p>','</p>')"><i
+            class="bi bi-paragraph"></i></button>
+    }
+
+    <span class="rte-divider"></span>
+
+    <!-- ── Blockquote — always ──────────────────────────────────────── -->
+    <button type="button" class="rte-btn" title="Blockquote" (click)="format('<blockquote>','</blockquote>')"><i
+            class="bi bi-blockquote-left"></i></button>
+
+    <!-- ── Code — full only ─────────────────────────────────────────── -->
+    @if (mode === 'full') {
+    <span class="rte-divider"></span>
+    <button type="button" class="rte-btn" title="Inline Code" (click)="format('<code>','</code>')"><i
+            class="bi bi-code"></i></button>
+    <button type="button" class="rte-btn" title="Code Block" (click)="format('<pre><code>','</code></pre>')"><i
+            class="bi bi-code-slash"></i></button>
+    }
+
+    <span class="rte-divider"></span>
+
+    <!-- ── Lists — always ───────────────────────────────────────────── -->
+    <button type="button" class="rte-btn" title="Bullet List" (click)="format('<ul>\n  <li>','</li>\n</ul>')"><i
+            class="bi bi-list-ul"></i></button>
+    @if (mode === 'full') {
+    <button type="button" class="rte-btn" title="Ordered List" (click)="format('<ol>\n  <li>','</li>\n</ol>')"><i
+            class="bi bi-list-ol"></i></button>
+    }
+
+    <span class="rte-divider"></span>
+
+    <!-- ── Link — always ────────────────────────────────────────────── -->
+    <button type="button" class="rte-btn" title="Insert Link" (click)="openLinkModal()"><i
+            class="bi bi-link-45deg"></i></button>
+
+    <!-- ── Image + HR — full only ───────────────────────────────────── -->
+    @if (mode === 'full') {
+    <button type="button" class="rte-btn" title="Insert Image" (click)="openImageModal()"><i
+            class="bi bi-image"></i></button>
+    <button type="button" class="rte-btn" title="Horizontal Rule" (click)="format('\n<hr>\n','')">—</button>
+    }
+
+    <span class="rte-divider"></span>
+
+    <!-- ── Emoji dropdown — always ──────────────────────────────────── -->
+    <div class="rte-dropdown">
+        <button type="button" class="rte-btn" title="Emoji" (click)="toggleEmoji($event)"><i
+                class="bi bi-emoji-smile"></i></button>
+        @if (showEmoji()) {
+        <div class="rte-dropdown-panel rte-emoji-grid">
+            @for (emoji of emojis; track emoji) {
+            <button type="button" class="rte-emoji-btn" (click)="insertEmoji(emoji)">{{ emoji }}</button>
+            }
+        </div>
+        }
+    </div>
+
+    <!-- ── Color + Background palettes — full only ──────────────────── -->
+    @if (mode === 'full') {
+    <div class="rte-dropdown">
+        <button type="button" class="rte-btn" title="Text Color" (click)="toggleColor($event)"><i
+                class="bi bi-fonts"></i></button>
+        @if (showColor()) {
+        <div class="rte-dropdown-panel rte-palette">
+            @for (c of textColors; track c) {
+            <button type="button" class="rte-swatch" [style.background]="c" [title]="c"
+                (click)="applyColor(c)"></button>
+            }
+        </div>
+        }
+    </div>
+    <div class="rte-dropdown">
+        <button type="button" class="rte-btn" title="Background Color" (click)="toggleBg($event)"><i
+                class="bi bi-brush"></i></button>
+        @if (showBg()) {
+        <div class="rte-dropdown-panel rte-palette">
+            @for (c of bgColors; track c) {
+            <button type="button" class="rte-swatch" [style.background]="c" [title]="c" (click)="applyBg(c)"></button>
+            }
+        </div>
+        }
+    </div>
+    }
+
+    <!-- ── Clear Formatting — pushed to far right ───────────────────── -->
+    <button type="button" class="rte-btn rte-btn--clear" title="Clear Formatting" (click)="clearFormat()"><i
+            class="bi bi-eraser"></i></button>
+
+</div>
+
+<!-- ─── Link Modal ──────────────────────────────────────────────────────── -->
+@if (linkModal()) {
+<div class="admin-modal-overlay" (click)="cancelLink()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Insert Link</p>
+        <div class="admin-modal-reason">
+            <input type="url" class="rte-modal-input" [value]="linkModal()!.url" (input)="setLinkField('url', $event)"
+                placeholder="https://…" autofocus>
+        </div>
+        <div class="admin-modal-reason" style="margin-bottom:0">
+            <input type="text" class="rte-modal-input" [value]="linkModal()!.text"
+                (input)="setLinkField('text', $event)" placeholder="Link text (uses URL if empty)">
+        </div>
+        <div class="admin-modal-actions">
+            <button type="button" class="btn-ghost" (click)="cancelLink()">Cancel</button>
+            <button type="button" class="btn-primary" (click)="confirmLink()"
+                [disabled]="!linkModal()!.url.trim()">Insert</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- ─── Image Modal ─────────────────────────────────────────────────────── -->
+@if (imageModal()) {
+<div class="admin-modal-overlay" (click)="cancelImage()">
+    <div class="admin-modal rte-image-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Insert Image</p>
+
+        <!-- Upload zone -->
+        <div class="img-upload-zone" [class.drag-over]="imageDragOver()" (dragover)="onImageDragOver($event)"
+            (dragleave)="onImageDragLeave()" (drop)="onImageDrop($event)">
+            @if (imageUploading()) {
+            <div class="img-upload-placeholder">
+                <span class="contact-spinner"></span>&nbsp; Uploading…
+            </div>
+            } @else if (imagePreview()) {
+            <div class="img-upload-preview">
+                <img [src]="imagePreview()!" alt="Preview" />
+                <button type="button" class="img-upload-clear" (click)="clearImagePreview()">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+            </div>
+            } @else {
+            <div class="img-upload-placeholder">
+                <i class="bi bi-cloud-upload" style="font-size:1.5rem"></i>
+                <span>Drag &amp; drop, or <label class="img-upload-browse">browse<input type="file" accept="image/*"
+                            (change)="onImageFileInput($event)" hidden></label></span>
+                <span style="font-size:0.72rem;color:var(--text-muted)">JPEG, PNG, WebP, GIF · max 5 MB</span>
+            </div>
+            }
+        </div>
+
+        @if (imageUploadError()) {
+        <p style="font-size:0.78rem;color:#ef4444;margin-top:0.35rem;margin-bottom:0">
+            <i class="bi bi-exclamation-circle"></i> {{ imageUploadError() }}
+        </p>
+        }
+
+        <!-- URL paste fallback -->
+        <div class="admin-modal-reason" style="margin-top:0.75rem">
+            <input type="url" class="rte-modal-input" [value]="imageModal()!.url" (input)="setImageField('url', $event)"
+                placeholder="Or paste a URL directly">
+        </div>
+
+        <!-- Alt text -->
+        <div class="admin-modal-reason" style="margin-bottom:0">
+            <input type="text" class="rte-modal-input" [value]="imageModal()!.alt"
+                (input)="setImageField('alt', $event)" placeholder="Alt text (optional)">
+        </div>
+
+        <div class="admin-modal-actions">
+            <button type="button" class="btn-ghost" (click)="cancelImage()">Cancel</button>
+            <button type="button" class="btn-primary" (click)="confirmImage()"
+                [disabled]="!imageModal()!.url.trim() || imageUploading()">Insert</button>
+        </div>
+    </div>
+</div>
+}

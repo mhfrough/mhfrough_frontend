@@ -19,6 +19,7 @@ export class AdminLoginComponent implements OnDestroy {
     readonly warning = signal('');
     readonly lockInfo = signal<{ lockedUntil: Date; remainingSeconds: number } | null>(null);
     readonly showPassword = signal(false);
+    readonly rememberMe = signal(false);
 
     private lockTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -60,7 +61,7 @@ export class AdminLoginComponent implements OnDestroy {
         this.error.set('');
         this.warning.set('');
         this.lockInfo.set(null);
-        this.auth.login(form.value.email, form.value.password).subscribe({
+        this.auth.login(form.value.email, form.value.password, this.rememberMe()).subscribe({
             next: () => this.router.navigate(['/admin']),
             error: (err) => {
                 this.loading.set(false);

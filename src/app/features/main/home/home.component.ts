@@ -4,17 +4,20 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
+import { FooterSettingsService } from '../../../core/services/footer-settings.service';
+import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule, RouterLink, ImgFallbackDirective],
     templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit, OnDestroy {
     private projectsService = inject(ProjectsService);
     private platformId = inject(PLATFORM_ID);
     private readonly realtime = inject(RealtimeService);
+    readonly footerSettings = inject(FooterSettingsService);
     readonly projects = signal<any[]>([]);
     readonly loadingProjects = signal(true);
     readonly greeting = signal('');
@@ -23,22 +26,23 @@ export class HomeComponent implements OnInit, OnDestroy {
     private subs = new Subscription();
 
     ngOnInit() {
-        this.projectsService.getAll().subscribe({
+        this.footerSettings.load();
+        this.projectsService.getFeatured().subscribe({
             next: (data: any[]) => { this.projects.set(data); this.loadingProjects.set(false); },
             error: () => this.loadingProjects.set(false),
         });
         this.buildGreeting();
 
-        // project:created → append if published
+        // project:created → append if published AND featured
         this.subs.add(this.realtime.on<any>('project:created').subscribe(project => {
-            if (project.isPublished) {
+            if (project.isPublished && project.featured) {
                 this.projects.update(list => [...list, project]);
             }
         }));
 
-        // project:updated → update in-place (remove if no longer published)
+        // project:updated → update in-place; remove if no longer published or no longer featured
         this.subs.add(this.realtime.on<any>('project:updated').subscribe(project => {
-            if (project.isPublished) {
+            if (project.isPublished && project.featured) {
                 this.projects.update(list => {
                     const exists = list.some(p => p.id === project.id);
                     return exists ? list.map(p => p.id === project.id ? project : p) : [...list, project];

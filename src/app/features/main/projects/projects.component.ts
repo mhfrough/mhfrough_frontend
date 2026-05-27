@@ -1,13 +1,15 @@
 import { Component, OnInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
+import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 
 @Component({
     selector: 'app-projects',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, RouterLink, ImgFallbackDirective],
     templateUrl: './projects.component.html',
 })
 export class ProjectsComponent implements OnInit, OnDestroy {

@@ -4,9 +4,13 @@
 
     <!-- Header -->
     <div class="cw-header">
+        @if (footerSettings.data().avatarUrl) {
+        <img class="cw-avatar cw-avatar-img" [src]="footerSettings.data().avatarUrl" alt="avatar">
+        } @else {
         <div class="cw-avatar">MH</div>
+        }
         <div class="cw-header-info">
-            <p class="cw-name">Mohammad Hamza</p>
+            <p class="cw-name">{{ footerSettings.data().displayName || 'Mohammad Hamza' }}</p>
             <p class="cw-status">
                 <span class="cw-online-dot"></span>
                 {{ settings()?.status_message ?? 'Typically replies quickly' }}

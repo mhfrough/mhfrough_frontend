@@ -32,7 +32,8 @@
                 <div class="contact-field">
                     <label class="contact-label">Name *</label>
                     <input [(ngModel)]="formData.name" name="name" required minlength="2" maxlength="100"
-                        class="contact-input" [class.is-error]="(f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid"
+                        class="contact-input"
+                        [class.is-error]="(f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid"
                         placeholder="Your full name">
                     @if ((f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid) {
                     <span class="contact-error">Please enter your name.</span>
@@ -41,7 +42,8 @@
                 <div class="contact-field">
                     <label class="contact-label">Email *</label>
                     <input [(ngModel)]="formData.email" name="email" required email type="email" class="contact-input"
-                        [class.is-error]="(f.submitted || f.controls['email']?.touched) && f.controls['email']?.invalid" placeholder="you@example.com">
+                        [class.is-error]="(f.submitted || f.controls['email']?.touched) && f.controls['email']?.invalid"
+                        placeholder="you@example.com">
                     @if ((f.submitted || f.controls['email']?.touched) && f.controls['email']?.invalid) {
                     <span class="contact-error">Please enter a valid email.</span>
                     }
@@ -59,22 +61,13 @@
                     <label class="contact-label">Subject <span class="contact-optional">(optional)</span></label>
                     <select [(ngModel)]="formData.subject" name="subject" class="contact-input contact-select">
                         <option value="">— Select a subject —</option>
-                        <optgroup label="Services">
-                            <option value="Web Side Design">Web Side Design</option>
-                            <option value="Application Development">Application Development</option>
-                            <option value="Mobile Development">Mobile Development</option>
-                            <option value="Website Development">Website Development</option>
-                            <option value="Programming Troubleshooting">Programming Troubleshooting</option>
-                            <option value="Logo Design">Logo Design</option>
-                            <option value="Adobe XD Design">Adobe XD Design</option>
-                            <option value="Canva Design">Canva Design</option>
-                        </optgroup>
+                        @if (dynamicSubject()) {
+                        <option [value]="dynamicSubject()">{{ dynamicSubject() }}</option>
+                        }
                         <optgroup label="General">
                             <option value="Project Inquiry">Project Inquiry</option>
                             <option value="Freelance Collaboration">Freelance Collaboration</option>
                             <option value="Job Opportunity">Job Opportunity</option>
-                            <option value="UI/UX Design">UI/UX Design</option>
-                            <option value="Product Design">Product Design</option>
                             <option value="Consulting">Consulting</option>
                             <option value="Just Saying Hello">Just Saying Hello</option>
                         </optgroup>
@@ -86,21 +79,7 @@
             <div class="contact-field">
                 <label class="contact-label">Message *</label>
                 <div class="rte-wrap">
-                    <div class="rte-toolbar">
-                        <button type="button" class="rte-btn" title="Bold"
-                            (click)="format(msgArea, '<strong>', '</strong>')"><i class="bi bi-type-bold"></i></button>
-                        <button type="button" class="rte-btn" title="Italic"
-                            (click)="format(msgArea, '<em>', '</em>')"><i class="bi bi-type-italic"></i></button>
-                        <button type="button" class="rte-btn" title="Underline"
-                            (click)="format(msgArea, '<u>', '</u>')"><i class="bi bi-type-underline"></i></button>
-                        <span class="rte-divider"></span>
-                        <button type="button" class="rte-btn" title="Blockquote"
-                            (click)="format(msgArea, '<blockquote>', '</blockquote>')"><i
-                                class="bi bi-blockquote-left"></i></button>
-                        <button type="button" class="rte-btn" title="Bullet List"
-                            (click)="format(msgArea, '<ul>\n  <li>', '</li>\n</ul>')"><i
-                                class="bi bi-list-ul"></i></button>
-                    </div>
+                    <app-rte-toolbar [el]="msgArea" mode="minimal"></app-rte-toolbar>
                     <textarea #msgArea [(ngModel)]="formData.message" name="message" required minlength="10"
                         maxlength="2000" rows="6" class="contact-input contact-textarea rte-textarea"
                         [class.is-error]="(f.submitted || f.controls['message']?.touched) && f.controls['message']?.invalid"
@@ -135,21 +114,36 @@
 
         <!-- ─── Contact Meta ─────────────────────────────────────────── -->
         <div class="contact-meta">
+            @if (footerSettings.data().contactEmail && isSocialVisible('contactEmail')) {
             <div class="contact-meta-item">
                 <span class="contact-meta-label">Email</span>
-                <a href="mailto:mhfrough@yahoo.com" class="contact-meta-value">mhfrough&#64;yahoo.com</a>
+                <a [href]="'mailto:' + footerSettings.data().contactEmail" class="contact-meta-value">{{
+                    footerSettings.data().contactEmail }}</a>
             </div>
+            }
+            @if (footerSettings.data().linkedin && isSocialVisible('linkedin')) {
             <div class="contact-meta-divider"></div>
             <div class="contact-meta-item">
                 <span class="contact-meta-label">LinkedIn</span>
-                <a href="https://www.linkedin.com/in/mhfrough/" target="_blank" rel="noopener"
-                    class="contact-meta-value">in/mhfrough</a>
+                <a [href]="footerSettings.data().linkedin!.startsWith('http') ? footerSettings.data().linkedin! : 'https://linkedin.com/' + footerSettings.data().linkedin"
+                    target="_blank" rel="noopener" class="contact-meta-value">{{ footerSettings.data().linkedin }}</a>
             </div>
+            }
+            @if (footerSettings.data().github && isSocialVisible('github')) {
+            <div class="contact-meta-divider"></div>
+            <div class="contact-meta-item">
+                <span class="contact-meta-label">GitHub</span>
+                <a [href]="footerSettings.data().github!.startsWith('http') ? footerSettings.data().github! : 'https://github.com/' + footerSettings.data().github"
+                    target="_blank" rel="noopener" class="contact-meta-value">{{ footerSettings.data().github }}</a>
+            </div>
+            }
+            @if (footerSettings.data().location && isSocialVisible('location')) {
             <div class="contact-meta-divider"></div>
             <div class="contact-meta-item">
                 <span class="contact-meta-label">Based in</span>
-                <span class="contact-meta-value">Karachi, Pakistan</span>
+                <span class="contact-meta-value">{{ footerSettings.data().location }}</span>
             </div>
+            }
         </div>
 
     </div>

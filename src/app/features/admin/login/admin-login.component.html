@@ -47,6 +47,14 @@
                     </button>
                 </div>
             </div>
+            <div class="admin-remember-row">
+                <label class="admin-remember-label">
+                    <input type="checkbox" [checked]="rememberMe()"
+                        (change)="rememberMe.set($any($event.target).checked)" class="admin-remember-check">
+                    <span>Remember me</span>
+                </label>
+                <span class="admin-remember-hint">Stay signed in even after closing the browser</span>
+            </div>
             <div style="margin-top: 2rem;">
                 <button type="submit" class="btn-primary" [disabled]="loading() || !!lockInfo()"
                     style="width:100%; justify-content:center;">

@@ -15,36 +15,39 @@
                     placeholder="Project name">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Tech Stack <span class="admin-form-hint">(comma-separated, optional)</span></label>
-                <input ngModel [ngModel]="editing()?.techStack" name="techStack" class="admin-form-input"
-                    placeholder="Angular, NestJS, PostgreSQL">
+                <label class="admin-form-label">Slug <span class="admin-form-hint">(URL-friendly,
+                        optional)</span></label>
+                <div style="display:flex;gap:0.5rem">
+                    <input #slugInput ngModel [ngModel]="editing()?.slug" name="slug" class="admin-form-input"
+                        placeholder="my-project-name" style="flex:1">
+                    <button type="button" class="btn-ghost" style="white-space:nowrap;padding:0 0.75rem"
+                        (click)="generateSlug(f)">Auto</button>
+                </div>
             </div>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Tech Stack <span class="admin-form-hint">(comma-separated,
+                    optional)</span></label>
+            <input ngModel [ngModel]="editing()?.techStack" name="techStack" class="admin-form-input"
+                placeholder="Angular, NestJS, PostgreSQL">
         </div>
         <div class="admin-form-field">
             <label class="admin-form-label">Description *</label>
             <div class="rte-wrap">
-                <div class="rte-toolbar">
-                    <button type="button" class="rte-btn" title="Bold"
-                        (click)="format(descArea, '<strong>', '</strong>')"><i class="bi bi-type-bold"></i></button>
-                    <button type="button" class="rte-btn" title="Italic" (click)="format(descArea, '<em>', '</em>')"><i
-                            class="bi bi-type-italic"></i></button>
-                    <button type="button" class="rte-btn" title="Underline" (click)="format(descArea, '<u>', '</u>')"><i
-                            class="bi bi-type-underline"></i></button>
-                    <button type="button" class="rte-btn" title="Strikethrough"
-                        (click)="format(descArea, '<s>', '</s>')"><i class="bi bi-type-strikethrough"></i></button>
-                    <span class="rte-divider"></span>
-                    <button type="button" class="rte-btn" title="Blockquote"
-                        (click)="format(descArea, '<blockquote>', '</blockquote>')"><i
-                            class="bi bi-blockquote-left"></i></button>
-                    <button type="button" class="rte-btn" title="Bullet List"
-                        (click)="format(descArea, '<ul>\n  <li>', '</li>\n</ul>')"><i
-                            class="bi bi-list-ul"></i></button>
-                    <button type="button" class="rte-btn" title="Ordered List"
-                        (click)="format(descArea, '<ol>\n  <li>', '</li>\n</ol>')"><i
-                            class="bi bi-list-ol"></i></button>
-                </div>
+                <app-rte-toolbar [el]="descArea" mode="full"></app-rte-toolbar>
                 <textarea #descArea ngModel [ngModel]="editing()?.description" name="description" required rows="3"
-                    class="admin-form-textarea rte-textarea" [class.is-invalid]="(f.submitted || f.controls['description']?.touched) && f.controls['description']?.invalid"></textarea>
+                    class="admin-form-textarea rte-textarea"
+                    [class.is-invalid]="(f.submitted || f.controls['description']?.touched) && f.controls['description']?.invalid"></textarea>
+            </div>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Case Study / Content <span class="admin-form-hint">(optional, HTML
+                    supported)</span></label>
+            <div class="rte-wrap">
+                <app-rte-toolbar [el]="contentArea" mode="full"></app-rte-toolbar>
+                <textarea #contentArea ngModel [ngModel]="editing()?.content" name="content" rows="14"
+                    class="admin-form-textarea rte-textarea"
+                    style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
             </div>
         </div>
         <div class="admin-form-grid">
@@ -59,17 +62,41 @@
                     placeholder="https://github.com/…">
             </div>
         </div>
-        <div class="admin-form-grid">
-            <div class="admin-form-field">
-                <label class="admin-form-label">Thumbnail URL <span class="admin-form-hint">(optional)</span></label>
-                <input ngModel [ngModel]="editing()?.thumbnail" name="thumbnail" class="admin-form-input"
-                    placeholder="https://…">
+        <div class="admin-form-field" style="width:100%">
+            <label class="admin-form-label">Thumbnail <span class="admin-form-hint">(optional)</span></label>
+            <div class="img-upload-zone" [class.drag-over]="dragOver()" (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+                @if (uploading()) {
+                <div class="img-upload-placeholder"><span class="contact-spinner"></span>&nbsp; Uploading…</div>
+                } @else if (thumbPreview()) {
+                <div class="img-upload-preview">
+                    <img [src]="thumbPreview()!" alt="Thumbnail preview" />
+                    <button type="button" class="img-upload-clear" (click)="thumbPreview.set(null)">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                </div>
+                } @else {
+                <div class="img-upload-placeholder">
+                    <i class="bi bi-cloud-upload" style="font-size:1.5rem"></i>
+                    <span>Drag &amp; drop an image, or <label class="img-upload-browse">browse<input type="file"
+                                accept="image/*" (change)="onFileInput($event)" hidden></label></span>
+                    <span style="font-size:0.75rem;color:var(--text-muted)">JPEG, PNG, WebP, GIF · max 5 MB</span>
+                </div>
+                }
             </div>
-            <div class="admin-form-field">
-                <label class="admin-form-label">Sort Order <span class="admin-form-hint">(optional)</span></label>
-                <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number"
-                    class="admin-form-input">
-            </div>
+            <input ngModel [ngModel]="thumbPreview() ?? ''" name="thumbnail" class="admin-form-input"
+                placeholder="Or paste a URL directly" style="margin-top:0.5rem"
+                (ngModelChange)="thumbPreview.set($event || null)">
+            @if (uploadError()) {
+            <p style="font-size:0.78rem;color:#ef4444;margin-top:0.35rem;margin-bottom:0">
+                <i class="bi bi-exclamation-circle"></i> {{ uploadError() }}
+            </p>
+            }
+        </div>
+        <div class="admin-form-field" style="max-width:200px">
+            <label class="admin-form-label">Sort Order <span class="admin-form-hint">(optional)</span></label>
+            <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number"
+                class="admin-form-input">
         </div>
         <div class="admin-form-checks">
             <div class="admin-form-check">
@@ -114,10 +141,10 @@
         <tbody>
             @for (p of projects(); track p.id) {
             <tr>
-                <td style="font-weight:600">
-                    {{ p.title }}
-                    @if (p.adminNote) {
-                    <span class="admin-note-badge" [title]="p.adminNote"><i class="bi bi-sticky"></i></span>
+                <td>
+                    <span style="font-weight:600">{{ p.title }}</span>
+                    @if (!p.isPublished && p.adminNote) {
+                    <span class="admin-table-note">{{ p.adminNote }}</span>
                     }
                 </td>
                 <td style="color:var(--text-muted);font-size:0.78rem">{{ p.techStack?.slice(0,3).join(', ') }}</td>
@@ -134,6 +161,12 @@
                 <td style="text-align:right;white-space:nowrap">
                     <button class="btn-text" (click)="edit(p)" style="margin-right:1.25rem">
                         <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button class="btn-text" (click)="toggleFeatured(p)" style="margin-right:1.25rem"
+                        [title]="p.featured ? 'Remove from home page' : 'Show on home page'">
+                        <i class="bi" [class.bi-star-fill]="p.featured" [class.bi-star]="!p.featured"
+                            [style.color]="p.featured ? '#d97706' : 'var(--text-muted)'"></i>
+                        {{ p.featured ? 'Unfeature' : 'Feature' }}
                     </button>
                     @if (p.isPublished) {
                     <button class="btn-text" (click)="openStatusModal(p.id)" style="margin-right:1.25rem">
@@ -170,12 +203,9 @@
 <div class="admin-modal-overlay" (click)="cancelStatus()">
     <div class="admin-modal" (click)="$event.stopPropagation()">
         <p class="admin-modal-title">{{ statusModal()!.title }}</p>
-        <p class="admin-modal-body">This project will be hidden from the public site. You can optionally add a note.</p>
-        <div class="admin-form-field" style="margin-bottom:1.5rem">
-            <label class="admin-form-label">Reason / Note <span class="admin-form-hint">(optional)</span></label>
-            <textarea class="admin-form-textarea admin-modal-textarea" rows="3" [value]="statusModal()!.reason"
-                (input)="setStatusReason($event)"
-                placeholder="e.g. Temporarily taken offline for updates..."></textarea>
+        <div class="admin-modal-reason">
+            <textarea rows="3" [value]="statusModal()!.reason" (input)="setStatusReason($event)"
+                placeholder="Reason (optional)"></textarea>
         </div>
         <div class="admin-modal-actions">
             <button class="btn-ghost" (click)="cancelStatus()">Cancel</button>

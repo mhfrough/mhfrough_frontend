@@ -8,6 +8,12 @@ export class BlogsService {
     private readonly base = `${environment.apiUrl}/blogs`;
     private readonly commentsBase = `${environment.apiUrl}/blog-comments`;
 
+    uploadImage(file: File) {
+        const fd = new FormData();
+        fd.append('file', file);
+        return this.http.post<{ url: string }>(`${environment.apiUrl}/upload/image`, fd);
+    }
+
     getAll() { return this.http.get<any[]>(this.base); }
     getAllAdmin() { return this.http.get<any[]>(`${this.base}/all`); }
     getBySlug(slug: string) { return this.http.get<any>(`${this.base}/${slug}`); }

@@ -6,11 +6,13 @@ import { Subscription } from 'rxjs';
 import { BlogsService } from '../../../../core/services/blogs.service';
 import { UserInfoService } from '../../../../core/services/user-info.service';
 import { RealtimeService } from '../../../../core/services/realtime.service';
+import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/rte-toolbar.component';
+import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
 
 @Component({
     selector: 'app-blog-detail',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule],
+    imports: [CommonModule, RouterLink, FormsModule, RteToolbarComponent, ImgFallbackDirective],
     templateUrl: './blog-detail.component.html',
 })
 export class BlogDetailComponent implements OnInit, OnDestroy {

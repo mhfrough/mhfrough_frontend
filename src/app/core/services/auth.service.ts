@@ -20,9 +20,20 @@ export class AuthService {
 
     isLoggedIn(): boolean { return this._loggedIn(); }
 
-    login(email: string, password: string) {
-        return this.http.post(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
+    /** Returns true when the user signed in with "Remember Me" */
+    isRememberMe(): boolean {
+        if (!isPlatformBrowser(this.platformId)) return false;
+        return localStorage.getItem('admin_remember_me') === '1';
+    }
+
+    login(email: string, password: string, rememberMe = false) {
+        return this.http.post(`${environment.apiUrl}/auth/login`, { email, password, rememberMe }).pipe(
             tap(() => {
+                if (rememberMe) {
+                    localStorage.setItem('admin_remember_me', '1');
+                } else {
+                    localStorage.removeItem('admin_remember_me');
+                }
                 sessionStorage.setItem('admin_session', '1');
                 this._loggedIn.set(true);
             }),
@@ -33,6 +44,7 @@ export class AuthService {
         return this.http.post(`${environment.apiUrl}/auth/logout`, {}).pipe(
             tap(() => {
                 sessionStorage.removeItem('admin_session');
+                localStorage.removeItem('admin_remember_me');
                 this._loggedIn.set(false);
                 this.router.navigate(['/admin/login']);
             }),
@@ -41,6 +53,7 @@ export class AuthService {
 
     forceLogout() {
         sessionStorage.removeItem('admin_session');
+        localStorage.removeItem('admin_remember_me');
         this._loggedIn.set(false);
         this.router.navigate(['/admin/login']);
     }

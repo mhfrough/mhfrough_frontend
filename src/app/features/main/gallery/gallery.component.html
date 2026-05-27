@@ -1,0 +1,158 @@
+<section class="gallery-page">
+
+    <!-- ─── Header ───────────────────────────────────────────────────────────── -->
+    <header class="gallery-header">
+        <p class="gallery-eyebrow">Visual Work</p>
+        <h1 class="gallery-heading">Gallery</h1>
+        <p class="gallery-subtext">A curated collection of photos, graphics, and visual experiments.</p>
+    </header>
+
+    <!-- ─── Category Filter ───────────────────────────────────────────────────── -->
+    @if (!loading() && categories().length > 0) {
+    <div class="gallery-filters">
+        <button class="gallery-filter-tag" [class.is-active]="selectedCategory() === 'all'"
+            (click)="selectCategory('all')">All</button>
+        @for (cat of categories(); track cat) {
+        <button class="gallery-filter-tag" [class.is-active]="selectedCategory() === cat"
+            (click)="selectCategory(cat)">{{ cat }}</button>
+        }
+    </div>
+    }
+
+    <!-- ─── States ────────────────────────────────────────────────────────────── -->
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+    </div>
+    } @else if (filteredItems().length === 0) {
+    <p class="empty-state">No items in this category yet.</p>
+    } @else {
+
+    <!-- ─── Masonry Grid ─────────────────────────────────────────────────────── -->
+    <div class="gallery-masonry">
+        @for (item of filteredItems(); track item.id; let i = $index) {
+        <div class="gallery-tile" (click)="openLightbox(i)" role="button" tabindex="0" (keydown.enter)="openLightbox(i)"
+            [attr.aria-label]="'View ' + (item.title || item.category || 'gallery item')">
+
+            <!-- Image -->
+            @if (item.mediaType === 'image' || item.mediaType === 'gif') {
+            <img [src]="item.mediaUrl" [alt]="item.altText || item.title || ''" loading="lazy" />
+            }
+
+            <!-- Video thumbnail -->
+            @if (item.mediaType === 'video') {
+            <video [src]="item.mediaUrl" preload="metadata" muted playsinline></video>
+            <span class="gallery-tile-play"><i class="bi bi-play-fill"></i></span>
+            }
+
+            <!-- Hover overlay -->
+            <div class="gallery-tile-overlay">
+                <span class="gallery-tile-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        <line x1="11" y1="8" x2="11" y2="14" />
+                        <line x1="8" y1="11" x2="14" y2="11" />
+                    </svg>
+                </span>
+                @if (item.category) {
+                <span class="gallery-tile-cat">{{ item.category }}</span>
+                }
+            </div>
+        </div>
+        }
+    </div>
+    }
+
+</section>
+
+<!-- ─── Lightbox ──────────────────────────────────────────────────────────────── -->
+@if (lightboxItem()) {
+<div class="gallery-lightbox" (click)="closeLightbox()" role="dialog" aria-modal="true" aria-label="Media viewer">
+
+    <!-- Close -->
+    <button class="lb-btn lb-close" (click)="closeLightbox()" aria-label="Close lightbox">
+        <i class="bi bi-x-lg"></i>
+    </button>
+
+    <!-- Counter -->
+    <span class="lb-counter">{{ (lightboxIndex() ?? 0) + 1 }} / {{ filteredItems().length }}</span>
+
+    <!-- Prev -->
+    @if (filteredItems().length > 1) {
+    <button class="lb-btn lb-prev" (click)="$event.stopPropagation(); prevItem()" aria-label="Previous">
+        <i class="bi bi-chevron-left"></i>
+    </button>
+    }
+
+    <!-- Media area -->
+    <div class="lb-stage" (click)="$event.stopPropagation()">
+
+        <!-- Zoom controls (image only) -->
+        @if (lightboxItem()!.mediaType !== 'video') {
+        <div class="lb-zoom-bar">
+            <button class="lb-zoom-btn" (click)="zoomOut()" [disabled]="zoomLevel() <= 0.5" aria-label="Zoom out">
+                <i class="bi bi-dash"></i>
+            </button>
+            <span class="lb-zoom-val" (click)="resetZoom()" title="Reset zoom">{{ (zoomLevel() * 100).toFixed(0)
+                }}%</span>
+            <button class="lb-zoom-btn" (click)="zoomIn()" [disabled]="zoomLevel() >= 3" aria-label="Zoom in">
+                <i class="bi bi-plus"></i>
+            </button>
+        </div>
+        }
+
+        <!-- Media -->
+        <div class="lb-media-wrap" [class.lb-scrollable]="zoomLevel() > 1">
+            @if (lightboxItem()!.mediaType === 'image' || lightboxItem()!.mediaType === 'gif') {
+            <img class="lb-media" [src]="lightboxItem()!.mediaUrl"
+                [alt]="lightboxItem()!.altText || lightboxItem()!.title || ''"
+                [style.transform]="'scale(' + zoomLevel() + ')'"
+                [style.cursor]="zoomLevel() > 1 ? 'move' : 'default'" />
+            } @else {
+            <video class="lb-media" [src]="lightboxItem()!.mediaUrl" controls autoplay playsinline></video>
+            }
+        </div>
+
+        <!-- Info panel -->
+        <div class="lb-info">
+            @if (lightboxItem()!.caption) {
+            <p class="lb-caption">{{ lightboxItem()!.caption }}</p>
+            }
+            <div class="lb-meta">
+                @if (lightboxItem()!.title) {
+                <span class="lb-meta-item"><i class="bi bi-type"></i> {{ lightboxItem()!.title }}</span>
+                }
+                @if (lightboxItem()!.category) {
+                <span class="lb-meta-item"><i class="bi bi-tag"></i> {{ lightboxItem()!.category }}</span>
+                }
+                <span class="lb-meta-item lb-meta-type">
+                    <i class="bi" [class.bi-image]="lightboxItem()!.mediaType === 'image'"
+                        [class.bi-filetype-gif]="lightboxItem()!.mediaType === 'gif'"
+                        [class.bi-camera-video]="lightboxItem()!.mediaType === 'video'"></i>
+                    {{ lightboxItem()!.mediaType | uppercase }}
+                </span>
+                @if (lightboxItem()!.fileSize) {
+                <span class="lb-meta-item"><i class="bi bi-hdd"></i> {{ formatBytes(lightboxItem()!.fileSize!) }}</span>
+                }
+                @if (lightboxItem()!.mimeType) {
+                <span class="lb-meta-item"><i class="bi bi-file-earmark"></i> {{ lightboxItem()!.mimeType }}</span>
+                }
+                <span class="lb-meta-item">
+                    <i class="bi bi-calendar3"></i> {{ lightboxItem()!.createdAt | date:'mediumDate' }}
+                </span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Next -->
+    @if (filteredItems().length > 1) {
+    <button class="lb-btn lb-next" (click)="$event.stopPropagation(); nextItem()" aria-label="Next">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+    }
+
+</div>
+}

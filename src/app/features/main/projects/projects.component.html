@@ -43,6 +43,10 @@
                     </div>
                     }
                     <div class="project-links">
+                        @if (project.content || project.slug) {
+                        <a [routerLink]="['/projects', project.slug || project.id]" class="link-arrow">Case Study <i
+                                class="bi bi-arrow-right"></i></a>
+                        }
                         @if (project.liveUrl) {
                         <a [href]="project.liveUrl" target="_blank" rel="noopener" class="link-arrow">Live <i
                                 class="bi bi-arrow-up-right"></i></a>

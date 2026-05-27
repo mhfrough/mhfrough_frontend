@@ -84,11 +84,9 @@
 <div class="admin-modal-overlay" (click)="cancelStatus()">
     <div class="admin-modal" (click)="$event.stopPropagation()">
         <p class="admin-modal-title">{{ statusModal()!.title }}</p>
-        <p class="admin-modal-body">This comment will be hidden from the public site. You can optionally add a note.</p>
-        <div class="admin-form-field" style="margin-bottom:1.5rem">
-            <label class="admin-form-label">Reason / Note <span class="admin-form-hint">(optional)</span></label>
-            <textarea class="admin-form-textarea admin-modal-textarea" rows="3" [value]="statusModal()!.reason"
-                (input)="setStatusReason($event)" placeholder="e.g. Violates community guidelines..."></textarea>
+        <div class="admin-modal-reason">
+            <textarea rows="3" [value]="statusModal()!.reason" (input)="setStatusReason($event)"
+                placeholder="Reason (optional)"></textarea>
         </div>
         <div class="admin-modal-actions">
             <button class="btn-ghost" (click)="cancelStatus()">Cancel</button>

@@ -5,17 +5,20 @@ import {
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChatService } from '../../core/services/chat.service';
+import { FooterSettingsService } from '../../core/services/footer-settings.service';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
     selector: 'app-chat-widget',
     standalone: true,
-    imports: [FormsModule, CommonModule],
+    imports: [FormsModule, CommonModule, ImgFallbackDirective],
     templateUrl: './chat-widget.component.html',
     styleUrl: './chat-widget.component.scss',
 })
 export class ChatWidgetComponent implements OnInit, OnDestroy {
     private readonly chatService = inject(ChatService);
     private readonly platformId = inject(PLATFORM_ID);
+    readonly footerSettings = inject(FooterSettingsService);
 
     @ViewChild('messagesEl') messagesEl!: ElementRef<HTMLDivElement>;
 
@@ -76,6 +79,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         if (isPlatformBrowser(this.platformId)) {
+            this.footerSettings.load();
             this.chatService.loadSettings();
             const { sessionId, visitorName } = this.chatService.getStoredSession();
             if (sessionId && visitorName) {

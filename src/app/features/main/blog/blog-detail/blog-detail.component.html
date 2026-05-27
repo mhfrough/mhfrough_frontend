@@ -26,9 +26,9 @@
         }
 
         @if (blog().tags?.length) {
-        <div class="blog-tags" style="margin-bottom:1.25rem">
+        <div class="project-detail-tags">
             @for (tag of blog().tags; track tag) {
-            <span class="blog-tag">{{ tag }}</span>
+            <span class="project-detail-tag">{{ tag }}</span>
             }
         </div>
         }
@@ -103,7 +103,8 @@
                             maxlength="100" class="contact-input"
                             [class.is-error]="(cf.submitted || cf.controls['authorName']?.touched) && cf.controls['authorName']?.invalid"
                             placeholder="Your name">
-                        @if ((cf.submitted || cf.controls['authorName']?.touched) && cf.controls['authorName']?.invalid) {
+                        @if ((cf.submitted || cf.controls['authorName']?.touched) && cf.controls['authorName']?.invalid)
+                        {
                         <span class="contact-error">Name is required.</span>
                         }
                     </div>
@@ -113,7 +114,8 @@
                             maxlength="254" class="contact-input"
                             [class.is-error]="(cf.submitted || cf.controls['authorEmail']?.touched) && cf.controls['authorEmail']?.invalid"
                             placeholder="you@example.com">
-                        @if ((cf.submitted || cf.controls['authorEmail']?.touched) && cf.controls['authorEmail']?.invalid) {
+                        @if ((cf.submitted || cf.controls['authorEmail']?.touched) &&
+                        cf.controls['authorEmail']?.invalid) {
                         <span class="contact-error">Valid email is required.</span>
                         }
                     </div>
@@ -122,24 +124,7 @@
                 <div class="contact-field">
                     <label class="contact-label">Comment *</label>
                     <div class="rte-wrap">
-                        <div class="rte-toolbar">
-                            <button type="button" class="rte-btn" title="Bold"
-                                (click)="format(commentArea, '<strong>', '</strong>')"><i
-                                    class="bi bi-type-bold"></i></button>
-                            <button type="button" class="rte-btn" title="Italic"
-                                (click)="format(commentArea, '<em>', '</em>')"><i
-                                    class="bi bi-type-italic"></i></button>
-                            <button type="button" class="rte-btn" title="Underline"
-                                (click)="format(commentArea, '<u>', '</u>')"><i
-                                    class="bi bi-type-underline"></i></button>
-                            <span class="rte-divider"></span>
-                            <button type="button" class="rte-btn" title="Blockquote"
-                                (click)="format(commentArea, '<blockquote>', '</blockquote>')"><i
-                                    class="bi bi-blockquote-left"></i></button>
-                            <button type="button" class="rte-btn" title="Bullet List"
-                                (click)="format(commentArea, '<ul>\n  <li>', '</li>\n</ul>')"><i
-                                    class="bi bi-list-ul"></i></button>
-                        </div>
+                        <app-rte-toolbar [el]="commentArea" mode="minimal"></app-rte-toolbar>
                         <textarea #commentArea [(ngModel)]="commentData.content" name="content" required minlength="2"
                             maxlength="2000" rows="4" class="contact-input contact-textarea rte-textarea"
                             [class.is-error]="(cf.submitted || cf.controls['content']?.touched) && cf.controls['content']?.invalid"

@@ -13,11 +13,12 @@ import {
     InvoicesService,
     CreateInvoicePayload,
 } from '../../../../core/services/invoices.service';
+import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/rte-toolbar.component';
 
 @Component({
     selector: 'app-admin-invoice-form',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterLink],
+    imports: [CommonModule, ReactiveFormsModule, RouterLink, RteToolbarComponent],
     templateUrl: './admin-invoice-form.component.html',
 })
 export class AdminInvoiceFormComponent implements OnInit {

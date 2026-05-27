@@ -6,6 +6,7 @@
         <ul class="nav-links">
             <li><a routerLink="/" fragment="about">About</a></li>
             <li><a routerLink="/projects" routerLinkActive="active">Projects</a></li>
+            <li><a routerLink="/gallery" routerLinkActive="active">Gallery</a></li>
             <li><a routerLink="/" fragment="services">Services</a></li>
             <li><a routerLink="/blog" routerLinkActive="active">Writing</a></li>
             <li><a routerLink="/feedback" routerLinkActive="active">Reviews</a></li>
@@ -24,6 +25,7 @@
     <div class="mobile-menu">
         <a routerLink="/" fragment="about" (click)="navOpen.set(false)">About</a>
         <a routerLink="/projects" (click)="navOpen.set(false)">Projects</a>
+        <a routerLink="/gallery" (click)="navOpen.set(false)">Gallery</a>
         <a routerLink="/" fragment="services" (click)="navOpen.set(false)">Services</a>
         <a routerLink="/blog" (click)="navOpen.set(false)">Writing</a>
         <a routerLink="/feedback" (click)="navOpen.set(false)">Reviews</a>
@@ -40,14 +42,58 @@
 <footer class="site-footer">
     <div class="container">
         <div class="footer-bottom">
-            <span>© {{ year }} mhfrough.dev &nbsp;·&nbsp; Made with ♥ in Karachi</span>
+            <span>
+                © {{ year }} {{ footerSettings.data().copyrightOwner }}
+                @if (footerSettings.data().showFooterTagline && footerSettings.data().footerTagline) {
+                &nbsp;·&nbsp; {{ footerSettings.data().footerTagline }}
+                }
+            </span>
             <button class="back-to-top" (click)="scrollTop()">Back to top ↑</button>
             <div class="footer-social">
-                <a href="https://github.com/mhfrough" target="_blank" rel="noopener" aria-label="GitHub"><i
+                @if (footerSettings.data().github && isSocialVisible('github')) {
+                <a [href]="footerSettings.data().github" target="_blank" rel="noopener" aria-label="GitHub"><i
                         class="bi bi-github"></i></a>
-                <a href="https://www.linkedin.com/in/mhfrough/" target="_blank" rel="noopener" aria-label="LinkedIn"><i
+                }
+                @if (footerSettings.data().linkedin && isSocialVisible('linkedin')) {
+                <a [href]="footerSettings.data().linkedin" target="_blank" rel="noopener" aria-label="LinkedIn"><i
                         class="bi bi-linkedin"></i></a>
-                <a href="mailto:mhfrough&#64;yahoo.com" aria-label="Email"><i class="bi bi-envelope"></i></a>
+                }
+                @if (footerSettings.data().twitter && isSocialVisible('twitter')) {
+                <a [href]="footerSettings.data().twitter" target="_blank" rel="noopener" aria-label="X / Twitter"><i
+                        class="bi bi-twitter-x"></i></a>
+                }
+                @if (footerSettings.data().instagram && isSocialVisible('instagram')) {
+                <a [href]="footerSettings.data().instagram" target="_blank" rel="noopener" aria-label="Instagram"><i
+                        class="bi bi-instagram"></i></a>
+                }
+                @if (footerSettings.data().youtube && isSocialVisible('youtube')) {
+                <a [href]="footerSettings.data().youtube" target="_blank" rel="noopener" aria-label="YouTube"><i
+                        class="bi bi-youtube"></i></a>
+                }
+                @if (footerSettings.data().medium && isSocialVisible('medium')) {
+                <a [href]="footerSettings.data().medium" target="_blank" rel="noopener" aria-label="Medium"><i
+                        class="bi bi-medium"></i></a>
+                }
+                @if (footerSettings.data().dribbble && isSocialVisible('dribbble')) {
+                <a [href]="footerSettings.data().dribbble" target="_blank" rel="noopener" aria-label="Dribbble"><i
+                        class="bi bi-dribbble"></i></a>
+                }
+                @if (footerSettings.data().stackoverflow && isSocialVisible('stackoverflow')) {
+                <a [href]="footerSettings.data().stackoverflow" target="_blank" rel="noopener"
+                    aria-label="Stack Overflow"><i class="bi bi-stack-overflow"></i></a>
+                }
+                @if (footerSettings.data().discord && isSocialVisible('discord')) {
+                <a [href]="footerSettings.data().discord" target="_blank" rel="noopener" aria-label="Discord"><i
+                        class="bi bi-discord"></i></a>
+                }
+                @if (footerSettings.data().website && isSocialVisible('website')) {
+                <a [href]="footerSettings.data().website" target="_blank" rel="noopener" aria-label="Website"><i
+                        class="bi bi-globe2"></i></a>
+                }
+                @if (footerSettings.data().contactEmail && isSocialVisible('contactEmail')) {
+                <a [href]="'mailto:' + footerSettings.data().contactEmail" aria-label="Email"><i
+                        class="bi bi-envelope"></i></a>
+                }
             </div>
         </div>
     </div>

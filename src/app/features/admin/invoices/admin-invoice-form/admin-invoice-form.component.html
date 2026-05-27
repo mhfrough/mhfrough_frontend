@@ -143,24 +143,7 @@
         </p>
         <div class="admin-form-field">
             <div class="rte-wrap">
-                <div class="rte-toolbar">
-                    <button type="button" class="rte-btn" title="Bold"
-                        (click)="format(notesArea, '<strong>', '</strong>')"><i class="bi bi-type-bold"></i></button>
-                    <button type="button" class="rte-btn" title="Italic" (click)="format(notesArea, '<em>', '</em>')"><i
-                            class="bi bi-type-italic"></i></button>
-                    <button type="button" class="rte-btn" title="Underline"
-                        (click)="format(notesArea, '<u>', '</u>')"><i class="bi bi-type-underline"></i></button>
-                    <span class="rte-divider"></span>
-                    <button type="button" class="rte-btn" title="Bullet List"
-                        (click)="format(notesArea, '<ul>\n  <li>', '</li>\n</ul>')"><i
-                            class="bi bi-list-ul"></i></button>
-                    <button type="button" class="rte-btn" title="Ordered List"
-                        (click)="format(notesArea, '<ol>\n  <li>', '</li>\n</ol>')"><i
-                            class="bi bi-list-ol"></i></button>
-                    <span class="rte-divider"></span>
-                    <button type="button" class="rte-btn" title="Link" (click)="insertLink(notesArea)"><i
-                            class="bi bi-link-45deg"></i></button>
-                </div>
+                <app-rte-toolbar [el]="notesArea" mode="minimal"></app-rte-toolbar>
                 <textarea #notesArea class="admin-form-textarea rte-textarea" formControlName="notes" rows="5"
                     placeholder="Payment terms, thank you note, additional details…"
                     style="font-family:var(--font-mono);font-size:0.82rem"></textarea>

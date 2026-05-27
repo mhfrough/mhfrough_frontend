@@ -2,11 +2,13 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { BlogsService } from '../../../core/services/blogs.service';
+import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
+import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 
 @Component({
     selector: 'app-admin-blogs',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RteToolbarComponent, ImgFallbackDirective],
     templateUrl: './admin-blogs.component.html',
 })
 export class AdminBlogsComponent implements OnInit {
@@ -18,6 +20,10 @@ export class AdminBlogsComponent implements OnInit {
     readonly showForm = signal(false);
     readonly deleteTargetId = signal<string | null>(null);
     readonly statusModal = signal<{ id: string; title: string; reason: string } | null>(null);
+    readonly coverPreview = signal<string | null>(null);
+    readonly uploading = signal(false);
+    readonly dragOver = signal(false);
+    readonly uploadError = signal<string | null>(null);
 
     ngOnInit() { this.load(); }
 
@@ -25,11 +31,16 @@ export class AdminBlogsComponent implements OnInit {
         this.service.getAllAdmin().subscribe({ next: (d: any[]) => { this.blogs.set(d); this.loading.set(false); } });
     }
 
-    openNew() { this.editing.set(null); this.showForm.set(true); }
+    openNew() { this.editing.set(null); this.coverPreview.set(null); this.uploadError.set(null); this.showForm.set(true); }
 
-    edit(b: any) { this.editing.set({ ...b, tags: b.tags?.join(', ') }); this.showForm.set(true); }
+    edit(b: any) {
+        this.editing.set({ ...b, tags: b.tags?.join(', ') });
+        this.coverPreview.set(b.coverImage || null);
+        this.uploadError.set(null);
+        this.showForm.set(true);
+    }
 
-    cancel() { this.showForm.set(false); this.editing.set(null); }
+    cancel() { this.showForm.set(false); this.editing.set(null); this.coverPreview.set(null); this.uploadError.set(null); }
 
     save(form: NgForm) {
         form.form.markAllAsTouched();
@@ -38,6 +49,45 @@ export class AdminBlogsComponent implements OnInit {
         const payload = { ...form.value, tags: form.value.tags?.split(',').map((s: string) => s.trim()).filter(Boolean) };
         const obs = this.editing() ? this.service.update(this.editing().id, payload) : this.service.create(payload);
         obs.subscribe({ next: () => { this.load(); this.cancel(); this.saving.set(false); } });
+    }
+
+    onDragOver(e: DragEvent) { e.preventDefault(); this.dragOver.set(true); }
+    onDragLeave() { this.dragOver.set(false); }
+
+    onDrop(e: DragEvent) {
+        e.preventDefault();
+        this.dragOver.set(false);
+        const file = e.dataTransfer?.files?.[0];
+        if (file) this.uploadFile(file);
+    }
+
+    onFileInput(e: Event) {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) this.uploadFile(file);
+    }
+
+    private uploadFile(file: File) {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+        if (!allowed.includes(file.type)) {
+            this.uploadError.set('Invalid type — use JPEG, PNG, WebP, GIF or SVG.');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            this.uploadError.set('File exceeds 5 MB limit.');
+            return;
+        }
+        this.uploadError.set(null);
+        this.uploading.set(true);
+        this.service.uploadImage(file).subscribe({
+            next: ({ url }) => {
+                this.coverPreview.set(url);
+                this.uploading.set(false);
+            },
+            error: () => {
+                this.uploadError.set('Upload failed. Please try again.');
+                this.uploading.set(false);
+            },
+        });
     }
 
     confirmDelete(id: string) { this.deleteTargetId.set(id); }
@@ -83,5 +133,24 @@ export class AdminBlogsComponent implements OnInit {
         el.setRangeText(html, start, end, 'end');
         el.focus();
         el.dispatchEvent(new Event('input'));
+    }
+
+    generateSlug(form: NgForm): void {
+        const title = form.value.title ?? '';
+        const slug = title
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .trim()
+            .replace(/[\s_]+/g, '-')
+            .replace(/-+/g, '-');
+        form.setValue({ ...form.value, slug });
+    }
+
+    calcReadTime(form: NgForm): void {
+        const content: string = form.value.content ?? '';
+        const stripped = content.replace(/<[^>]*>/g, ' ');
+        const words = stripped.trim().split(/\s+/).filter(Boolean).length;
+        const mins = Math.max(1, Math.ceil(words / 200));
+        form.setValue({ ...form.value, readTimeMinutes: mins });
     }
 }

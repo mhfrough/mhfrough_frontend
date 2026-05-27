@@ -1,9 +1,9 @@
 import { Injectable, signal, inject, PLATFORM_ID, NgZone } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from './auth.service';
+import { AdminSettingsService } from './admin-settings.service';
 
-const INACTIVITY_MS = 10 * 60 * 1000; // 10 minutes
-const WARNING_MS = 9 * 60 * 1000;     // show warning at 9 minutes (1 min before logout)
+const DEFAULT_TIMEOUT_MINUTES = 10;
 const COUNTDOWN_SECS = 60;
 
 @Injectable({ providedIn: 'root' })
@@ -12,6 +12,7 @@ export class InactivityService {
     readonly countdown = signal(COUNTDOWN_SECS);
 
     private readonly auth = inject(AuthService);
+    private readonly settingsService = inject(AdminSettingsService);
     private readonly platformId = inject(PLATFORM_ID);
     private readonly zone = inject(NgZone);
 
@@ -27,6 +28,9 @@ export class InactivityService {
 
     start() {
         if (!isPlatformBrowser(this.platformId)) return;
+        const settings = this.settingsService.settings();
+        // Skip inactivity logout if disabled or user chose Remember Me
+        if (!settings.enableInactivityLogout || this.auth.isRememberMe()) return;
         this.events.forEach(e => window.addEventListener(e, this.boundReset, { passive: true }));
         this.scheduleWarning();
     }
@@ -44,6 +48,16 @@ export class InactivityService {
         this.scheduleWarning();
     }
 
+    private get timeoutMinutes(): number {
+        const s = this.settingsService.settings();
+        return s.inactivityTimeoutMinutes > 0 ? s.inactivityTimeoutMinutes : DEFAULT_TIMEOUT_MINUTES;
+    }
+
+    private get warningMs(): number {
+        const total = this.timeoutMinutes * 60 * 1000;
+        return Math.max(total - COUNTDOWN_SECS * 1000, 0);
+    }
+
     private reset() {
         if (this.showWarning()) return;
         this.clearTimers();
@@ -57,7 +71,7 @@ export class InactivityService {
                 this.countdown.set(COUNTDOWN_SECS);
                 this.startCountdown();
             });
-        }, WARNING_MS);
+        }, this.warningMs);
     }
 
     private startCountdown() {

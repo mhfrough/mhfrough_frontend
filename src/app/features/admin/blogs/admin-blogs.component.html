@@ -16,63 +16,25 @@
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label">Slug *</label>
-                <input ngModel [ngModel]="editing()?.slug" name="slug" required class="admin-form-input"
-                    [class.is-invalid]="(f.submitted || f.controls['slug']?.touched) && f.controls['slug']?.invalid"
-                    placeholder="my-post-slug">
+                <div style="display:flex;gap:0.5rem">
+                    <input ngModel [ngModel]="editing()?.slug" name="slug" required class="admin-form-input"
+                        [class.is-invalid]="(f.submitted || f.controls['slug']?.touched) && f.controls['slug']?.invalid"
+                        placeholder="my-post-slug" style="flex:1">
+                    <button type="button" class="btn-ghost" style="white-space:nowrap;padding:0 0.75rem"
+                        (click)="generateSlug(f)">Auto</button>
+                </div>
             </div>
         </div>
         <div class="admin-form-field">
             <label class="admin-form-label">Excerpt *</label>
             <textarea ngModel [ngModel]="editing()?.excerpt" name="excerpt" required rows="2"
-                class="admin-form-textarea" [class.is-invalid]="(f.submitted || f.controls['excerpt']?.touched) && f.controls['excerpt']?.invalid"></textarea>
+                class="admin-form-textarea"
+                [class.is-invalid]="(f.submitted || f.controls['excerpt']?.touched) && f.controls['excerpt']?.invalid"></textarea>
         </div>
         <div class="admin-form-field">
             <label class="admin-form-label">Content *</label>
             <div class="rte-wrap">
-                <div class="rte-toolbar">
-                    <button type="button" class="rte-btn" title="Bold"
-                        (click)="format(contentArea, '<strong>', '</strong>')"><i class="bi bi-type-bold"></i></button>
-                    <button type="button" class="rte-btn" title="Italic"
-                        (click)="format(contentArea, '<em>', '</em>')"><i class="bi bi-type-italic"></i></button>
-                    <button type="button" class="rte-btn" title="Underline"
-                        (click)="format(contentArea, '<u>', '</u>')"><i class="bi bi-type-underline"></i></button>
-                    <button type="button" class="rte-btn" title="Strikethrough"
-                        (click)="format(contentArea, '<s>', '</s>')"><i class="bi bi-type-strikethrough"></i></button>
-                    <span class="rte-divider"></span>
-                    <button type="button" class="rte-btn" title="Heading 1"
-                        (click)="format(contentArea, '<h1>', '</h1>')">H1</button>
-                    <button type="button" class="rte-btn" title="Heading 2"
-                        (click)="format(contentArea, '<h2>', '</h2>')">H2</button>
-                    <button type="button" class="rte-btn" title="Heading 3"
-                        (click)="format(contentArea, '<h3>', '</h3>')">H3</button>
-                    <span class="rte-divider"></span>
-                    <button type="button" class="rte-btn" title="Paragraph"
-                        (click)="format(contentArea, '<p>', '</p>')"><i class="bi bi-paragraph"></i></button>
-                    <button type="button" class="rte-btn" title="Blockquote"
-                        (click)="format(contentArea, '<blockquote>', '</blockquote>')"><i
-                            class="bi bi-blockquote-left"></i></button>
-                    <span class="rte-divider"></span>
-                    <button type="button" class="rte-btn" title="Inline Code"
-                        (click)="format(contentArea, '<code>', '</code>')"><i class="bi bi-code"></i></button>
-                    <button type="button" class="rte-btn" title="Code Block"
-                        (click)="format(contentArea, '<pre><code>', '</code></pre>')"><i
-                            class="bi bi-code-slash"></i></button>
-                    <span class="rte-divider"></span>
-                    <button type="button" class="rte-btn" title="Link" (click)="insertLink(contentArea)"><i
-                            class="bi bi-link-45deg"></i></button>
-                    <button type="button" class="rte-btn" title="Unordered List"
-                        (click)="format(contentArea, '<ul>\n  <li>', '</li>\n</ul>')"><i
-                            class="bi bi-list-ul"></i></button>
-                    <button type="button" class="rte-btn" title="Ordered List"
-                        (click)="format(contentArea, '<ol>\n  <li>', '</li>\n</ol>')"><i
-                            class="bi bi-list-ol"></i></button>
-                    <span class="rte-divider"></span>
-                    <button type="button" class="rte-btn" title="Image"
-                        (click)="format(contentArea, '<img src=&quot;&quot; alt=&quot;', '&quot;>')"><i
-                            class="bi bi-image"></i></button>
-                    <button type="button" class="rte-btn" title="Horizontal Rule"
-                        (click)="format(contentArea, '\n<hr>\n', '')">—</button>
-                </div>
+                <app-rte-toolbar [el]="contentArea" mode="full"></app-rte-toolbar>
                 <textarea #contentArea ngModel [ngModel]="editing()?.content" name="content" required rows="12"
                     class="admin-form-textarea rte-textarea"
                     [class.is-invalid]="(f.submitted || f.controls['content']?.touched) && f.controls['content']?.invalid"
@@ -81,15 +43,51 @@
         </div>
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label">Tags <span class="admin-form-hint">(comma-separated, optional)</span></label>
+                <label class="admin-form-label">Tags <span class="admin-form-hint">(comma-separated,
+                        optional)</span></label>
                 <input ngModel [ngModel]="editing()?.tags" name="tags" class="admin-form-input"
                     placeholder="Angular, Web Dev">
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label">Read Time (mins) <span class="admin-form-hint">(optional)</span></label>
-                <input ngModel [ngModel]="editing()?.readTimeMinutes ?? 5" name="readTimeMinutes" type="number" min="1"
-                    class="admin-form-input">
+                <div style="display:flex;gap:0.5rem">
+                    <input ngModel [ngModel]="editing()?.readTimeMinutes ?? 5" name="readTimeMinutes" type="number"
+                        min="1" class="admin-form-input" style="flex:1">
+                    <button type="button" class="btn-ghost" style="white-space:nowrap;padding:0 0.75rem"
+                        (click)="calcReadTime(f)">Auto</button>
+                </div>
             </div>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Cover Image <span class="admin-form-hint">(optional)</span></label>
+            <div class="img-upload-zone" [class.drag-over]="dragOver()" (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+                @if (uploading()) {
+                <div class="img-upload-placeholder"><span class="contact-spinner"></span>&nbsp; Uploading…</div>
+                } @else if (coverPreview()) {
+                <div class="img-upload-preview">
+                    <img [src]="coverPreview()!" alt="Cover preview" />
+                    <button type="button" class="img-upload-clear" (click)="coverPreview.set(null)">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                </div>
+                } @else {
+                <div class="img-upload-placeholder">
+                    <i class="bi bi-cloud-upload" style="font-size:1.5rem"></i>
+                    <span>Drag &amp; drop an image, or <label class="img-upload-browse">browse<input type="file"
+                                accept="image/*" (change)="onFileInput($event)" hidden></label></span>
+                    <span style="font-size:0.75rem;color:var(--text-muted)">JPEG, PNG, WebP, GIF · max 5 MB</span>
+                </div>
+                }
+            </div>
+            <input ngModel [ngModel]="coverPreview() ?? ''" name="coverImage" class="admin-form-input"
+                placeholder="Or paste a URL directly" style="margin-top:0.5rem"
+                (ngModelChange)="coverPreview.set($event || null)">
+            @if (uploadError()) {
+            <p style="font-size:0.78rem;color:#ef4444;margin-top:0.35rem;margin-bottom:0">
+                <i class="bi bi-exclamation-circle"></i> {{ uploadError() }}
+            </p>
+            }
         </div>
         <div class="admin-form-checks">
             <div class="admin-form-check">
@@ -130,10 +128,10 @@
         <tbody>
             @for (b of blogs(); track b.id) {
             <tr>
-                <td style="font-weight:600">
-                    {{ b.title }}
-                    @if (b.adminNote) {
-                    <span class="admin-note-badge" [title]="b.adminNote"><i class="bi bi-sticky"></i></span>
+                <td>
+                    <span style="font-weight:600">{{ b.title }}</span>
+                    @if (!b.isPublished && b.adminNote) {
+                    <span class="admin-table-note">{{ b.adminNote }}</span>
                     }
                 </td>
                 <td style="color:var(--text-muted);font-size:0.78rem;font-family:var(--font-mono)">{{ b.slug }}</td>
@@ -184,13 +182,9 @@
 <div class="admin-modal-overlay" (click)="cancelStatus()">
     <div class="admin-modal" (click)="$event.stopPropagation()">
         <p class="admin-modal-title">{{ statusModal()!.title }}</p>
-        <p class="admin-modal-body">This post will be hidden from the public site. You can optionally add a note.</p>
-        <div class="admin-form-field" style="margin-bottom:1.5rem">
-            <label class="admin-form-label">Reason / Note <span class="admin-form-hint">(optional)</span></label>
-            <textarea class="admin-form-textarea admin-modal-textarea" rows="3"
-                [value]="statusModal()!.reason"
-                (input)="setStatusReason($event)"
-                placeholder="e.g. Needs revision before republishing..."></textarea>
+        <div class="admin-modal-reason">
+            <textarea rows="3" [value]="statusModal()!.reason" (input)="setStatusReason($event)"
+                placeholder="Reason (optional)"></textarea>
         </div>
         <div class="admin-modal-actions">
             <button class="btn-ghost" (click)="cancelStatus()">Cancel</button>

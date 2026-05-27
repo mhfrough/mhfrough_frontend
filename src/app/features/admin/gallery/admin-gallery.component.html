@@ -1,0 +1,246 @@
+<div class="admin-page-header">
+    <h1 class="admin-page-title">Gallery</h1>
+    <button class="btn-primary" (click)="openNew()"><i class="bi bi-plus-lg"></i> Add Item</button>
+</div>
+
+<!-- ─── Upload / Edit Form ─────────────────────────────────────────────────── -->
+@if (showForm()) {
+<div class="admin-form-panel">
+    <p class="admin-form-title">{{ editing() ? 'Edit Gallery Item' : 'New Gallery Item' }}</p>
+    <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+
+        <!-- Media upload -->
+        <div class="admin-form-field" style="width:100%">
+            <label class="admin-form-label">Media File *
+                <span class="admin-form-hint">(image, gif, video — max 100 MB)</span>
+            </label>
+            <div class="img-upload-zone" [class.drag-over]="dragOver()" (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+                @if (uploading()) {
+                <div class="img-upload-placeholder"><span class="contact-spinner"></span>&nbsp; Uploading…</div>
+                } @else if (mediaPreview()) {
+                <div class="img-upload-preview">
+                    @if (mediaPreview()!.mediaType === 'video') {
+                    <video [src]="mediaPreview()!.url" style="max-height:140px;max-width:100%" controls muted></video>
+                    } @else {
+                    <img [src]="mediaPreview()!.url" alt="Preview" />
+                    }
+                    <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.4rem;text-align:center">
+                        {{ mediaPreview()!.mediaType | uppercase }} · {{ formatBytes(mediaPreview()!.fileSize) }}
+                    </div>
+                    <button type="button" class="img-upload-clear" (click)="mediaPreview.set(null)">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                </div>
+                } @else {
+                <div class="img-upload-placeholder">
+                    <i class="bi bi-cloud-upload" style="font-size:1.5rem"></i>
+                    <span>Drag &amp; drop, or
+                        <label class="img-upload-browse">browse
+                            <input type="file" accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"
+                                (change)="onFileInput($event)" hidden>
+                        </label>
+                    </span>
+                    <span style="font-size:0.75rem;color:var(--text-muted)">Images · GIF · MP4 · WebM · OGG · MOV</span>
+                </div>
+                }
+            </div>
+            @if (uploadError()) {
+            <p style="font-size:0.78rem;color:#ef4444;margin-top:0.35rem;margin-bottom:0">
+                <i class="bi bi-exclamation-circle"></i> {{ uploadError() }}
+            </p>
+            }
+            @if (!mediaPreview() && f.submitted) {
+            <p style="font-size:0.78rem;color:#ef4444;margin-top:0.35rem;margin-bottom:0">
+                <i class="bi bi-exclamation-circle"></i> Please upload a media file.
+            </p>
+            }
+        </div>
+
+        <!-- Title & Category -->
+        <div class="admin-form-grid">
+            <div class="admin-form-field">
+                <label class="admin-form-label">Title <span class="admin-form-hint">(optional)</span></label>
+                <input ngModel [ngModel]="editing()?.title" name="title" class="admin-form-input"
+                    placeholder="Photo title">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Category <span class="admin-form-hint">(optional)</span></label>
+                <input ngModel [ngModel]="editing()?.category" name="category" class="admin-form-input"
+                    placeholder="e.g. Photography, Design, Travel">
+            </div>
+        </div>
+
+        <!-- Caption -->
+        <div class="admin-form-field">
+            <label class="admin-form-label">Caption <span class="admin-form-hint">(optional)</span></label>
+            <textarea ngModel [ngModel]="editing()?.caption" name="caption" rows="2" class="admin-form-textarea"
+                placeholder="A short description shown in the lightbox"></textarea>
+        </div>
+
+        <!-- Alt Text & Sort Order -->
+        <div class="admin-form-grid">
+            <div class="admin-form-field">
+                <label class="admin-form-label">Alt Text <span class="admin-form-hint">(optional,
+                        accessibility)</span></label>
+                <input ngModel [ngModel]="editing()?.altText" name="altText" class="admin-form-input"
+                    placeholder="Describe the image for screen readers">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Sort Order</label>
+                <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number" min="0"
+                    class="admin-form-input">
+            </div>
+        </div>
+
+        <!-- Published -->
+        <div class="admin-form-checks">
+            <div class="admin-form-check">
+                <input ngModel [ngModel]="editing()?.isPublished ?? true" name="isPublished" type="checkbox"
+                    id="gal-pub">
+                <label for="gal-pub">Published (visible on site)</label>
+            </div>
+        </div>
+
+        <div class="admin-form-actions">
+            <button type="submit" class="btn-primary" [disabled]="saving()">
+                @if (saving()) { <span class="contact-spinner"></span>&nbsp; }
+                {{ editing() ? 'Update' : 'Create' }}
+            </button>
+            <button type="button" class="btn-ghost" (click)="cancel()">Cancel</button>
+        </div>
+    </form>
+</div>
+}
+
+<!-- ─── Gallery Items Table ─────────────────────────────────────────────────── -->
+@if (loading()) {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+} @else if (items().length === 0) {
+<p class="empty-state">No gallery items yet. Add one above.</p>
+} @else {
+<div class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Preview</th>
+                <th>Title / Category</th>
+                <th>Type</th>
+                <th>Caption</th>
+                <th>Status</th>
+                <th>Added</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (item of sortedItems(); track item.id; let first = $first; let last = $last) {
+            <tr>
+                <td>
+                    <div style="display:flex;flex-direction:column;gap:2px;align-items:center">
+                        <button class="btn-text" style="padding:0.1rem 0.3rem" (click)="moveSortOrder(item, -1)"
+                            [disabled]="first" title="Move up" aria-label="Move up">
+                            <i class="bi bi-chevron-up"></i>
+                        </button>
+                        <span style="font-size:0.72rem;color:var(--text-muted)">{{ item.sortOrder }}</span>
+                        <button class="btn-text" style="padding:0.1rem 0.3rem" (click)="moveSortOrder(item, 1)"
+                            [disabled]="last" title="Move down" aria-label="Move down">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                </td>
+                <td>
+                    <div class="gallery-admin-thumb">
+                        @if (item.mediaType === 'video') {
+                        <video [src]="item.mediaUrl" muted preload="metadata"></video>
+                        <span class="gallery-admin-thumb-badge"><i class="bi bi-camera-video-fill"></i></span>
+                        } @else if (item.mediaType === 'gif') {
+                        <img [src]="item.mediaUrl" alt="" loading="lazy" />
+                        <span class="gallery-admin-thumb-badge">GIF</span>
+                        } @else {
+                        <img [src]="item.mediaUrl" alt="" loading="lazy" />
+                        }
+                    </div>
+                </td>
+                <td>
+                    <div style="font-size:0.84rem;color:var(--text)">{{ item.title || '—' }}</div>
+                    @if (item.category) {
+                    <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">
+                        <i class="bi bi-tag"></i> {{ item.category }}
+                    </div>
+                    }
+                </td>
+                <td>
+                    <span class="gallery-type-badge" [class.gallery-type-badge--video]="item.mediaType === 'video'"
+                        [class.gallery-type-badge--gif]="item.mediaType === 'gif'">
+                        {{ item.mediaType | uppercase }}
+                    </span>
+                </td>
+                <td style="max-width:200px">
+                    <span style="font-size:0.78rem;color:var(--text-muted);
+                            display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
+                        {{ item.caption || '—' }}
+                    </span>
+                </td>
+                <td>
+                    <span class="admin-badge" [class.admin-badge--on]="item.isPublished">
+                        {{ item.isPublished ? 'Published' : 'Hidden' }}
+                    </span>
+                </td>
+                <td style="color:var(--text-muted);font-size:0.78rem;font-family:var(--font-mono);white-space:nowrap">
+                    {{ item.createdAt | date:'MMM d, y' }}
+                </td>
+                <td style="text-align:right;white-space:nowrap">
+                    <button class="btn-text" (click)="edit(item)" style="margin-right:1.25rem">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    @if (item.isPublished) {
+                    <button class="btn-text" (click)="openHideModal(item.id)" style="margin-right:1.25rem">
+                        <i class="bi bi-eye-slash"></i> Hide
+                    </button>
+                    } @else {
+                    <button class="btn-text" (click)="publishItem(item)" style="margin-right:1.25rem">
+                        <i class="bi bi-eye"></i> Publish
+                    </button>
+                    }
+                    <button class="btn-text-danger" (click)="confirmDelete(item.id)">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+}
+
+<!-- ─── Delete Confirm ──────────────────────────────────────────────────────── -->
+@if (deleteTargetId()) {
+<div class="admin-modal-overlay" (click)="cancelDelete()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Delete Gallery Item?</p>
+        <p class="admin-modal-body">This action cannot be undone. The file will remain in storage.</p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelDelete()">Cancel</button>
+            <button class="btn-danger" (click)="executeDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- ─── Hide Confirm ────────────────────────────────────────────────────────── -->
+@if (statusModal()) {
+<div class="admin-modal-overlay" (click)="cancelStatus()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Hide Gallery Item</p>
+        <p class="admin-modal-body">This item will be hidden from the public gallery. You can publish it again at any
+            time.</p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelStatus()">Cancel</button>
+            <button class="btn-primary" (click)="executeStatus()">Confirm</button>
+        </div>
+    </div>
+</div>
+}

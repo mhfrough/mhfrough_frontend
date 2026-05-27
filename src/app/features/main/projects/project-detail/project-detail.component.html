@@ -1,0 +1,58 @@
+<div class="project-detail-page">
+
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+    </div>
+    } @else if (project()) {
+
+    <article class="project-detail-article">
+
+        <a routerLink="/projects" class="blog-detail-back">
+            <i class="bi bi-arrow-left"></i> All Projects
+        </a>
+
+        @if (project().thumbnail) {
+        <div class="project-detail-cover">
+            <img [src]="project().thumbnail" [alt]="'Screenshot of ' + project().title" loading="lazy" />
+        </div>
+        }
+
+        @if (project().techStack?.length) {
+        <div class="project-detail-tags">
+            @for (tech of project().techStack; track tech) {
+            <span class="project-detail-tag">{{ tech }}</span>
+            }
+        </div>
+        }
+
+        <h1 class="project-detail-title">{{ project().title }}</h1>
+
+        <div class="project-detail-meta">
+            @if (project().liveUrl) {
+            <a [href]="project().liveUrl" target="_blank" rel="noopener noreferrer" class="project-detail-meta-link">
+                <i class="bi bi-box-arrow-up-right"></i> Live Site
+            </a>
+            }
+            @if (project().githubUrl) {
+            <a [href]="project().githubUrl" target="_blank" rel="noopener noreferrer" class="project-detail-meta-link">
+                <i class="bi bi-github"></i> Source Code
+            </a>
+            }
+            <span class="project-detail-meta-date">
+                <i class="bi bi-calendar3"></i> {{ project().createdAt | date:'MMMM y' }}
+            </span>
+        </div>
+
+        <p class="project-detail-summary">{{ project().description }}</p>
+
+        @if (project().content) {
+        <div class="project-detail-divider"></div>
+        <div class="project-detail-content blog-detail-content" [innerHTML]="project().content"></div>
+        }
+
+    </article>
+
+    }
+
+</div>
