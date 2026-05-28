@@ -5,11 +5,12 @@ import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 
 @Component({
     selector: 'app-projects',
     standalone: true,
-    imports: [CommonModule, RouterLink, ImgFallbackDirective],
+    imports: [CommonModule, RouterLink, ImgFallbackDirective, ExternalUrlPipe],
     templateUrl: './projects.component.html',
 })
 export class ProjectsComponent implements OnInit, OnDestroy {

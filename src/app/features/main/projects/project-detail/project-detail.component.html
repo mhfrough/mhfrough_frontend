@@ -30,12 +30,12 @@
 
         <div class="project-detail-meta">
             @if (project().liveUrl) {
-            <a [href]="project().liveUrl" target="_blank" rel="noopener noreferrer" class="project-detail-meta-link">
+            <a [href]="project().liveUrl | externalUrl:'project_detail_live'" target="_blank" rel="noopener noreferrer" class="project-detail-meta-link">
                 <i class="bi bi-box-arrow-up-right"></i> Live Site
             </a>
             }
             @if (project().githubUrl) {
-            <a [href]="project().githubUrl" target="_blank" rel="noopener noreferrer" class="project-detail-meta-link">
+            <a [href]="project().githubUrl | externalUrl:'project_detail_github'" target="_blank" rel="noopener noreferrer" class="project-detail-meta-link">
                 <i class="bi bi-github"></i> Source Code
             </a>
             }

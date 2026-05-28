@@ -6,11 +6,12 @@ import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, RouterLink, ImgFallbackDirective],
+    imports: [CommonModule, RouterLink, ImgFallbackDirective, ExternalUrlPipe],
     templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit, OnDestroy {

@@ -252,13 +252,13 @@
             <p class="settings-card-sub">All devices that have signed in. Revoke any session to force a sign-out.</p>
         </div>
         <div class="settings-card-actions">
-            <button class="btn-danger-sm" (click)="revokeAll()" [disabled]="revokeLoading() === 'all'">
+            <button class="btn-text-danger" (click)="revokeAll()" [disabled]="revokeLoading() === 'all'">
                 @if (revokeLoading() === 'all') { <span class="contact-spinner"></span> } @else { <i
                     class="bi bi-slash-circle"></i> }
                 Revoke Others
             </button>
             @if (hasRevokedSessions) {
-            <button class="btn-ghost-sm" (click)="clearRevoked()" [disabled]="clearRevokedLoading()">
+            <button class="btn-text-danger" (click)="clearRevoked()" [disabled]="clearRevokedLoading()">
                 @if (clearRevokedLoading()) { <span class="contact-spinner"></span> } @else { <i
                     class="bi bi-trash3"></i> }
                 Clear History
@@ -321,14 +321,14 @@
                     </td>
                     <td>
                         @if (s.isActive) {
-                        <span class="status-badge status-badge--active">Active</span>
+                        <span class="admin-badge admin-badge--on">Active</span>
                         } @else {
-                        <span class="status-badge status-badge--revoked">Revoked</span>
+                        <span class="admin-badge admin-badge--danger">Revoked</span>
                         }
                     </td>
                     <td>
                         @if (s.isActive && s.id !== currentSessionId) {
-                        <button class="btn-revoke-label" (click)="revokeSession(s.id)"
+                        <button class="btn-text-danger" (click)="revokeSession(s.id)"
                             [disabled]="revokeLoading() === s.id">
                             @if (revokeLoading() === s.id) { <span class="contact-spinner"></span> } @else { <i
                                 class="bi bi-slash-circle"></i> }

@@ -125,7 +125,7 @@
             <div class="contact-meta-divider"></div>
             <div class="contact-meta-item">
                 <span class="contact-meta-label">LinkedIn</span>
-                <a [href]="footerSettings.data().linkedin!.startsWith('http') ? footerSettings.data().linkedin! : 'https://linkedin.com/' + footerSettings.data().linkedin"
+                <a [href]="(footerSettings.data().linkedin!.startsWith('http') ? footerSettings.data().linkedin! : 'https://linkedin.com/' + footerSettings.data().linkedin) | externalUrl:'contact_linkedin'"
                     target="_blank" rel="noopener" class="contact-meta-value">{{ footerSettings.data().linkedin }}</a>
             </div>
             }
@@ -133,7 +133,7 @@
             <div class="contact-meta-divider"></div>
             <div class="contact-meta-item">
                 <span class="contact-meta-label">GitHub</span>
-                <a [href]="footerSettings.data().github!.startsWith('http') ? footerSettings.data().github! : 'https://github.com/' + footerSettings.data().github"
+                <a [href]="(footerSettings.data().github!.startsWith('http') ? footerSettings.data().github! : 'https://github.com/' + footerSettings.data().github) | externalUrl:'contact_github'"
                     target="_blank" rel="noopener" class="contact-meta-value">{{ footerSettings.data().github }}</a>
             </div>
             }

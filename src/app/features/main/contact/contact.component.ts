@@ -6,11 +6,12 @@ import { InquiriesService } from '../../../core/services/inquiry-feedback.servic
 import { UserInfoService } from '../../../core/services/user-info.service';
 import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
+import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 
 @Component({
     selector: 'app-contact',
     standalone: true,
-    imports: [CommonModule, FormsModule, RteToolbarComponent],
+    imports: [CommonModule, FormsModule, RteToolbarComponent, ExternalUrlPipe],
     templateUrl: './contact.component.html',
 })
 export class ContactComponent implements OnInit {
