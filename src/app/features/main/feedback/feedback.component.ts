@@ -37,6 +37,8 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     readonly total = signal(0);
     readonly totalPages = signal(1);
 
+    private searchTimer?: ReturnType<typeof setTimeout>;
+
     get pageNumbers(): number[] {
         const total = this.totalPages();
         const cur = this.currentPage();
@@ -62,10 +64,14 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     }
 
     onSearch(e: Event) {
-        this.searchQuery.set((e.target as HTMLInputElement).value);
-        this.currentPage.set(1);
-        this.loadReviews();
-        this.syncUrl();
+        const value = (e.target as HTMLInputElement).value;
+        clearTimeout(this.searchTimer);
+        this.searchTimer = setTimeout(() => {
+            this.searchQuery.set(value);
+            this.currentPage.set(1);
+            this.loadReviews();
+            this.syncUrl();
+        }, 400);
     }
 
     onPageSizeChange(e: Event) {
@@ -109,7 +115,7 @@ export class FeedbackComponent implements OnInit, OnDestroy {
         this.subs.add(this.realtime.on<{ id: string }>('feedback:deleted').subscribe(() => this.loadReviews()));
     }
 
-    ngOnDestroy() { this.subs.unsubscribe(); }
+    ngOnDestroy() { this.subs.unsubscribe(); clearTimeout(this.searchTimer); }
 
     submit(form: NgForm) {
         form.form.markAllAsTouched();

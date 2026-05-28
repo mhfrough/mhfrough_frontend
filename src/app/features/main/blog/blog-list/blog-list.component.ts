@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { BlogsService } from '../../../../core/services/blogs.service';
@@ -10,7 +10,7 @@ import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback
     imports: [CommonModule, RouterLink, ImgFallbackDirective],
     templateUrl: './blog-list.component.html',
 })
-export class BlogListComponent implements OnInit {
+export class BlogListComponent implements OnInit, OnDestroy {
     private service = inject(BlogsService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
@@ -23,6 +23,8 @@ export class BlogListComponent implements OnInit {
     readonly currentPage = signal(1);
     readonly total = signal(0);
     readonly totalPages = signal(1);
+
+    private searchTimer?: ReturnType<typeof setTimeout>;
 
     get pageNumbers(): number[] {
         const total = this.totalPages();
@@ -49,10 +51,14 @@ export class BlogListComponent implements OnInit {
     }
 
     onSearch(e: Event) {
-        this.searchQuery.set((e.target as HTMLInputElement).value);
-        this.currentPage.set(1);
-        this.load();
-        this.syncUrl();
+        const value = (e.target as HTMLInputElement).value;
+        clearTimeout(this.searchTimer);
+        this.searchTimer = setTimeout(() => {
+            this.searchQuery.set(value);
+            this.currentPage.set(1);
+            this.load();
+            this.syncUrl();
+        }, 400);
     }
 
     onPageSizeChange(e: Event) {
@@ -86,4 +92,6 @@ export class BlogListComponent implements OnInit {
 
         this.load();
     }
+
+    ngOnDestroy() { clearTimeout(this.searchTimer); }
 }

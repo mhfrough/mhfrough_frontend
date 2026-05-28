@@ -3,56 +3,102 @@ import {
     HostListener, PLATFORM_ID
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 
 @Component({
     selector: 'app-gallery',
     standalone: true,
-    imports: [CommonModule, DatePipe, ImgFallbackDirective],
+    imports: [CommonModule, DatePipe, ImgFallbackDirective, FormsModule],
     templateUrl: './gallery.component.html',
 })
 export class GalleryComponent implements OnInit, OnDestroy {
     private galleryService = inject(GalleryService);
     private platformId = inject(PLATFORM_ID);
 
+    readonly PAGE_SIZE = 24;
+
     readonly items = signal<GalleryItem[]>([]);
+    readonly total = signal(0);
+    readonly hasMore = signal(false);
     readonly loading = signal(true);
+    readonly loadingMore = signal(false);
+
+    readonly categories = signal<string[]>([]);
     readonly selectedCategory = signal<string>('all');
+    readonly searchQuery = signal('');
+
     readonly lightboxIndex = signal<number | null>(null);
     readonly zoomLevel = signal(1);
-
-    readonly categories = computed(() => {
-        const cats = this.items()
-            .map(i => i.category)
-            .filter((c): c is string => !!c);
-        return [...new Set(cats)];
-    });
-
-    readonly filteredItems = computed(() => {
-        const cat = this.selectedCategory();
-        if (cat === 'all') return this.items();
-        return this.items().filter(i => i.category === cat);
-    });
 
     readonly lightboxItem = computed(() => {
         const idx = this.lightboxIndex();
         if (idx === null) return null;
-        return this.filteredItems()[idx] ?? null;
+        return this.items()[idx] ?? null;
     });
 
+    private currentPage = 1;
+    private searchTimer?: ReturnType<typeof setTimeout>;
+
     ngOnInit() {
-        this.galleryService.getAll().subscribe({
-            next: (data) => { this.items.set(data); this.loading.set(false); },
-            error: () => this.loading.set(false),
+        this.galleryService.getCategories().subscribe({
+            next: (cats) => this.categories.set(cats),
+        });
+        this.loadPage(1, true);
+    }
+
+    ngOnDestroy() {
+        clearTimeout(this.searchTimer);
+        this.closeLightbox();
+    }
+
+    private loadPage(page: number, reset: boolean) {
+        if (reset) {
+            this.loading.set(true);
+        } else {
+            this.loadingMore.set(true);
+        }
+        const q = this.searchQuery() || undefined;
+        const cat = this.selectedCategory() !== 'all' ? this.selectedCategory() : undefined;
+        this.galleryService.getPublicPaginated(page, this.PAGE_SIZE, q, cat).subscribe({
+            next: (res) => {
+                if (reset) {
+                    this.items.set(res.data);
+                } else {
+                    this.items.update(prev => [...prev, ...res.data]);
+                }
+                this.total.set(res.total);
+                this.currentPage = page;
+                this.hasMore.set(page < res.totalPages);
+                this.loading.set(false);
+                this.loadingMore.set(false);
+            },
+            error: () => {
+                this.loading.set(false);
+                this.loadingMore.set(false);
+            },
         });
     }
 
-    ngOnDestroy() { this.closeLightbox(); }
+    loadMore() {
+        if (!this.hasMore() || this.loadingMore() || this.loading()) return;
+        this.loadPage(this.currentPage + 1, false);
+    }
 
     selectCategory(cat: string) {
         this.selectedCategory.set(cat);
         this.closeLightbox();
+        this.loadPage(1, true);
+    }
+
+    onSearch(event: Event) {
+        const value = (event.target as HTMLInputElement).value;
+        clearTimeout(this.searchTimer);
+        this.searchTimer = setTimeout(() => {
+            this.searchQuery.set(value);
+            this.loadPage(1, true);
+        }, 350);
     }
 
     openLightbox(index: number) {
@@ -74,36 +120,37 @@ export class GalleryComponent implements OnInit, OnDestroy {
     prevItem() {
         const idx = this.lightboxIndex();
         if (idx === null) return;
-        const total = this.filteredItems().length;
-        this.lightboxIndex.set((idx - 1 + total) % total);
+        this.lightboxIndex.set((idx - 1 + this.items().length) % this.items().length);
         this.zoomLevel.set(1);
     }
 
     nextItem() {
         const idx = this.lightboxIndex();
         if (idx === null) return;
-        const total = this.filteredItems().length;
-        this.lightboxIndex.set((idx + 1) % total);
+        this.lightboxIndex.set((idx + 1) % this.items().length);
         this.zoomLevel.set(1);
     }
 
-    zoomIn() {
-        this.zoomLevel.update(z => Math.min(z + 0.5, 3));
-    }
-
-    zoomOut() {
-        this.zoomLevel.update(z => Math.max(z - 0.5, 0.5));
-    }
-
-    resetZoom() {
-        this.zoomLevel.set(1);
-    }
+    zoomIn() { this.zoomLevel.update(z => Math.min(z + 0.5, 3)); }
+    zoomOut() { this.zoomLevel.update(z => Math.max(z - 0.5, 0.5)); }
+    resetZoom() { this.zoomLevel.set(1); }
 
     formatBytes(bytes: number): string {
         if (!bytes) return '';
         if (bytes < 1024) return `${bytes} B`;
         if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
         return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    @HostListener('window:scroll', [])
+    onWindowScroll() {
+        if (!isPlatformBrowser(this.platformId)) return;
+        if (!this.hasMore() || this.loadingMore() || this.loading()) return;
+        const scrolled = window.scrollY + window.innerHeight;
+        const pageHeight = document.documentElement.scrollHeight;
+        if (scrolled >= pageHeight - 300) {
+            this.loadMore();
+        }
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -116,3 +163,4 @@ export class GalleryComponent implements OnInit, OnDestroy {
         if (e.key === '-') { this.zoomOut(); return; }
     }
 }
+

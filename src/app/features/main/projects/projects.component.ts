@@ -31,6 +31,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     readonly total = signal(0);
     readonly totalPages = signal(1);
 
+    private searchTimer?: ReturnType<typeof setTimeout>;
+
     get pageNumbers(): number[] {
         const total = this.totalPages();
         const cur = this.currentPage();
@@ -56,10 +58,14 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     }
 
     onSearch(e: Event) {
-        this.searchQuery.set((e.target as HTMLInputElement).value);
-        this.currentPage.set(1);
-        this.load();
-        this.syncUrl();
+        const value = (e.target as HTMLInputElement).value;
+        clearTimeout(this.searchTimer);
+        this.searchTimer = setTimeout(() => {
+            this.searchQuery.set(value);
+            this.currentPage.set(1);
+            this.load();
+            this.syncUrl();
+        }, 400);
     }
 
     onPageSizeChange(e: Event) {
@@ -100,6 +106,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
+        clearTimeout(this.searchTimer);
         this.subs.unsubscribe();
         this.closeLightbox();
     }
