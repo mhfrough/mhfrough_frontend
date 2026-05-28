@@ -66,7 +66,7 @@
                 <div class="img-upload-placeholder"><span class="contact-spinner"></span>&nbsp; Uploading…</div>
                 } @else if (coverPreview()) {
                 <div class="img-upload-preview">
-                    <img [src]="coverPreview()!" alt="Cover preview" />
+                    <img [src]="coverPreview()!" alt="Cover preview" loading="lazy" />
                     <button type="button" class="img-upload-clear" (click)="coverPreview.set(null)">
                         <i class="bi bi-x-circle-fill"></i>
                     </button>

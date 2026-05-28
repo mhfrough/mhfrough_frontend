@@ -70,7 +70,7 @@
                 <div class="img-upload-placeholder"><span class="contact-spinner"></span>&nbsp; Uploading…</div>
                 } @else if (thumbPreview()) {
                 <div class="img-upload-preview">
-                    <img [src]="thumbPreview()!" alt="Thumbnail preview" />
+                    <img [src]="thumbPreview()!" alt="Thumbnail preview" loading="lazy" />
                     <button type="button" class="img-upload-clear" (click)="thumbPreview.set(null)">
                         <i class="bi bi-x-circle-fill"></i>
                     </button>

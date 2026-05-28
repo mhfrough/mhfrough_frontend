@@ -108,8 +108,8 @@
             @if (lightboxItem()!.mediaType === 'image' || lightboxItem()!.mediaType === 'gif') {
             <img class="lb-media" [src]="lightboxItem()!.mediaUrl"
                 [alt]="lightboxItem()!.altText || lightboxItem()!.title || ''"
-                [style.transform]="'scale(' + zoomLevel() + ')'"
-                [style.cursor]="zoomLevel() > 1 ? 'move' : 'default'" />
+                [style.transform]="'scale(' + zoomLevel() + ')'" [style.cursor]="zoomLevel() > 1 ? 'move' : 'default'"
+                loading="lazy" />
             } @else {
             <video class="lb-media" [src]="lightboxItem()!.mediaUrl" controls autoplay playsinline></video>
             }

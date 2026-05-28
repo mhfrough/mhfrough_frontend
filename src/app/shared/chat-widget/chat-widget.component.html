@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="cw-header">
         @if (footerSettings.data().avatarUrl) {
-        <img class="cw-avatar cw-avatar-img" [src]="footerSettings.data().avatarUrl" alt="avatar">
+        <img class="cw-avatar cw-avatar-img" [src]="footerSettings.data().avatarUrl" alt="avatar" loading="lazy">
         } @else {
         <div class="cw-avatar">MH</div>
         }

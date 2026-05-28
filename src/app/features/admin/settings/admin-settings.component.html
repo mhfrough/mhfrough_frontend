@@ -45,7 +45,7 @@
     <div class="profile-avatar-row">
         <div class="profile-avatar-wrap">
             @if (avatarPreview()) {
-            <img class="profile-avatar-img" [src]="avatarPreview()" alt="Avatar">
+            <img class="profile-avatar-img" [src]="avatarPreview()" alt="Avatar" loading="lazy">
             } @else {
             <div class="profile-avatar-initials">{{ profileInitials }}</div>
             }

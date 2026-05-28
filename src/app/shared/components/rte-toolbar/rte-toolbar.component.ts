@@ -221,7 +221,7 @@ export class RteToolbarComponent {
         this.imageModal.set(null);
         this.imagePreview.set(null);
         if (!m.url.trim() || !this.el) return;
-        const html = `<img src="${m.url}" alt="${m.alt || ''}">`;
+        const html = `<img src="${m.url}" alt="${m.alt || ''}" loading="lazy">`;
         const pos = this.el.selectionEnd;
         this.el.setRangeText(html, pos, pos, 'end');
         this.el.focus();

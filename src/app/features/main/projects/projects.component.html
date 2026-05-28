@@ -71,7 +71,7 @@
         <i class="bi bi-x-lg"></i>
     </button>
     <div class="lightbox-inner" (click)="$event.stopPropagation()">
-        <img class="lightbox-img" [src]="lightboxSrc()!" alt="Full preview" />
+        <img class="lightbox-img" [src]="lightboxSrc()!" alt="Full preview" loading="lazy" />
     </div>
 </div>
 }

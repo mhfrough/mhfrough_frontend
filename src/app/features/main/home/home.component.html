@@ -306,7 +306,7 @@
                 @for (client of marqueeClients; track $index) {
                 <a class="client-item" [href]="client.url" target="_blank" rel="noopener noreferrer"
                     [attr.aria-label]="'Open ' + client.name + ' website'">
-                    <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'">
+                    <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'" loading="lazy">
                     <span class="client-name">{{ client.name }}</span>
                 </a>
                 }
@@ -315,7 +315,7 @@
                 @for (client of marqueeClients; track $index) {
                 <a class="client-item" [href]="client.url" target="_blank" rel="noopener noreferrer" tabindex="-1"
                     [attr.aria-label]="'Open ' + client.name + ' website'">
-                    <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'">
+                    <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'" loading="lazy">
                     <span class="client-name">{{ client.name }}</span>
                 </a>
                 }
@@ -339,7 +339,7 @@
         <i class="bi bi-x-lg"></i>
     </button>
     <div class="lightbox-inner" (click)="$event.stopPropagation()">
-        <img class="lightbox-img" [src]="lightboxSrc()!" alt="Full preview" />
+        <img class="lightbox-img" [src]="lightboxSrc()!" alt="Full preview" loading="lazy" />
     </div>
 </div>
 }

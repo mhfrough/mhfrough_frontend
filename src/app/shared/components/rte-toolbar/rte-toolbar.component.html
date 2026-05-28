@@ -144,7 +144,7 @@
             </div>
             } @else if (imagePreview()) {
             <div class="img-upload-preview">
-                <img [src]="imagePreview()!" alt="Preview" />
+                <img [src]="imagePreview()!" alt="Preview" loading="lazy" />
                 <button type="button" class="img-upload-clear" (click)="clearImagePreview()">
                     <i class="bi bi-x-circle-fill"></i>
                 </button>

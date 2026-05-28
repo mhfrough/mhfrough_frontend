@@ -23,7 +23,7 @@
                     @if (mediaPreview()!.mediaType === 'video') {
                     <video [src]="mediaPreview()!.url" style="max-height:140px;max-width:100%" controls muted></video>
                     } @else {
-                    <img [src]="mediaPreview()!.url" alt="Preview" />
+                    <img [src]="mediaPreview()!.url" alt="Preview" loading="lazy" />
                     }
                     <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.4rem;text-align:center">
                         {{ mediaPreview()!.mediaType | uppercase }} · {{ formatBytes(mediaPreview()!.fileSize) }}
