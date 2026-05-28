@@ -3,6 +3,7 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { BlogsService } from '../../../../core/services/blogs.service';
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
+import { PreconnectService } from '../../../../core/services/preconnect.service';
 
 @Component({
     selector: 'app-blog-list',
@@ -14,6 +15,7 @@ export class BlogListComponent implements OnInit, OnDestroy {
     private service = inject(BlogsService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
+    private preconnect = inject(PreconnectService);
     readonly blogs = signal<any[]>([]);
     readonly loading = signal(true);
 
@@ -45,6 +47,7 @@ export class BlogListComponent implements OnInit, OnDestroy {
                     this.total.set(res.total);
                     this.totalPages.set(res.totalPages);
                     this.loading.set(false);
+                    if (this.currentPage() === 1) this.preconnect.add(res.data[0]?.coverImage);
                 },
                 error: () => this.loading.set(false),
             });

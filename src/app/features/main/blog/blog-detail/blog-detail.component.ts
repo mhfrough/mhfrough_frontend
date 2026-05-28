@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { BlogsService } from '../../../../core/services/blogs.service';
 import { UserInfoService } from '../../../../core/services/user-info.service';
 import { RealtimeService } from '../../../../core/services/realtime.service';
+import { PreconnectService } from '../../../../core/services/preconnect.service';
 import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
 
@@ -21,6 +22,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     private service = inject(BlogsService);
     private userInfo = inject(UserInfoService);
     private readonly realtime = inject(RealtimeService);
+    private preconnect = inject(PreconnectService);
 
     readonly blog = signal<any>(null);
     readonly loading = signal(true);
@@ -47,6 +49,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
             next: (data: any) => {
                 this.blog.set(data);
                 this.loading.set(false);
+                this.preconnect.add(data?.coverImage);
                 this.loadComments(data.id);
                 this.subscribeToCommentEvents(data.id);
             },

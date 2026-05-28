@@ -4,6 +4,7 @@ import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
+import { PreconnectService } from '../../../core/services/preconnect.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 
@@ -19,6 +20,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private readonly realtime = inject(RealtimeService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
+    private preconnect = inject(PreconnectService);
     readonly projects = signal<any[]>([]);
     readonly loading = signal(true);
     readonly lightboxSrc = signal<string | null>(null);
@@ -52,6 +54,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
                     this.total.set(res.total);
                     this.totalPages.set(res.totalPages);
                     this.loading.set(false);
+                    if (this.currentPage() === 1) this.preconnect.add(res.data[0]?.thumbnail);
                 },
                 error: () => this.loading.set(false),
             });

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectsService } from '../../../../core/services/projects.service';
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
 import { ExternalUrlPipe } from '../../../../shared/pipes/external-url.pipe';
+import { PreconnectService } from '../../../../core/services/preconnect.service';
 
 @Component({
     selector: 'app-project-detail',
@@ -15,6 +16,7 @@ export class ProjectDetailComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private service = inject(ProjectsService);
+    private preconnect = inject(PreconnectService);
 
     readonly project = signal<any>(null);
     readonly loading = signal(true);
@@ -23,11 +25,11 @@ export class ProjectDetailComponent implements OnInit {
         const slug = this.route.snapshot.paramMap.get('slug') ?? '';
         // Try slug endpoint first; if it fails (not a valid slug), try by id
         this.service.getBySlug(slug).subscribe({
-            next: (data: any) => { this.project.set(data); this.loading.set(false); },
+            next: (data: any) => { this.project.set(data); this.loading.set(false); this.preconnect.add(data?.thumbnail); },
             error: () => {
                 // fallback: try by UUID id
                 this.service.getOne(slug).subscribe({
-                    next: (data: any) => { this.project.set(data); this.loading.set(false); },
+                    next: (data: any) => { this.project.set(data); this.loading.set(false); this.preconnect.add(data?.thumbnail); },
                     error: () => {
                         this.router.navigate(['/not-found'], {
                             replaceUrl: true,

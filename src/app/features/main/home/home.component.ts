@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
+import { PreconnectService } from '../../../core/services/preconnect.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 
@@ -19,6 +20,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private platformId = inject(PLATFORM_ID);
     private readonly realtime = inject(RealtimeService);
     readonly footerSettings = inject(FooterSettingsService);
+    private preconnect = inject(PreconnectService);
     readonly projects = signal<any[]>([]);
     readonly loadingProjects = signal(true);
     readonly greeting = signal('');
@@ -36,7 +38,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.footerSettings.load();
         this.projectsService.getFeatured().subscribe({
-            next: (data: any[]) => { this.projects.set(data); this.loadingProjects.set(false); },
+            next: (data: any[]) => { this.projects.set(data); this.loadingProjects.set(false); this.preconnect.add(data[0]?.thumbnail); },
             error: () => this.loadingProjects.set(false),
         });
         this.buildGreeting();
