@@ -7267,7 +7267,9 @@ button.admin-nav-link:last-child:hover {
     min-width: 8rem;
     flex-shrink: 0;
 
-    i { font-size: 0.9rem; }
+    i {
+        font-size: 0.9rem;
+    }
 }
 
 .social-link-input {

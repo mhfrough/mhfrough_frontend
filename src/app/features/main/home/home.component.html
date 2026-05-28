@@ -116,10 +116,10 @@
                 <strong>KIET</strong> (formerly PAF-KIET).
             </p>
             <div class="about-links">
-                <a [href]="'https://github.com/mhfrough' | externalUrl:'about_github'" target="_blank" rel="noopener">GitHub <i
-                        class="bi bi-arrow-up-right"></i></a>
-                <a [href]="'https://www.linkedin.com/in/mhfrough/' | externalUrl:'about_linkedin'" target="_blank" rel="noopener">LinkedIn <i
-                        class="bi bi-arrow-up-right"></i></a>
+                <a [href]="'https://github.com/mhfrough' | externalUrl:'about_github'" target="_blank"
+                    rel="noopener">GitHub <i class="bi bi-arrow-up-right"></i></a>
+                <a [href]="'https://www.linkedin.com/in/mhfrough/' | externalUrl:'about_linkedin'" target="_blank"
+                    rel="noopener">LinkedIn <i class="bi bi-arrow-up-right"></i></a>
             </div>
             }
         </div>
@@ -304,8 +304,8 @@
             <!-- Track duplicated for seamless infinite loop -->
             <div class="clients-track">
                 @for (client of marqueeClients; track $index) {
-                <a class="client-item" [href]="client.url | externalUrl:'clients_marquee'" target="_blank" rel="noopener noreferrer"
-                    [attr.aria-label]="'Open ' + client.name + ' website'">
+                <a class="client-item" [href]="client.url | externalUrl:'clients_marquee'" target="_blank"
+                    rel="noopener noreferrer" [attr.aria-label]="'Open ' + client.name + ' website'">
                     <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'" loading="lazy">
                     <span class="client-name">{{ client.name }}</span>
                 </a>
@@ -313,8 +313,8 @@
             </div>
             <div class="clients-track" aria-hidden="true">
                 @for (client of marqueeClients; track $index) {
-                <a class="client-item" [href]="client.url | externalUrl:'clients_marquee'" target="_blank" rel="noopener noreferrer" tabindex="-1"
-                    [attr.aria-label]="'Open ' + client.name + ' website'">
+                <a class="client-item" [href]="client.url | externalUrl:'clients_marquee'" target="_blank"
+                    rel="noopener noreferrer" tabindex="-1" [attr.aria-label]="'Open ' + client.name + ' website'">
                     <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'" loading="lazy">
                     <span class="client-name">{{ client.name }}</span>
                 </a>
