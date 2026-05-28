@@ -14,7 +14,7 @@
 
         @if (project().thumbnail) {
         <div class="project-detail-cover">
-            <img [src]="project().thumbnail" [alt]="'Screenshot of ' + project().title" loading="lazy" />
+            <img [ngSrc]="project().thumbnail" fill priority [alt]="'Screenshot of ' + project().title" />
         </div>
         }
 

@@ -82,7 +82,7 @@
             <div class="home-project-aside">
                 @if (project.thumbnail) {
                 <div class="home-project-thumb">
-                    <img [src]="project.thumbnail" [alt]="project.title" loading="lazy" />
+                    <img [ngSrc]="project.thumbnail" fill [priority]="i === 0" [alt]="project.title" />
                 </div>
                 }
                 <span class="home-project-arrow">

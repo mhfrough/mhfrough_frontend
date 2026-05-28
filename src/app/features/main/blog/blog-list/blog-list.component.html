@@ -39,7 +39,7 @@
         <a [routerLink]="['/blog', blog.slug]" class="blog-card">
             @if (blog.coverImage) {
             <div class="blog-thumb">
-                <img [src]="blog.coverImage" [alt]="'Cover image for ' + blog.title" loading="lazy" />
+                <img [ngSrc]="blog.coverImage" fill [priority]="$first" [alt]="'Cover image for ' + blog.title" />
             </div>
             }
             <div class="blog-body">

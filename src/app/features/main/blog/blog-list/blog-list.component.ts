@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { BlogsService } from '../../../../core/services/blogs.service';
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
@@ -7,7 +7,7 @@ import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback
 @Component({
     selector: 'app-blog-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, ImgFallbackDirective],
+    imports: [CommonModule, RouterLink, NgOptimizedImage, ImgFallbackDirective],
     templateUrl: './blog-list.component.html',
 })
 export class BlogListComponent implements OnInit, OnDestroy {

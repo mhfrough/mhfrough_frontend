@@ -3,7 +3,7 @@ import { provideRouter, withViewTransitions, withInMemoryScrolling } from '@angu
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideServiceWorker } from '@angular/service-worker';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, IMAGE_LOADER, ImageLoaderConfig } from '@angular/common';
 import { routes } from './app.routes';
 import { credentialsInterceptor } from './core/interceptors/credentials.interceptor';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
@@ -31,5 +31,6 @@ export const appConfig: ApplicationConfig = {
     }),
     { provide: APP_INITIALIZER, useFactory: registerFirebaseSW, multi: true },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    { provide: IMAGE_LOADER, useValue: (config: ImageLoaderConfig) => config.src },
   ],
 };

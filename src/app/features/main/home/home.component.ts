@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser, CommonModule } from '@angular/common';
+import { isPlatformBrowser, CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
@@ -11,7 +11,7 @@ import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, RouterLink, ImgFallbackDirective, ExternalUrlPipe],
+    imports: [CommonModule, RouterLink, NgOptimizedImage, ImgFallbackDirective, ExternalUrlPipe],
     templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit, OnDestroy {

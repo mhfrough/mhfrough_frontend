@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectsService } from '../../../../core/services/projects.service';
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
@@ -8,7 +8,7 @@ import { ExternalUrlPipe } from '../../../../shared/pipes/external-url.pipe';
 @Component({
     selector: 'app-project-detail',
     standalone: true,
-    imports: [CommonModule, RouterLink, ImgFallbackDirective, ExternalUrlPipe],
+    imports: [CommonModule, RouterLink, NgOptimizedImage, ImgFallbackDirective, ExternalUrlPipe],
     templateUrl: './project-detail.component.html',
 })
 export class ProjectDetailComponent implements OnInit {

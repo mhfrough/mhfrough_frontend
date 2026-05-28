@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -12,7 +12,7 @@ import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback
 @Component({
     selector: 'app-blog-detail',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule, RteToolbarComponent, ImgFallbackDirective],
+    imports: [CommonModule, RouterLink, FormsModule, NgOptimizedImage, RteToolbarComponent, ImgFallbackDirective],
     templateUrl: './blog-detail.component.html',
 })
 export class BlogDetailComponent implements OnInit, OnDestroy {

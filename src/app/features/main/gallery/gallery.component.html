@@ -47,7 +47,8 @@
 
             <!-- Image -->
             @if (item.mediaType === 'image' || item.mediaType === 'gif') {
-            <img [src]="item.mediaUrl" [alt]="item.altText || item.title || ''" loading="lazy" />
+            <img [src]="item.mediaUrl" [alt]="item.altText || item.title || ''"
+                [attr.loading]="i < 3 ? 'eager' : 'lazy'" [attr.fetchpriority]="i === 0 ? 'high' : null" />
             }
 
             <!-- Video thumbnail -->

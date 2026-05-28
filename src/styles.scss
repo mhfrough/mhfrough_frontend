@@ -2037,6 +2037,7 @@ body::before {
 }
 
 .home-project-thumb {
+    position: relative;
     width: 96px;
     height: 64px;
     overflow: hidden;
@@ -2086,6 +2087,7 @@ body::before {
 }
 
 .project-detail-cover {
+    position: relative;
     width: 100%;
     aspect-ratio: 16 / 7;
     overflow: hidden;
@@ -2265,6 +2267,7 @@ body::before {
     }
 
     .blog-thumb {
+        position: relative;
         overflow: hidden;
         width: 220px;
         height: 180px;
@@ -5271,6 +5274,7 @@ button.admin-nav-link:last-child:hover {
 }
 
 .blog-detail-cover {
+    position: relative;
     width: 100%;
     aspect-ratio: 16 / 7;
     overflow: hidden;

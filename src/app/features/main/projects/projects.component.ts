@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, HostListener, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser, CommonModule } from '@angular/common';
+import { isPlatformBrowser, CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
@@ -10,7 +10,7 @@ import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 @Component({
     selector: 'app-projects',
     standalone: true,
-    imports: [CommonModule, RouterLink, ImgFallbackDirective, ExternalUrlPipe],
+    imports: [CommonModule, RouterLink, NgOptimizedImage, ImgFallbackDirective, ExternalUrlPipe],
     templateUrl: './projects.component.html',
 })
 export class ProjectsComponent implements OnInit, OnDestroy {
