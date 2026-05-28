@@ -13,11 +13,18 @@
         </div>
 
         @if (activeTab === 'chat') {
+        <div class="ac-sidebar-search">
+            <div class="ac-search-wrap">
+                <i class="bi bi-search"></i>
+                <input [value]="sessionSearch()" (input)="onSessionSearch($event)" placeholder="Search conversations…"
+                    autocomplete="off">
+            </div>
+        </div>
         <ul class="ac-session-list">
-            @if (sessions().length === 0) {
-            <li class="ac-session-empty">No active sessions</li>
+            @if (filteredSessions().length === 0) {
+            <li class="ac-session-empty">{{ sessionSearch() ? 'No results' : 'No active sessions' }}</li>
             }
-            @for (session of sessions(); track trackBySessionId($index, session)) {
+            @for (session of filteredSessions(); track trackBySessionId($index, session)) {
             <li class="ac-session-item" [class.is-active]="activeSessionId() === session.id"
                 [class.is-closed]="session.status === 'closed'" (click)="selectSession(session)">
                 <div class="ac-session-avatar">

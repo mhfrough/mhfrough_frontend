@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { FeedbackService } from '../../../core/services/inquiry-feedback.service';
@@ -20,6 +20,51 @@ export class AdminFeedbackComponent implements OnInit, OnDestroy {
     readonly deleteTargetId = signal<string | null>(null);
     readonly statusModal = signal<{ id: string; title: string; reason: string } | null>(null);
     private subs = new Subscription();
+
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(25);
+    readonly currentPage = signal(1);
+
+    readonly filteredFeedback = computed(() => {
+        const q = this.searchQuery().toLowerCase().trim();
+        if (!q) return this.feedback();
+        return this.feedback().filter(fb =>
+            fb.name?.toLowerCase().includes(q) ||
+            fb.role?.toLowerCase().includes(q) ||
+            fb.company?.toLowerCase().includes(q) ||
+            fb.review?.toLowerCase().includes(q)
+        );
+    });
+
+    readonly pagedFeedback = computed(() => {
+        const start = (this.currentPage() - 1) * this.pageSize();
+        return this.filteredFeedback().slice(start, start + this.pageSize());
+    });
+
+    readonly totalPages = computed(() =>
+        Math.max(1, Math.ceil(this.filteredFeedback().length / this.pageSize()))
+    );
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+    }
 
     ngOnInit() {
         this.load();

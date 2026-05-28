@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
@@ -24,6 +24,51 @@ export class AdminGalleryComponent implements OnInit {
     readonly statusModal = signal<{ id: string } | null>(null);
     readonly uploadError = signal<string | null>(null);
     readonly mediaPreview = signal<{ url: string; mediaType: string; mimeType: string; fileSize: number } | null>(null);
+
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(25);
+    readonly currentPage = signal(1);
+
+    readonly filteredItems = computed(() => {
+        const q = this.searchQuery().toLowerCase().trim();
+        const sorted = this.sortedItems();
+        if (!q) return sorted;
+        return sorted.filter(item =>
+            item.title?.toLowerCase().includes(q) ||
+            item.category?.toLowerCase().includes(q) ||
+            item.caption?.toLowerCase().includes(q)
+        );
+    });
+
+    readonly pagedItems = computed(() => {
+        const start = (this.currentPage() - 1) * this.pageSize();
+        return this.filteredItems().slice(start, start + this.pageSize());
+    });
+
+    readonly totalPages = computed(() =>
+        Math.max(1, Math.ceil(this.filteredItems().length / this.pageSize()))
+    );
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+    }
 
     readonly ALLOWED_MIME = [
         'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml',

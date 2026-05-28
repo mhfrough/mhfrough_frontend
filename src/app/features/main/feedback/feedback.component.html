@@ -10,13 +10,34 @@
     </div>
 
     <!-- ─── Approved Reviews Grid ────────────────────────────────────── -->
+    @if (loadingReviews() && reviews().length === 0) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+    </div>
+    } @else if (!loadingReviews() && total() === 0 && !searchQuery()) {
+    <p class="empty-state" style="text-align:left;padding:3rem 0 0">No reviews yet — be the first to leave one below.
+    </p>
+    } @else {
+
+    <div class="pub-list-toolbar">
+        <div class="pub-list-search">
+            <i class="bi bi-search"></i>
+            <input [value]="searchQuery()" (input)="onSearch($event)" placeholder="Search reviews…" autocomplete="off">
+        </div>
+        <select class="pub-page-size-select" [value]="pageSize()" (change)="onPageSizeChange($event)">
+            <option value="5">5 / page</option>
+            <option value="10">10 / page</option>
+            <option value="20">20 / page</option>
+        </select>
+        <span class="pub-list-toolbar-count">{{ total() }} review{{ total() !== 1 ? 's' : '' }}</span>
+    </div>
+
     @if (loadingReviews()) {
     <div class="loading-state">
         <div class="spinner"></div>
     </div>
     } @else if (reviews().length === 0) {
-    <p class="empty-state" style="text-align:left;padding:3rem 0 0">No reviews yet — be the first to leave one below.
-    </p>
+    <p class="empty-state" style="text-align:left;padding:1rem 0 0">No reviews match your search.</p>
     } @else {
     <div class="reviews-grid">
         @for (r of reviews(); track r.id) {
@@ -38,6 +59,32 @@
         </article>
         }
     </div>
+    }
+
+    @if (totalPages() > 1) {
+    <div class="pub-pagination">
+        <button class="pub-pagination-page" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        @if (pageNumbers[0] > 1) {
+        <button class="pub-pagination-page" (click)="goToPage(1)">1</button>
+        @if (pageNumbers[0] > 2) { <span class="pub-pagination-label">…</span> }
+        }
+        @for (n of pageNumbers; track n) {
+        <button class="pub-pagination-page" [class.is-active]="currentPage() === n" (click)="goToPage(n)">{{ n
+            }}</button>
+        }
+        @if (pageNumbers[pageNumbers.length - 1] < totalPages()) { @if (pageNumbers[pageNumbers.length - 1] <
+            totalPages() - 1) { <span class="pub-pagination-label">…</span> }
+            <button class="pub-pagination-page" (click)="goToPage(totalPages())">{{ totalPages() }}</button>
+            }
+            <button class="pub-pagination-page" (click)="goToPage(currentPage() + 1)"
+                [disabled]="currentPage() === totalPages()">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+            <span class="pub-pagination-label">{{ currentPage() }} / {{ totalPages() }}</span>
+    </div>
+    }
     }
 
     <!-- ─── Submit Form ──────────────────────────────────────────────── -->
@@ -71,7 +118,8 @@
                 <div class="contact-field">
                     <label class="contact-label">Name *</label>
                     <input [(ngModel)]="formData.name" name="name" required minlength="2" maxlength="100"
-                        class="contact-input" [class.is-error]="(f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid"
+                        class="contact-input"
+                        [class.is-error]="(f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid"
                         placeholder="Your full name">
                     @if ((f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid) {
                     <span class="contact-error">Please enter your name.</span>

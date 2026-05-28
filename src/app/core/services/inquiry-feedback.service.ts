@@ -19,6 +19,11 @@ export class FeedbackService {
     private readonly base = `${environment.apiUrl}/feedback`;
 
     getApproved() { return this.http.get<any[]>(this.base); }
+    getApprovedPaginated(page: number, limit: number, q?: string) {
+        const params: Record<string, any> = { page, limit };
+        if (q) params['q'] = q;
+        return this.http.get<{ data: any[]; total: number; page: number; limit: number; totalPages: number }>(this.base, { params });
+    }
     getAll() { return this.http.get<any[]>(`${this.base}/all`); }
     submit(data: any) { return this.http.post<any>(this.base, data); }
     approve(id: string) { return this.http.patch(`${this.base}/${id}/approve`, {}); }

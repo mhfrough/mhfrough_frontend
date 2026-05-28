@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BlogsService } from '../../../core/services/blogs.service';
 import { AdminNotificationService } from '../../../core/services/admin-notification.service';
@@ -21,6 +21,50 @@ export class AdminCommentsComponent implements OnInit, OnDestroy {
     readonly filter = signal<'pending' | 'all'>('pending');
     readonly deleteTargetId = signal<string | null>(null);
     readonly statusModal = signal<{ id: string; title: string; reason: string } | null>(null);
+
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(25);
+    readonly currentPage = signal(1);
+
+    readonly filteredComments = computed(() => {
+        const q = this.searchQuery().toLowerCase().trim();
+        if (!q) return this.comments();
+        return this.comments().filter(c =>
+            c.authorName?.toLowerCase().includes(q) ||
+            c.authorEmail?.toLowerCase().includes(q) ||
+            c.content?.toLowerCase().includes(q)
+        );
+    });
+
+    readonly pagedComments = computed(() => {
+        const start = (this.currentPage() - 1) * this.pageSize();
+        return this.filteredComments().slice(start, start + this.pageSize());
+    });
+
+    readonly totalPages = computed(() =>
+        Math.max(1, Math.ceil(this.filteredComments().length / this.pageSize()))
+    );
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+    }
 
     private subs = new Subscription();
 
@@ -64,6 +108,8 @@ export class AdminCommentsComponent implements OnInit, OnDestroy {
 
     setFilter(f: 'pending' | 'all') {
         this.filter.set(f);
+        this.searchQuery.set('');
+        this.currentPage.set(1);
         this.load();
     }
 

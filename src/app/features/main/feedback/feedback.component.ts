@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FeedbackService } from '../../../core/services/inquiry-feedback.service';
 import { UserInfoService } from '../../../core/services/user-info.service';
@@ -16,6 +17,8 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     private service = inject(FeedbackService);
     private userInfo = inject(UserInfoService);
     private readonly realtime = inject(RealtimeService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
     readonly sending = signal(false);
     readonly sent = signal(false);
     readonly error = signal('');
@@ -27,31 +30,83 @@ export class FeedbackComponent implements OnInit, OnDestroy {
 
     formData = { name: '', email: '', role: '', company: '', review: '' };
 
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(5);
+    readonly currentPage = signal(1);
+    readonly total = signal(0);
+    readonly totalPages = signal(1);
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    private loadReviews() {
+        this.loadingReviews.set(true);
+        this.service.getApprovedPaginated(this.currentPage(), this.pageSize(), this.searchQuery() || undefined)
+            .subscribe({
+                next: (res) => {
+                    this.reviews.set(res.data);
+                    this.total.set(res.total);
+                    this.totalPages.set(res.totalPages);
+                    this.loadingReviews.set(false);
+                },
+                error: () => this.loadingReviews.set(false),
+            });
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+        this.loadReviews();
+        this.syncUrl();
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+        this.loadReviews();
+        this.syncUrl();
+    }
+
+    goToPage(n: number) {
+        this.currentPage.set(n);
+        this.loadReviews();
+        this.syncUrl();
+    }
+
+    private syncUrl() {
+        const q = this.searchQuery();
+        const page = this.currentPage();
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { q: q || null, page: page > 1 ? page : null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
     ngOnInit() {
+        const p = this.route.snapshot.queryParams;
+        if (p['q']) this.searchQuery.set(p['q']);
+        if (p['page']) this.currentPage.set(+p['page']);
+
         const saved = this.userInfo.get();
         if (saved) {
             this.formData = { ...this.formData, name: saved.name ?? '', email: saved.email ?? '' };
         }
-        this.service.getApproved().subscribe({
-            next: (data: any[]) => { this.reviews.set(data); this.loadingReviews.set(false); },
-            error: () => this.loadingReviews.set(false),
-        });
+        this.loadReviews();
 
-        // Admin approved a review → append to public list
-        this.subs.add(this.realtime.on<any>('feedback:approved').subscribe(item => {
-            this.reviews.update(list => {
-                const exists = list.some(r => r.id === item.id);
-                return exists ? list.map(r => r.id === item.id ? item : r) : [...list, item];
-            });
-        }));
-
-        // Admin unapproved/deleted → remove from public list
-        this.subs.add(this.realtime.on<{ id: string }>('feedback:unapproved').subscribe(({ id }) => {
-            this.reviews.update(list => list.filter(r => r.id !== id));
-        }));
-        this.subs.add(this.realtime.on<{ id: string }>('feedback:deleted').subscribe(({ id }) => {
-            this.reviews.update(list => list.filter(r => r.id !== id));
-        }));
+        // Admin approved/unapproved/deleted → reload current page
+        this.subs.add(this.realtime.on<any>('feedback:approved').subscribe(() => this.loadReviews()));
+        this.subs.add(this.realtime.on<{ id: string }>('feedback:unapproved').subscribe(() => this.loadReviews()));
+        this.subs.add(this.realtime.on<{ id: string }>('feedback:deleted').subscribe(() => this.loadReviews()));
     }
 
     ngOnDestroy() { this.subs.unsubscribe(); }

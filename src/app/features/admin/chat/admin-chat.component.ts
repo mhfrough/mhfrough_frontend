@@ -1,5 +1,5 @@
 import {
-    Component, OnInit, OnDestroy, inject, signal,
+    Component, OnInit, OnDestroy, inject, signal, computed,
     ViewChild, ElementRef, effect, untracked, afterRenderEffect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -29,6 +29,21 @@ export class AdminChatComponent implements OnInit, OnDestroy {
 
     readonly deleteTargetId = signal<string | null>(null);
     readonly closeTargetId = signal<string | null>(null);
+
+    // Chat sidebar search
+    readonly sessionSearch = signal('');
+
+    readonly filteredSessions = computed(() => {
+        const q = this.sessionSearch().toLowerCase().trim();
+        if (!q) return this.sessions();
+        return this.sessions().filter(s =>
+            s.visitorName?.toLowerCase().includes(q)
+        );
+    });
+
+    onSessionSearch(e: Event) {
+        this.sessionSearch.set((e.target as HTMLInputElement).value);
+    }
 
     // Settings form
     greetingMessages: string[] = [];

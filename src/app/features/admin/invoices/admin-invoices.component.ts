@@ -28,6 +28,50 @@ export class AdminInvoicesComponent implements OnInit {
             .reduce((acc, i) => acc + Number(i.total), 0),
     );
 
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(25);
+    readonly currentPage = signal(1);
+
+    readonly filteredInvoices = computed(() => {
+        const q = this.searchQuery().toLowerCase().trim();
+        if (!q) return this.invoices();
+        return this.invoices().filter(inv =>
+            inv.invoiceNumber?.toLowerCase().includes(q) ||
+            (inv as any).clientName?.toLowerCase().includes(q) ||
+            (inv as any).clientEmail?.toLowerCase().includes(q)
+        );
+    });
+
+    readonly pagedInvoices = computed(() => {
+        const start = (this.currentPage() - 1) * this.pageSize();
+        return this.filteredInvoices().slice(start, start + this.pageSize());
+    });
+
+    readonly totalPages = computed(() =>
+        Math.max(1, Math.ceil(this.filteredInvoices().length / this.pageSize()))
+    );
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+    }
+
     ngOnInit() {
         this.load();
     }

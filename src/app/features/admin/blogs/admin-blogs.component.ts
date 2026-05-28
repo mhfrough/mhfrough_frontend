@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { BlogsService } from '../../../core/services/blogs.service';
@@ -24,6 +24,50 @@ export class AdminBlogsComponent implements OnInit {
     readonly uploading = signal(false);
     readonly dragOver = signal(false);
     readonly uploadError = signal<string | null>(null);
+
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(25);
+    readonly currentPage = signal(1);
+
+    readonly filteredBlogs = computed(() => {
+        const q = this.searchQuery().toLowerCase().trim();
+        if (!q) return this.blogs();
+        return this.blogs().filter(b =>
+            b.title?.toLowerCase().includes(q) ||
+            b.slug?.toLowerCase().includes(q) ||
+            b.tags?.some((t: string) => t.toLowerCase().includes(q))
+        );
+    });
+
+    readonly pagedBlogs = computed(() => {
+        const start = (this.currentPage() - 1) * this.pageSize();
+        return this.filteredBlogs().slice(start, start + this.pageSize());
+    });
+
+    readonly totalPages = computed(() =>
+        Math.max(1, Math.ceil(this.filteredBlogs().length / this.pageSize()))
+    );
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+    }
 
     ngOnInit() { this.load(); }
 

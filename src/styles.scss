@@ -7288,3 +7288,312 @@ button.admin-nav-link:last-child:hover {
     min-width: 4rem;
     display: inline-block;
 }
+
+// -- Admin List Toolbar (search + page-size) ---------------------------------
+
+.admin-list-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+
+    &-count {
+        margin-left: auto;
+        font-family: var(--font-sans);
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+}
+
+.admin-list-search {
+    position: relative;
+    flex: 1;
+    min-width: 160px;
+    max-width: 320px;
+
+    i {
+        position: absolute;
+        left: 0.65rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        pointer-events: none;
+    }
+
+    input {
+        width: 100%;
+        height: 2.1rem;
+        padding: 0 0.75rem 0 2rem;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-family: var(--font-sans);
+        font-size: 0.82rem;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color var(--dur) var(--ease);
+
+        &::placeholder {
+            color: var(--text-muted);
+        }
+
+        &:focus {
+            border-color: rgba(228, 224, 216, 0.35);
+        }
+    }
+}
+
+.admin-page-size-select {
+    height: 2.1rem;
+    padding: 0 0.6rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    outline: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color var(--dur) var(--ease);
+
+    &:focus {
+        border-color: rgba(228, 224, 216, 0.35);
+    }
+
+    option {
+        background: var(--bg-alt);
+        color: var(--text);
+    }
+}
+
+// -- Admin Pagination ---------------------------------------------------------
+
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0 0.25rem;
+    flex-wrap: wrap;
+
+    &-label {
+        font-family: var(--font-sans);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        min-width: 64px;
+        text-align: center;
+    }
+
+    &-pages {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    &-page {
+        min-width: 28px;
+        height: 28px;
+        padding: 0 0.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-muted);
+        font-family: var(--font-sans);
+        font-size: 0.78rem;
+        cursor: pointer;
+        transition: all var(--dur) var(--ease);
+
+        &:hover:not(:disabled):not(.is-active) {
+            border-color: rgba(228, 224, 216, 0.3);
+            color: var(--text);
+        }
+
+        &.is-active {
+            border-color: var(--text);
+            color: var(--text);
+            background: rgba(228, 224, 216, 0.08);
+        }
+
+        &:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+    }
+}
+
+// -- Public List Toolbar (search + page-size) ---------------------------------
+
+.pub-list-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+
+    &-count {
+        margin-left: auto;
+        font-family: var(--font-sans);
+        font-size: 0.82rem;
+        color: var(--text-muted);
+    }
+}
+
+.pub-list-search {
+    position: relative;
+    flex: 1;
+    min-width: 180px;
+    max-width: 380px;
+
+    i {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+
+    input {
+        width: 100%;
+        height: 2.25rem;
+        padding: 0 0.9rem 0 2.2rem;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-family: var(--font-sans);
+        font-size: 0.875rem;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color var(--dur) var(--ease);
+
+        &::placeholder {
+            color: var(--text-muted);
+        }
+
+        &:focus {
+            border-color: rgba(228, 224, 216, 0.35);
+        }
+    }
+}
+
+.pub-page-size-select {
+    height: 2.25rem;
+    padding: 0 0.7rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    outline: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color var(--dur) var(--ease);
+
+    &:focus {
+        border-color: rgba(228, 224, 216, 0.35);
+    }
+
+    option {
+        background: var(--bg-alt);
+        color: var(--text);
+    }
+}
+
+// -- Public Pagination ---------------------------------------------------------
+
+.pub-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+
+    &-label {
+        font-family: var(--font-sans);
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        padding: 0 0.5rem;
+    }
+
+    &-page {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-muted);
+        font-family: var(--font-sans);
+        font-size: 0.875rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all var(--dur) var(--ease);
+
+        &:hover:not(:disabled):not(.is-active) {
+            border-color: rgba(228, 224, 216, 0.3);
+            color: var(--text);
+        }
+
+        &.is-active {
+            border-color: var(--text);
+            color: var(--text);
+            background: rgba(228, 224, 216, 0.08);
+        }
+
+        &:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+    }
+}
+
+// -- Chat sidebar search -------------------------------------------------------
+
+.ac-sidebar-search {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+
+    .ac-search-wrap {
+        position: relative;
+
+        i {
+            position: absolute;
+            left: 0.6rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            pointer-events: none;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.38rem 0.65rem 0.38rem 1.85rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--font-sans);
+            font-size: 0.78rem;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color var(--dur) var(--ease);
+
+            &::placeholder {
+                color: var(--text-muted);
+            }
+
+            &:focus {
+                border-color: rgba(228, 224, 216, 0.3);
+            }
+        }
+    }
+}

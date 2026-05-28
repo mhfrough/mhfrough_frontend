@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ProjectsService } from '../../../core/services/projects.service';
@@ -28,6 +28,50 @@ export class AdminProjectsComponent implements OnInit, OnDestroy {
     readonly dragOver = signal(false);
     readonly uploadError = signal<string | null>(null);
     private subs = new Subscription();
+
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(25);
+    readonly currentPage = signal(1);
+
+    readonly filteredProjects = computed(() => {
+        const q = this.searchQuery().toLowerCase().trim();
+        if (!q) return this.projects();
+        return this.projects().filter(p =>
+            p.title?.toLowerCase().includes(q) ||
+            p.techStack?.some((t: string) => t.toLowerCase().includes(q))
+        );
+    });
+
+    readonly pagedProjects = computed(() => {
+        const start = (this.currentPage() - 1) * this.pageSize();
+        return this.filteredProjects().slice(start, start + this.pageSize());
+    });
+
+    readonly totalPages = computed(() =>
+        Math.max(1, Math.ceil(this.filteredProjects().length / this.pageSize()))
+    );
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        const delta = 2;
+        for (let i = Math.max(1, cur - delta); i <= Math.min(total, cur + delta); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+    }
 
     ngOnInit() {
         this.load();

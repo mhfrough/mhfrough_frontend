@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, HostListener, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
@@ -17,40 +17,86 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private projectsService = inject(ProjectsService);
     private platformId = inject(PLATFORM_ID);
     private readonly realtime = inject(RealtimeService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
     readonly projects = signal<any[]>([]);
     readonly loading = signal(true);
     readonly lightboxSrc = signal<string | null>(null);
     private subs = new Subscription();
 
-    ngOnInit() {
-        this.projectsService.getAll().subscribe({
-            next: (data: any[]) => { this.projects.set(data); this.loading.set(false); },
-            error: () => this.loading.set(false),
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(5);
+    readonly currentPage = signal(1);
+    readonly total = signal(0);
+    readonly totalPages = signal(1);
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    private load() {
+        this.loading.set(true);
+        this.projectsService.getPublic(this.currentPage(), this.pageSize(), this.searchQuery() || undefined)
+            .subscribe({
+                next: (res) => {
+                    this.projects.set(res.data);
+                    this.total.set(res.total);
+                    this.totalPages.set(res.totalPages);
+                    this.loading.set(false);
+                },
+                error: () => this.loading.set(false),
+            });
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+        this.load();
+        this.syncUrl();
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+        this.load();
+        this.syncUrl();
+    }
+
+    goToPage(n: number) {
+        this.currentPage.set(n);
+        this.load();
+        this.syncUrl();
+    }
+
+    private syncUrl() {
+        const q = this.searchQuery();
+        const page = this.currentPage();
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { q: q || null, page: page > 1 ? page : null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
         });
+    }
 
-        this.subs.add(this.realtime.on<any>('project:created').subscribe(project => {
-            if (project.isPublished) {
-                this.projects.update(list => [...list, project]);
-            }
-        }));
+    ngOnInit() {
+        const p = this.route.snapshot.queryParams;
+        if (p['q']) this.searchQuery.set(p['q']);
+        if (p['page']) this.currentPage.set(+p['page']);
 
-        this.subs.add(this.realtime.on<any>('project:updated').subscribe(project => {
-            if (project.isPublished) {
-                this.projects.update(list => {
-                    const exists = list.some(p => p.id === project.id);
-                    return exists ? list.map(p => p.id === project.id ? project : p) : [...list, project];
-                });
-            } else {
-                this.projects.update(list => list.filter(p => p.id !== project.id));
-            }
-        }));
+        this.load();
 
-        this.subs.add(this.realtime.on<{ id: string }>('project:unpublished').subscribe(({ id }) => {
-            this.projects.update(list => list.filter(p => p.id !== id));
-        }));
-        this.subs.add(this.realtime.on<{ id: string }>('project:deleted').subscribe(({ id }) => {
-            this.projects.update(list => list.filter(p => p.id !== id));
-        }));
+        this.subs.add(this.realtime.on<any>('project:created').subscribe(() => this.load()));
+        this.subs.add(this.realtime.on<any>('project:updated').subscribe(() => this.load()));
+        this.subs.add(this.realtime.on<{ id: string }>('project:unpublished').subscribe(() => this.load()));
+        this.subs.add(this.realtime.on<{ id: string }>('project:deleted').subscribe(() => this.load()));
     }
 
     ngOnDestroy() {
