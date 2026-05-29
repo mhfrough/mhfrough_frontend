@@ -4,6 +4,7 @@ import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { BlogsService } from '../../../../core/services/blogs.service';
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
 import { PreconnectService } from '../../../../core/services/preconnect.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-blog-list',
@@ -16,6 +17,7 @@ export class BlogListComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private preconnect = inject(PreconnectService);
+    private titleService = inject(Title);
     readonly blogs = signal<any[]>([]);
     readonly loading = signal(true);
 
@@ -102,6 +104,7 @@ export class BlogListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.titleService.setTitle('Blog | Mohammad Hamza');
         const p = this.route.snapshot.queryParams;
         if (p['q']) this.searchQuery.set(p['q']);
         if (p['page']) this.currentPage.set(+p['page']);

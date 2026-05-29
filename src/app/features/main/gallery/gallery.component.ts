@@ -3,6 +3,7 @@ import {
     HostListener, PLATFORM_ID
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule, DatePipe } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
@@ -16,6 +17,7 @@ import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.di
 export class GalleryComponent implements OnInit, OnDestroy {
     private galleryService = inject(GalleryService);
     private platformId = inject(PLATFORM_ID);
+    private titleService = inject(Title);
 
     readonly PAGE_SIZE = 24;
 
@@ -44,6 +46,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     private searchTimer?: ReturnType<typeof setTimeout>;
 
     ngOnInit() {
+        this.titleService.setTitle('Gallery | Mohammad Hamza');
         this.galleryService.getCategories().subscribe({
             next: (cats) => this.categories.set(cats),
         });

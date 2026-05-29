@@ -1,8 +1,9 @@
-import { Component, inject, signal, HostBinding, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, signal, HostBinding, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { Title } from '@angular/platform-browser';
 import { SoundService } from '../../../core/services/sound.service';
 
 @Component({
@@ -11,11 +12,12 @@ import { SoundService } from '../../../core/services/sound.service';
     imports: [CommonModule, DatePipe, FormsModule, RouterLink],
     templateUrl: './admin-login.component.html',
 })
-export class AdminLoginComponent implements OnDestroy {
+export class AdminLoginComponent implements OnInit, OnDestroy {
     @HostBinding('attr.data-bs-theme') readonly darkTheme = 'dark';
     private auth = inject(AuthService);
     private router = inject(Router);
     private sound = inject(SoundService);
+    private titleService = inject(Title);
     readonly loading = signal(false);
     readonly error = signal('');
     readonly warning = signal('');
@@ -27,6 +29,10 @@ export class AdminLoginComponent implements OnDestroy {
 
     ngOnDestroy(): void {
         this.clearTimer();
+    }
+
+    ngOnInit(): void {
+        this.titleService.setTitle('Admin Login | Mohammad Hamza');
     }
 
     private clearTimer(): void {
