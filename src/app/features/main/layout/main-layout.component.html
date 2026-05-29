@@ -64,8 +64,8 @@
                 @if (footerLinksOverflow().length > 0) {
                 <div class="footer-social-overflow" #overflowRef>
                     <button class="footer-social-more" (click)="toggleFooterOverflow(); $event.stopPropagation()"
-                        [attr.aria-expanded]="footerOverflowOpen()"
-                        aria-label="More social links">+{{ footerLinksOverflow().length }}</button>
+                        [attr.aria-expanded]="footerOverflowOpen()" aria-label="More social links">+{{
+                        footerLinksOverflow().length }}</button>
                     @if (footerOverflowOpen()) {
                     <div class="footer-social-dropdown">
                         @for (link of footerLinksOverflow(); track link.key) {
