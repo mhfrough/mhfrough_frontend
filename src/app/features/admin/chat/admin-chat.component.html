@@ -157,7 +157,8 @@
         <div class="ac-messages" #msgsEl>
             @for (msg of activeMsgs(); track trackById($index, msg)) {
             <div class="ac-msg" [class.ac-msg--admin]="msg.sender === 'admin'"
-                [class.ac-msg--visitor]="msg.sender === 'visitor'">
+                [class.ac-msg--visitor]="msg.sender === 'visitor'"
+                [class.ac-msg--unread]="msg.sender === 'visitor' && !msg.read">
                 @if (msg.messageType === 'audio' && msg.audioUrl) {
                 @let bars = audioBarsFor(msg.id);
                 <div class="ac-audio-msg ac-msg-bubble">

@@ -83,6 +83,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     private _prevActiveMsgsCount = -1;
     private _prevSessionsCount = -1;
     private _titleBlinkInterval?: ReturnType<typeof setInterval>;
+    private _titleBlinkLabel = '';
     private _originalTitle = '';
 
     constructor() {
@@ -100,23 +101,36 @@ export class AdminChatComponent implements OnInit, OnDestroy {
                     const newFromVisitor = msgs.slice(this._prevActiveMsgsCount).filter(m => m.sender === 'visitor');
                     if (newFromVisitor.length > 0 && isPlatformBrowser(this.platformId)) {
                         this.sound.play('notification');
-                        this._startTitleBlink('💬 New Message');
+                        // Title managed by unreadChatCount effect below
                     }
                 }
                 this._prevActiveMsgsCount = msgs.length;
             });
         });
 
-        // Sound + title blink when a brand-new chat session arrives
+        // Sound when a brand-new chat session arrives
         effect(() => {
             const sessions = this.sessions();
             untracked(() => {
                 if (this._prevSessionsCount >= 0 && sessions.length > this._prevSessionsCount
                     && isPlatformBrowser(this.platformId)) {
                     this.sound.play('notification');
-                    this._startTitleBlink('💬 New Chat');
+                    // Title managed by unreadChatCount effect below
                 }
                 this._prevSessionsCount = sessions.length;
+            });
+        });
+
+        // Title blink driven by total unread count across all sessions
+        effect(() => {
+            const count = this.chatService.unreadChatCount();
+            untracked(() => {
+                if (!isPlatformBrowser(this.platformId)) return;
+                if (count > 0) {
+                    this._startTitleBlink(`💬 (${count}) New Message`);
+                } else {
+                    this._stopTitleBlink();
+                }
             });
         });
 
@@ -167,7 +181,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
 
     selectSession(session: ChatSession) {
         this.chatService.selectSession(session.id);
-        this._stopTitleBlink();
+        // Title will reset automatically once unreadChatCount drops to 0 via sessions:update
     }
 
     sendMessage() {
@@ -289,11 +303,13 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     // ─── Title blink ──────────────────────────────────────────────────────────
 
     private _startTitleBlink(label: string): void {
-        if (!isPlatformBrowser(this.platformId) || this._titleBlinkInterval) return;
+        if (!isPlatformBrowser(this.platformId)) return;
+        this._titleBlinkLabel = label; // Update label even if already blinking
+        if (this._titleBlinkInterval) return;
         this._originalTitle = document.title;
         let blink = false;
         this._titleBlinkInterval = setInterval(() => {
-            document.title = blink ? label : this._originalTitle;
+            document.title = blink ? this._titleBlinkLabel : this._originalTitle;
             blink = !blink;
         }, 1000);
     }

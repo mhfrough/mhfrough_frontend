@@ -14,6 +14,8 @@ export interface ChatMessage {
     createdAt: string;
     messageType?: 'text' | 'audio';
     audioUrl?: string | null;
+    /** Client-side only: true when this admin message arrived while the widget was closed */
+    isUnread?: boolean;
 }
 
 export interface ChatSession {
@@ -92,13 +94,15 @@ export class ChatService {
                     sessionStorage.setItem(SESSION_KEY, res.sessionId);
                     sessionStorage.setItem(VISITOR_NAME_KEY, visitorName);
                     this.visitorSessionId.set(res.sessionId);
-                    this.visitorMessages.set(res.messages);
+                    // Mark all loaded history as already-read so the counter starts at 0
+                    this.visitorMessages.set(res.messages.map(m => ({ ...m, isUnread: false })));
                 },
             );
         });
 
         this.socket.on('message:new', (msg: ChatMessage) => {
-            this.visitorMessages.update(m => [...m, msg]);
+            // New admin messages are unread until the widget is opened
+            this.visitorMessages.update(m => [...m, { ...msg, isUnread: msg.sender === 'admin' }]);
         });
 
         this.socket.on('admin:typing', (data: { isTyping: boolean }) => {
@@ -147,6 +151,11 @@ export class ChatService {
         this.socket?.emit('visitor:typing', { sessionId, isTyping });
     }
 
+    /** Clear unread flags on all visitor messages (called when widget opens) */
+    markAllVisitorMsgsRead() {
+        this.visitorMessages.update(msgs => msgs.map(m => ({ ...m, isUnread: false })));
+    }
+
     getStoredSession(): { sessionId: string | null; visitorName: string | null } {
         if (!isPlatformBrowser(this.platformId)) return { sessionId: null, visitorName: null };
         return {
@@ -191,8 +200,14 @@ export class ChatService {
         });
 
         this.socket.on('sessions:update', (sessions: ChatSession[]) => {
-            this.sessions.set(sessions);
-            this.updateUnreadCount(sessions);
+            // If admin is currently viewing a session, keep its unread count at 0
+            // so the counter doesn't flicker after auto-marking messages as read
+            const activeId = this.activeSessionId();
+            const adjusted = activeId
+                ? sessions.map(s => s.id === activeId ? { ...s, unreadCount: 0 } : s)
+                : sessions;
+            this.sessions.set(adjusted);
+            this.updateUnreadCount(adjusted);
         });
 
         this.socket.on('message:new', (msg: ChatMessage) => {
@@ -202,6 +217,10 @@ export class ChatService {
             }
             if (msg.sessionId === this.activeSessionId()) {
                 this.activeMsgs.update(m => [...m, msg]);
+                // Auto-mark as read — admin is actively viewing this session
+                if (msg.sender === 'visitor') {
+                    this.markSessionReadHttp(msg.sessionId).subscribe();
+                }
             }
         });
 
@@ -247,6 +266,10 @@ export class ChatService {
 
     deleteSession(sessionId: string) {
         return this.http.delete(`${environment.apiUrl}/chat/sessions/${sessionId}`);
+    }
+
+    markSessionReadHttp(sessionId: string) {
+        return this.http.post(`${environment.apiUrl}/chat/sessions/${sessionId}/read`, {});
     }
 
     disconnectAdmin() {

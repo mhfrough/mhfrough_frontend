@@ -302,6 +302,22 @@
             align-self: flex-end;
         }
     }
+
+    &--unread {
+        .ac-msg-bubble {
+            border-color: var(--text) !important;
+        }
+
+        .ac-msg-time::after {
+            content: ' · NEW';
+            font-family: var(--font-mono);
+            font-size: 0.58rem;
+            font-weight: 700;
+            color: var(--text);
+            opacity: 0.55;
+            letter-spacing: 0.07em;
+        }
+    }
 }
 
 .ac-msg-bubble {

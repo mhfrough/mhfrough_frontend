@@ -1,5 +1,5 @@
 import {
-    Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID,
+    Component, OnInit, OnDestroy, inject, signal, computed, PLATFORM_ID,
     ViewChild, ElementRef, effect, untracked, afterRenderEffect, NgZone,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +30,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     readonly open = signal(false);
     readonly visible = signal(false);
     readonly started = signal(false);
-    readonly unreadCount = signal(0);
+    /** Derived from isUnread flags on messages — automatically accurate on reload */
+    readonly unreadCount = computed(() => this.chatService.visitorMessages().filter(m => m.isUnread === true).length);
     readonly messages = this.chatService.visitorMessages;
     readonly adminTyping = this.chatService.adminIsTyping;
     readonly sessionClosed = this.chatService.sessionClosed;
@@ -65,8 +66,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     private typingTimeout?: ReturnType<typeof setTimeout>;
     private _visibleTimer?: ReturnType<typeof setTimeout>;
     private _shouldScroll = signal(false);
-    private _prevMsgCount = -1;
+    private _prevUnreadCount = 0;
     private _titleBlinkInterval?: ReturnType<typeof setInterval>;
+    private _titleBlinkLabel = '';
     private _originalTitle = '';
 
     constructor() {
@@ -79,23 +81,17 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             });
         });
 
-        // Track unread admin messages while widget is closed — play sound + blink title
+        // Sound + title blink when unread count increases while widget is closed
         effect(() => {
-            const msgs = this.messages();
+            const count = this.unreadCount();
             untracked(() => {
-                if (this._prevMsgCount >= 0 && !this.open()) {
-                    const newAdminMsgs = msgs
-                        .slice(this._prevMsgCount)
-                        .filter(m => m.sender === 'admin').length;
-                    if (newAdminMsgs > 0) {
-                        this.unreadCount.update(n => n + newAdminMsgs);
-                        if (isPlatformBrowser(this.platformId)) {
-                            this.sound.play('notification');
-                            this._startTitleBlink();
-                        }
+                if (count > this._prevUnreadCount && !this.open()) {
+                    if (isPlatformBrowser(this.platformId)) {
+                        this.sound.play('notification');
+                        this._startTitleBlink();
                     }
                 }
-                this._prevMsgCount = msgs.length;
+                this._prevUnreadCount = count;
             });
         });
 
@@ -158,20 +154,22 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     toggle() {
         this.open.update(v => !v);
         if (this.open()) {
-            this.unreadCount.set(0);
-            this._prevMsgCount = this.messages().length;
-            this._stopTitleBlink();
+            // Mark all admin messages as read — clears unreadCount automatically via computed
+            this.chatService.markAllVisitorMsgsRead();
             this._shouldScroll.set(true);
             this.pickGreeting();
         }
     }
 
     private _startTitleBlink(): void {
-        if (!isPlatformBrowser(this.platformId) || this._titleBlinkInterval) return;
+        if (!isPlatformBrowser(this.platformId)) return;
+        const count = this.unreadCount();
+        this._titleBlinkLabel = count > 0 ? `💬 (${count}) New Message` : '💬 New Message';
+        if (this._titleBlinkInterval) return; // Already blinking; label updated above
         this._originalTitle = document.title;
         let blink = false;
         this._titleBlinkInterval = setInterval(() => {
-            document.title = blink ? '💬 New Message' : this._originalTitle;
+            document.title = blink ? this._titleBlinkLabel : this._originalTitle;
             blink = !blink;
         }, 1000);
     }
