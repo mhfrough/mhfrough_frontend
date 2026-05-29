@@ -93,7 +93,7 @@ export class AdminSettingsComponent implements OnInit {
     profileDisplayName = '';
     profileBio = '';
     profileAboutHtml = '';
-    profileTimezone = 'Asia/Karachi';
+    profileTimezone = 'Asia/Karāchi';
 
     /** All link fields keyed by field name */
     profileLinks: Record<string, string> = {};
@@ -102,7 +102,7 @@ export class AdminSettingsComponent implements OnInit {
     readonly SOCIAL_FIELDS: { key: string; label: string; icon: string; hasFooter: boolean; type?: string; placeholder: string }[] = [
         { key: 'contactEmail', label: 'Email', icon: 'bi-envelope', hasFooter: true, type: 'email', placeholder: 'contact@example.com' },
         { key: 'phone', label: 'Phone', icon: 'bi-telephone', hasFooter: false, type: 'tel', placeholder: '+1 555 000 0000' },
-        { key: 'location', label: 'Based in', icon: 'bi-geo-alt', hasFooter: false, placeholder: 'Karachi, Pakistan' },
+        { key: 'location', label: 'Based in', icon: 'bi-geo-alt', hasFooter: false, placeholder: 'Karāchi, Pakistan' },
         { key: 'website', label: 'Website', icon: 'bi-globe2', hasFooter: true, type: 'url', placeholder: 'https://yoursite.com' },
         { key: 'github', label: 'GitHub', icon: 'bi-github', hasFooter: true, placeholder: 'username or full URL' },
         { key: 'linkedin', label: 'LinkedIn', icon: 'bi-linkedin', hasFooter: true, placeholder: 'username or full URL' },
@@ -126,7 +126,7 @@ export class AdminSettingsComponent implements OnInit {
 
     readonly TIMEZONES = [
         'UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
-        'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Asia/Dubai', 'Asia/Karachi',
+        'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Asia/Dubai', 'Asia/Karāchi',
         'Asia/Kolkata', 'Asia/Dhaka', 'Asia/Bangkok', 'Asia/Singapore', 'Asia/Tokyo',
         'Australia/Sydney', 'Pacific/Auckland',
     ];
@@ -137,7 +137,7 @@ export class AdminSettingsComponent implements OnInit {
     readonly footerLoading = signal(false);
 
     footerCopyrightOwner = 'mhfrough.dev';
-    footerTagline = 'Made with \u2665 in Karachi';
+    footerTagline = 'Made with \u2665 in Karāchi';
     footerShowTagline = true;
 
     readonly year = new Date().getFullYear();
@@ -234,7 +234,7 @@ export class AdminSettingsComponent implements OnInit {
         this.rememberMeDays = s.rememberMeDays;
         this.sessionDurationDays = s.sessionDurationDays;
         this.footerCopyrightOwner = s.copyrightOwner ?? 'mhfrough.dev';
-        this.footerTagline = s.footerTagline ?? 'Made with \u2665 in Karachi';
+        this.footerTagline = s.footerTagline ?? 'Made with \u2665 in Karāchi';
         this.footerShowTagline = s.showFooterTagline ?? true;
     }
 
@@ -242,7 +242,7 @@ export class AdminSettingsComponent implements OnInit {
         this.profileDisplayName = p.displayName ?? '';
         this.profileBio = p.bio ?? '';
         this.profileAboutHtml = p.aboutHtml ?? '';
-        this.profileTimezone = p.timezone ?? 'Asia/Karachi';
+        this.profileTimezone = p.timezone ?? 'Asia/Karāchi';
         this.profileLinks = {
             contactEmail: p.contactEmail ?? '',
             phone: p.phone ?? '',

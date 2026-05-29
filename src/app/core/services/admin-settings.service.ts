@@ -71,7 +71,7 @@ const DEFAULTS: AdminSettings = {
     rememberMeDays: 30,
     sessionDurationDays: 1,
     copyrightOwner: 'mhfrough.dev',
-    footerTagline: 'Made with \u2665 in Karachi',
+    footerTagline: 'Made with \u2665 in Karāchi',
     showFooterTagline: true,
     updatedAt: '',
 };

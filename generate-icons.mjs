@@ -10,23 +10,23 @@ const SCREENSHOTS = './public/screenshots';
 // ─── SVG templates ────────────────────────────────────────────────────────────
 
 function iconSvg(size, maskable = false) {
-    // For maskable icons, content sits in the inner 80% (safe zone = 40% padding each side)
-    const pad = maskable ? size * 0.15 : size * 0.12;
-    const inner = size - pad * 2;
+  // For maskable icons, content sits in the inner 80% (safe zone = 40% padding each side)
+  const pad = maskable ? size * 0.15 : size * 0.12;
+  const inner = size - pad * 2;
 
-    // Noise filter — baked as a lightweight fractalNoise
-    const noiseId = `n${size}${maskable ? 'm' : ''}`;
+  // Noise filter — baked as a lightweight fractalNoise
+  const noiseId = `n${size}${maskable ? 'm' : ''}`;
 
-    // Font size scales with icon
-    const fs = inner * 0.38;
-    const cy = size / 2;
-    const cx = size / 2;
+  // Font size scales with icon
+  const fs = inner * 0.38;
+  const cy = size / 2;
+  const cx = size / 2;
 
-    // Dot accent
-    const dotR = inner * 0.045;
-    const dotY = cy + inner * 0.31;
+  // Dot accent
+  const dotR = inner * 0.045;
+  const dotY = cy + inner * 0.31;
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <defs>
     <filter id="${noiseId}" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="linearRGB">
       <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" stitchTiles="stitch" result="noise"/>
@@ -66,15 +66,15 @@ function iconSvg(size, maskable = false) {
 
 // Screenshot placeholder SVGs (1280×720 desktop, 390×844 mobile)
 function screenshotSvg(w, h) {
-    const cx = w / 2;
-    const cy = h / 2;
-    // Two-line sub-label — always split so it never hits the edge
-    const line1 = 'Application Developer &amp; Product Designer';
-    const line2 = '· Karachi';
-    const labelSize = w < 600 ? 13 : 15;   // smaller on narrow screens
-    const lineH = labelSize * 1.7;
+  const cx = w / 2;
+  const cy = h / 2;
+  // Two-line sub-label — always split so it never hits the edge
+  const line1 = 'Application Developer &amp; Product Designer';
+  const line2 = '· Karāchi';
+  const labelSize = w < 600 ? 13 : 15;   // smaller on narrow screens
+  const lineH = labelSize * 1.7;
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
   <rect width="${w}" height="${h}" fill="#1a1917"/>
   <text x="${cx}" y="${cy - 20}" text-anchor="middle" font-family="'Arial', 'Tahoma', sans-serif"
     font-size="60" font-weight="700" fill="#e4e0d8">\u0621</text>
@@ -90,7 +90,7 @@ function screenshotSvg(w, h) {
 
 // ─── Transparent SVG icon (no bg, paper noise, letter in website bg colour) ───
 function transparentIconSvg() {
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <defs>
     <filter id="paper" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="linearRGB">
       <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" stitchTiles="stitch" result="noise"/>
@@ -128,47 +128,47 @@ function transparentIconSvg() {
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
 
 async function run() {
-    for (const size of sizes) {
-        const svg = Buffer.from(iconSvg(size, false));
-        await sharp(svg).png().toFile(join(OUT, `icon-${size}x${size}.png`));
-        console.log(`✓ icon-${size}x${size}.png`);
-    }
+  for (const size of sizes) {
+    const svg = Buffer.from(iconSvg(size, false));
+    await sharp(svg).png().toFile(join(OUT, `icon-${size}x${size}.png`));
+    console.log(`✓ icon-${size}x${size}.png`);
+  }
 
-    // Maskable — only 192 and 512 needed
-    for (const size of [192, 512]) {
-        const svg = Buffer.from(iconSvg(size, true));
-        await sharp(svg).png().toFile(join(OUT, `icon-${size}x${size}-maskable.png`));
-        console.log(`✓ icon-${size}x${size}-maskable.png`);
-    }
+  // Maskable — only 192 and 512 needed
+  for (const size of [192, 512]) {
+    const svg = Buffer.from(iconSvg(size, true));
+    await sharp(svg).png().toFile(join(OUT, `icon-${size}x${size}-maskable.png`));
+    console.log(`✓ icon-${size}x${size}-maskable.png`);
+  }
 
-    // Screenshots (separate folder)
-    const { mkdirSync } = await import('fs');
-    mkdirSync(SCREENSHOTS, { recursive: true });
+  // Screenshots (separate folder)
+  const { mkdirSync } = await import('fs');
+  mkdirSync(SCREENSHOTS, { recursive: true });
 
-    const deskSvg = Buffer.from(screenshotSvg(1280, 720));
-    await sharp(deskSvg).png().toFile(join(SCREENSHOTS, 'screenshot-desktop.png'));
-    console.log('✓ screenshots/screenshot-desktop.png');
+  const deskSvg = Buffer.from(screenshotSvg(1280, 720));
+  await sharp(deskSvg).png().toFile(join(SCREENSHOTS, 'screenshot-desktop.png'));
+  console.log('✓ screenshots/screenshot-desktop.png');
 
-    const mobSvg = Buffer.from(screenshotSvg(390, 844));
-    await sharp(mobSvg).png().toFile(join(SCREENSHOTS, 'screenshot-mobile.png'));
-    console.log('✓ screenshots/screenshot-mobile.png');
+  const mobSvg = Buffer.from(screenshotSvg(390, 844));
+  await sharp(mobSvg).png().toFile(join(SCREENSHOTS, 'screenshot-mobile.png'));
+  console.log('✓ screenshots/screenshot-mobile.png');
 
-    // Favicon PNGs
-    const fav32 = Buffer.from(iconSvg(32, false));
-    await sharp(fav32).png().toFile('./public/favicon-32x32.png');
-    console.log('✓ favicon-32x32.png');
+  // Favicon PNGs
+  const fav32 = Buffer.from(iconSvg(32, false));
+  await sharp(fav32).png().toFile('./public/favicon-32x32.png');
+  console.log('✓ favicon-32x32.png');
 
-    const fav64 = Buffer.from(iconSvg(64, false));
-    await sharp(fav64).png().toFile('./public/favicon-64x64.png');
-    console.log('✓ favicon-64x64.png');
+  const fav64 = Buffer.from(iconSvg(64, false));
+  await sharp(fav64).png().toFile('./public/favicon-64x64.png');
+  console.log('✓ favicon-64x64.png');
 
-    // Transparent SVG icon (for public/icons/icon.svg)
-    const svgIcon = transparentIconSvg();
-    const { writeFileSync } = await import('fs');
-    writeFileSync(join(OUT, 'icon.svg'), svgIcon, 'utf8');
-    console.log('✓ icons/icon.svg (transparent)');
+  // Transparent SVG icon (for public/icons/icon.svg)
+  const svgIcon = transparentIconSvg();
+  const { writeFileSync } = await import('fs');
+  writeFileSync(join(OUT, 'icon.svg'), svgIcon, 'utf8');
+  console.log('✓ icons/icon.svg (transparent)');
 
-    console.log('\nAll icons generated.');
+  console.log('\nAll icons generated.');
 }
 
 run().catch(err => { console.error(err); process.exit(1); });

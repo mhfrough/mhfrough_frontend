@@ -29,7 +29,7 @@ export interface FooterSettings {
 
 const DEFAULTS: FooterSettings = {
     copyrightOwner: 'mhfrough.dev',
-    footerTagline: 'Made with \u2665 in Karachi',
+    footerTagline: 'Made with \u2665 in Karāchi',
     showFooterTagline: true,
     displayName: null,
     avatarUrl: null,
