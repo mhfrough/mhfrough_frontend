@@ -33,9 +33,9 @@ export class ActivityLogService {
         return this.http.delete(`${this.base}/all`);
     }
 
-    reportClientError(message: string, stack?: string, context?: string) {
+    reportClientError(message: string, stack?: string, context?: string, statusCode?: number) {
         const url = typeof window !== 'undefined' ? window.location.href : '';
-        return this.http.post(`${this.base}/client-error`, { message, stack, url, context }, { responseType: 'text' });
+        return this.http.post(`${this.base}/client-error`, { message, stack, url, context, statusCode }, { responseType: 'text' });
     }
 
     reportPageNotFound(url: string) {
