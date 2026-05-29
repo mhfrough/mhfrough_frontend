@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { SoundService } from '../../../core/services/sound.service';
 
 @Component({
     selector: 'app-admin-login',
@@ -14,6 +15,7 @@ export class AdminLoginComponent implements OnDestroy {
     @HostBinding('attr.data-bs-theme') readonly darkTheme = 'dark';
     private auth = inject(AuthService);
     private router = inject(Router);
+    private sound = inject(SoundService);
     readonly loading = signal(false);
     readonly error = signal('');
     readonly warning = signal('');
@@ -65,21 +67,31 @@ export class AdminLoginComponent implements OnDestroy {
             next: () => this.router.navigate(['/admin']),
             error: (err) => {
                 this.loading.set(false);
-                const body = err?.error ?? {};
+                const raw = err?.error;
+                let body: Record<string, unknown> = {};
+                if (raw && typeof raw === 'object') {
+                    body = raw;
+                } else if (typeof raw === 'string') {
+                    try { body = JSON.parse(raw); } catch { /* non-JSON */ }
+                }
                 const status = err?.status;
 
-                if (body.error === 'account_locked' || status === 423) {
-                    const lockedUntil = body.lockedUntil
-                        ? new Date(body.lockedUntil)
-                        : new Date(Date.now() + (body.remainingMinutes ?? 180) * 60 * 1000);
+                if (body['error'] === 'account_locked' || status === 423) {
+                    const lockedUntil = body['lockedUntil']
+                        ? new Date(body['lockedUntil'] as string)
+                        : new Date(Date.now() + ((body['remainingMinutes'] as number) ?? 180) * 60 * 1000);
                     this.lockInfo.set({ lockedUntil, remainingSeconds: 0 });
                     this.startCountdown(lockedUntil);
-                } else if (body.error === 'invalid_credentials' || (status === 401 && body.attemptsLeft !== undefined)) {
-                    this.warning.set(body.warning ?? 'Wrong password.');
+                    this.sound.play('error');
+                } else if (body['error'] === 'invalid_credentials' || (status === 401 && body['attemptsLeft'] !== undefined)) {
+                    this.warning.set((body['warning'] as string) ?? 'Wrong password.');
+                    this.sound.play('notification');
                 } else if (status === 429) {
                     this.error.set('Too many attempts. Please wait before trying again.');
+                    this.sound.play('error');
                 } else {
-                    this.error.set(body.message ?? 'Login failed. Please try again.');
+                    this.error.set((body['message'] as string) ?? 'Login failed. Please try again.');
+                    this.sound.play('error');
                 }
             },
         });

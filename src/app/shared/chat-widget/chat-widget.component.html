@@ -73,13 +73,12 @@
             @if (msg.messageType === 'audio' && msg.audioUrl) {
             @let bars = audioBarsFor(msg.id);
             <div class="cw-audio-msg">
-                <button class="cw-audio-play" type="button"
-                    (click)="toggleAudio(msg.id, msg.audioUrl)"
+                <button class="cw-audio-play" type="button" (click)="toggleAudio(msg.id, msg.audioUrl)"
                     [attr.aria-label]="playingAudioId() === msg.id ? 'Pause' : 'Play audio'">
                     @if (playingAudioId() === msg.id) {
                     <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
-                        <rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16"
-                            rx="1" />
+                        <rect x="6" y="4" width="4" height="16" rx="1" />
+                        <rect x="14" y="4" width="4" height="16" rx="1" />
                     </svg>
                     } @else {
                     <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
@@ -90,19 +89,16 @@
                 <div class="cw-audio-track">
                     <div class="cw-audio-waveform">
                         @for (h of bars; track $index; let i = $index) {
-                        <div class="cw-audio-wv-bar"
-                            [style.height.px]="h * 0.28"
+                        <div class="cw-audio-wv-bar" [style.height.px]="h * 0.28"
                             [class.is-played]="(audioProgress()[msg.id] || 0) / (audioDurations()[msg.id] || 1) > i / bars.length">
                         </div>
                         }
                     </div>
                     <div class="cw-audio-scrub-row">
-                        <input type="range" class="cw-audio-scrubber"
-                            [max]="audioDurations()[msg.id] || 1"
+                        <input type="range" class="cw-audio-scrubber" [max]="audioDurations()[msg.id] || 1"
                             [value]="audioProgress()[msg.id] || 0"
                             (input)="seekAudio(msg.id, msg.audioUrl, $any($event.target).value)"
-                            (mousedown)="getOrCreateAudioEl_noop(msg.id, msg.audioUrl)"
-                            aria-label="Seek audio" />
+                            (mousedown)="getOrCreateAudioEl_noop(msg.id, msg.audioUrl)" aria-label="Seek audio" />
                         <span class="cw-audio-time">
                             {{ formatAudioTime(audioProgress()[msg.id]) }}
                             @if (audioDurations()[msg.id]) { / {{ formatAudioTime(audioDurations()[msg.id]) }} }

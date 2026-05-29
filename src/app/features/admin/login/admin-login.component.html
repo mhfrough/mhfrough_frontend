@@ -24,7 +24,10 @@
             <span>{{ warning() }}</span>
         </div>
         } @else if (error()) {
-        <div class="admin-alert admin-alert--error">{{ error() }}</div>
+        <div class="admin-alert admin-alert--error">
+            <i class="bi bi-exclamation-octagon-fill" style="flex-shrink:0"></i>
+            <span>{{ error() }}</span>
+        </div>
         }
 
         <form #f="ngForm" (ngSubmit)="login(f)" novalidate>

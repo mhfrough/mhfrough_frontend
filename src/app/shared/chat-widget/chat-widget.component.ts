@@ -1,6 +1,6 @@
 import {
     Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID,
-    ViewChild, ElementRef, effect, untracked, afterRenderEffect,
+    ViewChild, ElementRef, effect, untracked, afterRenderEffect, NgZone,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -23,6 +23,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     readonly footerSettings = inject(FooterSettingsService);
     private readonly activityLog = inject(ActivityLogService);
     private readonly sound = inject(SoundService);
+    private readonly zone = inject(NgZone);
 
     @ViewChild('messagesEl') messagesEl!: ElementRef<HTMLDivElement>;
 
@@ -97,6 +98,22 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             });
         });
 
+        // Eagerly preload audio metadata for any audio messages
+        effect(() => {
+            const msgs = this.messages();
+            untracked(() => {
+                if (!isPlatformBrowser(this.platformId)) return;
+                msgs.filter(m => m.messageType === 'audio' && m.audioUrl)
+                    .forEach(m => this.getOrCreateAudioEl(m.id, m.audioUrl!));
+            });
+        });
+
+        // Stop title blink once unread count reaches 0
+        effect(() => {
+            const count = this.unreadCount();
+            if (count === 0) untracked(() => this._stopTitleBlink());
+        });
+
         // Perform the actual scroll after Angular has committed DOM updates
         afterRenderEffect(() => {
             if (this._shouldScroll()) {
@@ -140,6 +157,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         this.open.update(v => !v);
         if (this.open()) {
             this.unreadCount.set(0);
+            this._prevMsgCount = this.messages().length;
             this._stopTitleBlink();
             this._shouldScroll.set(true);
             this.pickGreeting();
@@ -335,14 +353,18 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         if (!this.audioEls.has(msgId)) {
             const el = new Audio(src);
             el.preload = 'metadata';
+            const setDuration = () => {
+                if (isFinite(el.duration) && el.duration > 0) {
+                    this.zone.run(() => this.audioDurations.update(d => ({ ...d, [msgId]: el.duration })));
+                }
+            };
+            el.addEventListener('loadedmetadata', setDuration);
+            el.addEventListener('durationchange', setDuration);
             el.addEventListener('timeupdate', () => {
-                this.audioProgress.update(p => ({ ...p, [msgId]: el.currentTime }));
-            });
-            el.addEventListener('loadedmetadata', () => {
-                this.audioDurations.update(d => ({ ...d, [msgId]: el.duration }));
+                this.zone.run(() => this.audioProgress.update(p => ({ ...p, [msgId]: el.currentTime })));
             });
             el.addEventListener('ended', () => {
-                this.playingAudioId.set(null);
+                this.zone.run(() => this.playingAudioId.set(null));
             });
             this.audioEls.set(msgId, el);
         }

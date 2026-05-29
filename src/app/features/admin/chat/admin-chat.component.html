@@ -161,8 +161,7 @@
                 @if (msg.messageType === 'audio' && msg.audioUrl) {
                 @let bars = audioBarsFor(msg.id);
                 <div class="ac-audio-msg ac-msg-bubble">
-                    <button class="ac-audio-play" type="button"
-                        (click)="toggleAudio(msg.id, msg.audioUrl)"
+                    <button class="ac-audio-play" type="button" (click)="toggleAudio(msg.id, msg.audioUrl)"
                         [attr.aria-label]="playingAudioId() === msg.id ? 'Pause' : 'Play audio'">
                         @if (playingAudioId() === msg.id) {
                         <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
@@ -178,19 +177,16 @@
                     <div class="ac-audio-track">
                         <div class="ac-audio-waveform">
                             @for (h of bars; track $index; let i = $index) {
-                            <div class="ac-audio-wv-bar"
-                                [style.height.px]="h * 0.26"
+                            <div class="ac-audio-wv-bar" [style.height.px]="h * 0.26"
                                 [class.is-played]="(audioProgress()[msg.id] || 0) / (audioDurations()[msg.id] || 1) > i / bars.length">
                             </div>
                             }
                         </div>
                         <div class="ac-audio-scrub-row">
-                            <input type="range" class="ac-audio-scrubber"
-                                [max]="audioDurations()[msg.id] || 1"
+                            <input type="range" class="ac-audio-scrubber" [max]="audioDurations()[msg.id] || 1"
                                 [value]="audioProgress()[msg.id] || 0"
                                 (input)="seekAudio(msg.id, msg.audioUrl, $any($event.target).value)"
-                                (mousedown)="preloadAudio(msg.id, msg.audioUrl)"
-                                aria-label="Seek audio" />
+                                (mousedown)="preloadAudio(msg.id, msg.audioUrl)" aria-label="Seek audio" />
                             <span class="ac-audio-time">
                                 {{ formatAudioTime(audioProgress()[msg.id]) }}
                                 @if (audioDurations()[msg.id]) { / {{ formatAudioTime(audioDurations()[msg.id]) }} }
