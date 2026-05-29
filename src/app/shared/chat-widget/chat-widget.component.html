@@ -69,8 +69,7 @@
 
         @for (msg of messages(); track trackById($index, msg)) {
         <div class="cw-bubble" [class.cw-bubble--admin]="msg.sender === 'admin'"
-            [class.cw-bubble--visitor]="msg.sender === 'visitor'"
-            [class.cw-bubble--unread]="msg.isUnread">
+            [class.cw-bubble--visitor]="msg.sender === 'visitor'" [class.cw-bubble--unread]="msg.isUnread">
             @if (msg.messageType === 'audio' && msg.audioUrl) {
             @let bars = audioBarsFor(msg.id);
             <div class="cw-audio-msg">
