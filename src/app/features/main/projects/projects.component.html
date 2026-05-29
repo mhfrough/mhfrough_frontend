@@ -29,9 +29,11 @@
 
     @if (allTags().length > 0) {
     <div class="gallery-filters">
-        <button class="gallery-filter-tag" [class.is-active]="selectedTag() === 'all'" (click)="selectTag('all')">All</button>
+        <button class="gallery-filter-tag" [class.is-active]="selectedTag() === 'all'"
+            (click)="selectTag('all')">All</button>
         @for (tag of allTags(); track tag) {
-        <button class="gallery-filter-tag" [class.is-active]="selectedTag() === tag" (click)="selectTag(tag)">{{ tag }}</button>
+        <button class="gallery-filter-tag" [class.is-active]="selectedTag() === tag" (click)="selectTag(tag)">{{ tag
+            }}</button>
         }
     </div>
     }

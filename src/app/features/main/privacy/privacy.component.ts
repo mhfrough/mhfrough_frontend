@@ -1,5 +1,6 @@
-﻿import { Component } from '@angular/core';
+﻿import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-privacy',
@@ -7,4 +8,7 @@ import { RouterLink } from '@angular/router';
     imports: [RouterLink],
     templateUrl: './privacy.component.html',
 })
-export class PrivacyComponent {}
+export class PrivacyComponent implements OnInit {
+    private titleService = inject(Title);
+    ngOnInit() { this.titleService.setTitle('Privacy Policy | Mohammad Hamza'); }
+}

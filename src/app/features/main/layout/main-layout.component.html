@@ -53,49 +53,31 @@
             </span>
             <button class="back-to-top" (click)="scrollTop()">Back to top ↑</button>
             <div class="footer-social">
-                @if (footerSettings.data().github && isSocialVisible('github')) {
-                <a [href]="footerSettings.data().github | externalUrl:'footer_github'" target="_blank" rel="noopener"
-                    aria-label="GitHub"><i class="bi bi-github"></i></a>
-                }
-                @if (footerSettings.data().linkedin && isSocialVisible('linkedin')) {
-                <a [href]="footerSettings.data().linkedin | externalUrl:'footer_linkedin'" target="_blank"
-                    rel="noopener" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
-                }
-                @if (footerSettings.data().twitter && isSocialVisible('twitter')) {
-                <a [href]="footerSettings.data().twitter | externalUrl:'footer_twitter'" target="_blank" rel="noopener"
-                    aria-label="X / Twitter"><i class="bi bi-twitter-x"></i></a>
-                }
-                @if (footerSettings.data().instagram && isSocialVisible('instagram')) {
-                <a [href]="footerSettings.data().instagram | externalUrl:'footer_instagram'" target="_blank"
-                    rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                }
-                @if (footerSettings.data().youtube && isSocialVisible('youtube')) {
-                <a [href]="footerSettings.data().youtube | externalUrl:'footer_youtube'" target="_blank" rel="noopener"
-                    aria-label="YouTube"><i class="bi bi-youtube"></i></a>
-                }
-                @if (footerSettings.data().medium && isSocialVisible('medium')) {
-                <a [href]="footerSettings.data().medium | externalUrl:'footer_medium'" target="_blank" rel="noopener"
-                    aria-label="Medium"><i class="bi bi-medium"></i></a>
-                }
-                @if (footerSettings.data().dribbble && isSocialVisible('dribbble')) {
-                <a [href]="footerSettings.data().dribbble | externalUrl:'footer_dribbble'" target="_blank"
-                    rel="noopener" aria-label="Dribbble"><i class="bi bi-dribbble"></i></a>
-                }
-                @if (footerSettings.data().stackoverflow && isSocialVisible('stackoverflow')) {
-                <a [href]="footerSettings.data().stackoverflow | externalUrl:'footer_stackoverflow'" target="_blank"
-                    rel="noopener" aria-label="Stack Overflow"><i class="bi bi-stack-overflow"></i></a>
-                }
-                @if (footerSettings.data().discord && isSocialVisible('discord')) {
-                <a [href]="footerSettings.data().discord | externalUrl:'footer_discord'" target="_blank" rel="noopener"
-                    aria-label="Discord"><i class="bi bi-discord"></i></a>
-                }
-                @if (footerSettings.data().website && isSocialVisible('website')) {
-                <a [href]="footerSettings.data().website | externalUrl:'footer_website'" target="_blank" rel="noopener"
-                    aria-label="Website"><i class="bi bi-globe2"></i></a>
+                @for (link of footerLinksMain(); track link.key) {
+                <a [href]="link.href | externalUrl:('footer_' + link.key)" target="_blank" rel="noopener"
+                    [attr.aria-label]="link.label"><i class="bi" [class]="link.icon"></i></a>
                 }
                 @if (footerSettings.data().contactEmail && isSocialVisible('contactEmail')) {
                 <a [href]="'mailto:' + footerSettings.data().contactEmail" aria-label="Email"><i
                         class="bi bi-envelope"></i></a>
+                }
+                @if (footerLinksOverflow().length > 0) {
+                <div class="footer-social-overflow" #overflowRef>
+                    <button class="footer-social-more" (click)="toggleFooterOverflow(); $event.stopPropagation()"
+                        [attr.aria-expanded]="footerOverflowOpen()"
+                        aria-label="More social links">+{{ footerLinksOverflow().length }}</button>
+                    @if (footerOverflowOpen()) {
+                    <div class="footer-social-dropdown">
+                        @for (link of footerLinksOverflow(); track link.key) {
+                        <a [href]="link.href | externalUrl:('footer_' + link.key)" target="_blank" rel="noopener"
+                            [attr.aria-label]="link.label">
+                            <i class="bi" [class]="link.icon"></i>
+                            <span>{{ link.label }}</span>
+                        </a>
+                        }
+                    </div>
+                    }
+                </div>
                 }
             </div>
         </div>
@@ -107,3 +89,6 @@
 
 <!-- ─── Cookie Consent ───────────────────────────────────────────────────────── -->
 <app-cookie-consent />
+
+<!-- ─── Front-end Toast Notifications ───────────────────────────────────────── -->
+<app-front-toast />

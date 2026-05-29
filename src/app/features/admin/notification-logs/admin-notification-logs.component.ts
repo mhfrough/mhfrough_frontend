@@ -119,6 +119,7 @@ export class AdminNotificationLogsComponent implements OnInit {
     getBadgeClass(log: ActivityLogEntry): string {
         if (log.status === 'error') return 'admin-badge--danger';
         const action = log.action;
+        if (action === 'push:skipped') return 'admin-badge--danger';
         if (action === 'auth:login') return 'admin-badge--on';
         if (action.endsWith(':create') || action.endsWith(':received') || action.endsWith(':approve') || action.endsWith(':publish') || action === 'push:sent') {
             return 'admin-badge--on';

@@ -6,6 +6,8 @@ import { Subscription } from 'rxjs';
 import { FeedbackService } from '../../../core/services/inquiry-feedback.service';
 import { UserInfoService } from '../../../core/services/user-info.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
+import { FrontToastService } from '../../../core/services/front-toast.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-feedback',
@@ -19,8 +21,9 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     private readonly realtime = inject(RealtimeService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
+    private toast = inject(FrontToastService);
+    private titleService = inject(Title);
     readonly sending = signal(false);
-    readonly sent = signal(false);
     readonly error = signal('');
     readonly reviews = signal<any[]>([]);
     readonly loadingReviews = signal(true);
@@ -99,6 +102,7 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.titleService.setTitle('Reviews | Mohammad Hamza');
         const p = this.route.snapshot.queryParams;
         if (p['q']) this.searchQuery.set(p['q']);
         if (p['page']) this.currentPage.set(+p['page']);
@@ -125,7 +129,7 @@ export class FeedbackComponent implements OnInit, OnDestroy {
         this.service.submit({ ...form.value, rating: this.selectedRating }).subscribe({
             next: () => {
                 this.userInfo.save({ name: form.value.name, email: form.value.email });
-                this.sent.set(true);
+                this.toast.success('Thank you! Your review has been submitted for approval.');
                 this.sending.set(false);
                 form.reset();
                 this.selectedRating = 5;

@@ -2,19 +2,21 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { InvoicesService, Invoice } from '../../../core/services/invoices.service';
+import { AdminListBase } from '../../../shared/admin-list.base';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
     selector: 'app-admin-invoices',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule, RouterLink, PaginationComponent, ConfirmModalComponent],
     templateUrl: './admin-invoices.component.html',
 })
-export class AdminInvoicesComponent implements OnInit {
+export class AdminInvoicesComponent extends AdminListBase implements OnInit {
     private readonly svc = inject(InvoicesService);
 
     readonly invoices = signal<Invoice[]>([]);
     readonly loading = signal(true);
-    readonly deleteTargetId = signal<string | null>(null);
 
     readonly paidCount = computed(() =>
         this.invoices().filter((i) => i.status === 'paid').length,
@@ -27,11 +29,6 @@ export class AdminInvoicesComponent implements OnInit {
             .filter((i) => i.status !== 'paid')
             .reduce((acc, i) => acc + Number(i.total), 0),
     );
-
-    // ── Pagination + Search ──────────────────────────────────────────────────
-    readonly searchQuery = signal('');
-    readonly pageSize = signal(25);
-    readonly currentPage = signal(1);
 
     readonly filteredInvoices = computed(() => {
         const q = this.searchQuery().toLowerCase().trim();
@@ -48,29 +45,9 @@ export class AdminInvoicesComponent implements OnInit {
         return this.filteredInvoices().slice(start, start + this.pageSize());
     });
 
-    readonly totalPages = computed(() =>
+    override readonly totalPages = computed(() =>
         Math.max(1, Math.ceil(this.filteredInvoices().length / this.pageSize()))
     );
-
-    get pageNumbers(): number[] {
-        const total = this.totalPages();
-        const cur = this.currentPage();
-        const pages: number[] = [];
-        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
-            pages.push(i);
-        }
-        return pages;
-    }
-
-    onSearch(e: Event) {
-        this.searchQuery.set((e.target as HTMLInputElement).value);
-        this.currentPage.set(1);
-    }
-
-    onPageSizeChange(e: Event) {
-        this.pageSize.set(+(e.target as HTMLSelectElement).value);
-        this.currentPage.set(1);
-    }
 
     ngOnInit() {
         this.load();
@@ -87,15 +64,7 @@ export class AdminInvoicesComponent implements OnInit {
         });
     }
 
-    confirmDelete(id: string) {
-        this.deleteTargetId.set(id);
-    }
-
-    cancelDelete() {
-        this.deleteTargetId.set(null);
-    }
-
-    executeDelete() {
+    override executeDelete(): void {
         const id = this.deleteTargetId();
         if (!id) return;
         this.deleteTargetId.set(null);

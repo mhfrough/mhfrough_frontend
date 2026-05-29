@@ -31,8 +31,8 @@
 <div class="settings-card">
     <div class="settings-card-header">
         <div>
-            <h2 class="settings-card-title"><i class="bi bi-person-badge"></i> Identity</h2>
-            <p class="settings-card-sub">Your public profile — display name, avatar and short bio.</p>
+            <h2 class="settings-card-title"><i class="bi bi-person-badge"></i> Identity &amp; About</h2>
+            <p class="settings-card-sub">Your public profile — display name, avatar and about section content.</p>
         </div>
     </div>
 
@@ -82,11 +82,13 @@
         </div>
     </div>
 
-    <div class="admin-form-field">
-        <label class="admin-form-label label-optional">Short bio</label>
-        <textarea class="admin-form-textarea" [(ngModel)]="profileBio" placeholder="A brief description about yourself…"
-            rows="3" maxlength="500"></textarea>
-        <p class="form-hint">{{ profileBio.length }}/500 characters</p>
+    <div class="admin-form-field" style="margin-top:1rem">
+        <label class="admin-form-label label-optional">About HTML</label>
+        <p class="form-hint" style="margin-bottom:0.4rem">This content appears in the About section on the home page.
+            Supports rich text formatting.</p>
+        <app-rte-toolbar [el]="aboutEl ?? null" mode="full"></app-rte-toolbar>
+        <textarea #aboutEl class="admin-form-textarea admin-rte-textarea" [(ngModel)]="profileAboutHtml"
+            placeholder="<p>Write your about section content here…</p>" rows="12"></textarea>
     </div>
 
     <div class="admin-form-actions" style="margin-top:1.25rem">
@@ -94,34 +96,6 @@
             @if (profileSaving() === 'identity') { <span class="contact-spinner"></span> Saving… } @else { <i
                 class="bi bi-check-lg"></i> Save Profile }
         </button>
-    </div>
-</div>
-
-<!-- ── About Section (Rich Text) ─────────────────────────────────────────── -->
-<div class="settings-card">
-    <div class="settings-card-header">
-        <div>
-            <h2 class="settings-card-title"><i class="bi bi-file-person"></i> About Section</h2>
-            <p class="settings-card-sub">This content appears in the About section on the home page. Supports rich text
-                formatting.</p>
-        </div>
-    </div>
-
-    <div class="admin-form-field">
-        <label class="admin-form-label label-optional">About HTML</label>
-        <app-rte-toolbar [el]="aboutEl ?? null" mode="full"></app-rte-toolbar>
-        <textarea #aboutEl class="admin-form-textarea admin-rte-textarea" [(ngModel)]="profileAboutHtml"
-            placeholder="<p>Write your about section content here…</p>" rows="12"></textarea>
-    </div>
-
-    <div class="admin-form-actions" style="margin-top:1.25rem">
-        <button class="btn-primary" (click)="saveProfile('about')" [disabled]="profileSaving() === 'about'">
-            @if (profileSaving() === 'about') { <span class="contact-spinner"></span> Saving… } @else { <i
-                class="bi bi-check-lg"></i> Save About Section }
-        </button>
-        @if (profileSaved() === 'about') { <span class="settings-saved-msg"><i class="bi bi-check-circle-fill"></i>
-            Saved!</span> }
-        @if (profileError()?.section === 'about') { <span class="settings-error-msg">{{ profileError()!.msg }}</span> }
     </div>
 </div>
 
@@ -740,6 +714,15 @@
                     {{ tickerFormMessage.length }}/500
                 </p>
             </div>
+            <div class="admin-form-grid">
+                <div class="admin-form-field">
+                    <label class="admin-form-label" for="ticker-auto-off">Auto-unpublish at <span
+                            style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+                    <input type="datetime-local" id="ticker-auto-off" name="autoDeactivateAt" class="admin-form-input"
+                        [(ngModel)]="tickerFormAutoDeactivateAt">
+                    <p class="admin-form-hint">Leave blank to keep published indefinitely.</p>
+                </div>
+            </div>
             <div class="admin-form-checks">
                 <div class="admin-form-check checkbox-field">
                     <input type="checkbox" id="ticker-pub" name="isPublished" [(ngModel)]="tickerFormPublished">
@@ -789,9 +772,10 @@
                 <tr>
                     <th>Message</th>
                     <th style="width:100px">Status</th>
+                    <th style="width:160px">Auto-Off</th>
                     <th style="width:160px">Created</th>
                     <th style="width:160px">Updated</th>
-                    <th style="width:140px"></th>
+                    <th style="width:200px"></th>
                 </tr>
             </thead>
             <tbody>
@@ -806,25 +790,30 @@
                         }
                     </td>
                     <td style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap">
+                        @if (item.autoDeactivateAt) {
+                        {{ item.autoDeactivateAt | date:'dd MMM yyyy, HH:mm' }}
+                        } @else {
+                        <span style="color:var(--text-muted);opacity:0.5">—</span>
+                        }
+                    </td>
+                    <td style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap">
                         {{ item.createdAt | date:'dd MMM yyyy, HH:mm' }}
                     </td>
                     <td style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap">
                         {{ item.updatedAt | date:'dd MMM yyyy, HH:mm' }}
                     </td>
-                    <td>
-                        <div style="display:flex;gap:0.4rem;justify-content:flex-end;align-items:center">
-                            <button class="btn-text" (click)="editTicker(item)" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn-text" (click)="toggleTickerPublish(item)"
-                                [title]="item.isPublished ? 'Unpublish' : 'Publish'">
-                                <i class="bi" [class.bi-eye-slash]="item.isPublished"
-                                    [class.bi-eye]="!item.isPublished"></i>
-                            </button>
-                            <button class="btn-text-danger" (click)="confirmDeleteTicker(item.id)" title="Delete">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
+                    <td style="text-align:right;white-space:nowrap">
+                        <button class="btn-text" (click)="editTicker(item)" style="margin-right:0.75rem">
+                            <i class="bi bi-pencil"></i> Edit
+                        </button>
+                        <button class="btn-text" (click)="toggleTickerPublish(item)" style="margin-right:0.75rem">
+                            <i class="bi" [class.bi-eye-slash]="item.isPublished"
+                                [class.bi-eye]="!item.isPublished"></i>
+                            {{ item.isPublished ? 'Unpublish' : 'Publish' }}
+                        </button>
+                        <button class="btn-text-danger" (click)="confirmDeleteTicker(item.id)">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
                     </td>
                 </tr>
                 }

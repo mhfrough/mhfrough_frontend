@@ -9,6 +9,9 @@ import { RealtimeService } from '../../../../core/services/realtime.service';
 import { PreconnectService } from '../../../../core/services/preconnect.service';
 import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
+import { FrontToastService } from '../../../../core/services/front-toast.service';
+import { Title } from '@angular/platform-browser';
+import { EditorHelperService } from '../../../../core/services/editor-helper.service';
 
 @Component({
     selector: 'app-blog-detail',
@@ -17,12 +20,15 @@ import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback
     templateUrl: './blog-detail.component.html',
 })
 export class BlogDetailComponent implements OnInit, OnDestroy {
+    private editor = inject(EditorHelperService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private service = inject(BlogsService);
     private userInfo = inject(UserInfoService);
     private readonly realtime = inject(RealtimeService);
     private preconnect = inject(PreconnectService);
+    private toast = inject(FrontToastService);
+    private titleService = inject(Title);
 
     readonly blog = signal<any>(null);
     readonly loading = signal(true);
@@ -31,11 +37,11 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     readonly comments = signal<any[]>([]);
     readonly commentCount = signal(0);
     readonly commentSending = signal(false);
-    readonly commentSent = signal(false);
     readonly commentError = signal('');
 
     commentData = { authorName: '', authorEmail: '', content: '' };
     private subs = new Subscription();
+    private pendingReviewToastId: number | null = null;
 
     ngOnInit() {
         const saved = this.userInfo.get();
@@ -48,9 +54,11 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
         this.service.getBySlug(slug).subscribe({
             next: (data: any) => {
                 this.blog.set(data);
+                this.titleService.setTitle(`${data.title} | Mohammad Hamza`);
                 this.loading.set(false);
                 this.preconnect.add(data?.coverImage);
                 this.loadComments(data.id);
+                this.subscribeToRealtimeEvents(data.id);
                 this.subscribeToCommentEvents(data.id);
             },
             error: () => {
@@ -65,10 +73,32 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() { this.subs.unsubscribe(); }
 
+    private subscribeToRealtimeEvents(blogId: string) {
+        // Blog updated in-place (e.g. content, title edited)
+        this.subs.add(this.realtime.on<any>('blog:updated').subscribe(blog => {
+            if (blog.id !== this.blog()?.id) return;
+            this.blog.set(blog);
+            this.titleService.setTitle(`${blog.title} | Mohammad Hamza`);
+        }));
+
+        // Blog unpublished or deleted → redirect away
+        const redirectAway = ({ id }: { id: string }) => {
+            if (id !== this.blog()?.id) return;
+            this.router.navigate(['/blog'], { replaceUrl: true });
+        };
+        this.subs.add(this.realtime.on<{ id: string }>('blog:unpublished').subscribe(redirectAway));
+        this.subs.add(this.realtime.on<{ id: string }>('blog:deleted').subscribe(redirectAway));
+    }
+
     private subscribeToCommentEvents(blogId: string) {
         // Admin approved a comment → append to visible comments
         this.subs.add(this.realtime.on<any>('comment:approved').subscribe(comment => {
             if (comment.blogId !== blogId) return;
+            // Dismiss the "pending review" toast since comment is now visible
+            if (this.pendingReviewToastId !== null) {
+                this.toast.dismiss(this.pendingReviewToastId);
+                this.pendingReviewToastId = null;
+            }
             this.comments.update(list => {
                 const exists = list.some(c => c.id === comment.id);
                 return exists ? list.map(c => c.id === comment.id ? comment : c) : [...list, comment];
@@ -108,7 +138,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
         this.service.submitComment(this.blog().id, { authorName, authorEmail, content }).subscribe({
             next: () => {
                 this.userInfo.save({ name: authorName, email: authorEmail });
-                this.commentSent.set(true);
+                this.pendingReviewToastId = this.toast.success('Comment submitted — it will appear after review.');
                 this.commentSending.set(false);
                 this.commentData.content = '';
                 form.resetForm({ authorName, authorEmail, content: '' });
@@ -121,14 +151,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     }
 
     format(el: HTMLTextAreaElement, open: string, close: string): void {
-        const start = el.selectionStart;
-        const end = el.selectionEnd;
-        const sel = el.value.substring(start, end);
-        const replacement = open + (sel || 'text') + close;
-        el.setRangeText(replacement, start, end, 'select');
-        el.focus();
-        el.dispatchEvent(new Event('input'));
-        // sync ngModel
+        this.editor.format(el, open, close);
         this.commentData.content = el.value;
     }
 }

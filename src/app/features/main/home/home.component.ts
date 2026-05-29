@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID
 import { isPlatformBrowser, CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
@@ -21,6 +22,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private readonly realtime = inject(RealtimeService);
     readonly footerSettings = inject(FooterSettingsService);
     private preconnect = inject(PreconnectService);
+    private titleService = inject(Title);
     readonly projects = signal<any[]>([]);
     readonly loadingProjects = signal(true);
     readonly greeting = signal('');
@@ -36,6 +38,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private subs = new Subscription();
 
     ngOnInit() {
+        this.titleService.setTitle('Mohammad Hamza — Application Developer & Product Designer');
         this.footerSettings.load();
         this.projectsService.getFeatured().subscribe({
             next: (data: any[]) => { this.projects.set(data); this.loadingProjects.set(false); this.preconnect.add(data[0]?.thumbnail); },

@@ -12,12 +12,8 @@
         <div class="tag-input-field-wrap">
             <input #tagInput type="text" class="tag-text-input"
                 [placeholder]="tags.length === 0 ? 'Type a tag, press Enter or comma to add…' : ''"
-                [(ngModel)]="inputValue" [ngModelOptions]="{standalone: true}"
-                (keydown)="onKeyDown($event)"
-                (input)="onInput()"
-                (focus)="onFocus()"
-                (blur)="onBlur()"
-                autocomplete="off">
+                [(ngModel)]="inputValue" [ngModelOptions]="{standalone: true}" (keydown)="onKeyDown($event)"
+                (input)="onInput()" (focus)="onFocus()" (blur)="onBlur()" autocomplete="off">
             @if (showDropdown && filteredSuggestions.length > 0) {
             <div class="tag-suggestions">
                 @for (s of filteredSuggestions; track s) {

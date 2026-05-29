@@ -4,8 +4,11 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-gallery',
@@ -16,6 +19,9 @@ import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.di
 export class GalleryComponent implements OnInit, OnDestroy {
     private galleryService = inject(GalleryService);
     private platformId = inject(PLATFORM_ID);
+    private readonly realtime = inject(RealtimeService);
+    private titleService = inject(Title);
+    private subs = new Subscription();
 
     readonly PAGE_SIZE = 24;
 
@@ -24,6 +30,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
     readonly hasMore = signal(false);
     readonly loading = signal(true);
     readonly loadingMore = signal(false);
+
+    readonly loadedImages = signal<Set<string>>(new Set());
 
     readonly categories = signal<string[]>([]);
     readonly selectedCategory = signal<string>('all');
@@ -44,6 +52,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     private searchTimer?: ReturnType<typeof setTimeout>;
 
     ngOnInit() {
+        this.titleService.setTitle('Gallery | Mohammad Hamza');
         this.galleryService.getCategories().subscribe({
             next: (cats) => this.categories.set(cats),
         });
@@ -51,10 +60,35 @@ export class GalleryComponent implements OnInit, OnDestroy {
             next: (tags) => this.allTags.set(tags),
         });
         this.loadPage(1, true);
+
+        // Realtime: reflect gallery changes without disrupting infinite-scroll position
+        this.subs.add(this.realtime.on<GalleryItem>('gallery:created').subscribe(item => {
+            if (item.isPublished) {
+                this.items.update(list => [item, ...list]);
+                this.total.update(t => t + 1);
+            }
+        }));
+        this.subs.add(this.realtime.on<GalleryItem>('gallery:updated').subscribe(item => {
+            if (item.isPublished) {
+                this.items.update(list => {
+                    const idx = list.findIndex(g => g.id === item.id);
+                    return idx >= 0 ? list.map(g => g.id === item.id ? item : g) : list;
+                });
+            } else {
+                this.items.update(list => list.filter(g => g.id !== item.id));
+                this.total.update(t => Math.max(0, t - 1));
+            }
+        }));
+        this.subs.add(this.realtime.on<{ id: string }>('gallery:deleted').subscribe(({ id }) => {
+            this.items.update(list => list.filter(g => g.id !== id));
+            this.total.update(t => Math.max(0, t - 1));
+        }));
+        this.subs.add(this.realtime.on<{}>('gallery:reordered').subscribe(() => this.loadPage(1, true)));
     }
 
     ngOnDestroy() {
         clearTimeout(this.searchTimer);
+        this.subs.unsubscribe();
         this.closeLightbox();
     }
 
@@ -71,6 +105,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
             next: (res) => {
                 if (reset) {
                     this.items.set(res.data);
+                    this.loadedImages.set(new Set());
                 } else {
                     this.items.update(prev => [...prev, ...res.data]);
                 }
@@ -111,6 +146,14 @@ export class GalleryComponent implements OnInit, OnDestroy {
             this.searchQuery.set(value);
             this.loadPage(1, true);
         }, 350);
+    }
+
+    onImageLoad(id: string) {
+        this.loadedImages.update(s => new Set([...s, id]));
+    }
+
+    isImageLoaded(id: string): boolean {
+        return this.loadedImages().has(id);
     }
 
     openLightbox(index: number) {

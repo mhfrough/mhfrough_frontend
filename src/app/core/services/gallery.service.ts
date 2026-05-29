@@ -12,6 +12,7 @@ export interface GalleryItem {
     tags?: string[];
     sortOrder: number;
     isPublished: boolean;
+    adminNote?: string;
     altText?: string;
     mimeType?: string;
     fileSize?: number;

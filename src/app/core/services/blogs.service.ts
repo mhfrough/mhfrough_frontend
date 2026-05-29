@@ -28,6 +28,7 @@ export class BlogsService {
     update(id: string, data: any) { return this.http.put<any>(`${this.base}/${id}`, data); }
     unpublish(id: string, adminNote?: string) { return this.http.patch<any>(`${this.base}/${id}/unpublish`, { adminNote }); }
     remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
+    reorder(items: { id: string; sortOrder: number }[]) { return this.http.patch(`${this.base}/reorder`, { items }); }
 
     // Comments
     getComments(blogId: string) { return this.http.get<any[]>(`${this.commentsBase}/post/${blogId}`); }

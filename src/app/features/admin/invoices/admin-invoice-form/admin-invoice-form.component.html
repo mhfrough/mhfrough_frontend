@@ -145,18 +145,19 @@
             <div class="rte-wrap">
                 <app-rte-toolbar [el]="notesArea" mode="minimal"></app-rte-toolbar>
                 <textarea #notesArea class="admin-form-textarea rte-textarea" formControlName="notes" rows="5"
-                    placeholder="Payment terms, thank you note, additional details…"
+                    placeholder="Payment terms, thank you note, additional detailsï¿½"
                     style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
             </div>
         </div>
 
         <div class="admin-form-actions">
-            <button type="button" class="btn-primary" (click)="save(true)" [disabled]="saving()">
-                @if (saving()) { <span class="contact-spinner"></span>&nbsp; }
+            <button type="button" class="btn-primary" (click)="save(true)"
+                [disabled]="savingPreview() || savingDraft()">
+                @if (savingPreview()) { <span class="contact-spinner"></span>&nbsp; }
                 <i class="bi bi-eye"></i> Save &amp; Preview
             </button>
-            <button type="submit" class="btn-ghost" [disabled]="saving()">
-                @if (saving()) { <span class="contact-spinner"></span>&nbsp; }
+            <button type="submit" class="btn-ghost" [disabled]="savingDraft() || savingPreview()">
+                @if (savingDraft()) { <span class="contact-spinner"></span>&nbsp; }
                 Save Draft
             </button>
             <a routerLink="/admin/invoices" class="btn-ghost">Cancel</a>

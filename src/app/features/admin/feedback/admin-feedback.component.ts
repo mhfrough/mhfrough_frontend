@@ -4,32 +4,31 @@ import { Subscription } from 'rxjs';
 import { FeedbackService } from '../../../core/services/inquiry-feedback.service';
 import { AdminNotificationService } from '../../../core/services/admin-notification.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
+import { AdminListBase } from '../../../shared/admin-list.base';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { ReasonModalComponent } from '../../../shared/components/reason-modal/reason-modal.component';
 
 @Component({
     selector: 'app-admin-feedback',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, PaginationComponent, ConfirmModalComponent, ReasonModalComponent],
     templateUrl: './admin-feedback.component.html',
 })
-export class AdminFeedbackComponent implements OnInit, OnDestroy {
+export class AdminFeedbackComponent extends AdminListBase implements OnInit, OnDestroy {
     private readonly service = inject(FeedbackService);
     private readonly notif = inject(AdminNotificationService);
     private readonly realtime = inject(RealtimeService);
     readonly feedback = signal<any[]>([]);
     readonly loading = signal(true);
-    readonly deleteTargetId = signal<string | null>(null);
-    readonly statusModal = signal<{ id: string; title: string; reason: string } | null>(null);
+    readonly statusModal = signal<{ id: string; title: string } | null>(null);
     private subs = new Subscription();
-
-    // ── Pagination + Search ──────────────────────────────────────────────────
-    readonly searchQuery = signal('');
-    readonly pageSize = signal(25);
-    readonly currentPage = signal(1);
 
     readonly filteredFeedback = computed(() => {
         const q = this.searchQuery().toLowerCase().trim();
-        if (!q) return this.feedback();
-        return this.feedback().filter(fb =>
+        const sorted = [...this.feedback()].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+        if (!q) return sorted;
+        return sorted.filter(fb =>
             fb.name?.toLowerCase().includes(q) ||
             fb.role?.toLowerCase().includes(q) ||
             fb.company?.toLowerCase().includes(q) ||
@@ -42,29 +41,9 @@ export class AdminFeedbackComponent implements OnInit, OnDestroy {
         return this.filteredFeedback().slice(start, start + this.pageSize());
     });
 
-    readonly totalPages = computed(() =>
+    override readonly totalPages = computed(() =>
         Math.max(1, Math.ceil(this.filteredFeedback().length / this.pageSize()))
     );
-
-    get pageNumbers(): number[] {
-        const total = this.totalPages();
-        const cur = this.currentPage();
-        const pages: number[] = [];
-        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
-            pages.push(i);
-        }
-        return pages;
-    }
-
-    onSearch(e: Event) {
-        this.searchQuery.set((e.target as HTMLInputElement).value);
-        this.currentPage.set(1);
-    }
-
-    onPageSizeChange(e: Event) {
-        this.pageSize.set(+(e.target as HTMLSelectElement).value);
-        this.currentPage.set(1);
-    }
 
     ngOnInit() {
         this.load();
@@ -106,28 +85,49 @@ export class AdminFeedbackComponent implements OnInit, OnDestroy {
         });
     }
 
-    confirmDelete(id: string) { this.deleteTargetId.set(id); }
-    cancelDelete() { this.deleteTargetId.set(null); }
-
-    executeDelete() {
+    override executeDelete(): void {
         const id = this.deleteTargetId();
         if (!id) return;
         this.deleteTargetId.set(null);
         this.service.remove(id).subscribe();
     }
 
-    openStatusModal(id: string) { this.statusModal.set({ id, title: 'Unapprove Review', reason: '' }); }
-    cancelStatus() { this.statusModal.set(null); }
-    setStatusReason(e: Event) {
-        const val = (e.target as HTMLTextAreaElement).value;
-        this.statusModal.update(m => m ? { ...m, reason: val } : null);
-    }
-    executeStatus() {
+    openStatusModal(id: string): void { this.statusModal.set({ id, title: 'Unapprove Review' }); }
+    cancelStatus(): void { this.statusModal.set(null); }
+    executeStatus(reason: string): void {
         const m = this.statusModal();
         if (!m) return;
         this.statusModal.set(null);
-        this.service.unapprove(m.id, m.reason || undefined).subscribe(() => {
+        this.service.unapprove(m.id, reason || undefined).subscribe(() => {
             this.notif.fetchCounts();
         });
+    }
+
+    readonly dragCardId = signal<string | null>(null);
+    readonly dragOverCardId = signal<string | null>(null);
+
+    onCardDragStart(id: string): void { this.dragCardId.set(id); }
+    onCardDragOver(e: DragEvent, id: string): void { e.preventDefault(); this.dragOverCardId.set(id); }
+    onCardDragLeave(): void { this.dragOverCardId.set(null); }
+    onCardDragEnd(): void { this.dragCardId.set(null); this.dragOverCardId.set(null); }
+    onCardDrop(targetId: string): void {
+        const srcId = this.dragCardId();
+        this.dragCardId.set(null); this.dragOverCardId.set(null);
+        if (!srcId || srcId === targetId) { return; }
+        const list = [...this.feedback()].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+        const src = list.find(f => f.id === srcId);
+        const tgt = list.find(f => f.id === targetId);
+        if (!src || !tgt) { return; }
+        const srcOrd = src.sortOrder ?? 0;
+        const tgtOrd = tgt.sortOrder ?? 0;
+        this.feedback.update(li => li.map(f => {
+            if (f.id === srcId) return { ...f, sortOrder: tgtOrd };
+            if (f.id === targetId) return { ...f, sortOrder: srcOrd };
+            return f;
+        }));
+        this.service.reorder([
+            { id: srcId, sortOrder: tgtOrd },
+            { id: targetId, sortOrder: srcOrd },
+        ]).subscribe({ error: () => this.load() });
     }
 }

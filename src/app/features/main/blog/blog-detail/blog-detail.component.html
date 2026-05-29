@@ -79,21 +79,10 @@
             <p class="blog-comment-form-title">Leave a Comment</p>
             <p class="blog-comment-form-note">Comments are reviewed before publishing.</p>
 
-            @if (commentSent()) {
-            <div class="contact-banner contact-banner--success">
-                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-                    <path fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
-                </svg>
-                Comment submitted — it will appear after review.
-            </div>
-            }
             @if (commentError()) {
             <div class="contact-banner contact-banner--error">{{ commentError() }}</div>
             }
 
-            @if (!commentSent()) {
             <form #cf="ngForm" (ngSubmit)="submitComment(cf)" novalidate class="contact-form">
 
                 <div class="contact-row">
@@ -148,7 +137,6 @@
                     </button>
                 </div>
             </form>
-            }
         </div>
     </section>
 

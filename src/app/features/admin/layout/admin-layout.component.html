@@ -130,7 +130,7 @@
             <strong>{{ inactivity.countdown() }}</strong> second{{ inactivity.countdown() === 1 ? '' : 's' }}.
         </p>
         <div class="admin-modal-actions">
-            <button class="btn-ghost" (click)="logout()">Logout Now</button>
+            <button class="btn-ghost btn-logout" (click)="logout()">Logout Now</button>
             <button class="btn-primary" (click)="inactivity.stayLoggedIn()">Stay Logged In</button>
         </div>
     </div>

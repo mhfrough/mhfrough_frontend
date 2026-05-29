@@ -14,6 +14,7 @@ import {
     CreateInvoicePayload,
 } from '../../../../core/services/invoices.service';
 import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/rte-toolbar.component';
+import { EditorHelperService } from '../../../../core/services/editor-helper.service';
 
 @Component({
     selector: 'app-admin-invoice-form',
@@ -22,13 +23,15 @@ import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/r
     templateUrl: './admin-invoice-form.component.html',
 })
 export class AdminInvoiceFormComponent implements OnInit {
+    private readonly editor = inject(EditorHelperService);
     private readonly fb = inject(FormBuilder);
     private readonly svc = inject(InvoicesService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly platformId = inject(PLATFORM_ID);
 
-    readonly saving = signal(false);
+    readonly savingPreview = signal(false);
+    readonly savingDraft = signal(false);
     readonly loading = signal(false);
     readonly editId = signal<string | null>(null);
 
@@ -135,7 +138,11 @@ export class AdminInvoiceFormComponent implements OnInit {
             this.form.markAllAsTouched();
             return;
         }
-        this.saving.set(true);
+        if (preview) {
+            this.savingPreview.set(true);
+        } else {
+            this.savingDraft.set(true);
+        }
         const v = this.form.getRawValue();
         const payload: CreateInvoicePayload = {
             clientName: v.clientName!,
@@ -161,37 +168,24 @@ export class AdminInvoiceFormComponent implements OnInit {
         const req = id ? this.svc.update(id, payload) : this.svc.create(payload);
         req.subscribe({
             next: (inv) => {
-                this.saving.set(false);
+                this.savingPreview.set(false);
+                this.savingDraft.set(false);
                 if (preview) {
                     this.router.navigate(['/admin/invoices', inv.id]);
                 } else {
                     this.router.navigate(['/admin/invoices']);
                 }
             },
-            error: () => this.saving.set(false),
+            error: () => { this.savingPreview.set(false); this.savingDraft.set(false); },
         });
     }
 
     format(el: HTMLTextAreaElement, open: string, close: string): void {
-        const start = el.selectionStart;
-        const end = el.selectionEnd;
-        const sel = el.value.substring(start, end);
-        const replacement = open + (sel || 'text') + close;
-        el.setRangeText(replacement, start, end, 'select');
-        el.focus();
-        el.dispatchEvent(new Event('input'));
+        this.editor.format(el, open, close);
     }
 
     insertLink(el: HTMLTextAreaElement): void {
-        const url = prompt('Enter URL:');
-        if (!url) { el.focus(); return; }
-        const start = el.selectionStart;
-        const end = el.selectionEnd;
-        const sel = el.value.substring(start, end) || 'link text';
-        const html = `<a href="${url}">${sel}</a>`;
-        el.setRangeText(html, start, end, 'end');
-        el.focus();
-        el.dispatchEvent(new Event('input'));
+        this.editor.insertLink(el);
     }
 
     formatCurrency(n: number): string {

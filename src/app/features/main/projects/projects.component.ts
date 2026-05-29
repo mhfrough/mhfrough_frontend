@@ -7,6 +7,7 @@ import { RealtimeService } from '../../../core/services/realtime.service';
 import { PreconnectService } from '../../../core/services/preconnect.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-projects',
@@ -21,6 +22,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private preconnect = inject(PreconnectService);
+    private titleService = inject(Title);
     readonly projects = signal<any[]>([]);
     readonly loading = signal(true);
     readonly lightboxSrc = signal<string | null>(null);
@@ -31,7 +33,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     readonly pageSize = signal(5);
     readonly currentPage = signal(1);
     readonly total = signal(0);
-    readonly totalPages = signal(1);    readonly allTags = signal<string[]>([]);
+    readonly totalPages = signal(1); readonly allTags = signal<string[]>([]);
     readonly selectedTag = signal('all');
     private searchTimer?: ReturnType<typeof setTimeout>;
 
@@ -52,15 +54,15 @@ export class ProjectsComponent implements OnInit, OnDestroy {
             this.searchQuery() || undefined,
             this.selectedTag() !== 'all' ? this.selectedTag() : undefined,
         ).subscribe({
-                next: (res) => {
-                    this.projects.set(res.data);
-                    this.total.set(res.total);
-                    this.totalPages.set(res.totalPages);
-                    this.loading.set(false);
-                    if (this.currentPage() === 1) this.preconnect.add(res.data[0]?.thumbnail);
-                },
-                error: () => this.loading.set(false),
-            });
+            next: (res) => {
+                this.projects.set(res.data);
+                this.total.set(res.total);
+                this.totalPages.set(res.totalPages);
+                this.loading.set(false);
+                if (this.currentPage() === 1) this.preconnect.add(res.data[0]?.thumbnail);
+            },
+            error: () => this.loading.set(false),
+        });
     }
 
     onSearch(e: Event) {
@@ -107,6 +109,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.titleService.setTitle('Projects | Mohammad Hamza');
         const p = this.route.snapshot.queryParams;
         if (p['q']) this.searchQuery.set(p['q']);
         if (p['page']) this.currentPage.set(+p['page']);
@@ -114,7 +117,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
         this.projectsService.getTags().subscribe({ next: t => this.allTags.set(t) });
         this.load();
-
         this.subs.add(this.realtime.on<any>('project:created').subscribe(() => this.load()));
         this.subs.add(this.realtime.on<any>('project:updated').subscribe(() => this.load()));
         this.subs.add(this.realtime.on<{ id: string }>('project:unpublished').subscribe(() => this.load()));

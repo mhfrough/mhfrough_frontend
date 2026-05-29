@@ -179,6 +179,10 @@ export class ChatService {
         });
 
         this.socket.on('message:new', (msg: ChatMessage) => {
+            // Clear the typing indicator before appending the new message
+            if (msg.sender === 'visitor') {
+                this.visitorTyping.set(null);
+            }
             if (msg.sessionId === this.activeSessionId()) {
                 this.activeMsgs.update(m => [...m, msg]);
             }

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { RealtimeService } from './realtime.service';
 
 export interface FooterSettings {
     copyrightOwner: string;
@@ -52,13 +53,25 @@ const DEFAULTS: FooterSettings = {
 export class FooterSettingsService {
     private readonly http = inject(HttpClient);
     private readonly platformId = inject(PLATFORM_ID);
+    private readonly realtime = inject(RealtimeService);
 
     readonly data = signal<FooterSettings>(DEFAULTS);
+    private realtimeSubscribed = false;
 
     load() {
         if (!isPlatformBrowser(this.platformId)) return;
         this.http.get<FooterSettings>(`${environment.apiUrl}/site-settings/footer`).pipe(
             tap(d => this.data.set(d)),
         ).subscribe({ error: () => { } });
+
+        // Reload footer data whenever admin saves profile/links
+        if (!this.realtimeSubscribed) {
+            this.realtimeSubscribed = true;
+            this.realtime.on<Partial<FooterSettings>>('profile:updated').subscribe(() => {
+                this.http.get<FooterSettings>(`${environment.apiUrl}/site-settings/footer`).pipe(
+                    tap(d => this.data.set(d)),
+                ).subscribe({ error: () => { } });
+            });
+        }
     }
 }

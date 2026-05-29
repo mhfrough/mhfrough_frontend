@@ -29,4 +29,5 @@ export class FeedbackService {
     approve(id: string) { return this.http.patch(`${this.base}/${id}/approve`, {}); }
     unapprove(id: string, adminNote?: string) { return this.http.patch(`${this.base}/${id}/unapprove`, { adminNote }); }
     remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
+    reorder(items: { id: string; sortOrder: number }[]) { return this.http.patch(`${this.base}/reorder`, { items }); }
 }

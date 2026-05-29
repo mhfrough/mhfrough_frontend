@@ -1,6 +1,8 @@
-import { Component, OnInit, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { TickerService, TickerMessage } from '../../core/services/ticker.service';
+import { RealtimeService } from '../../core/services/realtime.service';
 
 const SESSION_KEY = 'ticker_dismissed';
 
@@ -119,9 +121,11 @@ const SESSION_KEY = 'ticker_dismissed';
 }
     `],
 })
-export class TickerBannerComponent implements OnInit {
+export class TickerBannerComponent implements OnInit, OnDestroy {
     private readonly tickerService = inject(TickerService);
     private readonly platformId = inject(PLATFORM_ID);
+    private readonly realtime = inject(RealtimeService);
+    private subs = new Subscription();
 
     readonly tickers = signal<TickerMessage[]>([]);
     readonly visible = signal(false);
@@ -139,6 +143,27 @@ export class TickerBannerComponent implements OnInit {
             },
             error: () => { /* non-critical — silently ignore */ },
         });
+
+        // Realtime: reflect ticker changes instantly
+        this.subs.add(this.realtime.on<TickerMessage>('ticker:created').subscribe(msg => {
+            this.tickers.update(list => [msg, ...list]);
+            this.visible.set(true);
+        }));
+        this.subs.add(this.realtime.on<TickerMessage>('ticker:updated').subscribe(msg => {
+            this.tickers.update(list => {
+                const idx = list.findIndex(t => t.id === msg.id);
+                return idx >= 0 ? list.map(t => t.id === msg.id ? msg : t) : [msg, ...list];
+            });
+            if (this.tickers().length > 0) this.visible.set(true);
+        }));
+        this.subs.add(this.realtime.on<{ id: string }>('ticker:deleted').subscribe(({ id }) => {
+            this.tickers.update(list => list.filter(t => t.id !== id));
+            if (this.tickers().length === 0) this.visible.set(false);
+        }));
+    }
+
+    ngOnDestroy() {
+        this.subs.unsubscribe();
     }
 
     dismiss() {

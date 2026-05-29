@@ -6,7 +6,10 @@ import { InquiriesService } from '../../../core/services/inquiry-feedback.servic
 import { UserInfoService } from '../../../core/services/user-info.service';
 import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
+import { EditorHelperService } from '../../../core/services/editor-helper.service';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
+import { FrontToastService } from '../../../core/services/front-toast.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-contact',
@@ -15,11 +18,14 @@ import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
     templateUrl: './contact.component.html',
 })
 export class ContactComponent implements OnInit {
+    private editor = inject(EditorHelperService);
     private service = inject(InquiriesService);
     private route = inject(ActivatedRoute);
     private platformId = inject(PLATFORM_ID);
     private userInfo = inject(UserInfoService);
     readonly footerSettings = inject(FooterSettingsService);
+    private toast = inject(FrontToastService);
+    private titleService = inject(Title);
 
     isSocialVisible(key: string): boolean {
         const vis = this.footerSettings.data().socialVisibility;
@@ -27,7 +33,6 @@ export class ContactComponent implements OnInit {
     }
 
     readonly sending = signal(false);
-    readonly sent = signal(false);
     readonly error = signal('');
     readonly dynamicSubject = signal<string | null>(null);
 
@@ -38,6 +43,7 @@ export class ContactComponent implements OnInit {
     formData = { name: '', email: '', phone: '', subject: '', message: '' };
 
     ngOnInit() {
+        this.titleService.setTitle('Contact | Mohammad Hamza');
         this.footerSettings.load();
         if (isPlatformBrowser(this.platformId)) {
             const saved = this.userInfo.get();
@@ -73,7 +79,7 @@ export class ContactComponent implements OnInit {
         this.service.submit(payload).subscribe({
             next: () => {
                 this.userInfo.save({ name: raw.name, email: raw.email, phone: raw.phone });
-                this.sent.set(true);
+                this.toast.success('Message sent — I\'ll get back to you soon.');
                 this.sending.set(false);
                 this.formData = { ...this.formData, subject: '', message: '' };
                 form.resetForm(this.formData);
@@ -85,17 +91,10 @@ export class ContactComponent implements OnInit {
     reset(form: NgForm) {
         this.formData = { name: '', email: '', phone: '', subject: '', message: '' };
         form.resetForm(this.formData);
-        this.sent.set(false);
         this.error.set('');
     }
 
     format(el: HTMLTextAreaElement, open: string, close: string): void {
-        const start = el.selectionStart;
-        const end = el.selectionEnd;
-        const sel = el.value.substring(start, end);
-        const replacement = open + (sel || 'text') + close;
-        el.setRangeText(replacement, start, end, 'select');
-        el.focus();
-        el.dispatchEvent(new Event('input'));
+        this.editor.format(el, open, close);
     }
 }

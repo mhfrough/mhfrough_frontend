@@ -6,6 +6,7 @@ export interface TickerMessage {
     id: string;
     message: string;
     isPublished: boolean;
+    autoDeactivateAt: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -35,7 +36,7 @@ export class TickerService {
         return this.http.get<TickerPage>(`${this.base}/admin`, { params });
     }
 
-    create(data: { message: string; isPublished?: boolean }) {
+    create(data: { message: string; isPublished?: boolean; autoDeactivateAt?: string | null }) {
         return this.http.post<TickerMessage>(this.base, data);
     }
 

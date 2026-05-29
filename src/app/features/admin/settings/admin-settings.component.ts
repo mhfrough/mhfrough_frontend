@@ -79,6 +79,7 @@ export class AdminSettingsComponent implements OnInit {
     // Form fields
     tickerFormMessage = '';
     tickerFormPublished = true;
+    tickerFormAutoDeactivateAt = '';
 
     // ── Profile ──────────────────────────────────────────────────────────────
     readonly profileSaving = signal<'identity' | 'about' | 'links' | null>(null);
@@ -517,6 +518,7 @@ export class AdminSettingsComponent implements OnInit {
     getLogBadgeClass(log: ActivityLogEntry): string {
         if (log.status === 'error') return 'admin-badge--danger';
         const action = log.action;
+        if (action === 'push:skipped') return 'admin-badge--danger';
         if (action === 'auth:login') return 'admin-badge--on';
         if (action.endsWith(':create') || action.endsWith(':received') || action.endsWith(':approve')
             || action.endsWith(':publish') || action === 'push:sent') return 'admin-badge--on';
@@ -611,6 +613,7 @@ export class AdminSettingsComponent implements OnInit {
         this.tickerEditing.set(null);
         this.tickerFormMessage = '';
         this.tickerFormPublished = true;
+        this.tickerFormAutoDeactivateAt = '';
         this.tickerError.set(null);
         this.tickerShowForm.set(true);
     }
@@ -619,6 +622,9 @@ export class AdminSettingsComponent implements OnInit {
         this.tickerEditing.set({ ...item });
         this.tickerFormMessage = item.message;
         this.tickerFormPublished = item.isPublished;
+        this.tickerFormAutoDeactivateAt = item.autoDeactivateAt
+            ? new Date(item.autoDeactivateAt).toISOString().slice(0, 16)
+            : '';
         this.tickerError.set(null);
         this.tickerShowForm.set(true);
     }
@@ -634,9 +640,12 @@ export class AdminSettingsComponent implements OnInit {
         this.tickerSaving.set(true);
         this.tickerError.set(null);
         const editing = this.tickerEditing();
+        const autoDeactivateAt = this.tickerFormAutoDeactivateAt
+            ? new Date(this.tickerFormAutoDeactivateAt).toISOString()
+            : null;
         const action$ = editing
-            ? this.tickerService.update(editing.id, { message: this.tickerFormMessage.trim(), isPublished: this.tickerFormPublished })
-            : this.tickerService.create({ message: this.tickerFormMessage.trim(), isPublished: this.tickerFormPublished });
+            ? this.tickerService.update(editing.id, { message: this.tickerFormMessage.trim(), isPublished: this.tickerFormPublished, autoDeactivateAt: autoDeactivateAt ?? undefined })
+            : this.tickerService.create({ message: this.tickerFormMessage.trim(), isPublished: this.tickerFormPublished, autoDeactivateAt });
 
         action$.subscribe({
             next: () => {

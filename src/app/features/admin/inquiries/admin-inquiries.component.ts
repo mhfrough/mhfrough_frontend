@@ -4,26 +4,23 @@ import { Subscription } from 'rxjs';
 import { InquiriesService } from '../../../core/services/inquiry-feedback.service';
 import { AdminNotificationService } from '../../../core/services/admin-notification.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
+import { AdminListBase } from '../../../shared/admin-list.base';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
     selector: 'app-admin-inquiries',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, PaginationComponent, ConfirmModalComponent],
     templateUrl: './admin-inquiries.component.html',
 })
-export class AdminInquiriesComponent implements OnInit, OnDestroy {
+export class AdminInquiriesComponent extends AdminListBase implements OnInit, OnDestroy {
     private readonly service = inject(InquiriesService);
     private readonly notif = inject(AdminNotificationService);
     private readonly realtime = inject(RealtimeService);
     readonly inquiries = signal<any[]>([]);
     readonly loading = signal(true);
-    readonly deleteTargetId = signal<string | null>(null);
     private subs = new Subscription();
-
-    // ── Pagination + Search ──────────────────────────────────────────────────
-    readonly searchQuery = signal('');
-    readonly pageSize = signal(25);
-    readonly currentPage = signal(1);
 
     readonly filteredInquiries = computed(() => {
         const q = this.searchQuery().toLowerCase().trim();
@@ -41,29 +38,9 @@ export class AdminInquiriesComponent implements OnInit, OnDestroy {
         return this.filteredInquiries().slice(start, start + this.pageSize());
     });
 
-    readonly totalPages = computed(() =>
+    override readonly totalPages = computed(() =>
         Math.max(1, Math.ceil(this.filteredInquiries().length / this.pageSize()))
     );
-
-    get pageNumbers(): number[] {
-        const total = this.totalPages();
-        const cur = this.currentPage();
-        const pages: number[] = [];
-        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
-            pages.push(i);
-        }
-        return pages;
-    }
-
-    onSearch(e: Event) {
-        this.searchQuery.set((e.target as HTMLInputElement).value);
-        this.currentPage.set(1);
-    }
-
-    onPageSizeChange(e: Event) {
-        this.pageSize.set(+(e.target as HTMLSelectElement).value);
-        this.currentPage.set(1);
-    }
 
     ngOnInit() {
         this.load();
@@ -93,10 +70,7 @@ export class AdminInquiriesComponent implements OnInit, OnDestroy {
         });
     }
 
-    confirmDelete(id: string) { this.deleteTargetId.set(id); }
-    cancelDelete() { this.deleteTargetId.set(null); }
-
-    executeDelete() {
+    override executeDelete(): void {
         const id = this.deleteTargetId();
         if (!id) return;
         this.deleteTargetId.set(null);
