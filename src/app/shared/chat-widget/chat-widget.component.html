@@ -95,8 +95,8 @@
                         }
                     </div>
                     <div class="cw-audio-scrub-row">
-                        <input type="range" class="cw-audio-scrubber" [max]="audioDurations()[msg.id] || 1"
-                            [value]="audioProgress()[msg.id] || 0"
+                        <input type="range" step="any" class="cw-audio-scrubber" [max]="audioDurations()[msg.id] || 1"
+                            [attr.data-audio-scrubber]="msg.id"
                             (input)="seekAudio(msg.id, msg.audioUrl, $any($event.target).value)"
                             (mousedown)="getOrCreateAudioEl_noop(msg.id, msg.audioUrl)" aria-label="Seek audio" />
                         <span class="cw-audio-time">

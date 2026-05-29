@@ -52,6 +52,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     readonly audioDurations = signal<Record<string, number>>({});
     private audioEls = new Map<string, HTMLAudioElement>();
     private _audioBarsCache = new Map<string, number[]>();
+    private _rafId: number | null = null;
 
     readonly deleteTargetId = signal<string | null>(null);
     readonly closeTargetId = signal<string | null>(null);
@@ -158,6 +159,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         // socket managed by AdminLayoutComponent
         this._stopTitleBlink();
+        this._stopScrubberLoop();
         this._cleanupRecording();
         this.audioEls.forEach(el => { el.pause(); el.src = ''; });
         this.audioEls.clear();
@@ -431,11 +433,47 @@ export class AdminChatComponent implements OnInit, OnDestroy {
                 this.zone.run(() => this.audioProgress.update(p => ({ ...p, [msgId]: el.currentTime })));
             });
             el.addEventListener('ended', () => {
-                this.zone.run(() => this.playingAudioId.set(null));
+                this.zone.run(() => {
+                    this._stopScrubberLoop();
+                    const dur = isFinite(el.duration) ? el.duration : el.currentTime;
+                    this.audioProgress.update(p => ({ ...p, [msgId]: dur }));
+                    // Snap range DOM to end directly (no [value] binding to rely on)
+                    const rangeEl = document.querySelector<HTMLInputElement>(`[data-audio-scrubber="${msgId}"]`);
+                    if (rangeEl) rangeEl.value = dur.toString();
+                    this.playingAudioId.set(null);
+                });
             });
             this.audioEls.set(msgId, el);
         }
         return this.audioEls.get(msgId)!;
+    }
+
+    private _startScrubberLoop(msgId: string): void {
+        this._stopScrubberLoop();
+        let frame = 0;
+        const loop = () => {
+            const el = this.audioEls.get(msgId);
+            if (el && this.playingAudioId() === msgId) {
+                const ct = el.currentTime;
+                const rangeEl = document.querySelector<HTMLInputElement>(`[data-audio-scrubber="${msgId}"]`);
+                if (rangeEl) rangeEl.value = ct.toString();
+                // Update signal every 3 frames (~20 fps) so waveform bars stay in sync
+                if (++frame % 3 === 0) {
+                    this.zone.run(() => this.audioProgress.update(p => ({ ...p, [msgId]: ct })));
+                }
+                this._rafId = requestAnimationFrame(loop);
+            } else {
+                this._rafId = null;
+            }
+        };
+        this._rafId = requestAnimationFrame(loop);
+    }
+
+    private _stopScrubberLoop(): void {
+        if (this._rafId !== null) {
+            cancelAnimationFrame(this._rafId);
+            this._rafId = null;
+        }
     }
 
     toggleAudio(msgId: string, src: string) {
@@ -444,6 +482,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
         const playing = this.playingAudioId();
         if (playing === msgId) {
             el.pause();
+            this._stopScrubberLoop();
             this.playingAudioId.set(null);
         } else {
             if (playing) this.audioEls.get(playing)?.pause();
@@ -455,6 +494,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
                 ).subscribe();
             });
             this.playingAudioId.set(msgId);
+            this._startScrubberLoop(msgId);
         }
     }
 

@@ -59,6 +59,10 @@ export class AdminLoginComponent implements OnDestroy {
     login(form: NgForm) {
         form.form.markAllAsTouched();
         if (form.invalid) return;
+
+        // Prime AudioContext NOW (inside the user gesture) so async callbacks can play sounds.
+        this.sound.prime();
+
         this.loading.set(true);
         this.error.set('');
         this.warning.set('');
@@ -68,29 +72,47 @@ export class AdminLoginComponent implements OnDestroy {
             error: (err) => {
                 this.loading.set(false);
                 const raw = err?.error;
-                let body: Record<string, unknown> = {};
-                if (raw && typeof raw === 'object') {
-                    body = raw;
-                } else if (typeof raw === 'string') {
-                    try { body = JSON.parse(raw); } catch { /* non-JSON */ }
-                }
-                const status = err?.status;
+                const status: number = err?.status ?? 0;
 
-                if (body['error'] === 'account_locked' || status === 423) {
+                // Normalise body — handles pre-parsed object, raw JSON string, or empty
+                let body: Record<string, unknown> = {};
+                if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+                    body = raw as Record<string, unknown>;
+                } else if (typeof raw === 'string' && raw.trim().startsWith('{')) {
+                    try { body = JSON.parse(raw); } catch { /* malformed — body stays {} */ }
+                }
+
+                // Extract a human-readable string; reject raw JSON blobs
+                const safeStr = (val: unknown, fallback: string): string => {
+                    if (typeof val !== 'string') return fallback;
+                    const s = val.trim();
+                    if (!s || s.startsWith('{') || s.startsWith('[')) return fallback;
+                    return s;
+                };
+
+                if (status === 423 || body['error'] === 'account_locked') {
                     const lockedUntil = body['lockedUntil']
                         ? new Date(body['lockedUntil'] as string)
                         : new Date(Date.now() + ((body['remainingMinutes'] as number) ?? 180) * 60 * 1000);
                     this.lockInfo.set({ lockedUntil, remainingSeconds: 0 });
                     this.startCountdown(lockedUntil);
                     this.sound.play('error');
-                } else if (body['error'] === 'invalid_credentials' || (status === 401 && body['attemptsLeft'] !== undefined)) {
-                    this.warning.set((body['warning'] as string) ?? 'Wrong password.');
-                    this.sound.play('notification');
+                } else if (status === 401) {
+                    // Wrong password (with or without lockout tracking) shows a WARNING.
+                    // Account-not-found returns no 'warning' field → shows as error below.
+                    const warningMsg = safeStr(body['warning'], '');
+                    if (warningMsg) {
+                        this.warning.set(warningMsg);
+                        this.sound.play('warning');
+                    } else {
+                        this.error.set(safeStr(body['message'], 'Invalid credentials.'));
+                        this.sound.play('error');
+                    }
                 } else if (status === 429) {
                     this.error.set('Too many attempts. Please wait before trying again.');
                     this.sound.play('error');
                 } else {
-                    this.error.set((body['message'] as string) ?? 'Login failed. Please try again.');
+                    this.error.set(safeStr(body['message'], 'Login failed. Please try again.'));
                     this.sound.play('error');
                 }
             },

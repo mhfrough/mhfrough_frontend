@@ -1,7 +1,7 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-export type SoundType = 'success' | 'error' | 'info' | 'notification';
+export type SoundType = 'success' | 'error' | 'warning' | 'info' | 'notification';
 
 @Injectable({ providedIn: 'root' })
 export class SoundService {
@@ -35,13 +35,23 @@ export class SoundService {
         osc.stop(start + duration);
     }
 
+    /** Call this synchronously inside a user-gesture (e.g. button click) to warm
+     *  up the AudioContext so that sounds triggered in async callbacks will play. */
+    prime(): void {
+        if (!isPlatformBrowser(this.platformId)) return;
+        const ctx = this.getCtx();
+        if (ctx && ctx.state === 'suspended') {
+            ctx.resume().catch(() => { /* ignore */ });
+        }
+    }
+
     play(type: SoundType): void {
         const ctx = this.getCtx();
         if (!ctx) return;
 
         // Resume AudioContext if suspended (browser autoplay policy)
         if (ctx.state === 'suspended') {
-            ctx.resume().then(() => this.playSound(ctx, type));
+            ctx.resume().then(() => this.playSound(ctx, type)).catch(() => { /* ignore */ });
             return;
         }
         this.playSound(ctx, type);
@@ -60,6 +70,11 @@ export class SoundService {
                 // Descending: high → low
                 this.tone(ctx, 880, now, 0.09);
                 this.tone(ctx, 540, now + 0.1, 0.12, 0.16);
+                break;
+            case 'warning':
+                // Caution: mid → lower (two-note drop, less severe than error)
+                this.tone(ctx, 600, now, 0.1, 0.16);
+                this.tone(ctx, 440, now + 0.13, 0.14, 0.16);
                 break;
             case 'info':
                 // Single neutral chime
