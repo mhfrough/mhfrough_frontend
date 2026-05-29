@@ -138,7 +138,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         }));
         return [...inquiries, ...feedback]
             .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-            .slice(0, 8);
+            .slice(0, 6);
     }
 
     get pendingActions(): number {
