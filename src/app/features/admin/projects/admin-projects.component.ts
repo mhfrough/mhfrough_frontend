@@ -3,48 +3,44 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
-import { EditorHelperService } from '../../../core/services/editor-helper.service';
-import { AdminListBase } from '../../../shared/admin-list.base';
-import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
-import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
-import { ImgUploadComponent } from '../../../shared/components/img-upload/img-upload.component';
+import { Subscription } from 'rxjs';
 import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { TagInputComponent } from '../../../shared/components/tag-input/tag-input.component';
-import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-admin-projects',
     standalone: true,
-    imports: [
-        CommonModule, FormsModule,
-        PaginationComponent, ConfirmModalComponent, ImgUploadComponent,
-        RteToolbarComponent, ImgFallbackDirective, TagInputComponent,
-    ],
+    imports: [CommonModule, FormsModule, RteToolbarComponent, ImgFallbackDirective, TagInputComponent],
     templateUrl: './admin-projects.component.html',
 })
-export class AdminProjectsComponent extends AdminListBase implements OnInit, OnDestroy {
+export class AdminProjectsComponent implements OnInit, OnDestroy {
     private service = inject(ProjectsService);
     private readonly realtime = inject(RealtimeService);
-    readonly editor = inject(EditorHelperService);
-
     readonly projects = signal<any[]>([]);
     readonly loading = signal(true);
     readonly saving = signal(false);
     readonly editing = signal<any>(null);
     readonly showForm = signal(false);
+    readonly deleteTargetId = signal<string | null>(null);
+    readonly statusModal = signal<{ id: string; title: string; reason: string } | null>(null);
     readonly thumbPreview = signal<string | null>(null);
     readonly uploading = signal(false);
+    readonly dragOver = signal(false);
     readonly uploadError = signal<string | null>(null);
     readonly allTags = signal<string[]>([]);
     readonly formTags = signal<string[]>([]);
     private subs = new Subscription();
 
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(25);
+    readonly currentPage = signal(1);
+
     readonly filteredProjects = computed(() => {
         const q = this.searchQuery().toLowerCase().trim();
-        const sorted = [...this.projects()].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-        if (!q) return sorted;
-        return sorted.filter(p =>
+        if (!q) return this.projects();
+        return this.projects().filter(p =>
             p.title?.toLowerCase().includes(q) ||
             p.techStack?.some((t: string) => t.toLowerCase().includes(q))
         );
@@ -55,9 +51,30 @@ export class AdminProjectsComponent extends AdminListBase implements OnInit, OnD
         return this.filteredProjects().slice(start, start + this.pageSize());
     });
 
-    override readonly totalPages = computed(() =>
+    readonly totalPages = computed(() =>
         Math.max(1, Math.ceil(this.filteredProjects().length / this.pageSize()))
     );
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        const delta = 2;
+        for (let i = Math.max(1, cur - delta); i <= Math.min(total, cur + delta); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+    }
 
     ngOnInit() {
         this.load();
@@ -115,75 +132,99 @@ export class AdminProjectsComponent extends AdminListBase implements OnInit, OnD
         obs.subscribe({ next: () => { this.cancel(); this.saving.set(false); } });
     }
 
+    confirmDelete(id: string) { this.deleteTargetId.set(id); }
+    cancelDelete() { this.deleteTargetId.set(null); }
+
     toggleFeatured(p: any) {
         const newVal = !p.featured;
+        // optimistic update so the star flips immediately
         this.projects.update(list => list.map(x => x.id === p.id ? { ...x, featured: newVal } : x));
         this.service.patchFeatured(p.id, newVal).subscribe({
             error: () => {
+                // revert on failure
                 this.projects.update(list => list.map(x => x.id === p.id ? { ...x, featured: p.featured } : x));
             },
         });
     }
 
-    override executeDelete(): void {
+    executeDelete() {
         const id = this.deleteTargetId();
         if (!id) return;
         this.deleteTargetId.set(null);
         this.service.remove(id).subscribe();
     }
 
-    openStatusModal(id: string): void { }
-    cancelStatus(): void { }
-    executeStatus(reason: string): void { }
-
-    hideItem(id: string): void {
-        this.service.unpublish(id).subscribe(() => {
-            this.projects.update(list => list.map(p => p.id === id ? { ...p, isPublished: false } : p));
-        });
+    openStatusModal(id: string) { this.statusModal.set({ id, title: 'Unpublish Project', reason: '' }); }
+    cancelStatus() { this.statusModal.set(null); }
+    setStatusReason(e: Event) {
+        const val = (e.target as HTMLTextAreaElement).value;
+        this.statusModal.update(m => m ? { ...m, reason: val } : null);
     }
-    publishItem(id: string): void {
-        this.service.update(id, { isPublished: true }).subscribe(() => {
-            this.projects.update(list => list.map(p => p.id === id ? { ...p, isPublished: true } : p));
-        });
+    executeStatus() {
+        const m = this.statusModal();
+        if (!m) return;
+        this.statusModal.set(null);
+        this.service.unpublish(m.id, m.reason || undefined).subscribe();
     }
 
-    readonly dragRowId = signal<string | null>(null);
-    readonly dragOverRowId = signal<string | null>(null);
-
-    onRowDragStart(id: string): void { this.dragRowId.set(id); }
-    onRowDragOver(e: DragEvent, id: string): void { e.preventDefault(); this.dragOverRowId.set(id); }
-    onRowDragLeave(): void { this.dragOverRowId.set(null); }
-    onRowDragEnd(): void { this.dragRowId.set(null); this.dragOverRowId.set(null); }
-    onRowDrop(targetId: string): void {
-        const srcId = this.dragRowId();
-        this.dragRowId.set(null); this.dragOverRowId.set(null);
-        if (!srcId || srcId === targetId) { return; }
-        const list = [...this.projects()].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-        const src = list.find(p => p.id === srcId);
-        const tgt = list.find(p => p.id === targetId);
-        if (!src || !tgt) { return; }
-        const srcOrd = src.sortOrder ?? 0;
-        const tgtOrd = tgt.sortOrder ?? 0;
-        this.projects.update(li => li.map(p => {
-            if (p.id === srcId) return { ...p, sortOrder: tgtOrd };
-            if (p.id === targetId) return { ...p, sortOrder: srcOrd };
-            return p;
-        }));
-        this.service.reorder([
-            { id: srcId, sortOrder: tgtOrd },
-            { id: targetId, sortOrder: srcOrd },
-        ]).subscribe({ error: () => this.load() });
+    format(el: HTMLTextAreaElement, open: string, close: string): void {
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        const sel = el.value.substring(start, end);
+        const replacement = open + (sel || 'text') + close;
+        el.setRangeText(replacement, start, end, 'select');
+        el.focus();
+        el.dispatchEvent(new Event('input'));
     }
 
-    format(el: HTMLTextAreaElement, open: string, close: string): void { this.editor.format(el, open, close); }
-    insertLink(el: HTMLTextAreaElement): void { this.editor.insertLink(el); }
+    insertLink(el: HTMLTextAreaElement): void {
+        const url = prompt('Enter URL:');
+        if (!url) { el.focus(); return; }
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        const sel = el.value.substring(start, end) || 'link text';
+        const html = `<a href="${url}">${sel}</a>`;
+        el.setRangeText(html, start, end, 'end');
+        el.focus();
+        el.dispatchEvent(new Event('input'));
+    }
 
-    onFileSelected(file: File): void {
+    onDragOver(e: DragEvent) { e.preventDefault(); this.dragOver.set(true); }
+    onDragLeave() { this.dragOver.set(false); }
+
+    onDrop(e: DragEvent) {
+        e.preventDefault();
+        this.dragOver.set(false);
+        const file = e.dataTransfer?.files?.[0];
+        if (file) this.uploadFile(file);
+    }
+
+    onFileInput(e: Event) {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) this.uploadFile(file);
+    }
+
+    private uploadFile(file: File) {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+        if (!allowed.includes(file.type)) {
+            this.uploadError.set('Invalid type — use JPEG, PNG, WebP, GIF or SVG.');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            this.uploadError.set('File exceeds 5 MB limit.');
+            return;
+        }
         this.uploadError.set(null);
         this.uploading.set(true);
         this.service.uploadImage(file).subscribe({
-            next: ({ url }) => { this.thumbPreview.set(url); this.uploading.set(false); },
-            error: () => { this.uploadError.set('Upload failed. Please try again.'); this.uploading.set(false); },
+            next: ({ url }) => {
+                this.thumbPreview.set(url);
+                this.uploading.set(false);
+            },
+            error: () => {
+                this.uploadError.set('Upload failed. Please try again.');
+                this.uploading.set(false);
+            },
         });
     }
 

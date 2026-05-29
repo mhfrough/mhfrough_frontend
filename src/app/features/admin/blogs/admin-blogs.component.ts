@@ -2,11 +2,6 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { BlogsService } from '../../../core/services/blogs.service';
-import { EditorHelperService } from '../../../core/services/editor-helper.service';
-import { AdminListBase } from '../../../shared/admin-list.base';
-import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
-import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
-import { ImgUploadComponent } from '../../../shared/components/img-upload/img-upload.component';
 import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { TagInputComponent } from '../../../shared/components/tag-input/tag-input.component';
@@ -14,33 +9,34 @@ import { TagInputComponent } from '../../../shared/components/tag-input/tag-inpu
 @Component({
     selector: 'app-admin-blogs',
     standalone: true,
-    imports: [
-        CommonModule, FormsModule,
-        PaginationComponent, ConfirmModalComponent, ImgUploadComponent,
-        RteToolbarComponent, ImgFallbackDirective, TagInputComponent,
-    ],
+    imports: [CommonModule, FormsModule, RteToolbarComponent, ImgFallbackDirective, TagInputComponent],
     templateUrl: './admin-blogs.component.html',
 })
-export class AdminBlogsComponent extends AdminListBase implements OnInit {
+export class AdminBlogsComponent implements OnInit {
     private service = inject(BlogsService);
-    readonly editor = inject(EditorHelperService);
-
     readonly blogs = signal<any[]>([]);
     readonly loading = signal(true);
     readonly saving = signal(false);
     readonly editing = signal<any>(null);
     readonly showForm = signal(false);
+    readonly deleteTargetId = signal<string | null>(null);
+    readonly statusModal = signal<{ id: string; title: string; reason: string } | null>(null);
     readonly coverPreview = signal<string | null>(null);
     readonly uploading = signal(false);
+    readonly dragOver = signal(false);
     readonly uploadError = signal<string | null>(null);
     readonly allTags = signal<string[]>([]);
     readonly formTags = signal<string[]>([]);
 
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(25);
+    readonly currentPage = signal(1);
+
     readonly filteredBlogs = computed(() => {
         const q = this.searchQuery().toLowerCase().trim();
-        const sorted = [...this.blogs()].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-        if (!q) return sorted;
-        return sorted.filter(b =>
+        if (!q) return this.blogs();
+        return this.blogs().filter(b =>
             b.title?.toLowerCase().includes(q) ||
             b.slug?.toLowerCase().includes(q) ||
             b.tags?.some((t: string) => t.toLowerCase().includes(q))
@@ -52,9 +48,29 @@ export class AdminBlogsComponent extends AdminListBase implements OnInit {
         return this.filteredBlogs().slice(start, start + this.pageSize());
     });
 
-    override readonly totalPages = computed(() =>
+    readonly totalPages = computed(() =>
         Math.max(1, Math.ceil(this.filteredBlogs().length / this.pageSize()))
     );
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+    }
 
     ngOnInit() { this.load(); }
 
@@ -84,63 +100,88 @@ export class AdminBlogsComponent extends AdminListBase implements OnInit {
         obs.subscribe({ next: () => { this.load(); this.cancel(); this.saving.set(false); } });
     }
 
-    onFileSelected(file: File): void {
+    onDragOver(e: DragEvent) { e.preventDefault(); this.dragOver.set(true); }
+    onDragLeave() { this.dragOver.set(false); }
+
+    onDrop(e: DragEvent) {
+        e.preventDefault();
+        this.dragOver.set(false);
+        const file = e.dataTransfer?.files?.[0];
+        if (file) this.uploadFile(file);
+    }
+
+    onFileInput(e: Event) {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) this.uploadFile(file);
+    }
+
+    private uploadFile(file: File) {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+        if (!allowed.includes(file.type)) {
+            this.uploadError.set('Invalid type — use JPEG, PNG, WebP, GIF or SVG.');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            this.uploadError.set('File exceeds 5 MB limit.');
+            return;
+        }
         this.uploadError.set(null);
         this.uploading.set(true);
         this.service.uploadImage(file).subscribe({
-            next: ({ url }) => { this.coverPreview.set(url); this.uploading.set(false); },
-            error: () => { this.uploadError.set('Upload failed. Please try again.'); this.uploading.set(false); },
+            next: ({ url }) => {
+                this.coverPreview.set(url);
+                this.uploading.set(false);
+            },
+            error: () => {
+                this.uploadError.set('Upload failed. Please try again.');
+                this.uploading.set(false);
+            },
         });
     }
 
-    override executeDelete(): void {
+    confirmDelete(id: string) { this.deleteTargetId.set(id); }
+    cancelDelete() { this.deleteTargetId.set(null); }
+
+    executeDelete() {
         const id = this.deleteTargetId();
         if (!id) return;
         this.deleteTargetId.set(null);
         this.service.remove(id).subscribe(() => this.load());
     }
 
-    openStatusModal(id: string): void { }
-    cancelStatus(): void { }
-    executeStatus(reason: string): void { }
-
-    hideItem(id: string): void { this.service.unpublish(id).subscribe(() => this.load()); }
-    publishItem(id: string): void { this.service.update(id, { isPublished: true }).subscribe(() => this.load()); }
-
-    readonly dragRowId = signal<string | null>(null);
-    readonly dragOverRowId = signal<string | null>(null);
-
-    onRowDragStart(id: string): void { this.dragRowId.set(id); }
-    onRowDragOver(e: DragEvent, id: string): void { e.preventDefault(); this.dragOverRowId.set(id); }
-    onRowDragLeave(): void { this.dragOverRowId.set(null); }
-    onRowDragEnd(): void { this.dragRowId.set(null); this.dragOverRowId.set(null); }
-    onRowDrop(targetId: string): void {
-        const srcId = this.dragRowId();
-        this.dragRowId.set(null); this.dragOverRowId.set(null);
-        if (!srcId || srcId === targetId) { return; }
-        const list = [...this.blogs()].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-        const src = list.find(b => b.id === srcId);
-        const tgt = list.find(b => b.id === targetId);
-        if (!src || !tgt) { return; }
-        const srcOrd = src.sortOrder ?? 0;
-        const tgtOrd = tgt.sortOrder ?? 0;
-        this.blogs.update(li => li.map(b => {
-            if (b.id === srcId) return { ...b, sortOrder: tgtOrd };
-            if (b.id === targetId) return { ...b, sortOrder: srcOrd };
-            return b;
-        }));
-        this.service.reorder([
-            { id: srcId, sortOrder: tgtOrd },
-            { id: targetId, sortOrder: srcOrd },
-        ]).subscribe({ error: () => this.load() });
+    openStatusModal(id: string) { this.statusModal.set({ id, title: 'Unpublish Blog Post', reason: '' }); }
+    cancelStatus() { this.statusModal.set(null); }
+    setStatusReason(e: Event) {
+        const val = (e.target as HTMLTextAreaElement).value;
+        this.statusModal.update(m => m ? { ...m, reason: val } : null);
+    }
+    executeStatus() {
+        const m = this.statusModal();
+        if (!m) return;
+        this.statusModal.set(null);
+        this.service.unpublish(m.id, m.reason || undefined).subscribe(() => this.load());
     }
 
     format(el: HTMLTextAreaElement, open: string, close: string): void {
-        this.editor.format(el, open, close);
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        const sel = el.value.substring(start, end);
+        const replacement = open + (sel || 'text') + close;
+        el.setRangeText(replacement, start, end, 'select');
+        el.focus();
+        el.dispatchEvent(new Event('input'));
     }
 
     insertLink(el: HTMLTextAreaElement): void {
-        this.editor.insertLink(el);
+        const url = prompt('Enter URL:');
+        if (!url) { el.focus(); return; }
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        const sel = el.value.substring(start, end) || 'link text';
+        const html = `<a href="${url}">${sel}</a>`;
+        el.setRangeText(html, start, end, 'end');
+        el.focus();
+        el.dispatchEvent(new Event('input'));
     }
 
     generateSlug(form: NgForm): void {

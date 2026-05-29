@@ -7,7 +7,6 @@ import { RealtimeService } from '../../../core/services/realtime.service';
 import { PreconnectService } from '../../../core/services/preconnect.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
-import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-projects',
@@ -22,7 +21,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private preconnect = inject(PreconnectService);
-    private titleService = inject(Title);
     readonly projects = signal<any[]>([]);
     readonly loading = signal(true);
     readonly lightboxSrc = signal<string | null>(null);
@@ -109,7 +107,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.titleService.setTitle('Projects | Mohammad Hamza');
         const p = this.route.snapshot.queryParams;
         if (p['q']) this.searchQuery.set(p['q']);
         if (p['page']) this.currentPage.set(+p['page']);
@@ -117,6 +114,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
         this.projectsService.getTags().subscribe({ next: t => this.allTags.set(t) });
         this.load();
+
         this.subs.add(this.realtime.on<any>('project:created').subscribe(() => this.load()));
         this.subs.add(this.realtime.on<any>('project:updated').subscribe(() => this.load()));
         this.subs.add(this.realtime.on<{ id: string }>('project:unpublished').subscribe(() => this.load()));

@@ -85,12 +85,19 @@
                 placeholder="A short description shown in the lightbox"></textarea>
         </div>
 
-        <!-- Alt Text -->
-        <div class="admin-form-field">
-            <label class="admin-form-label label-optional">Alt Text <span
-                    class="form-hint">(accessibility)</span></label>
-            <input ngModel [ngModel]="editing()?.altText" name="altText" class="admin-form-input"
-                placeholder="Describe the image for screen readers">
+        <!-- Alt Text & Sort Order -->
+        <div class="admin-form-grid">
+            <div class="admin-form-field">
+                <label class="admin-form-label label-optional">Alt Text <span
+                        class="form-hint">(accessibility)</span></label>
+                <input ngModel [ngModel]="editing()?.altText" name="altText" class="admin-form-input"
+                    placeholder="Describe the image for screen readers">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label label-optional">Sort Order</label>
+                <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number" min="0"
+                    class="admin-form-input">
+            </div>
         </div>
 
         <!-- Published -->
@@ -156,22 +163,20 @@
             </tr>
         </thead>
         <tbody>
-            @for (item of pagedItems(); track item.id) {
-            <tr [class.drag-over-row]="dragOverRowId() === item.id" (dragover)="onRowDragOver($event, item.id)"
-                (dragleave)="onRowDragLeave()" (drop)="onRowDrop(item.id)" (dragend)="onRowDragEnd()">
+            @for (item of pagedItems(); track item.id; let first = $first; let last = $last) {
+            <tr>
                 <td>
-                    <span class="drag-handle" draggable="true" (dragstart)="onRowDragStart(item.id)"
-                        title="Drag to reorder">
-                        <svg class="drag-icon" width="8" height="14" viewBox="0 0 8 14" fill="currentColor"
-                            aria-hidden="true">
-                            <circle cx="2" cy="2" r="1.4" />
-                            <circle cx="6" cy="2" r="1.4" />
-                            <circle cx="2" cy="7" r="1.4" />
-                            <circle cx="6" cy="7" r="1.4" />
-                            <circle cx="2" cy="12" r="1.4" />
-                            <circle cx="6" cy="12" r="1.4" />
-                        </svg>
-                    </span>
+                    <div style="display:flex;flex-direction:column;gap:2px;align-items:center">
+                        <button class="btn-text" style="padding:0.1rem 0.3rem" (click)="moveSortOrder(item, -1)"
+                            [disabled]="first" title="Move up" aria-label="Move up">
+                            <i class="bi bi-chevron-up"></i>
+                        </button>
+                        <span style="font-size:0.72rem;color:var(--text-muted)">{{ item.sortOrder }}</span>
+                        <button class="btn-text" style="padding:0.1rem 0.3rem" (click)="moveSortOrder(item, 1)"
+                            [disabled]="last" title="Move down" aria-label="Move down">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
                 </td>
                 <td>
                     <div class="gallery-admin-thumb">
@@ -200,13 +205,6 @@
                         }
                     </div>
                     }
-                    @if (!item.isPublished && item.adminNote) {
-                    <div class="admin-unapprove-note" style="margin-top:4px">
-                        <span class="admin-unapprove-note__label"><i class="bi bi-exclamation-circle"></i> Hidden —
-                            reason</span>
-                        <span class="admin-unapprove-note__text" [title]="item.adminNote">{{ item.adminNote }}</span>
-                    </div>
-                    }
                 </td>
                 <td>
                     <span class="gallery-type-badge" [class.gallery-type-badge--video]="item.mediaType === 'video'"
@@ -221,8 +219,7 @@
                     </span>
                 </td>
                 <td>
-                    <span class="admin-badge" [class.admin-badge--on]="item.isPublished"
-                        [class.admin-badge--warn]="!item.isPublished">
+                    <span class="admin-badge" [class.admin-badge--on]="item.isPublished">
                         {{ item.isPublished ? 'Published' : 'Hidden' }}
                     </span>
                 </td>
@@ -252,26 +249,56 @@
     </table>
 </div>
 
-<app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageNumbers]="pageNumbers"
-    (pageChange)="currentPage.set($event)" />
+@if (totalPages() > 1) {
+<div class="admin-pagination">
+    <button class="admin-pagination-page" (click)="currentPage.update(p => p - 1)" [disabled]="currentPage() === 1">
+        <i class="bi bi-chevron-left"></i>
+    </button>
+    <div class="admin-pagination-pages">
+        @if (pageNumbers[0] > 1) {
+        <button class="admin-pagination-page" (click)="currentPage.set(1)">1</button>
+        @if (pageNumbers[0] > 2) { <span class="admin-pagination-label">…</span> }
+        }
+        @for (n of pageNumbers; track n) {
+        <button class="admin-pagination-page" [class.is-active]="currentPage() === n" (click)="currentPage.set(n)">{{ n
+            }}</button>
+        }
+        @if (pageNumbers[pageNumbers.length - 1] < totalPages()) { @if (pageNumbers[pageNumbers.length - 1] <
+            totalPages() - 1) { <span class="admin-pagination-label">…</span> }
+            <button class="admin-pagination-page" (click)="currentPage.set(totalPages())">{{ totalPages() }}</button>
+            }
+    </div>
+    <button class="admin-pagination-page" (click)="currentPage.update(p => p + 1)"
+        [disabled]="currentPage() === totalPages()">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+    <span class="admin-pagination-label">{{ currentPage() }} / {{ totalPages() }}</span>
+</div>
+}
 }
 }
 
 <!-- ─── Delete Confirm ──────────────────────────────────────────────────────── -->
 @if (deleteTargetId()) {
-<app-confirm-modal title="Delete Gallery Item?" body="This action cannot be undone. The file will remain in storage."
-    (confirmed)="executeDelete()" (cancelled)="cancelDelete()" />
+<div class="admin-modal-overlay" (click)="cancelDelete()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Delete Gallery Item?</p>
+        <p class="admin-modal-body">This action cannot be undone. The file will remain in storage.</p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelDelete()">Cancel</button>
+            <button class="btn-danger" (click)="executeDelete()">Delete</button>
+        </div>
+    </div>
+</div>
 }
 
 <!-- ─── Hide Confirm ────────────────────────────────────────────────────────── -->
 @if (statusModal()) {
 <div class="admin-modal-overlay" (click)="cancelStatus()">
     <div class="admin-modal" (click)="$event.stopPropagation()">
-        <p class="admin-modal-title">{{ statusModal()!.title }}</p>
-        <div class="admin-modal-reason">
-            <textarea rows="3" [value]="statusModal()!.reason" (input)="setStatusReason($event)"
-                placeholder="Reason (optional)"></textarea>
-        </div>
+        <p class="admin-modal-title">Hide Gallery Item</p>
+        <p class="admin-modal-body">This item will be hidden from the public gallery. You can publish it again at any
+            time.</p>
         <div class="admin-modal-actions">
             <button class="btn-ghost" (click)="cancelStatus()">Cancel</button>
             <button class="btn-primary" (click)="executeStatus()">Confirm</button>

@@ -1,12 +1,9 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { BlogsService } from '../../../../core/services/blogs.service';
-import { RealtimeService } from '../../../../core/services/realtime.service';
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
 import { PreconnectService } from '../../../../core/services/preconnect.service';
-import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-blog-list',
@@ -19,11 +16,8 @@ export class BlogListComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private preconnect = inject(PreconnectService);
-    private readonly realtime = inject(RealtimeService);
-    private titleService = inject(Title);
     readonly blogs = signal<any[]>([]);
     readonly loading = signal(true);
-    private subs = new Subscription();
 
     // ── Pagination + Search ──────────────────────────────────────────────────
     readonly searchQuery = signal('');
@@ -108,7 +102,6 @@ export class BlogListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.titleService.setTitle('Writing — Blog | Mohammad Hamza');
         const p = this.route.snapshot.queryParams;
         if (p['q']) this.searchQuery.set(p['q']);
         if (p['page']) this.currentPage.set(+p['page']);
@@ -116,27 +109,7 @@ export class BlogListComponent implements OnInit, OnDestroy {
 
         this.service.getTags().subscribe({ next: t => this.allTags.set(t) });
         this.load();
-
-        // Realtime: refresh current page when blogs are published/changed/removed
-        this.subs.add(this.realtime.on<any>('blog:created').subscribe(() => { this.currentPage.set(1); this.load(); }));
-        this.subs.add(this.realtime.on<any>('blog:updated').subscribe(blog => {
-            this.blogs.update(list => {
-                const idx = list.findIndex(b => b.id === blog.id);
-                return idx >= 0 ? list.map(b => b.id === blog.id ? blog : b) : list;
-            });
-        }));
-        this.subs.add(this.realtime.on<{ id: string }>('blog:unpublished').subscribe(({ id }) => {
-            this.blogs.update(list => list.filter(b => b.id !== id));
-            this.total.update(t => Math.max(0, t - 1));
-        }));
-        this.subs.add(this.realtime.on<{ id: string }>('blog:deleted').subscribe(({ id }) => {
-            this.blogs.update(list => list.filter(b => b.id !== id));
-            this.total.update(t => Math.max(0, t - 1));
-        }));
     }
 
-    ngOnDestroy() {
-        clearTimeout(this.searchTimer);
-        this.subs.unsubscribe();
-    }
+    ngOnDestroy() { clearTimeout(this.searchTimer); }
 }

@@ -42,11 +42,8 @@
 
     <!-- ─── States ────────────────────────────────────────────────────────────── -->
     @if (loading()) {
-    <!-- Shimmer skeleton grid -->
-    <div class="gallery-skeleton">
-        @for (h of [260, 180, 320, 200, 280, 160, 300, 240, 190, 340, 220, 170]; track $index) {
-        <div class="gallery-skeleton-tile" [style.height.px]="h"></div>
-        }
+    <div class="loading-state">
+        <div class="spinner"></div>
     </div>
     } @else if (items().length === 0) {
     <p class="empty-state">{{ searchQuery() || selectedCategory() !== 'all' ? 'No items match your search.' : 'No items
@@ -59,16 +56,10 @@
         <div class="gallery-tile" (click)="openLightbox(i)" role="button" tabindex="0" (keydown.enter)="openLightbox(i)"
             [attr.aria-label]="'View ' + (item.title || item.category || 'gallery item')">
 
-            <!-- Per-tile shimmer until loaded -->
-            @if ((item.mediaType === 'image' || item.mediaType === 'gif') && !isImageLoaded(item.id)) {
-            <div class="gallery-tile-shimmer" style="min-height:120px"></div>
-            }
-
             <!-- Image -->
             @if (item.mediaType === 'image' || item.mediaType === 'gif') {
             <img [src]="item.mediaUrl" [alt]="item.altText || item.title || ''"
-                [attr.loading]="i < 3 ? 'eager' : 'lazy'" [attr.fetchpriority]="i === 0 ? 'high' : null"
-                (load)="onImageLoad(item.id)" />
+                [attr.loading]="i < 3 ? 'eager' : 'lazy'" [attr.fetchpriority]="i === 0 ? 'high' : null" />
             }
 
             <!-- Video thumbnail -->

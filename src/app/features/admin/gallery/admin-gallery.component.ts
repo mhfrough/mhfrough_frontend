@@ -2,43 +2,36 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
-import { AdminListBase } from '../../../shared/admin-list.base';
-import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
-import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { TagInputComponent } from '../../../shared/components/tag-input/tag-input.component';
 
 @Component({
     selector: 'app-admin-gallery',
     standalone: true,
-    imports: [
-        CommonModule, DatePipe, FormsModule,
-        PaginationComponent, ConfirmModalComponent,
-        ImgFallbackDirective, TagInputComponent,
-    ],
+    imports: [CommonModule, DatePipe, FormsModule, ImgFallbackDirective, TagInputComponent],
     templateUrl: './admin-gallery.component.html',
 })
-export class AdminGalleryComponent extends AdminListBase implements OnInit {
+export class AdminGalleryComponent implements OnInit {
     private service = inject(GalleryService);
 
     readonly items = signal<GalleryItem[]>([]);
     readonly loading = signal(true);
     readonly saving = signal(false);
     readonly uploading = signal(false);
+    readonly dragOver = signal(false);
     readonly showForm = signal(false);
     readonly editing = signal<GalleryItem | null>(null);
-    readonly statusModal = signal<{ id: string; title: string; reason: string } | null>(null);
+    readonly deleteTargetId = signal<string | null>(null);
+    readonly statusModal = signal<{ id: string } | null>(null);
     readonly uploadError = signal<string | null>(null);
     readonly mediaPreview = signal<{ url: string; mediaType: string; mimeType: string; fileSize: number } | null>(null);
     readonly allTags = signal<string[]>([]);
     readonly formTags = signal<string[]>([]);
-    readonly dragOver = signal(false);
 
-    readonly ALLOWED_MIME = [
-        'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml',
-        'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime',
-    ];
-    readonly MAX_SIZE = 100 * 1024 * 1024;
+    // ── Pagination + Search ──────────────────────────────────────────────────
+    readonly searchQuery = signal('');
+    readonly pageSize = signal(25);
+    readonly currentPage = signal(1);
 
     readonly filteredItems = computed(() => {
         const q = this.searchQuery().toLowerCase().trim();
@@ -56,9 +49,35 @@ export class AdminGalleryComponent extends AdminListBase implements OnInit {
         return this.filteredItems().slice(start, start + this.pageSize());
     });
 
-    override readonly totalPages = computed(() =>
+    readonly totalPages = computed(() =>
         Math.max(1, Math.ceil(this.filteredItems().length / this.pageSize()))
     );
+
+    get pageNumbers(): number[] {
+        const total = this.totalPages();
+        const cur = this.currentPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    onSearch(e: Event) {
+        this.searchQuery.set((e.target as HTMLInputElement).value);
+        this.currentPage.set(1);
+    }
+
+    onPageSizeChange(e: Event) {
+        this.pageSize.set(+(e.target as HTMLSelectElement).value);
+        this.currentPage.set(1);
+    }
+
+    readonly ALLOWED_MIME = [
+        'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml',
+        'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime',
+    ];
+    readonly MAX_SIZE = 100 * 1024 * 1024;
 
     ngOnInit() { this.load(); }
 
@@ -125,44 +144,28 @@ export class AdminGalleryComponent extends AdminListBase implements OnInit {
         });
     }
 
-    override executeDelete(): void {
+    confirmDelete(id: string) { this.deleteTargetId.set(id); }
+    cancelDelete() { this.deleteTargetId.set(null); }
+
+    executeDelete() {
         const id = this.deleteTargetId();
         if (!id) return;
         this.deleteTargetId.set(null);
         this.service.remove(id).subscribe({ next: () => this.load() });
     }
 
-    openHideModal(id: string): void { this.statusModal.set({ id, title: 'Hide Gallery Item', reason: '' }); }
-    cancelStatus(): void { this.statusModal.set(null); }
-    setStatusReason(e: Event): void {
-        const val = (e.target as HTMLTextAreaElement).value;
-        this.statusModal.update(m => m ? { ...m, reason: val } : null);
-    }
-    executeStatus(): void {
+    openHideModal(id: string) { this.statusModal.set({ id }); }
+    cancelStatus() { this.statusModal.set(null); }
+    executeStatus() {
         const m = this.statusModal();
         if (!m) return;
         this.statusModal.set(null);
         const item = this.items().find(i => i.id === m.id);
         if (!item) return;
-        const updated = { ...item, isPublished: false, adminNote: m.reason || undefined };
+        const updated = { ...item, isPublished: false };
         this.items.update(list => list.map(i => i.id === m.id ? updated : i));
-        this.service.update(m.id, { isPublished: false, adminNote: m.reason || undefined }).subscribe({
+        this.service.update(m.id, { isPublished: false }).subscribe({
             error: () => this.items.update(list => list.map(i => i.id === m.id ? item : i)),
-        });
-    }
-
-    onFileSelected(file: File): void {
-        this.uploadError.set(null);
-        this.uploading.set(true);
-        this.service.uploadMedia(file).subscribe({
-            next: (res) => {
-                this.mediaPreview.set({ url: res.url, mediaType: res.mediaType, mimeType: res.mimeType, fileSize: res.fileSize });
-                this.uploading.set(false);
-            },
-            error: () => {
-                this.uploadError.set('Upload failed. Please try again.');
-                this.uploading.set(false);
-            },
         });
     }
 
@@ -172,34 +175,6 @@ export class AdminGalleryComponent extends AdminListBase implements OnInit {
         this.service.update(item.id, { isPublished: true }).subscribe({
             error: () => this.items.update(list => list.map(i => i.id === item.id ? item : i)),
         });
-    }
-
-    readonly dragRowId = signal<string | null>(null);
-    readonly dragOverRowId = signal<string | null>(null);
-
-    onRowDragStart(id: string): void { this.dragRowId.set(id); }
-    onRowDragOver(e: DragEvent, id: string): void { e.preventDefault(); this.dragOverRowId.set(id); }
-    onRowDragLeave(): void { this.dragOverRowId.set(null); }
-    onRowDragEnd(): void { this.dragRowId.set(null); this.dragOverRowId.set(null); }
-    onRowDrop(targetId: string): void {
-        const srcId = this.dragRowId();
-        this.dragRowId.set(null); this.dragOverRowId.set(null);
-        if (!srcId || srcId === targetId) { return; }
-        const list = [...this.items()].sort((a, b) => a.sortOrder - b.sortOrder);
-        const src = list.find(i => i.id === srcId);
-        const tgt = list.find(i => i.id === targetId);
-        if (!src || !tgt) { return; }
-        const srcOrd = src.sortOrder;
-        const tgtOrd = tgt.sortOrder;
-        this.items.update(li => li.map(i => {
-            if (i.id === srcId) return { ...i, sortOrder: tgtOrd };
-            if (i.id === targetId) return { ...i, sortOrder: srcOrd };
-            return i;
-        }));
-        this.service.reorder([
-            { id: srcId, sortOrder: tgtOrd },
-            { id: targetId, sortOrder: srcOrd },
-        ]).subscribe({ error: () => this.load() });
     }
 
     moveSortOrder(item: GalleryItem, direction: -1 | 1) {
@@ -224,13 +199,6 @@ export class AdminGalleryComponent extends AdminListBase implements OnInit {
             { id: a.id, sortOrder: bOrd },
             { id: b.id, sortOrder: aOrd },
         ]).subscribe({ error: () => this.load() });
-    }
-
-    formatBytes(bytes: number): string {
-        if (!bytes) return '';
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     }
 
     onDragOver(e: DragEvent) { e.preventDefault(); this.dragOver.set(true); }
@@ -269,6 +237,13 @@ export class AdminGalleryComponent extends AdminListBase implements OnInit {
                 this.uploading.set(false);
             },
         });
+    }
+
+    formatBytes(bytes: number): string {
+        if (!bytes) return '';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     }
 
     sortedItems() {

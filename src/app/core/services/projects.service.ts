@@ -30,5 +30,4 @@ export class ProjectsService {
     patchFeatured(id: string, featured: boolean) { return this.http.patch<any>(`${this.base}/${id}/featured`, { featured }); }
     unpublish(id: string, adminNote?: string) { return this.http.patch<any>(`${this.base}/${id}/unpublish`, { adminNote }); }
     remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
-    reorder(items: { id: string; sortOrder: number }[]) { return this.http.patch(`${this.base}/reorder`, { items }); }
 }
