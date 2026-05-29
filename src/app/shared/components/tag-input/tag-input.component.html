@@ -1,0 +1,33 @@
+<div class="tag-input-wrap">
+    <div class="tag-input-inner" (click)="focusInput()">
+        @for (tag of tags; track tag) {
+        <span class="tag-chip">
+            <span class="tag-chip-label">{{ tag }}</span>
+            <button type="button" class="tag-chip-remove" (click)="$event.stopPropagation(); removeTag(tag)"
+                [attr.aria-label]="'Remove ' + tag">
+                <i class="bi bi-x"></i>
+            </button>
+        </span>
+        }
+        <div class="tag-input-field-wrap">
+            <input #tagInput type="text" class="tag-text-input"
+                [placeholder]="tags.length === 0 ? 'Type a tag, press Enter or comma to add…' : ''"
+                [(ngModel)]="inputValue" [ngModelOptions]="{standalone: true}"
+                (keydown)="onKeyDown($event)"
+                (input)="onInput()"
+                (focus)="onFocus()"
+                (blur)="onBlur()"
+                autocomplete="off">
+            @if (showDropdown && filteredSuggestions.length > 0) {
+            <div class="tag-suggestions">
+                @for (s of filteredSuggestions; track s) {
+                <button type="button" class="tag-suggestion-item" (mousedown)="addTag(s)">
+                    <i class="bi bi-tag"></i> {{ s }}
+                </button>
+                }
+            </div>
+            }
+        </div>
+    </div>
+    <p class="admin-form-hint tag-input-hint">Enter or comma to add · Backspace to remove last</p>
+</div>

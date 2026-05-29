@@ -116,17 +116,17 @@
             <!-- Name + Company -->
             <div class="contact-row">
                 <div class="contact-field">
-                    <label class="contact-label">Name *</label>
+                    <label class="contact-label label-required">Name</label>
                     <input [(ngModel)]="formData.name" name="name" required minlength="2" maxlength="100"
                         class="contact-input"
                         [class.is-error]="(f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid"
                         placeholder="Your full name">
                     @if ((f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid) {
-                    <span class="contact-error">Please enter your name.</span>
+                    <span class="form-error">Please enter your name.</span>
                     }
                 </div>
                 <div class="contact-field">
-                    <label class="contact-label">Company <span class="contact-optional">(optional)</span></label>
+                    <label class="contact-label label-optional">Company</label>
                     <input [(ngModel)]="formData.company" name="company" maxlength="100" class="contact-input"
                         placeholder="Company name">
                 </div>
@@ -134,14 +134,14 @@
 
             <!-- Role -->
             <div class="contact-field">
-                <label class="contact-label">Your Role <span class="contact-optional">(optional)</span></label>
+                <label class="contact-label label-optional">Your Role</label>
                 <input [(ngModel)]="formData.role" name="role" maxlength="100" class="contact-input"
                     placeholder="CTO, Product Manager…">
             </div>
 
             <!-- Star Rating -->
             <div class="contact-field">
-                <label class="contact-label">Rating *</label>
+                <label class="contact-label label-required">Rating</label>
                 <div class="star-picker">
                     @for (star of stars; track star) {
                     <button type="button" class="star-picker-btn" [class.is-active]="star <= selectedRating"
@@ -155,14 +155,17 @@
 
             <!-- Review -->
             <div class="contact-field">
-                <label class="contact-label">Review *</label>
-                <textarea ngModel name="review" required minlength="10" maxlength="1000" rows="5"
+                <label class="contact-label label-required">Review</label>
+                <textarea #reviewArea ngModel name="review" required minlength="10" maxlength="1000" rows="5"
                     class="contact-input contact-textarea"
                     [class.is-error]="(f.submitted || f.controls['review']?.touched) && f.controls['review']?.invalid"
                     placeholder="Share your experience working with me…"></textarea>
                 @if ((f.submitted || f.controls['review']?.touched) && f.controls['review']?.invalid) {
-                <span class="contact-error">Please write a review (min 10 characters).</span>
+                <span class="form-error">Please write a review (min 10 characters).</span>
                 }
+                <div class="char-count"><span [class.near-limit]="reviewArea.value.length >= 900"
+                        [class.over-limit]="reviewArea.value.length >= 1000">{{ 1000 - reviewArea.value.length }} /
+                        1000</span></div>
             </div>
 
             <!-- Actions -->

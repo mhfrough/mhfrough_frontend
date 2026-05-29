@@ -29,13 +29,13 @@
 
         <form #f="ngForm" (ngSubmit)="login(f)" novalidate>
             <div class="admin-form-field">
-                <label class="admin-form-label">Email *</label>
+                <label class="admin-form-label label-required">Email</label>
                 <input ngModel name="email" required email type="email" class="admin-form-input"
                     [class.is-invalid]="(f.submitted || f.controls['email']?.touched) && f.controls['email']?.invalid"
                     placeholder="mhfrough&#64;yahoo.com" autocomplete="username">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Password *</label>
+                <label class="admin-form-label label-required">Password</label>
                 <div class="admin-pw-wrap">
                     <input ngModel name="password" required [type]="showPassword() ? 'text' : 'password'"
                         class="admin-form-input"
@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div class="admin-remember-row">
-                <label class="admin-remember-label">
+                <label class="admin-remember-label checkbox-field">
                     <input type="checkbox" [checked]="rememberMe()"
                         (change)="rememberMe.set($any($event.target).checked)" class="admin-remember-check">
                     <span>Remember me</span>

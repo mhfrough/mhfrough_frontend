@@ -1,4 +1,4 @@
-﻿<div class="admin-page-header">
+<div class="admin-page-header">
     <div>
         <h1 class="admin-page-title">{{ editId() ? 'Edit Invoice' : 'New Invoice' }}</h1>
         <p class="admin-page-sub">{{ editId() ? 'Update invoice details' : 'Fill in the details to create a new invoice'
@@ -19,17 +19,17 @@
         <p class="admin-form-title">Invoice Info</p>
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label">Issue Date *</label>
+                <label class="admin-form-label label-required">Issue Date</label>
                 <input type="date" class="admin-form-input" formControlName="issueDate"
                     [class.is-invalid]="form.get('issueDate')?.invalid && form.get('issueDate')?.touched">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Due Date *</label>
+                <label class="admin-form-label label-required">Due Date</label>
                 <input type="date" class="admin-form-input" formControlName="dueDate"
                     [class.is-invalid]="form.get('dueDate')?.invalid && form.get('dueDate')?.touched">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Status <span class="admin-form-hint">(optional)</span></label>
+                <label class="admin-form-label label-optional">Status</label>
                 <select class="admin-form-select" formControlName="status">
                     <option value="draft">Draft</option>
                     <option value="sent">Sent</option>
@@ -37,7 +37,7 @@
                 </select>
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Tax Rate (%) <span class="admin-form-hint">optional</span></label>
+                <label class="admin-form-label label-optional">Tax Rate (%)</label>
                 <input type="number" class="admin-form-input" formControlName="taxRate" min="0" max="100" step="0.01"
                     placeholder="0">
             </div>
@@ -46,24 +46,24 @@
         <p class="admin-form-title" style="margin-top:2rem">Bill To</p>
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label">Client Name *</label>
+                <label class="admin-form-label label-required">Client Name</label>
                 <input type="text" class="admin-form-input" formControlName="clientName"
                     [class.is-invalid]="form.get('clientName')?.invalid && form.get('clientName')?.touched"
                     placeholder="Jane Doe / Acme Corp">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Email Address *</label>
+                <label class="admin-form-label label-required">Email Address</label>
                 <input type="email" class="admin-form-input" formControlName="clientEmail"
                     [class.is-invalid]="form.get('clientEmail')?.invalid && form.get('clientEmail')?.touched"
                     placeholder="client@example.com">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Phone <span class="admin-form-hint">optional</span></label>
+                <label class="admin-form-label label-optional">Phone</label>
                 <input type="tel" class="admin-form-input" formControlName="clientPhone"
                     placeholder="+1 (555) 000-0000">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Address *</label>
+                <label class="admin-form-label label-required">Address</label>
                 <textarea class="admin-form-textarea" formControlName="clientAddress" rows="2"
                     [class.is-invalid]="form.get('clientAddress')?.invalid && form.get('clientAddress')?.touched"
                     placeholder="123 Main St&#10;City, State, ZIP, Country"></textarea>
@@ -139,13 +139,13 @@
 
         <p class="admin-form-title" style="margin-top:2rem">
             Notes / Additional Info
-            <span class="admin-form-hint" style="font-size:0.75rem;font-weight:400">optional</span>
+            <span class="form-hint" style="font-size:0.75rem;font-weight:400">optional</span>
         </p>
         <div class="admin-form-field">
             <div class="rte-wrap">
                 <app-rte-toolbar [el]="notesArea" mode="minimal"></app-rte-toolbar>
                 <textarea #notesArea class="admin-form-textarea rte-textarea" formControlName="notes" rows="5"
-                    placeholder="Payment terms, thank you note, additional details…"
+                    placeholder="Payment terms, thank you note, additional details�"
                     style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
             </div>
         </div>

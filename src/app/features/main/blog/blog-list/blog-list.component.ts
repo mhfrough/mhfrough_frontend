@@ -25,6 +25,8 @@ export class BlogListComponent implements OnInit, OnDestroy {
     readonly currentPage = signal(1);
     readonly total = signal(0);
     readonly totalPages = signal(1);
+    readonly allTags = signal<string[]>([]);
+    readonly selectedTag = signal('all');
 
     private searchTimer?: ReturnType<typeof setTimeout>;
 
@@ -40,8 +42,11 @@ export class BlogListComponent implements OnInit, OnDestroy {
 
     private load() {
         this.loading.set(true);
-        this.service.getPublic(this.currentPage(), this.pageSize(), this.searchQuery() || undefined)
-            .subscribe({
+        this.service.getPublic(
+            this.currentPage(), this.pageSize(),
+            this.searchQuery() || undefined,
+            this.selectedTag() !== 'all' ? this.selectedTag() : undefined,
+        ).subscribe({
                 next: (res) => {
                     this.blogs.set(res.data);
                     this.total.set(res.total);
@@ -64,6 +69,13 @@ export class BlogListComponent implements OnInit, OnDestroy {
         }, 400);
     }
 
+    selectTag(tag: string) {
+        this.selectedTag.set(tag);
+        this.currentPage.set(1);
+        this.load();
+        this.syncUrl();
+    }
+
     onPageSizeChange(e: Event) {
         this.pageSize.set(+(e.target as HTMLSelectElement).value);
         this.currentPage.set(1);
@@ -80,9 +92,10 @@ export class BlogListComponent implements OnInit, OnDestroy {
     private syncUrl() {
         const q = this.searchQuery();
         const page = this.currentPage();
+        const tag = this.selectedTag();
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { q: q || null, page: page > 1 ? page : null },
+            queryParams: { q: q || null, page: page > 1 ? page : null, tag: tag !== 'all' ? tag : null },
             queryParamsHandling: 'merge',
             replaceUrl: true,
         });
@@ -92,7 +105,9 @@ export class BlogListComponent implements OnInit, OnDestroy {
         const p = this.route.snapshot.queryParams;
         if (p['q']) this.searchQuery.set(p['q']);
         if (p['page']) this.currentPage.set(+p['page']);
+        if (p['tag']) this.selectedTag.set(p['tag']);
 
+        this.service.getTags().subscribe({ next: t => this.allTags.set(t) });
         this.load();
     }
 

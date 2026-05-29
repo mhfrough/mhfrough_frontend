@@ -3,11 +3,12 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { TagInputComponent } from '../../../shared/components/tag-input/tag-input.component';
 
 @Component({
     selector: 'app-admin-gallery',
     standalone: true,
-    imports: [CommonModule, DatePipe, FormsModule, ImgFallbackDirective],
+    imports: [CommonModule, DatePipe, FormsModule, ImgFallbackDirective, TagInputComponent],
     templateUrl: './admin-gallery.component.html',
 })
 export class AdminGalleryComponent implements OnInit {
@@ -24,6 +25,8 @@ export class AdminGalleryComponent implements OnInit {
     readonly statusModal = signal<{ id: string } | null>(null);
     readonly uploadError = signal<string | null>(null);
     readonly mediaPreview = signal<{ url: string; mediaType: string; mimeType: string; fileSize: number } | null>(null);
+    readonly allTags = signal<string[]>([]);
+    readonly formTags = signal<string[]>([]);
 
     // ── Pagination + Search ──────────────────────────────────────────────────
     readonly searchQuery = signal('');
@@ -83,12 +86,14 @@ export class AdminGalleryComponent implements OnInit {
             next: (d) => { this.items.set(d); this.loading.set(false); },
             error: () => this.loading.set(false),
         });
+        this.service.getTags().subscribe({ next: t => this.allTags.set(t) });
     }
 
     openNew() {
         this.editing.set(null);
         this.mediaPreview.set(null);
         this.uploadError.set(null);
+        this.formTags.set([]);
         this.showForm.set(true);
     }
 
@@ -100,6 +105,7 @@ export class AdminGalleryComponent implements OnInit {
             mimeType: item.mimeType ?? '',
             fileSize: item.fileSize ?? 0,
         });
+        this.formTags.set(item.tags ? [...item.tags] : []);
         this.uploadError.set(null);
         this.showForm.set(true);
     }
@@ -109,6 +115,7 @@ export class AdminGalleryComponent implements OnInit {
         this.editing.set(null);
         this.mediaPreview.set(null);
         this.uploadError.set(null);
+        this.formTags.set([]);
     }
 
     save(form: NgForm) {
@@ -119,6 +126,7 @@ export class AdminGalleryComponent implements OnInit {
         const preview = this.mediaPreview();
         const payload: Partial<GalleryItem> = {
             ...form.value,
+            tags: this.formTags(),
             mediaUrl: preview?.url ?? this.editing()?.mediaUrl ?? '',
             mediaType: (preview?.mediaType as GalleryItem['mediaType']) ?? this.editing()?.mediaType ?? 'image',
             mimeType: preview?.mimeType || this.editing()?.mimeType,

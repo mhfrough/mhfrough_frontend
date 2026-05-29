@@ -28,6 +28,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
     readonly categories = signal<string[]>([]);
     readonly selectedCategory = signal<string>('all');
     readonly searchQuery = signal('');
+    readonly allTags = signal<string[]>([]);
+    readonly selectedTag = signal<string>('all');
 
     readonly lightboxIndex = signal<number | null>(null);
     readonly zoomLevel = signal(1);
@@ -45,6 +47,9 @@ export class GalleryComponent implements OnInit, OnDestroy {
         this.galleryService.getCategories().subscribe({
             next: (cats) => this.categories.set(cats),
         });
+        this.galleryService.getTags().subscribe({
+            next: (tags) => this.allTags.set(tags),
+        });
         this.loadPage(1, true);
     }
 
@@ -61,7 +66,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
         }
         const q = this.searchQuery() || undefined;
         const cat = this.selectedCategory() !== 'all' ? this.selectedCategory() : undefined;
-        this.galleryService.getPublicPaginated(page, this.PAGE_SIZE, q, cat).subscribe({
+        const tag = this.selectedTag() !== 'all' ? this.selectedTag() : undefined;
+        this.galleryService.getPublicPaginated(page, this.PAGE_SIZE, q, cat, tag).subscribe({
             next: (res) => {
                 if (reset) {
                     this.items.set(res.data);
@@ -88,6 +94,12 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
     selectCategory(cat: string) {
         this.selectedCategory.set(cat);
+        this.closeLightbox();
+        this.loadPage(1, true);
+    }
+
+    selectTag(tag: string) {
+        this.selectedTag.set(tag);
         this.closeLightbox();
         this.loadPage(1, true);
     }

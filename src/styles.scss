@@ -430,6 +430,10 @@ body::before {
     }
 }
 
+// --- Form theme (global) ----------------------------------------------------
+@import './form-theme';
+@import './focus-fixes';
+
 // --- Back to Top -------------------------------------------------------------
 .back-to-top-wrap {
     display: flex;
@@ -3732,6 +3736,7 @@ button.admin-nav-link:last-child:hover {
     background: transparent;
     border: none;
     border-bottom: 1px solid var(--border);
+    border-radius: 0;
     padding: 0.65rem 0.5rem;
     outline: none;
     width: 100%;
@@ -3838,6 +3843,126 @@ button.admin-nav-link:last-child:hover {
         user-select: none;
     }
 }
+
+// --- Tag Input ---------------------------------------------------------------
+
+.tag-input-wrap {
+    width: 100%;
+}
+
+.tag-input-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.4rem;
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+    cursor: text;
+    transition: border-color var(--dur) var(--ease);
+
+    &:focus-within {
+        border-bottom-color: var(--text);
+    }
+}
+
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 2px 6px 2px 8px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: transparent;
+    white-space: nowrap;
+}
+
+.tag-chip-label {
+    line-height: 1.4;
+}
+
+.tag-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0;
+    font-size: 0.8rem;
+    line-height: 1;
+    transition: color var(--dur) var(--ease);
+
+    &:hover {
+        color: #dc2626;
+    }
+}
+
+.tag-input-field-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 140px;
+}
+
+.tag-text-input {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 2px 0;
+
+    &::placeholder {
+        color: var(--text-muted);
+        opacity: 0.5;
+    }
+}
+
+.tag-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 180px;
+    max-width: 280px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    z-index: 100;
+    padding: 0.25rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.tag-suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    padding: 0.35rem 0.75rem;
+    text-align: left;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+
+    &:hover {
+        background: var(--surface);
+        color: var(--text);
+    }
+}
+
+.tag-input-hint {
+    margin-top: 0.3rem !important;
+    font-size: 0.68rem;
+}
+
+// --- Admin Form Actions -------------------------------------------------------
 
 .admin-form-actions {
     display: flex;
@@ -5902,7 +6027,7 @@ button.admin-nav-link:last-child:hover {
 .settings-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 0;
     padding: 1.75rem;
     margin-bottom: 1.5rem;
 }

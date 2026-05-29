@@ -1,0 +1,30 @@
+<div class="form-field" [class.invalid]="showError">
+    <label *ngIf="label" class="field-label" [class.label-required]="required"
+        [class.label-optional]="optional && !required">
+        {{ label }}
+    </label>
+
+    <ng-container [ngSwitch]="type">
+        <textarea *ngSwitchCase="'textarea'" [formControl]="$any(control)" [attr.maxlength]="maxlength"
+            class="field-input"></textarea>
+        <input *ngSwitchCase="'int'" type="number" [formControl]="$any(control)" step="1" inputmode="numeric"
+            class="field-input" />
+        <input *ngSwitchDefault [type]="type" [formControl]="$any(control)" class="field-input" />
+    </ng-container>
+
+    <div class="validation" *ngIf="showError">
+        <div *ngIf="control?.errors?.['required']">This field is required.</div>
+        <div *ngIf="control?.errors?.['email']">Enter a valid email address.</div>
+        <div *ngIf="control?.errors?.['pattern']">Invalid format.</div>
+        <div *ngIf="control?.errors?.['min']">Value too small.</div>
+        <div *ngIf="control?.errors?.['max']">Value too large.</div>
+        <div *ngIf="control?.errors?.['maxlength']">Too many characters.</div>
+    </div>
+
+    <div class="char-count" *ngIf="maxlength">
+        <span [class.near-limit]="remainingChars !== null && remainingChars <= Math.ceil((maxlength || 0) * 0.1)"
+            [class.over-limit]="remainingChars !== null && remainingChars < 0">
+            {{ remainingChars !== null && remainingChars >= 0 ? remainingChars : 0 }} / {{ maxlength }}
+        </span>
+    </div>
+</div>

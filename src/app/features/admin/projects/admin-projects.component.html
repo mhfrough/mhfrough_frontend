@@ -9,14 +9,14 @@
     <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label">Title *</label>
+                <label class="admin-form-label label-required">Title</label>
                 <input ngModel [ngModel]="editing()?.title" name="title" required class="admin-form-input"
                     [class.is-invalid]="(f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid"
                     placeholder="Project name">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Slug <span class="admin-form-hint">(URL-friendly,
-                        optional)</span></label>
+                <label class="admin-form-label label-optional">Slug <span
+                        class="form-hint">(URL-friendly)</span></label>
                 <div style="display:flex;gap:0.5rem">
                     <input #slugInput ngModel [ngModel]="editing()?.slug" name="slug" class="admin-form-input"
                         placeholder="my-project-name" style="flex:1">
@@ -26,13 +26,17 @@
             </div>
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label">Tech Stack <span class="admin-form-hint">(comma-separated,
+            <label class="admin-form-label label-optional">Tech Stack <span class="form-hint">(comma-separated,
                     optional)</span></label>
             <input ngModel [ngModel]="editing()?.techStack" name="techStack" class="admin-form-input"
                 placeholder="Angular, NestJS, PostgreSQL">
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label">Description *</label>
+            <label class="admin-form-label label-optional">Tags <span class="form-hint">(SEO keywords)</span></label>
+            <app-tag-input [tags]="formTags()" [suggestions]="allTags()" (tagsChange)="formTags.set($event)"></app-tag-input>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-required">Description</label>
             <div class="rte-wrap">
                 <app-rte-toolbar [el]="descArea" mode="full"></app-rte-toolbar>
                 <textarea #descArea ngModel [ngModel]="editing()?.description" name="description" required rows="3"
@@ -41,7 +45,8 @@
             </div>
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label">Case Study / Content <span class="admin-form-hint">(optional, HTML
+            <label class="admin-form-label label-optional">Case Study / Content <span class="form-hint">(optional,
+                    HTML
                     supported)</span></label>
             <div class="rte-wrap">
                 <app-rte-toolbar [el]="contentArea" mode="full"></app-rte-toolbar>
@@ -52,18 +57,21 @@
         </div>
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label">Live URL <span class="admin-form-hint">(optional)</span></label>
+                <label class="admin-form-label label-optional">Live URL <span
+                        class="form-hint">(optional)</span></label>
                 <input ngModel [ngModel]="editing()?.liveUrl" name="liveUrl" class="admin-form-input" type="url"
                     placeholder="https://…">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">GitHub URL <span class="admin-form-hint">(optional)</span></label>
+                <label class="admin-form-label label-optional">GitHub URL <span
+                        class="form-hint">(optional)</span></label>
                 <input ngModel [ngModel]="editing()?.githubUrl" name="githubUrl" class="admin-form-input" type="url"
                     placeholder="https://github.com/…">
             </div>
         </div>
         <div class="admin-form-field" style="width:100%">
-            <label class="admin-form-label">Thumbnail <span class="admin-form-hint">(optional)</span></label>
+            <label class="admin-form-label label-optional">Thumbnail <span
+                    class="form-hint">(optional)</span></label>
             <div class="img-upload-zone" [class.drag-over]="dragOver()" (dragover)="onDragOver($event)"
                 (dragleave)="onDragLeave()" (drop)="onDrop($event)">
                 @if (uploading()) {
@@ -94,16 +102,17 @@
             }
         </div>
         <div class="admin-form-field" style="max-width:200px">
-            <label class="admin-form-label">Sort Order <span class="admin-form-hint">(optional)</span></label>
+            <label class="admin-form-label label-optional">Sort Order <span
+                    class="form-hint">(optional)</span></label>
             <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number"
                 class="admin-form-input">
         </div>
         <div class="admin-form-checks">
-            <div class="admin-form-check">
+            <div class="admin-form-check checkbox-field">
                 <input ngModel [ngModel]="editing()?.isPublished ?? true" name="isPublished" type="checkbox" id="pub">
                 <label for="pub">Published</label>
             </div>
-            <div class="admin-form-check">
+            <div class="admin-form-check checkbox-field">
                 <input ngModel [ngModel]="editing()?.featured ?? false" name="featured" type="checkbox" id="feat">
                 <label for="feat">Featured</label>
             </div>
@@ -165,6 +174,13 @@
                     <span style="font-weight:600">{{ p.title }}</span>
                     @if (!p.isPublished && p.adminNote) {
                     <span class="admin-table-note">{{ p.adminNote }}</span>
+                    }
+                    @if (p.tags?.length) {
+                    <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">
+                        @for (tag of p.tags; track tag) {
+                        <span class="tag-chip" style="font-size:0.65rem">{{ tag }}</span>
+                        }
+                    </div>
                     }
                 </td>
                 <td style="color:var(--text-muted);font-size:0.78rem">{{ p.techStack?.slice(0,3).join(', ') }}</td>

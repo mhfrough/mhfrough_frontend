@@ -4,11 +4,12 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { BlogsService } from '../../../core/services/blogs.service';
 import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { TagInputComponent } from '../../../shared/components/tag-input/tag-input.component';
 
 @Component({
     selector: 'app-admin-blogs',
     standalone: true,
-    imports: [CommonModule, FormsModule, RteToolbarComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, RteToolbarComponent, ImgFallbackDirective, TagInputComponent],
     templateUrl: './admin-blogs.component.html',
 })
 export class AdminBlogsComponent implements OnInit {
@@ -24,6 +25,8 @@ export class AdminBlogsComponent implements OnInit {
     readonly uploading = signal(false);
     readonly dragOver = signal(false);
     readonly uploadError = signal<string | null>(null);
+    readonly allTags = signal<string[]>([]);
+    readonly formTags = signal<string[]>([]);
 
     // ── Pagination + Search ──────────────────────────────────────────────────
     readonly searchQuery = signal('');
@@ -73,24 +76,26 @@ export class AdminBlogsComponent implements OnInit {
 
     load() {
         this.service.getAllAdmin().subscribe({ next: (d: any[]) => { this.blogs.set(d); this.loading.set(false); } });
+        this.service.getTags().subscribe({ next: t => this.allTags.set(t) });
     }
 
-    openNew() { this.editing.set(null); this.coverPreview.set(null); this.uploadError.set(null); this.showForm.set(true); }
+    openNew() { this.editing.set(null); this.coverPreview.set(null); this.uploadError.set(null); this.formTags.set([]); this.showForm.set(true); }
 
     edit(b: any) {
-        this.editing.set({ ...b, tags: b.tags?.join(', ') });
+        this.editing.set({ ...b });
         this.coverPreview.set(b.coverImage || null);
+        this.formTags.set(b.tags ? [...b.tags] : []);
         this.uploadError.set(null);
         this.showForm.set(true);
     }
 
-    cancel() { this.showForm.set(false); this.editing.set(null); this.coverPreview.set(null); this.uploadError.set(null); }
+    cancel() { this.showForm.set(false); this.editing.set(null); this.coverPreview.set(null); this.uploadError.set(null); this.formTags.set([]); }
 
     save(form: NgForm) {
         form.form.markAllAsTouched();
         if (form.invalid) return;
         this.saving.set(true);
-        const payload = { ...form.value, tags: form.value.tags?.split(',').map((s: string) => s.trim()).filter(Boolean) };
+        const payload = { ...form.value, tags: this.formTags() };
         const obs = this.editing() ? this.service.update(this.editing().id, payload) : this.service.create(payload);
         obs.subscribe({ next: () => { this.load(); this.cancel(); this.saving.set(false); } });
     }

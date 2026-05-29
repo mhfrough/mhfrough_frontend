@@ -27,6 +27,15 @@
         <span class="pub-list-toolbar-count">{{ total() }} post{{ total() !== 1 ? 's' : '' }}</span>
     </div>
 
+    @if (allTags().length > 0) {
+    <div class="gallery-filters">
+        <button class="gallery-filter-tag" [class.is-active]="selectedTag() === 'all'" (click)="selectTag('all')">All</button>
+        @for (tag of allTags(); track tag) {
+        <button class="gallery-filter-tag" [class.is-active]="selectedTag() === tag" (click)="selectTag(tag)">{{ tag }}</button>
+        }
+    </div>
+    }
+
     @if (loading()) {
     <div class="loading-state">
         <div class="spinner"></div>

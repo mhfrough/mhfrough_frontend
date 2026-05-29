@@ -10,6 +10,7 @@ import { ActivityLogService, ActivityLogEntry } from '../../../core/services/act
 import { PushNotificationAdminService } from '../../../core/services/push-notification-admin.service';
 import { FcmService } from '../../../core/services/fcm.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { TickerService, TickerMessage } from '../../../core/services/ticker.service';
 
 @Component({
     selector: 'app-admin-settings',
@@ -26,11 +27,12 @@ export class AdminSettingsComponent implements OnInit {
     private readonly logService = inject(ActivityLogService);
     private readonly pushService = inject(PushNotificationAdminService);
     readonly fcm = inject(FcmService);
+    private readonly tickerService = inject(TickerService);
 
     @ViewChild('aboutEl') aboutEl!: HTMLTextAreaElement;
 
     // ── Section tabs — driven by route param ─────────────────────────────────
-    readonly activeTab = signal<'profile' | 'security' | 'notifications'>('profile');
+    readonly activeTab = signal<'profile' | 'security' | 'notifications' | 'ticker'>('profile');
 
     // ── Activity Logs (Security tab) ─────────────────────────────────────────
     readonly activityLogs = signal<ActivityLogEntry[]>([]);
@@ -56,6 +58,27 @@ export class AdminSettingsComponent implements OnInit {
     readonly pushing = signal(false);
     readonly pushSuccess = signal<string | null>(null);
     readonly pushError = signal<string | null>(null);
+
+    // ── Ticker Messages (Ticker tab) ─────────────────────────────────────────
+    readonly tickerItems = signal<TickerMessage[]>([]);
+    readonly tickerLoading = signal(false);
+    readonly tickerLoaded = signal(false);
+    readonly tickerSaving = signal(false);
+    readonly tickerError = signal<string | null>(null);
+    readonly tickerSuccess = signal<string | null>(null);
+    readonly tickerDeleteTargetId = signal<string | null>(null);
+    readonly tickerDeleting = signal(false);
+    readonly tickerShowForm = signal(false);
+    readonly tickerEditing = signal<TickerMessage | null>(null);
+    // Pagination
+    readonly tickerPage = signal(1);
+    readonly tickerLimit = signal(10);
+    readonly tickerTotal = signal(0);
+    readonly tickerTotalPages = signal(1);
+    readonly tickerSearch = signal('');
+    // Form fields
+    tickerFormMessage = '';
+    tickerFormPublished = true;
 
     // ── Profile ──────────────────────────────────────────────────────────────
     readonly profileSaving = signal<'identity' | 'about' | 'links' | null>(null);
@@ -154,11 +177,14 @@ export class AdminSettingsComponent implements OnInit {
     ngOnInit() {
         // Read :tab param from route and keep in sync
         this.route.paramMap.subscribe(params => {
-            const tab = params.get('tab') as 'profile' | 'security' | 'notifications';
-            if (tab && ['profile', 'security', 'notifications'].includes(tab)) {
+            const tab = params.get('tab') as 'profile' | 'security' | 'notifications' | 'ticker';
+            if (tab && ['profile', 'security', 'notifications', 'ticker'].includes(tab)) {
                 this.activeTab.set(tab);
                 if (tab === 'security' && !this.activityLogsLoaded()) {
                     this.loadActivityLogs();
+                }
+                if (tab === 'ticker' && !this.tickerLoaded()) {
+                    this.loadTickers();
                 }
             }
         });
@@ -534,5 +560,133 @@ export class AdminSettingsComponent implements OnInit {
             },
         });
     }
+
+    // ── Ticker actions ────────────────────────────────────────────────────────
+
+    loadTickers() {
+        this.tickerLoading.set(true);
+        this.tickerService.getAll(this.tickerPage(), this.tickerLimit(), this.tickerSearch() || undefined).subscribe({
+            next: (res) => {
+                this.tickerItems.set(res.data);
+                this.tickerTotal.set(res.total);
+                this.tickerTotalPages.set(res.totalPages);
+                this.tickerLoading.set(false);
+                this.tickerLoaded.set(true);
+            },
+            error: () => {
+                this.tickerLoading.set(false);
+                this.tickerError.set('Failed to load ticker messages.');
+            },
+        });
+    }
+
+    onTickerSearch(e: Event) {
+        this.tickerSearch.set((e.target as HTMLInputElement).value);
+        this.tickerPage.set(1);
+        this.loadTickers();
+    }
+
+    onTickerPageSizeChange(e: Event) {
+        this.tickerLimit.set(+(e.target as HTMLSelectElement).value);
+        this.tickerPage.set(1);
+        this.loadTickers();
+    }
+
+    tickerGoToPage(page: number) {
+        this.tickerPage.set(page);
+        this.loadTickers();
+    }
+
+    get tickerPageNumbers(): number[] {
+        const total = this.tickerTotalPages();
+        const cur = this.tickerPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    }
+
+    openNewTicker() {
+        this.tickerEditing.set(null);
+        this.tickerFormMessage = '';
+        this.tickerFormPublished = true;
+        this.tickerError.set(null);
+        this.tickerShowForm.set(true);
+    }
+
+    editTicker(item: TickerMessage) {
+        this.tickerEditing.set({ ...item });
+        this.tickerFormMessage = item.message;
+        this.tickerFormPublished = item.isPublished;
+        this.tickerError.set(null);
+        this.tickerShowForm.set(true);
+    }
+
+    cancelTickerForm() {
+        this.tickerShowForm.set(false);
+        this.tickerEditing.set(null);
+    }
+
+    saveTicker(f: NgForm) {
+        f.form.markAllAsTouched();
+        if (f.invalid || !this.tickerFormMessage.trim()) return;
+        this.tickerSaving.set(true);
+        this.tickerError.set(null);
+        const editing = this.tickerEditing();
+        const action$ = editing
+            ? this.tickerService.update(editing.id, { message: this.tickerFormMessage.trim(), isPublished: this.tickerFormPublished })
+            : this.tickerService.create({ message: this.tickerFormMessage.trim(), isPublished: this.tickerFormPublished });
+
+        action$.subscribe({
+            next: () => {
+                this.tickerSaving.set(false);
+                this.tickerShowForm.set(false);
+                this.tickerEditing.set(null);
+                this.tickerSuccess.set(editing ? 'Ticker updated.' : 'Ticker created.');
+                setTimeout(() => this.tickerSuccess.set(null), 3000);
+                this.loadTickers();
+            },
+            error: (err: any) => {
+                this.tickerSaving.set(false);
+                this.tickerError.set(err?.error?.message ?? 'Failed to save ticker.');
+            },
+        });
+    }
+
+    toggleTickerPublish(item: TickerMessage) {
+        this.tickerService.update(item.id, { isPublished: !item.isPublished }).subscribe({
+            next: () => this.loadTickers(),
+            error: (err: any) => this.tickerError.set(err?.error?.message ?? 'Failed to update status.'),
+        });
+    }
+
+    confirmDeleteTicker(id: string) { this.tickerDeleteTargetId.set(id); }
+    cancelDeleteTicker() { this.tickerDeleteTargetId.set(null); }
+
+    executeDeleteTicker() {
+        const id = this.tickerDeleteTargetId();
+        if (!id) return;
+        this.tickerDeleting.set(true);
+        this.tickerService.remove(id).subscribe({
+            next: () => {
+                this.tickerDeleteTargetId.set(null);
+                this.tickerDeleting.set(false);
+                this.tickerSuccess.set('Ticker deleted.');
+                setTimeout(() => this.tickerSuccess.set(null), 3000);
+                // If deleting last item on page, go to prev page
+                if (this.tickerItems().length === 1 && this.tickerPage() > 1) {
+                    this.tickerPage.update(p => p - 1);
+                }
+                this.loadTickers();
+            },
+            error: (err: any) => {
+                this.tickerDeleting.set(false);
+                this.tickerDeleteTargetId.set(null);
+                this.tickerError.set(err?.error?.message ?? 'Failed to delete ticker.');
+            },
+        });
+    }
 }
+
 

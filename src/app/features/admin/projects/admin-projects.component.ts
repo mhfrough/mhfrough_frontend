@@ -6,11 +6,12 @@ import { RealtimeService } from '../../../core/services/realtime.service';
 import { Subscription } from 'rxjs';
 import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { TagInputComponent } from '../../../shared/components/tag-input/tag-input.component';
 
 @Component({
     selector: 'app-admin-projects',
     standalone: true,
-    imports: [CommonModule, FormsModule, RteToolbarComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, RteToolbarComponent, ImgFallbackDirective, TagInputComponent],
     templateUrl: './admin-projects.component.html',
 })
 export class AdminProjectsComponent implements OnInit, OnDestroy {
@@ -27,6 +28,8 @@ export class AdminProjectsComponent implements OnInit, OnDestroy {
     readonly uploading = signal(false);
     readonly dragOver = signal(false);
     readonly uploadError = signal<string | null>(null);
+    readonly allTags = signal<string[]>([]);
+    readonly formTags = signal<string[]>([]);
     private subs = new Subscription();
 
     // ── Pagination + Search ──────────────────────────────────────────────────
@@ -101,24 +104,30 @@ export class AdminProjectsComponent implements OnInit, OnDestroy {
 
     load() {
         this.service.getAllAdmin().subscribe({ next: (d: any[]) => { this.projects.set(d); this.loading.set(false); } });
+        this.service.getTags().subscribe({ next: t => this.allTags.set(t) });
     }
 
-    openNew() { this.editing.set(null); this.thumbPreview.set(null); this.uploadError.set(null); this.showForm.set(true); }
+    openNew() { this.editing.set(null); this.thumbPreview.set(null); this.uploadError.set(null); this.formTags.set([]); this.showForm.set(true); }
 
     edit(p: any) {
         this.editing.set({ ...p, techStack: p.techStack?.join(', ') });
         this.thumbPreview.set(p.thumbnail || null);
+        this.formTags.set(p.tags ? [...p.tags] : []);
         this.uploadError.set(null);
         this.showForm.set(true);
     }
 
-    cancel() { this.showForm.set(false); this.editing.set(null); this.thumbPreview.set(null); this.uploadError.set(null); }
+    cancel() { this.showForm.set(false); this.editing.set(null); this.thumbPreview.set(null); this.uploadError.set(null); this.formTags.set([]); }
 
     save(form: NgForm) {
         form.form.markAllAsTouched();
         if (form.invalid) return;
         this.saving.set(true);
-        const payload = { ...form.value, techStack: form.value.techStack?.split(',').map((s: string) => s.trim()).filter(Boolean) };
+        const payload = {
+            ...form.value,
+            tags: this.formTags(),
+            techStack: form.value.techStack?.split(',').map((s: string) => s.trim()).filter(Boolean),
+        };
         const obs = this.editing() ? this.service.update(this.editing().id, payload) : this.service.create(payload);
         obs.subscribe({ next: () => { this.cancel(); this.saving.set(false); } });
     }

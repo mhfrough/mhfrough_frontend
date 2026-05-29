@@ -17,6 +17,9 @@
         routerLink="/admin/settings/notifications">
         <i class="bi bi-bell"></i> Notifications
     </a>
+    <a class="settings-tab" [class.is-active]="activeTab() === 'ticker'" routerLink="/admin/settings/ticker">
+        <i class="bi bi-megaphone-fill"></i> Ticker
+    </a>
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════════════ -->
@@ -59,19 +62,19 @@
                 <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onAvatarSelect($event)"
                     style="display:none">
             </label>
-            <p class="settings-hint">JPG, PNG or WebP · max 5 MB · Recommended 400×400 px</p>
+            <p class="form-hint">JPG, PNG or WebP · max 5 MB · Recommended 400×400 px</p>
         </div>
     </div>
 
     <div class="admin-form-grid">
         <div class="admin-form-field">
-            <label class="admin-form-label">Display name</label>
+            <label class="admin-form-label label-optional">Display name</label>
             <input type="text" class="admin-form-input" [(ngModel)]="profileDisplayName"
                 placeholder="e.g. Mohammad Hamza" maxlength="80">
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label">Timezone</label>
-            <select class="admin-form-input" [(ngModel)]="profileTimezone">
+            <label class="admin-form-label label-optional">Timezone</label>
+            <select class="admin-form-input admin-form-select" [(ngModel)]="profileTimezone">
                 @for (tz of TIMEZONES; track tz) {
                 <option [value]="tz">{{ tz }}</option>
                 }
@@ -80,10 +83,10 @@
     </div>
 
     <div class="admin-form-field">
-        <label class="admin-form-label">Short bio</label>
+        <label class="admin-form-label label-optional">Short bio</label>
         <textarea class="admin-form-textarea" [(ngModel)]="profileBio" placeholder="A brief description about yourself…"
             rows="3" maxlength="500"></textarea>
-        <p class="settings-hint">{{ profileBio.length }}/500 characters</p>
+        <p class="form-hint">{{ profileBio.length }}/500 characters</p>
     </div>
 
     <div class="admin-form-actions" style="margin-top:1.25rem">
@@ -105,7 +108,7 @@
     </div>
 
     <div class="admin-form-field">
-        <label class="admin-form-label">About HTML</label>
+        <label class="admin-form-label label-optional">About HTML</label>
         <app-rte-toolbar [el]="aboutEl ?? null" mode="full"></app-rte-toolbar>
         <textarea #aboutEl class="admin-form-textarea admin-rte-textarea" [(ngModel)]="profileAboutHtml"
             placeholder="<p>Write your about section content here…</p>" rows="12"></textarea>
@@ -145,7 +148,7 @@
                 [name]="'link-' + field.key">
             <div class="social-vis-pills">
                 @if (field.hasFooter) {
-                <div class="admin-form-check">
+                <div class="admin-form-check checkbox-field">
                     <input type="checkbox" [id]="'vis-footer-' + field.key"
                         [checked]="getSocialVis(field.key, 'footer')"
                         (change)="setSocialVis(field.key, 'footer', $any($event.target).checked)">
@@ -154,7 +157,7 @@
                 } @else {
                 <span class="social-vis-pill-gap"></span>
                 }
-                <div class="admin-form-check">
+                <div class="admin-form-check checkbox-field">
                     <input type="checkbox" [id]="'vis-contact-' + field.key"
                         [checked]="getSocialVis(field.key, 'contact')"
                         (change)="setSocialVis(field.key, 'contact', $any($event.target).checked)">
@@ -206,13 +209,13 @@
 
     <div class="admin-form-grid">
         <div class="admin-form-field">
-            <label class="admin-form-label">Copyright owner</label>
+            <label class="admin-form-label label-optional">Copyright owner</label>
             <input type="text" class="admin-form-input" [(ngModel)]="footerCopyrightOwner" placeholder="mhfrough.dev"
                 maxlength="120">
-            <p class="settings-hint">Appears as: © {{ year }} {{ footerCopyrightOwner || 'mhfrough.dev' }}</p>
+            <p class="form-hint">Appears as: © {{ year }} {{ footerCopyrightOwner || 'mhfrough.dev' }}</p>
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label">Tagline</label>
+            <label class="admin-form-label label-optional">Tagline</label>
             <input type="text" class="admin-form-input" [(ngModel)]="footerTagline" placeholder="Made with ♥ in Karachi"
                 maxlength="200">
         </div>
@@ -383,7 +386,7 @@
             <div class="settings-field-inline">
                 <input type="number" class="admin-form-input settings-input-sm" [(ngModel)]="inactivityTimeoutMinutes"
                     min="1" max="480">
-                <span class="settings-hint">Warn at {{ inactivityTimeoutMinutes - 1 }} min, logout at {{
+                <span class="form-hint">Warn at {{ inactivityTimeoutMinutes - 1 }} min, logout at {{
                     inactivityTimeoutMinutes }} min.</span>
             </div>
         </div>
@@ -411,7 +414,7 @@
             <div class="settings-field-inline">
                 <input type="number" class="admin-form-input settings-input-sm" [(ngModel)]="maxLoginAttempts" min="1"
                     max="20">
-                <span class="settings-hint">Account locks after this many consecutive failures.</span>
+                <span class="form-hint">Account locks after this many consecutive failures.</span>
             </div>
         </div>
         <div class="settings-field-row">
@@ -419,7 +422,7 @@
             <div class="settings-field-inline">
                 <input type="number" class="admin-form-input settings-input-sm" [(ngModel)]="lockDurationMinutes"
                     min="5" max="1440">
-                <span class="settings-hint">{{ formatLockDuration(lockDurationMinutes) }} — account is locked for this
+                <span class="form-hint">{{ formatLockDuration(lockDurationMinutes) }} — account is locked for this
                     long.</span>
             </div>
         </div>
@@ -435,7 +438,7 @@
             <div class="settings-field-inline">
                 <input type="number" class="admin-form-input settings-input-sm" [(ngModel)]="rememberMeDays" min="1"
                     max="365">
-                <span class="settings-hint">How long the login persists when "Remember Me" is checked.</span>
+                <span class="form-hint">How long the login persists when "Remember Me" is checked.</span>
             </div>
         </div>
         <div class="settings-field-row">
@@ -443,7 +446,7 @@
             <div class="settings-field-inline">
                 <input type="number" class="admin-form-input settings-input-sm" [(ngModel)]="sessionDurationDays"
                     min="1" max="30">
-                <span class="settings-hint">Session cookie duration when "Remember Me" is not checked.</span>
+                <span class="form-hint">Session cookie duration when "Remember Me" is not checked.</span>
             </div>
         </div>
 
@@ -475,7 +478,7 @@
 
     <div class="settings-form settings-form--pw">
         <div class="admin-form-field">
-            <label class="admin-form-label">Current password</label>
+            <label class="admin-form-label label-required">Current password</label>
             <div class="admin-pw-wrap">
                 <input [type]="showCurrentPw() ? 'text' : 'password'" class="admin-form-input"
                     [(ngModel)]="currentPassword" autocomplete="current-password" placeholder="Current password">
@@ -485,7 +488,8 @@
             </div>
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label">New password <span class="settings-hint-inline">(min 8 chars)</span></label>
+            <label class="admin-form-label label-required">New password <span class="form-hint">(min 8
+                    chars)</span></label>
             <div class="admin-pw-wrap">
                 <input [type]="showNewPw() ? 'text' : 'password'" class="admin-form-input" [(ngModel)]="newPassword"
                     autocomplete="new-password" placeholder="New password">
@@ -495,7 +499,7 @@
             </div>
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label">Confirm new password</label>
+            <label class="admin-form-label label-required">Confirm new password</label>
             <div class="admin-pw-wrap">
                 <input [type]="showConfirmPw() ? 'text' : 'password'" class="admin-form-input"
                     [(ngModel)]="confirmPassword" autocomplete="new-password" placeholder="Confirm new password">
@@ -662,22 +666,23 @@
     <form #pushForm="ngForm" (ngSubmit)="sendPush(pushForm)" novalidate>
         <div class="settings-form">
             <div class="admin-form-field">
-                <label class="admin-form-label">Title <span class="required">*</span></label>
+                <label class="admin-form-label label-required">Title</label>
                 <input class="admin-form-input" type="text" [(ngModel)]="pushTitle" name="pushTitle"
                     placeholder="e.g. New blog post published!" maxlength="100" required
                     [class.is-invalid]="(pushForm.submitted || pushForm.controls['pushTitle']?.touched) && pushForm.controls['pushTitle']?.invalid" />
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Body <span class="required">*</span></label>
+                <label class="admin-form-label label-required">Body</label>
                 <textarea class="admin-form-textarea" rows="3" [(ngModel)]="pushBody" name="pushBody"
                     placeholder="Notification message text…" maxlength="300" required
                     [class.is-invalid]="(pushForm.submitted || pushForm.controls['pushBody']?.touched) && pushForm.controls['pushBody']?.invalid"></textarea>
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Click URL <span class="admin-form-hint">(optional)</span></label>
+                <label class="admin-form-label label-optional">Click URL <span
+                        class="admin-form-hint">(optional)</span></label>
                 <input class="admin-form-input" type="url" [(ngModel)]="pushUrl" name="pushUrl"
                     placeholder="https://mhfrough.dev/blog" />
-                <span class="settings-hint">Leave blank to open the home page on click.</span>
+                <span class="form-hint">Leave blank to open the home page on click.</span>
             </div>
             <div class="settings-actions">
                 <button type="submit" class="btn-primary" [disabled]="pushing()">
@@ -690,6 +695,162 @@
 </div>
 
 }
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- TICKER TAB                                                               -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+@if (activeTab() === 'ticker') {
+
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-megaphone-fill"></i> Ticker Messages</h2>
+            <p class="settings-card-sub">Manage scrolling ticker messages shown below the navigation bar.</p>
+        </div>
+        <button class="btn-primary" (click)="openNewTicker()">
+            <i class="bi bi-plus-lg"></i> Add Ticker
+        </button>
+    </div>
+
+    @if (tickerSuccess()) {
+    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> {{ tickerSuccess() }}</div>
+    }
+    @if (tickerError() && !tickerShowForm()) {
+    <div class="admin-alert admin-alert--error"><i class="bi bi-exclamation-triangle"></i> {{ tickerError() }}</div>
+    }
+
+    <!-- ── Create / Edit Form ─────────────────────────────────────────────── -->
+    @if (tickerShowForm()) {
+    <div class="admin-form-panel">
+        <p class="admin-form-title">{{ tickerEditing() ? 'Edit Ticker Message' : 'New Ticker Message' }}</p>
+
+        @if (tickerError()) {
+        <div class="admin-alert admin-alert--error"><i class="bi bi-exclamation-triangle"></i> {{ tickerError() }}
+        </div>
+        }
+
+        <form #tickerForm="ngForm" (ngSubmit)="saveTicker(tickerForm)" novalidate>
+            <div class="admin-form-field">
+                <label class="admin-form-label label-required">Message</label>
+                <textarea class="admin-form-textarea" name="message" [(ngModel)]="tickerFormMessage" rows="3"
+                    placeholder="Enter the ticker message text…" maxlength="500" required
+                    [class.is-invalid]="(tickerForm.submitted || tickerForm.controls['message']?.touched) && tickerForm.controls['message']?.invalid"></textarea>
+                <p class="settings-hint"
+                    [style.color]="tickerFormMessage.length > 450 ? (tickerFormMessage.length >= 500 ? '#ef4444' : '#f97316') : undefined">
+                    {{ tickerFormMessage.length }}/500
+                </p>
+            </div>
+            <div class="admin-form-checks">
+                <div class="admin-form-check checkbox-field">
+                    <input type="checkbox" id="ticker-pub" name="isPublished" [(ngModel)]="tickerFormPublished">
+                    <label for="ticker-pub">Published (visible on site)</label>
+                </div>
+            </div>
+            <div class="admin-form-actions">
+                <button type="submit" class="btn-primary" [disabled]="tickerSaving()">
+                    @if (tickerSaving()) { <span class="contact-spinner"></span>&nbsp; Saving… }
+                    @else { <i class="bi bi-check-lg"></i> {{ tickerEditing() ? 'Update' : 'Create' }} }
+                </button>
+                <button type="button" class="btn-ghost" (click)="cancelTickerForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- ── Toolbar ────────────────────────────────────────────────────────── -->
+    <div class="admin-list-toolbar">
+        <div class="admin-list-search">
+            <i class="bi bi-search"></i>
+            <input [value]="tickerSearch()" (input)="onTickerSearch($event)" placeholder="Search messages…"
+                autocomplete="off">
+        </div>
+        <select class="admin-page-size-select" [value]="tickerLimit()" (change)="onTickerPageSizeChange($event)">
+            <option value="10">10 / page</option>
+            <option value="25">25 / page</option>
+            <option value="50">50 / page</option>
+        </select>
+        <span class="admin-list-toolbar-count">{{ tickerTotal() }} message{{ tickerTotal() !== 1 ? 's' : '' }}</span>
+        <button class="btn-ghost" (click)="loadTickers()" [disabled]="tickerLoading()">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+    </div>
+
+    <!-- ── Table ──────────────────────────────────────────────────────────── -->
+    @if (tickerLoading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+    </div>
+    } @else if (tickerItems().length === 0) {
+    <p class="settings-empty">No ticker messages yet. Add one above.</p>
+    } @else {
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Message</th>
+                    <th style="width:100px">Status</th>
+                    <th style="width:160px">Created</th>
+                    <th style="width:160px">Updated</th>
+                    <th style="width:140px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of tickerItems(); track item.id) {
+                <tr>
+                    <td style="font-size:0.88rem;max-width:380px;word-break:break-word">{{ item.message }}</td>
+                    <td>
+                        @if (item.isPublished) {
+                        <span class="admin-badge admin-badge--on">Published</span>
+                        } @else {
+                        <span class="admin-badge admin-badge--warn">Unpublished</span>
+                        }
+                    </td>
+                    <td style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap">
+                        {{ item.createdAt | date:'dd MMM yyyy, HH:mm' }}
+                    </td>
+                    <td style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap">
+                        {{ item.updatedAt | date:'dd MMM yyyy, HH:mm' }}
+                    </td>
+                    <td>
+                        <div style="display:flex;gap:0.4rem;justify-content:flex-end;align-items:center">
+                            <button class="btn-text" (click)="editTicker(item)" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn-text" (click)="toggleTickerPublish(item)"
+                                [title]="item.isPublished ? 'Unpublish' : 'Publish'">
+                                <i class="bi" [class.bi-eye-slash]="item.isPublished"
+                                    [class.bi-eye]="!item.isPublished"></i>
+                            </button>
+                            <button class="btn-text-danger" (click)="confirmDeleteTicker(item.id)" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (tickerTotalPages() > 1) {
+    <div class="settings-pagination">
+        <button class="btn-ghost" (click)="tickerGoToPage(tickerPage() - 1)" [disabled]="tickerPage() === 1">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        @for (p of tickerPageNumbers; track p) {
+        <button class="btn-ghost" [class.is-active]="p === tickerPage()" (click)="tickerGoToPage(p)">{{ p }}</button>
+        }
+        <button class="btn-ghost" (click)="tickerGoToPage(tickerPage() + 1)"
+            [disabled]="tickerPage() === tickerTotalPages()">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
+    }
+    }
+</div>
+
+} <!-- /ticker tab -->
 
 <!-- Revoke session confirm modal -->
 @if (revokeConfirmId()) {
@@ -759,6 +920,23 @@
         <div class="admin-modal-actions">
             <button class="btn-ghost" (click)="cancelClearAllLogs()">Cancel</button>
             <button class="btn-danger" (click)="executeClearAllLogs()">Clear All</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Ticker delete confirm modal -->
+@if (tickerDeleteTargetId()) {
+<div class="admin-modal-overlay" (click)="cancelDeleteTicker()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Delete Ticker Message</p>
+        <p class="admin-modal-body">This action cannot be undone. Are you sure you want to delete this ticker message?
+        </p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelDeleteTicker()">Cancel</button>
+            <button class="btn-danger" (click)="executeDeleteTicker()" [disabled]="tickerDeleting()">
+                @if (tickerDeleting()) { <span class="contact-spinner"></span> } @else { Delete }
+            </button>
         </div>
     </div>
 </div>

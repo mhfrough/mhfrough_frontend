@@ -30,22 +30,22 @@
             <!-- Name + Email -->
             <div class="contact-row">
                 <div class="contact-field">
-                    <label class="contact-label">Name *</label>
+                    <label class="contact-label label-required">Name</label>
                     <input [(ngModel)]="formData.name" name="name" required minlength="2" maxlength="100"
                         class="contact-input"
                         [class.is-error]="(f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid"
                         placeholder="Your full name">
                     @if ((f.submitted || f.controls['name']?.touched) && f.controls['name']?.invalid) {
-                    <span class="contact-error">Please enter your name.</span>
+                    <span class="form-error">Please enter your name.</span>
                     }
                 </div>
                 <div class="contact-field">
-                    <label class="contact-label">Email *</label>
+                    <label class="contact-label label-required">Email</label>
                     <input [(ngModel)]="formData.email" name="email" required email type="email" class="contact-input"
                         [class.is-error]="(f.submitted || f.controls['email']?.touched) && f.controls['email']?.invalid"
                         placeholder="you@example.com">
                     @if ((f.submitted || f.controls['email']?.touched) && f.controls['email']?.invalid) {
-                    <span class="contact-error">Please enter a valid email.</span>
+                    <span class="form-error">Please enter a valid email.</span>
                     }
                 </div>
             </div>
@@ -53,12 +53,12 @@
             <!-- Phone + Subject -->
             <div class="contact-row">
                 <div class="contact-field">
-                    <label class="contact-label">Phone <span class="contact-optional">(optional)</span></label>
+                    <label class="contact-label label-optional">Phone</label>
                     <input [(ngModel)]="formData.phone" name="phone" type="tel" maxlength="20" class="contact-input"
                         placeholder="+92 300 0000000">
                 </div>
                 <div class="contact-field">
-                    <label class="contact-label">Subject <span class="contact-optional">(optional)</span></label>
+                    <label class="contact-label label-optional">Subject</label>
                     <select [(ngModel)]="formData.subject" name="subject" class="contact-input contact-select">
                         <option value="">— Select a subject —</option>
                         @if (dynamicSubject()) {
@@ -77,7 +77,7 @@
 
             <!-- Message -->
             <div class="contact-field">
-                <label class="contact-label">Message *</label>
+                <label class="contact-label label-required">Message</label>
                 <div class="rte-wrap">
                     <app-rte-toolbar [el]="msgArea" mode="minimal"></app-rte-toolbar>
                     <textarea #msgArea [(ngModel)]="formData.message" name="message" required minlength="10"
@@ -86,8 +86,11 @@
                         placeholder="Tell me about your project…"></textarea>
                 </div>
                 @if ((f.submitted || f.controls['message']?.touched) && f.controls['message']?.invalid) {
-                <span class="contact-error">Please enter a message (min 10 characters).</span>
+                <span class="form-error">Please enter a message (min 10 characters).</span>
                 }
+                <div class="char-count"><span [class.near-limit]="formData.message.length >= 1800"
+                        [class.over-limit]="formData.message.length >= 2000">{{ 2000 - formData.message.length }} /
+                        2000</span></div>
             </div>
 
             <!-- Actions -->

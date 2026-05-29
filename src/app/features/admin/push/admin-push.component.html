@@ -49,24 +49,27 @@
 
     <form #f="ngForm" (ngSubmit)="send(f)" novalidate>
         <div class="admin-form-field">
-            <label class="admin-form-label">Title <span class="required">*</span></label>
+            <label class="admin-form-label label-required">Title</label>
             <input class="admin-form-input" type="text" [(ngModel)]="title" name="title"
                 placeholder="e.g. New blog post published!" maxlength="100" required
                 [class.is-invalid]="(f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid" />
         </div>
 
         <div class="admin-form-field">
-            <label class="admin-form-label">Body <span class="required">*</span></label>
-            <textarea class="admin-form-textarea" rows="3" [(ngModel)]="body" name="body"
+            <label class="admin-form-label label-required">Body</label>
+            <textarea #bodyArea class="admin-form-textarea" rows="3" [(ngModel)]="body" name="body"
                 placeholder="Notification message text…" maxlength="300" required
                 [class.is-invalid]="(f.submitted || f.controls['body']?.touched) && f.controls['body']?.invalid"></textarea>
+            <div class="char-count"><span [class.near-limit]="bodyArea.value.length >= 270"
+                    [class.over-limit]="bodyArea.value.length >= 300">{{ 300 - bodyArea.value.length }} / 300</span>
+            </div>
         </div>
 
         <div class="admin-form-field">
-            <label class="admin-form-label">Click URL <span class="admin-form-hint">(optional)</span></label>
+            <label class="admin-form-label label-optional">Click URL</label>
             <input class="admin-form-input" type="url" [(ngModel)]="url" name="url"
                 placeholder="https://mhfrough.dev/blog" />
-            <span class="form-hint-text">Leave blank to open the home page on click.</span>
+            <span class="form-hint">Leave blank to open the home page on click.</span>
         </div>
 
         <div class="admin-form-actions">

@@ -8,11 +8,12 @@ import { FcmService } from '../../../core/services/fcm.service';
 import { CookieConsentComponent } from '../../../shared/cookie-consent/cookie-consent.component';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
+import { TickerBannerComponent } from '../../../shared/ticker-banner/ticker-banner.component';
 
 @Component({
     selector: 'app-main-layout',
     standalone: true,
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ChatWidgetComponent, CookieConsentComponent, ExternalUrlPipe],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ChatWidgetComponent, CookieConsentComponent, ExternalUrlPipe, TickerBannerComponent],
     templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {

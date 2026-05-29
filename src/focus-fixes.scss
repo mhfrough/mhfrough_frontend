@@ -1,0 +1,70 @@
+/* focus-fixes.scss
+   Global focus styles: remove focus outline for inputs/selects/textareas,
+   and ensure textarea keeps only bottom border on focus/active.
+*/
+
+input,
+select,
+textarea {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove outline/box-shadow on focus/active for form controls */
+input:focus,
+select:focus,
+textarea:focus,
+input:active,
+select:active,
+textarea:active,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+}
+
+/* Textarea: keep only bottom border when focused/active */
+textarea:focus,
+textarea:active,
+textarea:focus-visible {
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--text, #e4e0d8) !important;
+    border-radius: 0 !important;
+    background-clip: padding-box;
+}
+
+/* Ensure admin form inputs maintain bottom-border behavior */
+.admin-form-input:focus,
+.admin-form-textarea:focus,
+.admin-form-select:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-bottom-color: var(--text) !important;
+}
+
+/* Bootstrap form control overrides */
+.form-control:focus,
+.form-select:focus,
+.form-control:active,
+.form-select:active,
+.form-control:focus-visible,
+.form-select:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+}
+
+/* Ensure textarea with .form-control keeps only bottom border when focused/active */
+textarea.form-control:focus,
+textarea.form-control:active,
+textarea.form-control:focus-visible {
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--text, #e4e0d8) !important;
+    border-radius: 0 !important;
+    background-clip: padding-box;
+}

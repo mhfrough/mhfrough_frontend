@@ -11,8 +11,8 @@
 
         <!-- Media upload -->
         <div class="admin-form-field" style="width:100%">
-            <label class="admin-form-label">Media File *
-                <span class="admin-form-hint">(image, gif, video — max 100 MB)</span>
+            <label class="admin-form-label label-required">Media File
+                <span class="form-hint">(image, gif, video — max 100 MB)</span>
             </label>
             <div class="img-upload-zone" [class.drag-over]="dragOver()" (dragover)="onDragOver($event)"
                 (dragleave)="onDragLeave()" (drop)="onDrop($event)">
@@ -60,20 +60,26 @@
         <!-- Title & Category -->
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label">Title <span class="admin-form-hint">(optional)</span></label>
+                <label class="admin-form-label label-optional">Title</label>
                 <input ngModel [ngModel]="editing()?.title" name="title" class="admin-form-input"
                     placeholder="Photo title">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Category <span class="admin-form-hint">(optional)</span></label>
+                <label class="admin-form-label label-optional">Category</label>
                 <input ngModel [ngModel]="editing()?.category" name="category" class="admin-form-input"
                     placeholder="e.g. Photography, Design, Travel">
             </div>
         </div>
 
+        <!-- Tags -->
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Tags <span class="form-hint">(SEO keywords)</span></label>
+            <app-tag-input [tags]="formTags()" [suggestions]="allTags()" (tagsChange)="formTags.set($event)"></app-tag-input>
+        </div>
+
         <!-- Caption -->
         <div class="admin-form-field">
-            <label class="admin-form-label">Caption <span class="admin-form-hint">(optional)</span></label>
+            <label class="admin-form-label label-optional">Caption</label>
             <textarea ngModel [ngModel]="editing()?.caption" name="caption" rows="2" class="admin-form-textarea"
                 placeholder="A short description shown in the lightbox"></textarea>
         </div>
@@ -81,13 +87,13 @@
         <!-- Alt Text & Sort Order -->
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label">Alt Text <span class="admin-form-hint">(optional,
-                        accessibility)</span></label>
+                <label class="admin-form-label label-optional">Alt Text <span
+                        class="form-hint">(accessibility)</span></label>
                 <input ngModel [ngModel]="editing()?.altText" name="altText" class="admin-form-input"
                     placeholder="Describe the image for screen readers">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label">Sort Order</label>
+                <label class="admin-form-label label-optional">Sort Order</label>
                 <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number" min="0"
                     class="admin-form-input">
             </div>
@@ -95,7 +101,7 @@
 
         <!-- Published -->
         <div class="admin-form-checks">
-            <div class="admin-form-check">
+            <div class="admin-form-check checkbox-field">
                 <input ngModel [ngModel]="editing()?.isPublished ?? true" name="isPublished" type="checkbox"
                     id="gal-pub">
                 <label for="gal-pub">Published (visible on site)</label>
@@ -189,6 +195,13 @@
                     @if (item.category) {
                     <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">
                         <i class="bi bi-tag"></i> {{ item.category }}
+                    </div>
+                    }
+                    @if (item.tags?.length) {
+                    <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">
+                        @for (tag of item.tags!; track tag) {
+                        <span class="tag-chip" style="font-size:0.65rem">{{ tag }}</span>
+                        }
                     </div>
                     }
                 </td>

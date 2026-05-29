@@ -1,0 +1,147 @@
+/* Global form theme: standardize inputs, selects, textareas, checkboxes */
+
+/* Base form control appearance */
+input,
+textarea,
+select,
+.form-control,
+.field-input {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.6rem;
+    transition: border-color 120ms var(--ease), box-shadow 120ms var(--ease);
+    font-family: var(--font);
+    font-size: 0.95rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-muted);
+}
+
+/* Focus state */
+input:focus,
+textarea:focus,
+select:focus,
+.form-control:focus {
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.06);
+    outline: none;
+}
+
+/* Invalid state (Angular adds ng-invalid/ng-touched) and Bootstrap invalid classes */
+input.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+.form-control.is-invalid,
+.ng-invalid.ng-touched {
+    border-color: #e53935 !important;
+}
+
+.was-validated .form-control:invalid,
+.form-control:invalid {
+    border-color: #e53935;
+}
+
+/* Red underline variant (utility) */
+.input-underline {
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-bottom: 2px solid var(--border);
+    border-radius: 0;
+}
+
+.input-underline.invalid {
+    border-bottom-color: #e53935;
+}
+
+/* Label helpers: add a small helper class to markup labels with required/optional */
+.label-required::after {
+    content: ' *';
+    color: #e53935;
+    margin-left: 0.25rem;
+}
+
+.label-optional::after {
+    content: ' (Optional)';
+    color: var(--text-muted);
+    margin-left: 0.5rem;
+    font-weight: 400;
+    font-size: 0.92em;
+    text-transform: none;
+}
+
+/* Checkbox alignment helper */
+.checkbox-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Select styling: keep native arrow but ensure spacing */
+select.form-control,
+select {
+    appearance: none;
+    padding-right: 2rem;
+}
+
+/* Textarea char count utility (used by component) */
+.char-count {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* Near limit / over limit helpers for textarea */
+.near-limit {
+    color: orange;
+}
+
+.over-limit {
+    color: #e53935;
+}
+
+/* Checkbox + label alignment (covers common markup patterns used across admin) */
+input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    vertical-align: middle;
+}
+
+/* When label follows checkbox */
+input[type="checkbox"]+label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* When checkbox is inside a label */
+label>input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+/* Normalize existing markers used in admin templates */
+.required {
+    color: #e53935;
+    margin-left: 0.25rem;
+}
+
+.admin-form-hint,
+.settings-hint-inline,
+.settings-hint {
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: 0.25rem;
+}
+
+/* Inline error message shown below invalid fields */
+.form-error {
+    color: #e53935;
+    font-size: 0.78rem;
+    margin-top: 0.2rem;
+    display: block;
+}

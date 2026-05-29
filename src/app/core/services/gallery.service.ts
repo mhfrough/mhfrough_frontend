@@ -9,6 +9,7 @@ export interface GalleryItem {
     mediaUrl: string;
     mediaType: 'image' | 'video' | 'gif';
     category?: string;
+    tags?: string[];
     sortOrder: number;
     isPublished: boolean;
     altText?: string;
@@ -34,16 +35,18 @@ export class GalleryService {
     getAll() { return this.http.get<GalleryItem[]>(this.base); }
     getAllAdmin() { return this.http.get<GalleryItem[]>(`${this.base}/all`); }
 
-    getPublicPaginated(page: number, limit: number, q?: string, category?: string) {
+    getPublicPaginated(page: number, limit: number, q?: string, category?: string, tag?: string) {
         const params: Record<string, string> = { page: String(page), limit: String(limit) };
         if (q) params['q'] = q;
         if (category && category !== 'all') params['category'] = category;
+        if (tag && tag !== 'all') params['tag'] = tag;
         return this.http.get<{ data: GalleryItem[]; total: number; page: number; limit: number; totalPages: number }>(
             this.base, { params },
         );
     }
 
     getCategories() { return this.http.get<string[]>(`${this.base}/categories`); }
+    getTags() { return this.http.get<string[]>(`${this.base}/tags`); }
     getOne(id: string) { return this.http.get<GalleryItem>(`${this.base}/${id}`); }
     create(data: Partial<GalleryItem>) { return this.http.post<GalleryItem>(this.base, data); }
     update(id: string, data: Partial<GalleryItem>) { return this.http.put<GalleryItem>(`${this.base}/${id}`, data); }

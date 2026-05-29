@@ -98,31 +98,31 @@
 
                 <div class="contact-row">
                     <div class="contact-field">
-                        <label class="contact-label">Name *</label>
+                        <label class="contact-label label-required">Name</label>
                         <input [(ngModel)]="commentData.authorName" name="authorName" required minlength="2"
                             maxlength="100" class="contact-input"
                             [class.is-error]="(cf.submitted || cf.controls['authorName']?.touched) && cf.controls['authorName']?.invalid"
                             placeholder="Your name">
                         @if ((cf.submitted || cf.controls['authorName']?.touched) && cf.controls['authorName']?.invalid)
                         {
-                        <span class="contact-error">Name is required.</span>
+                        <span class="form-error">Name is required.</span>
                         }
                     </div>
                     <div class="contact-field">
-                        <label class="contact-label">Email *</label>
+                        <label class="contact-label label-required">Email</label>
                         <input [(ngModel)]="commentData.authorEmail" name="authorEmail" required email type="email"
                             maxlength="254" class="contact-input"
                             [class.is-error]="(cf.submitted || cf.controls['authorEmail']?.touched) && cf.controls['authorEmail']?.invalid"
                             placeholder="you@example.com">
                         @if ((cf.submitted || cf.controls['authorEmail']?.touched) &&
                         cf.controls['authorEmail']?.invalid) {
-                        <span class="contact-error">Valid email is required.</span>
+                        <span class="form-error">Valid email is required.</span>
                         }
                     </div>
                 </div>
 
                 <div class="contact-field">
-                    <label class="contact-label">Comment *</label>
+                    <label class="contact-label label-required">Comment</label>
                     <div class="rte-wrap">
                         <app-rte-toolbar [el]="commentArea" mode="minimal"></app-rte-toolbar>
                         <textarea #commentArea [(ngModel)]="commentData.content" name="content" required minlength="2"
@@ -131,8 +131,11 @@
                             placeholder="Share your thoughts…"></textarea>
                     </div>
                     @if ((cf.submitted || cf.controls['content']?.touched) && cf.controls['content']?.invalid) {
-                    <span class="contact-error">Comment is required.</span>
+                    <span class="form-error">Comment is required.</span>
                     }
+                    <div class="char-count"><span [class.near-limit]="commentArea.value.length >= 1800"
+                            [class.over-limit]="commentArea.value.length >= 2000">{{ 2000 - commentArea.value.length }}
+                            / 2000</span></div>
                 </div>
 
                 <div class="contact-actions">
