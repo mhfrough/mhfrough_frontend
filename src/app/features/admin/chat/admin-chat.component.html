@@ -158,7 +158,49 @@
             @for (msg of activeMsgs(); track trackById($index, msg)) {
             <div class="ac-msg" [class.ac-msg--admin]="msg.sender === 'admin'"
                 [class.ac-msg--visitor]="msg.sender === 'visitor'">
+                @if (msg.messageType === 'audio' && msg.audioUrl) {
+                @let bars = audioBarsFor(msg.id);
+                <div class="ac-audio-msg ac-msg-bubble">
+                    <button class="ac-audio-play" type="button"
+                        (click)="toggleAudio(msg.id, msg.audioUrl)"
+                        [attr.aria-label]="playingAudioId() === msg.id ? 'Pause' : 'Play audio'">
+                        @if (playingAudioId() === msg.id) {
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                            <rect x="6" y="4" width="4" height="16" rx="1" />
+                            <rect x="14" y="4" width="4" height="16" rx="1" />
+                        </svg>
+                        } @else {
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                        }
+                    </button>
+                    <div class="ac-audio-track">
+                        <div class="ac-audio-waveform">
+                            @for (h of bars; track $index; let i = $index) {
+                            <div class="ac-audio-wv-bar"
+                                [style.height.px]="h * 0.26"
+                                [class.is-played]="(audioProgress()[msg.id] || 0) / (audioDurations()[msg.id] || 1) > i / bars.length">
+                            </div>
+                            }
+                        </div>
+                        <div class="ac-audio-scrub-row">
+                            <input type="range" class="ac-audio-scrubber"
+                                [max]="audioDurations()[msg.id] || 1"
+                                [value]="audioProgress()[msg.id] || 0"
+                                (input)="seekAudio(msg.id, msg.audioUrl, $any($event.target).value)"
+                                (mousedown)="preloadAudio(msg.id, msg.audioUrl)"
+                                aria-label="Seek audio" />
+                            <span class="ac-audio-time">
+                                {{ formatAudioTime(audioProgress()[msg.id]) }}
+                                @if (audioDurations()[msg.id]) { / {{ formatAudioTime(audioDurations()[msg.id]) }} }
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                } @else {
                 <span class="ac-msg-bubble">{{ msg.content }}</span>
+                }
                 <span class="ac-msg-time">{{ msg.createdAt | date:'HH:mm' }}</span>
             </div>
             }
@@ -176,11 +218,51 @@
         <!-- Input -->
         @if (getActiveSession()?.status === 'active') {
         <div class="ac-input-row">
+
+            @if (isRecording()) {
+            <!-- Recording bar -->
+            <div class="ac-recording-bar">
+                <button class="ac-rec-delete" (click)="deleteRecording()" aria-label="Delete recording" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" width="14" height="14">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                        <path d="M10 11v6M14 11v6" />
+                        <path d="M9 6V4h6v2" />
+                    </svg>
+                </button>
+                <div class="ac-rec-waveform-wrap">
+                    <span class="ac-rec-dot"></span>
+                    <div class="ac-rec-waveform">
+                        @for (bar of waveformBars(); track $index) {
+                        <div class="ac-rec-bar" [style.transform]="'scaleY(' + (bar || 0.08) + ')'"></div>
+                        }
+                    </div>
+                    <span class="ac-rec-timer">{{ formatDuration(recordingSeconds()) }}</span>
+                </div>
+                <button class="ac-rec-send" (click)="stopAndSend()" aria-label="Send audio note" type="button">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </div>
+            } @else if (isUploadingAudio()) {
+            <div class="ac-uploading-audio">
+                <span></span><span></span><span></span>
+                <span class="ac-uploading-label">Sending audio…</span>
+            </div>
+            } @else {
             <textarea class="ac-textarea" [(ngModel)]="messageText" (keydown)="onKeydown($event)" (input)="onInput()"
                 (input)="autoResize($event)" placeholder="Type a reply…" rows="1"></textarea>
+            @if (messageText.trim()) {
             <button class="ac-send-btn" (click)="sendMessage()" [disabled]="!messageText.trim()">
                 <i class="bi bi-send-fill"></i>
             </button>
+            } @else {
+            <button class="ac-mic-btn" (click)="startRecording()" type="button" aria-label="Record audio note">
+                <i class="bi bi-mic"></i>
+            </button>
+            }
+            }
+
         </div>
         } @else {
         <div class="ac-chat-closed-notice">

@@ -601,3 +601,270 @@
         color: #dc2626;
     }
 }
+
+// ─── Mic button ───────────────────────────────────────────────────────────────
+.ac-mic-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: color var(--dur) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+
+    &:hover {
+        color: var(--text);
+        background: rgba(228, 224, 216, 0.05);
+        border-color: var(--text-muted);
+    }
+}
+
+// ─── Recording bar ────────────────────────────────────────────────────────────
+.ac-recording-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+}
+
+.ac-rec-delete {
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: 1px solid rgba(220, 38, 38, 0.4);
+    color: #dc2626;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background var(--dur) var(--ease);
+
+    &:hover {
+        background: rgba(220, 38, 38, 0.08);
+    }
+}
+
+.ac-rec-waveform-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.ac-rec-dot {
+    width: 7px;
+    height: 7px;
+    background: #dc2626;
+    flex-shrink: 0;
+    animation: ac-rec-blink 1s ease-in-out infinite;
+}
+
+@keyframes ac-rec-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.15;
+    }
+}
+
+.ac-rec-waveform {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 22px;
+    overflow: hidden;
+}
+
+.ac-rec-bar {
+    width: 3px;
+    height: 100%;
+    background: var(--text-muted);
+    transform-origin: center;
+    transition: transform 80ms ease;
+    transform: scaleY(0.08);
+}
+
+.ac-rec-timer {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+}
+
+.ac-rec-send {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    cursor: pointer;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+    transition: opacity var(--dur) var(--ease);
+
+    &:hover {
+        opacity: 0.82;
+    }
+}
+
+// ─── Uploading indicator ──────────────────────────────────────────────────────
+.ac-uploading-audio {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex: 1;
+
+    span:not(.ac-uploading-label) {
+        width: 5px;
+        height: 5px;
+        background: var(--text-muted);
+        animation: ac-bounce 1.2s infinite;
+
+        &:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        &:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+    }
+}
+
+.ac-uploading-label {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-left: 0.25rem;
+    opacity: 0.7;
+}
+
+// ─── Audio message bubble ─────────────────────────────────────────────────────
+.ac-audio-msg {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 200px;
+    // No padding — .ac-msg-bubble already applies it
+}
+
+.ac-audio-play {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity var(--dur) var(--ease);
+
+    // Visitor bubble = transparent/dark bg → light circle
+    .ac-msg--visitor & {
+        background: var(--text);
+        color: var(--bg);
+    }
+
+    // Admin bubble = var(--text) bg → semi-transparent circle
+    .ac-msg--admin & {
+        background: rgba(0, 0, 0, 0.18);
+        color: inherit;
+    }
+
+    &:hover {
+        opacity: 0.72;
+    }
+}
+
+.ac-audio-track {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.ac-audio-waveform {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 18px;
+    overflow: hidden;
+}
+
+.ac-audio-wv-bar {
+    width: 3px;
+    background: currentColor;
+    opacity: 0.2;
+    min-height: 3px;
+    transition: opacity 120ms;
+
+    &.is-played {
+        opacity: 0.8;
+    }
+}
+
+.ac-audio-scrub-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.ac-audio-scrubber {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.18);
+    outline: none;
+    cursor: pointer;
+    border: none;
+    padding: .15rem 0;
+
+    // Admin message bubble has a light background — use darker track so it's visible
+    .ac-msg--admin & {
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 9px;
+        height: 9px;
+        background: currentColor;
+        cursor: pointer;
+    }
+
+    &::-moz-range-thumb {
+        width: 9px;
+        height: 9px;
+        background: currentColor;
+        border: none;
+        cursor: pointer;
+    }
+}
+
+.ac-audio-time {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    opacity: 0.75;
+}

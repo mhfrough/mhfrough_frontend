@@ -85,8 +85,7 @@
                 <td style="font-weight:600">{{ formatCurrency(inv.total) }}</td>
                 <td>
                     <span class="admin-badge" [class.admin-badge--on]="inv.status === 'paid'"
-                        [class.admin-badge--warn]="inv.status === 'sent'"
-                        [class.admin-badge--danger]="inv.status === 'draft'">
+                        [class.admin-badge--warn]="inv.status === 'sent' || inv.status === 'draft'">
                         {{ statusLabel(inv.status) }}
                     </span>
                 </td>

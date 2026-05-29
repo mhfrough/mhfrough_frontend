@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { TickerService, TickerMessage } from '../../core/services/ticker.service';
@@ -15,16 +15,21 @@ const SESSION_KEY = 'ticker_dismissed';
 <div class="ticker-banner" role="marquee" aria-label="Site announcements">
     <span class="ticker-label" aria-hidden="true"><i class="bi bi-megaphone-fill"></i></span>
     <div class="ticker-track-wrap">
-        <div class="ticker-track">
-            @for (item of tickers(); track item.id) {
-            <span class="ticker-item">{{ item.message }}</span>
-            <span class="ticker-sep" aria-hidden="true">·</span>
-            }
-            <!-- duplicate for seamless infinite loop -->
-            @for (item of tickers(); track 'dup-' + item.id) {
-            <span class="ticker-item">{{ item.message }}</span>
-            <span class="ticker-sep" aria-hidden="true">·</span>
-            }
+        <div class="ticker-scroll">
+            <!-- First track -->
+            <div class="ticker-track">
+                @for (item of displayTickers(); track $index + '-a') {
+                <span class="ticker-item">{{ item.message }}</span>
+                <span class="ticker-sep" aria-hidden="true">·</span>
+                }
+            </div>
+            <!-- Duplicate for seamless infinite loop -->
+            <div class="ticker-track" aria-hidden="true">
+                @for (item of displayTickers(); track $index + '-b') {
+                <span class="ticker-item">{{ item.message }}</span>
+                <span class="ticker-sep" aria-hidden="true">·</span>
+                }
+            </div>
         </div>
     </div>
     <button class="ticker-close" (click)="dismiss()" aria-label="Dismiss ticker">
@@ -71,15 +76,21 @@ const SESSION_KEY = 'ticker_dismissed';
     -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
 }
 
+.ticker-scroll {
+    display: flex;
+    width: max-content;
+    animation: ticker-scroll 90s linear infinite;
+}
+
+.ticker-scroll:hover {
+    animation-play-state: paused;
+}
+
 .ticker-track {
     display: flex;
     align-items: center;
     white-space: nowrap;
-    animation: ticker-scroll 40s linear infinite;
-}
-
-.ticker-track:hover {
-    animation-play-state: paused;
+    flex-shrink: 0;
 }
 
 .ticker-item {
@@ -129,6 +140,14 @@ export class TickerBannerComponent implements OnInit, OnDestroy {
 
     readonly tickers = signal<TickerMessage[]>([]);
     readonly visible = signal(false);
+
+    /** Repeat items enough times so one track always overflows the viewport. */
+    readonly displayTickers = computed(() => {
+        const items = this.tickers();
+        if (!items.length) return [];
+        const reps = Math.max(1, Math.ceil(12 / items.length));
+        return Array.from({ length: reps }, () => items).flat();
+    });
 
     ngOnInit() {
         if (!isPlatformBrowser(this.platformId)) return;

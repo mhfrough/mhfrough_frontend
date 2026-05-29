@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, HostBinding, ViewChild, ElementRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
@@ -26,8 +27,31 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     readonly adminSettings = inject(AdminSettingsService);
     private readonly router = inject(Router);
     private readonly realtime = inject(RealtimeService);
+    private readonly titleService = inject(Title);
     readonly menuOpen = signal(false);
     private subs = new Subscription();
+
+    private static readonly ROUTE_TITLES: Record<string, string> = {
+        dashboard: 'Dashboard',
+        projects: 'Projects',
+        blogs: 'Blog Posts',
+        inquiries: 'Inquiries',
+        feedback: 'Feedback',
+        comments: 'Comments',
+        chat: 'Live Chat',
+        push: 'Push Notifications',
+        'notification-logs': 'Notification Logs',
+        invoices: 'Invoices',
+        gallery: 'Gallery',
+    };
+
+    private setTitleFromUrl(url: string): void {
+        const segment = url.split('/').filter(Boolean)[1] ?? '';
+        const label = AdminLayoutComponent.ROUTE_TITLES[segment];
+        if (label) {
+            this.titleService.setTitle(`${label} | Admin`);
+        }
+    }
 
     ngOnInit() {
         this.notif.init();
@@ -45,7 +69,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         setTimeout(() => { clearInterval(waitForSettings); if (!this.inactivity.showWarning()) this.inactivity.start(); }, 2000);
         this.subs.add(
             this.router.events.pipe(filter(e => e instanceof NavigationEnd))
-                .subscribe(() => {
+                .subscribe((e) => {
+                    this.setTitleFromUrl((e as NavigationEnd).urlAfterRedirects);
                     this.menuOpen.set(false);
                     setTimeout(() => {
                         const active = this.sidebarNav?.nativeElement?.querySelector<HTMLElement>('.is-active');
@@ -53,6 +78,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
                     }, 50);
                 })
         );
+        // Set title for the initial load
+        this.setTitleFromUrl(this.router.url);
     }
 
     ngOnDestroy() {

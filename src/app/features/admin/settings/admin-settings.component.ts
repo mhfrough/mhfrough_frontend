@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { AdminSettingsService, AdminSettings, AdminProfile, LoginSession } from '../../../core/services/admin-settings.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
@@ -26,6 +27,7 @@ export class AdminSettingsComponent implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly logService = inject(ActivityLogService);
     private readonly pushService = inject(PushNotificationAdminService);
+    private readonly titleService = inject(Title);
     readonly fcm = inject(FcmService);
     private readonly tickerService = inject(TickerService);
 
@@ -181,6 +183,13 @@ export class AdminSettingsComponent implements OnInit {
             const tab = params.get('tab') as 'profile' | 'security' | 'notifications' | 'ticker';
             if (tab && ['profile', 'security', 'notifications', 'ticker'].includes(tab)) {
                 this.activeTab.set(tab);
+                const tabLabels: Record<string, string> = {
+                    profile: 'Profile Settings',
+                    security: 'Security Settings',
+                    notifications: 'Notification Settings',
+                    ticker: 'Ticker Settings',
+                };
+                this.titleService.setTitle(`${tabLabels[tab] ?? 'Settings'} | Admin`);
                 if (tab === 'security' && !this.activityLogsLoaded()) {
                     this.loadActivityLogs();
                 }

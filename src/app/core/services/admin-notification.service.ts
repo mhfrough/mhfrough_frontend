@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { SoundService } from './sound.service';
 
 export interface AdminToast {
     id: number;
@@ -14,6 +15,7 @@ export interface AdminToast {
 export class AdminNotificationService {
     private readonly http = inject(HttpClient);
     private readonly platformId = inject(PLATFORM_ID);
+    private readonly sound = inject(SoundService);
 
     readonly unreadInquiries = signal(0);
     readonly pendingFeedback = signal(0);
@@ -90,6 +92,7 @@ export class AdminNotificationService {
     private pushToast(type: 'inquiry' | 'feedback' | 'comment', message: string): void {
         const id = ++this.toastId;
         this.toasts.update(list => [...list, { id, type, message }]);
+        this.sound.play('notification');
         setTimeout(() => this.dismissToast(id), 5000);
     }
 

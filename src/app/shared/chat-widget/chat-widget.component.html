@@ -70,7 +70,49 @@
         @for (msg of messages(); track trackById($index, msg)) {
         <div class="cw-bubble" [class.cw-bubble--admin]="msg.sender === 'admin'"
             [class.cw-bubble--visitor]="msg.sender === 'visitor'">
+            @if (msg.messageType === 'audio' && msg.audioUrl) {
+            @let bars = audioBarsFor(msg.id);
+            <div class="cw-audio-msg">
+                <button class="cw-audio-play" type="button"
+                    (click)="toggleAudio(msg.id, msg.audioUrl)"
+                    [attr.aria-label]="playingAudioId() === msg.id ? 'Pause' : 'Play audio'">
+                    @if (playingAudioId() === msg.id) {
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+                        <rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16"
+                            rx="1" />
+                    </svg>
+                    } @else {
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+                        <path d="M8 5v14l11-7z" />
+                    </svg>
+                    }
+                </button>
+                <div class="cw-audio-track">
+                    <div class="cw-audio-waveform">
+                        @for (h of bars; track $index; let i = $index) {
+                        <div class="cw-audio-wv-bar"
+                            [style.height.px]="h * 0.28"
+                            [class.is-played]="(audioProgress()[msg.id] || 0) / (audioDurations()[msg.id] || 1) > i / bars.length">
+                        </div>
+                        }
+                    </div>
+                    <div class="cw-audio-scrub-row">
+                        <input type="range" class="cw-audio-scrubber"
+                            [max]="audioDurations()[msg.id] || 1"
+                            [value]="audioProgress()[msg.id] || 0"
+                            (input)="seekAudio(msg.id, msg.audioUrl, $any($event.target).value)"
+                            (mousedown)="getOrCreateAudioEl_noop(msg.id, msg.audioUrl)"
+                            aria-label="Seek audio" />
+                        <span class="cw-audio-time">
+                            {{ formatAudioTime(audioProgress()[msg.id]) }}
+                            @if (audioDurations()[msg.id]) { / {{ formatAudioTime(audioDurations()[msg.id]) }} }
+                        </span>
+                    </div>
+                </div>
+            </div>
+            } @else {
             <span class="cw-bubble-text">{{ msg.content }}</span>
+            }
             <span class="cw-bubble-time">{{ msg.createdAt | date:'HH:mm' }}</span>
         </div>
         }
@@ -103,13 +145,64 @@
     <!-- Input -->
     @if (!sessionClosed()) {
     <div class="cw-footer">
+
+        @if (isRecording()) {
+        <!-- Recording bar -->
+        <div class="cw-recording-bar">
+            <button class="cw-rec-delete" (click)="deleteRecording()" aria-label="Delete recording" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" width="16" height="16">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                    <path d="M10 11v6M14 11v6" />
+                    <path d="M9 6V4h6v2" />
+                </svg>
+            </button>
+            <div class="cw-rec-waveform-wrap">
+                <span class="cw-rec-dot"></span>
+                <div class="cw-rec-waveform">
+                    @for (bar of waveformBars(); track $index) {
+                    <div class="cw-rec-bar" [style.transform]="'scaleY(' + (bar || 0.08) + ')'"></div>
+                    }
+                </div>
+                <span class="cw-rec-timer">{{ formatDuration(recordingSeconds()) }}</span>
+            </div>
+            <button class="cw-rec-send" (click)="stopAndSend()" aria-label="Send audio note" type="button">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+            </button>
+        </div>
+        } @else if (isUploadingAudio()) {
+        <!-- Uploading spinner -->
+        <div class="cw-uploading-audio">
+            <span class="cw-uploading-dot"></span>
+            <span class="cw-uploading-dot"></span>
+            <span class="cw-uploading-dot"></span>
+            <span class="cw-uploading-label">Sending audio…</span>
+        </div>
+        } @else {
         <textarea class="cw-input" [(ngModel)]="message" (keydown)="onKeydown($event)" (input)="onInput()"
             (input)="autoResize($event)" placeholder="Type a message…" autocomplete="off" rows="1"></textarea>
+        @if (message.trim()) {
         <button class="cw-send" (click)="send()" [disabled]="!message.trim()" aria-label="Send">
             <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
             </svg>
         </button>
+        } @else {
+        <button class="cw-mic" (click)="startRecording()" aria-label="Record audio note" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" width="16" height="16">
+                <rect x="9" y="2" width="6" height="12" rx="3" />
+                <path d="M5 10a7 7 0 0 0 14 0" />
+                <line x1="12" y1="19" x2="12" y2="22" />
+                <line x1="9" y1="22" x2="15" y2="22" />
+            </svg>
+        </button>
+        }
+        }
+
     </div>
     }
     }

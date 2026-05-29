@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FrontToastService } from '../../../core/services/front-toast.service';
 
@@ -10,7 +10,10 @@ import { FrontToastService } from '../../../core/services/front-toast.service';
 @if (svc.toasts().length > 0) {
 <div class="front-toasts" role="region" aria-live="polite" aria-label="Notifications">
     @for (toast of svc.toasts(); track toast.id) {
-    <div class="front-toast" [class]="'front-toast--' + toast.type">
+    <div class="front-toast" [class]="'front-toast--' + toast.type"
+         [class.front-toast--paused]="paused().has(toast.id)"
+         (mouseenter)="pause(toast.id)"
+         (mouseleave)="resume(toast.id)">
         <div class="front-toast__body">
             @if (toast.type === 'success') {
             <svg class="front-toast__icon" viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true">
@@ -41,4 +44,15 @@ import { FrontToastService } from '../../../core/services/front-toast.service';
 })
 export class FrontToastComponent {
     readonly svc = inject(FrontToastService);
+    readonly paused = signal<Set<number>>(new Set());
+
+    pause(id: number): void {
+        this.paused.update(s => new Set([...s, id]));
+        this.svc.pauseToast(id);
+    }
+
+    resume(id: number): void {
+        this.paused.update(s => { const n = new Set(s); n.delete(id); return n; });
+        this.svc.resumeToast(id);
+    }
 }

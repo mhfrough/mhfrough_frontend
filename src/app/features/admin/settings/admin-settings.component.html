@@ -714,14 +714,12 @@
                     {{ tickerFormMessage.length }}/500
                 </p>
             </div>
-            <div class="admin-form-grid">
-                <div class="admin-form-field">
-                    <label class="admin-form-label" for="ticker-auto-off">Auto-unpublish at <span
-                            style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
-                    <input type="datetime-local" id="ticker-auto-off" name="autoDeactivateAt" class="admin-form-input"
-                        [(ngModel)]="tickerFormAutoDeactivateAt">
-                    <p class="admin-form-hint">Leave blank to keep published indefinitely.</p>
-                </div>
+            <div class="admin-form-field" style="max-width:320px">
+                <label class="admin-form-label" for="ticker-auto-off">Auto-unpublish at <span
+                        style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+                <input type="datetime-local" id="ticker-auto-off" name="autoDeactivateAt" class="admin-form-input"
+                    [(ngModel)]="tickerFormAutoDeactivateAt">
+                <p class="admin-form-hint">Leave blank to keep published indefinitely.</p>
             </div>
             <div class="admin-form-checks">
                 <div class="admin-form-check checkbox-field">
@@ -786,7 +784,7 @@
                         @if (item.isPublished) {
                         <span class="admin-badge admin-badge--on">Published</span>
                         } @else {
-                        <span class="admin-badge admin-badge--warn">Unpublished</span>
+                        <span class="admin-badge admin-badge--warn">Hidden</span>
                         }
                     </td>
                     <td style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap">
@@ -809,7 +807,7 @@
                         <button class="btn-text" (click)="toggleTickerPublish(item)" style="margin-right:0.75rem">
                             <i class="bi" [class.bi-eye-slash]="item.isPublished"
                                 [class.bi-eye]="!item.isPublished"></i>
-                            {{ item.isPublished ? 'Unpublish' : 'Publish' }}
+                            {{ item.isPublished ? 'Hide' : 'Publish' }}
                         </button>
                         <button class="btn-text-danger" (click)="confirmDeleteTicker(item.id)">
                             <i class="bi bi-trash"></i> Delete

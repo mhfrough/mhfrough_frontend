@@ -338,7 +338,8 @@
     &--admin {
         align-self: flex-start;
 
-        .cw-bubble-text {
+        .cw-bubble-text,
+        .cw-audio-msg {
             background: #242220;
             color: #e4e0d8;
             border-radius: 0 12px 12px 12px;
@@ -353,7 +354,8 @@
     &--visitor {
         align-self: flex-end;
 
-        .cw-bubble-text {
+        .cw-bubble-text,
+        .cw-audio-msg {
             background: #e4e0d8;
             color: #1a1917;
             border-radius: 12px 12px 0 12px;
@@ -564,4 +566,284 @@
     &:not(:disabled):active {
         transform: scale(0.95);
     }
+}
+
+// ─── Mic button ───────────────────────────────────────────────────────────────
+.cw-mic {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(228, 224, 216, 0.08);
+    color: rgba(228, 224, 216, 0.65);
+    border: 1px solid rgba(228, 224, 216, 0.12);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 160ms, color 160ms, transform 120ms;
+
+    &:hover {
+        background: rgba(228, 224, 216, 0.14);
+        color: #e4e0d8;
+        transform: scale(1.06);
+    }
+
+    &:active {
+        transform: scale(0.94);
+    }
+}
+
+// ─── Recording bar ────────────────────────────────────────────────────────────
+.cw-recording-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    padding: 0.1rem 0;
+}
+
+.cw-rec-delete {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 150ms, color 150ms;
+
+    &:hover {
+        background: rgba(239, 68, 68, 0.12);
+    }
+}
+
+.cw-rec-waveform-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.cw-rec-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+    flex-shrink: 0;
+    animation: cw-rec-blink 1s ease-in-out infinite;
+}
+
+@keyframes cw-rec-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.cw-rec-waveform {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 24px;
+    overflow: hidden;
+}
+
+.cw-rec-bar {
+    width: 3px;
+    height: 100%;
+    border-radius: 1.5px;
+    background: rgba(228, 224, 216, 0.55);
+    transform-origin: center;
+    transition: transform 80ms ease;
+    transform: scaleY(0.08);
+}
+
+.cw-rec-timer {
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: rgba(228, 224, 216, 0.55);
+    flex-shrink: 0;
+    letter-spacing: 0.03em;
+}
+
+.cw-rec-send {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #4ade80;
+    color: #1a1917;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 150ms, transform 120ms;
+
+    &:hover {
+        opacity: 0.88;
+        transform: scale(1.06);
+    }
+
+    &:active {
+        transform: scale(0.94);
+    }
+}
+
+// ─── Uploading indicator ──────────────────────────────────────────────────────
+.cw-uploading-audio {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: 1;
+    padding: 0.25rem 0.1rem;
+}
+
+.cw-uploading-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(228, 224, 216, 0.5);
+    animation: cw-bounce 1.2s infinite;
+
+    &:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+}
+
+.cw-uploading-label {
+    font-size: 0.75rem;
+    color: rgba(228, 224, 216, 0.4);
+    margin-left: 0.25rem;
+}
+
+// ─── Audio message bubble ─────────────────────────────────────────────────────
+.cw-audio-msg {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0.75rem;
+    min-width: 190px;
+}
+
+.cw-audio-play {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 150ms;
+
+    // Admin bubble = dark background → light circle, dark icon inside
+    background: rgba(228, 224, 216, 0.88);
+    color: #1a1917;
+
+    // Visitor bubble = light background → dark circle, light icon inside
+    .cw-bubble--visitor & {
+        background: #1a1917;
+        color: #e4e0d8;
+    }
+
+    &:hover {
+        opacity: 0.8;
+    }
+}
+
+.cw-audio-track {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.cw-audio-waveform {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 20px;
+    overflow: hidden;
+}
+
+.cw-audio-wv-bar {
+    width: 3px;
+    border-radius: 1.5px;
+    background: currentColor;
+    opacity: 0.25;
+    transition: opacity 120ms;
+    min-height: 3px;
+
+    &.is-played {
+        opacity: 0.85;
+    }
+}
+
+.cw-audio-scrub-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.cw-audio-scrubber {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2px;
+    border-radius: 1px;
+    background: rgba(228, 224, 216, 0.25);
+    outline: none;
+    cursor: pointer;
+    padding: .15rem 0;
+
+    // On visitor bubble (light bg) the default track is too light — use a darker track
+    .cw-bubble--visitor & {
+        background: rgba(26, 25, 23, 0.25);
+    }
+
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: currentColor;
+        cursor: pointer;
+    }
+
+    &::-moz-range-thumb {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: currentColor;
+        border: none;
+        cursor: pointer;
+    }
+}
+
+.cw-audio-time {
+    font-size: 0.66rem;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.5;
+    white-space: nowrap;
+    flex-shrink: 0;
 }

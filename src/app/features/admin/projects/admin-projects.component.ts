@@ -7,7 +7,6 @@ import { EditorHelperService } from '../../../core/services/editor-helper.servic
 import { AdminListBase } from '../../../shared/admin-list.base';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
-import { ReasonModalComponent } from '../../../shared/components/reason-modal/reason-modal.component';
 import { ImgUploadComponent } from '../../../shared/components/img-upload/img-upload.component';
 import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
@@ -19,7 +18,7 @@ import { Subscription } from 'rxjs';
     standalone: true,
     imports: [
         CommonModule, FormsModule,
-        PaginationComponent, ConfirmModalComponent, ReasonModalComponent, ImgUploadComponent,
+        PaginationComponent, ConfirmModalComponent, ImgUploadComponent,
         RteToolbarComponent, ImgFallbackDirective, TagInputComponent,
     ],
     templateUrl: './admin-projects.component.html',
@@ -34,7 +33,6 @@ export class AdminProjectsComponent extends AdminListBase implements OnInit, OnD
     readonly saving = signal(false);
     readonly editing = signal<any>(null);
     readonly showForm = signal(false);
-    readonly statusModal = signal<{ id: string; title: string } | null>(null);
     readonly thumbPreview = signal<string | null>(null);
     readonly uploading = signal(false);
     readonly uploadError = signal<string | null>(null);
@@ -134,13 +132,19 @@ export class AdminProjectsComponent extends AdminListBase implements OnInit, OnD
         this.service.remove(id).subscribe();
     }
 
-    openStatusModal(id: string): void { this.statusModal.set({ id, title: 'Unpublish Project' }); }
-    cancelStatus(): void { this.statusModal.set(null); }
-    executeStatus(reason: string): void {
-        const m = this.statusModal();
-        if (!m) return;
-        this.statusModal.set(null);
-        this.service.unpublish(m.id, reason || undefined).subscribe();
+    openStatusModal(id: string): void { }
+    cancelStatus(): void { }
+    executeStatus(reason: string): void { }
+
+    hideItem(id: string): void {
+        this.service.unpublish(id).subscribe(() => {
+            this.projects.update(list => list.map(p => p.id === id ? { ...p, isPublished: false } : p));
+        });
+    }
+    publishItem(id: string): void {
+        this.service.update(id, { isPublished: true }).subscribe(() => {
+            this.projects.update(list => list.map(p => p.id === id ? { ...p, isPublished: true } : p));
+        });
     }
 
     readonly dragRowId = signal<string | null>(null);

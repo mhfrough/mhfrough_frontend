@@ -6852,8 +6852,8 @@ button.admin-nav-link:last-child:hover {
 
 .admin-toasts {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    top: 1rem;
+    right: 1rem;
     z-index: 9000;
     display: flex;
     flex-direction: column;
@@ -6863,7 +6863,7 @@ button.admin-nav-link:last-child:hover {
     @media (max-width: 540px) {
         left: 1rem;
         right: 1rem;
-        bottom: 1rem;
+        top: 0.75rem;
     }
 }
 
@@ -6946,7 +6946,7 @@ button.admin-nav-link:last-child:hover {
 
 .front-toasts {
     position: fixed;
-    top: 1.5rem;
+    top: calc(64px + 0.75rem);
     right: 1.5rem;
     z-index: 9100;
     display: flex;
@@ -6957,7 +6957,7 @@ button.admin-nav-link:last-child:hover {
     width: calc(100vw - 2rem);
 
     @media (max-width: 540px) {
-        top: 1rem;
+        top: calc(64px + 0.5rem);
         right: 1rem;
         left: 1rem;
         width: auto;
@@ -7016,6 +7016,12 @@ button.admin-nav-link:last-child:hover {
         transform-origin: left;
         animation: front-toast-progress linear forwards;
         // animation-duration is set inline from toast.duration
+    }
+
+    &.front-toast--paused {
+        .front-toast__progress {
+            animation-play-state: paused;
+        }
     }
 
     // Type variants
@@ -7619,6 +7625,16 @@ button.admin-nav-link:last-child:hover {
     }
 }
 
+.drag-icon {
+    display: block;
+    opacity: 0.45;
+    transition: opacity 0.15s;
+
+    .drag-handle:hover & {
+        opacity: 0.85;
+    }
+}
+
 tr.drag-over-row>td {
     background: rgba(99, 102, 241, 0.08) !important;
     box-shadow: inset 0 2px 0 var(--accent);
@@ -7671,6 +7687,17 @@ tr.drag-over-row>td {
         object-fit: cover;
         display: block;
     }
+}
+
+.gallery-admin-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    opacity: 0.35;
+    font-size: 1.25rem;
 }
 
 .gallery-admin-thumb-badge {

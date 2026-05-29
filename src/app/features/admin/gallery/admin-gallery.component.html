@@ -85,19 +85,12 @@
                 placeholder="A short description shown in the lightbox"></textarea>
         </div>
 
-        <!-- Alt Text & Sort Order -->
-        <div class="admin-form-grid">
-            <div class="admin-form-field">
-                <label class="admin-form-label label-optional">Alt Text <span
-                        class="form-hint">(accessibility)</span></label>
-                <input ngModel [ngModel]="editing()?.altText" name="altText" class="admin-form-input"
-                    placeholder="Describe the image for screen readers">
-            </div>
-            <div class="admin-form-field">
-                <label class="admin-form-label label-optional">Sort Order</label>
-                <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number" min="0"
-                    class="admin-form-input">
-            </div>
+        <!-- Alt Text -->
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Alt Text <span
+                    class="form-hint">(accessibility)</span></label>
+            <input ngModel [ngModel]="editing()?.altText" name="altText" class="admin-form-input"
+                placeholder="Describe the image for screen readers">
         </div>
 
         <!-- Published -->
@@ -169,7 +162,15 @@
                 <td>
                     <span class="drag-handle" draggable="true" (dragstart)="onRowDragStart(item.id)"
                         title="Drag to reorder">
-                        <i class="bi bi-grip-vertical"></i>
+                        <svg class="drag-icon" width="8" height="14" viewBox="0 0 8 14" fill="currentColor"
+                            aria-hidden="true">
+                            <circle cx="2" cy="2" r="1.4" />
+                            <circle cx="6" cy="2" r="1.4" />
+                            <circle cx="2" cy="7" r="1.4" />
+                            <circle cx="6" cy="7" r="1.4" />
+                            <circle cx="2" cy="12" r="1.4" />
+                            <circle cx="6" cy="12" r="1.4" />
+                        </svg>
                     </span>
                 </td>
                 <td>

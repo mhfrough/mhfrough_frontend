@@ -1,6 +1,7 @@
 import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type { Socket } from 'socket.io-client';
 
@@ -11,6 +12,8 @@ export interface ChatMessage {
     sender: 'visitor' | 'admin';
     read: boolean;
     createdAt: string;
+    messageType?: 'text' | 'audio';
+    audioUrl?: string | null;
 }
 
 export interface ChatSession {
@@ -124,6 +127,20 @@ export class ChatService {
         });
     }
 
+    sendVisitorAudioMessage(audioUrl: string) {
+        const sessionId = this.visitorSessionId();
+        if (!sessionId) return;
+        this.socket?.emit('visitor:audio_message', { sessionId, audioUrl }, (msg: ChatMessage) => {
+            if (msg) this.visitorMessages.update(m => [...m, msg]);
+        });
+    }
+
+    uploadChatAudio(blob: Blob): Observable<{ url: string }> {
+        const form = new FormData();
+        form.append('file', blob, 'audio.webm');
+        return this.http.post<{ url: string }>(`${environment.apiUrl}/chat/audio`, form);
+    }
+
     sendVisitorTyping(isTyping: boolean) {
         const sessionId = this.visitorSessionId();
         if (!sessionId) return;
@@ -210,6 +227,12 @@ export class ChatService {
 
     sendAdminMessage(sessionId: string, content: string) {
         this.socket?.emit('admin:message', { sessionId, content }, (msg: ChatMessage) => {
+            if (msg) this.activeMsgs.update(m => [...m, msg]);
+        });
+    }
+
+    sendAdminAudioMessage(sessionId: string, audioUrl: string) {
+        this.socket?.emit('admin:audio_message', { sessionId, audioUrl }, (msg: ChatMessage) => {
             if (msg) this.activeMsgs.update(m => [...m, msg]);
         });
     }
