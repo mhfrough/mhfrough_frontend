@@ -2,6 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode, APP_I
 import { provideRouter, withViewTransitions, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
 import { isPlatformBrowser, IMAGE_LOADER, ImageLoaderConfig } from '@angular/common';
 import { routes } from './app.routes';
@@ -23,6 +24,7 @@ function registerFirebaseSW() {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideAnimations(),
     provideRouter(routes, withViewTransitions(), withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' })),
     provideHttpClient(withFetch(), withInterceptors([credentialsInterceptor, authInterceptor, errorLogInterceptor])),
     provideClientHydration(withEventReplay()),

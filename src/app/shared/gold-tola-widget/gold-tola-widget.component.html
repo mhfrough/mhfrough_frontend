@@ -1,0 +1,21 @@
+<div class="gold-widget" title="{{ label }}">
+  <div class="gold-icon" aria-hidden="true" [attr.aria-label]="displayLabel">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true" role="img">
+      <title>{{ displayLabel }}</title>
+      <!-- gold coin -->
+      <circle cx="12" cy="12" r="9" fill="#FFD166" stroke="#C47A00" stroke-width="0.9" />
+      <text x="12" y="12" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" font-size="11" fill="#8A5800" font-family="sans-serif" font-weight="700">Au</text>
+    </svg>
+  </div>
+  <div class="gold-text">
+    <span class="gold-price">{{ formatCompact(displayKey) }} PKR</span>
+    <span class="gold-label">{{ displayLabel }}</span>
+  </div>
+
+  <div class="gold-dev" *ngIf="showDevControl">
+    <label class="visually-hidden">Gold dev control</label>
+    <select #devSel class="gold-dev-select" (change)="onDevChange(devSel.value)" [value]="displayKey">
+      <option *ngFor="let opt of PRICE_OPTIONS" [value]="opt.key">{{ opt.label }}</option>
+    </select>
+  </div>
+</div>

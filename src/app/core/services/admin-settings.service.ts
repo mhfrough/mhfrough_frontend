@@ -17,6 +17,12 @@ export interface AdminSettings {
     copyrightOwner: string;
     footerTagline: string;
     showFooterTagline: boolean;
+    // Widget configuration for site widgets (optional)
+    widgets?: {
+        weather?: { enabled?: boolean; location?: string | null; apiKey?: string | null };
+        gold?: { enabled?: boolean; label?: string | null };
+        usd?: { enabled?: boolean; provider?: string | null };
+    } | null;
     updatedAt: string;
 }
 
@@ -73,6 +79,11 @@ const DEFAULTS: AdminSettings = {
     copyrightOwner: 'mhfrough.dev',
     footerTagline: 'Made with \u2665 in Karāchi',
     showFooterTagline: true,
+    widgets: {
+        weather: { enabled: false, location: '', apiKey: '' },
+        gold: { enabled: false, label: 'Gold Rate' },
+        usd: { enabled: false, provider: '' },
+    },
     updatedAt: '',
 };
 

@@ -1,0 +1,13 @@
+<div class="widget-rotator" role="region" aria-live="polite" [hidden]="!auth.loggedIn()">
+    <div class="widget" *ngIf="currentIndex === 0" @slideDown>
+        <app-weather-widget></app-weather-widget>
+    </div>
+
+    <div class="widget" *ngIf="currentIndex === 1" @slideDown>
+        <app-usd-pkr-widget></app-usd-pkr-widget>
+    </div>
+
+    <div class="widget" *ngIf="currentIndex === 2" @slideDown>
+        <app-gold-tola-widget></app-gold-tola-widget>
+    </div>
+</div>

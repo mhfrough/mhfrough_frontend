@@ -1,0 +1,89 @@
+:host {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.gold-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: default;
+
+  .gold-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+      flex-shrink: 0;
+      transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+      transform-origin: center;
+      will-change: transform, opacity;
+      /* subtle golden shadow to match weather sunny icon */
+      filter: drop-shadow(0 6px 10px rgba(255,183,3,0.08));
+    }
+
+    &:hover svg,
+    &:focus-within svg {
+      transform: translateY(-2px) scale(1.04);
+      opacity: 0.98;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.06));
+    }
+  }
+
+  .gold-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    gap: 0.125rem;
+  }
+
+  .gold-price {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .gold-label {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: none;
+  }
+
+  &:hover .gold-icon,
+  &:hover .gold-label {
+    color: var(--text);
+  }
+
+  .gold-dev {
+    margin-left: 0.5rem;
+    display: flex;
+    align-items: center;
+
+    .gold-dev-select {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.62rem;
+      padding: 0.08rem 0.4rem;
+      border-radius: 6px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}

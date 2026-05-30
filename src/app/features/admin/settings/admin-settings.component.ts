@@ -34,7 +34,7 @@ export class AdminSettingsComponent implements OnInit {
     @ViewChild('aboutEl') aboutEl!: HTMLTextAreaElement;
 
     // ── Section tabs — driven by route param ─────────────────────────────────
-    readonly activeTab = signal<'profile' | 'security' | 'notifications' | 'ticker'>('profile');
+    readonly activeTab = signal<'profile' | 'widgets' | 'security' | 'notifications' | 'ticker'>('profile');
 
     // ── Activity Logs (Security tab) ─────────────────────────────────────────
     readonly activityLogs = signal<ActivityLogEntry[]>([]);
@@ -142,6 +142,26 @@ export class AdminSettingsComponent implements OnInit {
 
     readonly year = new Date().getFullYear();
 
+    // ── Widgets (new tab) ───────────────────────────────────────────────────
+    readonly widgetWeatherSaving = signal(false);
+    readonly widgetWeatherSaved = signal(false);
+    readonly widgetWeatherError = signal('');
+    widgetWeatherEnabled = false;
+    widgetWeatherLocation = '';
+    widgetWeatherApiKey = '';
+
+    readonly widgetGoldSaving = signal(false);
+    readonly widgetGoldSaved = signal(false);
+    readonly widgetGoldError = signal('');
+    widgetGoldEnabled = false;
+    widgetGoldLabel = 'Gold Rate';
+
+    readonly widgetUsdSaving = signal(false);
+    readonly widgetUsdSaved = signal(false);
+    readonly widgetUsdError = signal('');
+    widgetUsdEnabled = false;
+    widgetUsdProvider = '';
+
     // ── Settings form ─────────────────────────────────────────────────────────
     readonly settingsLoading = signal(false);
     readonly settingsSaved = signal(false);
@@ -180,11 +200,12 @@ export class AdminSettingsComponent implements OnInit {
     ngOnInit() {
         // Read :tab param from route and keep in sync
         this.route.paramMap.subscribe(params => {
-            const tab = params.get('tab') as 'profile' | 'security' | 'notifications' | 'ticker';
-            if (tab && ['profile', 'security', 'notifications', 'ticker'].includes(tab)) {
+            const tab = params.get('tab') as 'profile' | 'widgets' | 'security' | 'notifications' | 'ticker';
+            if (tab && ['profile', 'widgets', 'security', 'notifications', 'ticker'].includes(tab)) {
                 this.activeTab.set(tab);
                 const tabLabels: Record<string, string> = {
                     profile: 'Profile Settings',
+                    widgets: 'Widget Settings',
                     security: 'Security Settings',
                     notifications: 'Notification Settings',
                     ticker: 'Ticker Settings',
@@ -236,6 +257,20 @@ export class AdminSettingsComponent implements OnInit {
         this.footerCopyrightOwner = s.copyrightOwner ?? 'mhfrough.dev';
         this.footerTagline = s.footerTagline ?? 'Made with \u2665 in Karāchi';
         this.footerShowTagline = s.showFooterTagline ?? true;
+        // Populate widget settings (if present)
+        const ws = s.widgets ?? {};
+        const wWeather = ws.weather ?? {} as any;
+        this.widgetWeatherEnabled = !!wWeather.enabled;
+        this.widgetWeatherLocation = wWeather.location ?? '';
+        this.widgetWeatherApiKey = wWeather.apiKey ?? '';
+
+        const wGold = ws.gold ?? {} as any;
+        this.widgetGoldEnabled = !!wGold.enabled;
+        this.widgetGoldLabel = wGold.label ?? this.widgetGoldLabel;
+
+        const wUsd = ws.usd ?? {} as any;
+        this.widgetUsdEnabled = !!wUsd.enabled;
+        this.widgetUsdProvider = wUsd.provider ?? '';
     }
 
     private syncFormFromProfile(p: AdminProfile) {
@@ -340,6 +375,49 @@ export class AdminSettingsComponent implements OnInit {
                 setTimeout(() => this.footerSaved.set(false), 3000);
             },
             error: (e) => { this.footerLoading.set(false); this.footerError.set(e?.error?.message ?? 'Failed to save footer settings.'); },
+        });
+    }
+
+    // ── Widget save handlers ─────────────────────────────────────────────────
+    saveWeather() {
+        this.widgetWeatherSaving.set(true);
+        this.widgetWeatherSaved.set(false);
+        this.widgetWeatherError.set('');
+        this.settingsService.update({ widgets: { weather: { enabled: this.widgetWeatherEnabled, location: this.widgetWeatherLocation || undefined, apiKey: this.widgetWeatherApiKey || undefined } } }).subscribe({
+            next: () => {
+                this.widgetWeatherSaving.set(false);
+                this.widgetWeatherSaved.set(true);
+                setTimeout(() => this.widgetWeatherSaved.set(false), 3000);
+            },
+            error: (e) => { this.widgetWeatherSaving.set(false); this.widgetWeatherError.set(e?.error?.message ?? 'Failed to save weather settings.'); },
+        });
+    }
+
+    saveGold() {
+        this.widgetGoldSaving.set(true);
+        this.widgetGoldSaved.set(false);
+        this.widgetGoldError.set('');
+        this.settingsService.update({ widgets: { gold: { enabled: this.widgetGoldEnabled, label: this.widgetGoldLabel || undefined } } }).subscribe({
+            next: () => {
+                this.widgetGoldSaving.set(false);
+                this.widgetGoldSaved.set(true);
+                setTimeout(() => this.widgetGoldSaved.set(false), 3000);
+            },
+            error: (e) => { this.widgetGoldSaving.set(false); this.widgetGoldError.set(e?.error?.message ?? 'Failed to save gold settings.'); },
+        });
+    }
+
+    saveUsd() {
+        this.widgetUsdSaving.set(true);
+        this.widgetUsdSaved.set(false);
+        this.widgetUsdError.set('');
+        this.settingsService.update({ widgets: { usd: { enabled: this.widgetUsdEnabled, provider: this.widgetUsdProvider || undefined } } }).subscribe({
+            next: () => {
+                this.widgetUsdSaving.set(false);
+                this.widgetUsdSaved.set(true);
+                setTimeout(() => this.widgetUsdSaved.set(false), 3000);
+            },
+            error: (e) => { this.widgetUsdSaving.set(false); this.widgetUsdError.set(e?.error?.message ?? 'Failed to save USD/PKR settings.'); },
         });
     }
 

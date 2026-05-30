@@ -10,6 +10,9 @@
     <a class="settings-tab" [class.is-active]="activeTab() === 'profile'" routerLink="/admin/settings/profile">
         <i class="bi bi-person-circle"></i> Profile
     </a>
+    <a class="settings-tab" [class.is-active]="activeTab() === 'widgets'" routerLink="/admin/settings/widgets">
+        <i class="bi bi-grid-3x3-gap"></i> Widgets
+    </a>
     <a class="settings-tab" [class.is-active]="activeTab() === 'security'" routerLink="/admin/settings/security">
         <i class="bi bi-shield-lock"></i> Security
     </a>
@@ -215,6 +218,147 @@
 </div>
 
 } <!-- /profile tab -->
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- WIDGETS TAB                                                              -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+@if (activeTab() === 'widgets') {
+
+<!-- Weather Widget -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-cloud-sun"></i> Weather Widget</h2>
+            <p class="settings-card-sub">Configure the weather widget shown in the widget rotator.</p>
+        </div>
+    </div>
+
+    @if (widgetWeatherSaved()) {
+    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> Weather settings saved.</div>
+    }
+    @if (widgetWeatherError()) {
+    <div class="admin-alert admin-alert--error">{{ widgetWeatherError() }}</div>
+    }
+
+    <div class="settings-toggle-row">
+        <div>
+            <span class="settings-toggle-title">Enable weather widget</span>
+            <span class="settings-toggle-sub">Show weather information in the widget rotator.</span>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="widgetWeatherEnabled">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="admin-form-grid" style="margin-top:1rem">
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Location</label>
+            <input class="admin-form-input" type="text" [(ngModel)]="widgetWeatherLocation" placeholder="City, Country">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">API key <span
+                    class="admin-form-hint">(optional)</span></label>
+            <input class="admin-form-input" type="text" [(ngModel)]="widgetWeatherApiKey"
+                placeholder="OpenWeatherMap API key">
+        </div>
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1rem">
+        <button class="btn-primary" (click)="saveWeather()" [disabled]="widgetWeatherSaving()">
+            @if (widgetWeatherSaving()) { <span class="contact-spinner"></span> Saving… } @else { <i
+                class="bi bi-check-lg"></i> Save Weather }
+        </button>
+    </div>
+</div>
+
+<!-- Gold Rate Widget -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-currency-dollar"></i> Gold Rate Widget</h2>
+            <p class="settings-card-sub">Configure how the gold rate widget behaves and is labeled.</p>
+        </div>
+    </div>
+
+    @if (widgetGoldSaved()) {
+    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> Gold settings saved.</div>
+    }
+    @if (widgetGoldError()) {
+    <div class="admin-alert admin-alert--error">{{ widgetGoldError() }}</div>
+    }
+
+    <div class="settings-toggle-row">
+        <div>
+            <span class="settings-toggle-title">Enable gold rate widget</span>
+            <span class="settings-toggle-sub">Show live gold rate in the widget rotator.</span>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="widgetGoldEnabled">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="admin-form-grid" style="margin-top:1rem">
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Label</label>
+            <input class="admin-form-input" type="text" [(ngModel)]="widgetGoldLabel" placeholder="e.g. Gold Rate">
+        </div>
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1rem">
+        <button class="btn-primary" (click)="saveGold()" [disabled]="widgetGoldSaving()">
+            @if (widgetGoldSaving()) { <span class="contact-spinner"></span> Saving… } @else { <i
+                class="bi bi-check-lg"></i> Save Gold }
+        </button>
+    </div>
+</div>
+
+<!-- USD → PKR Widget -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-currency-exchange"></i> USD → PKR Widget</h2>
+            <p class="settings-card-sub">Configure the USD to PKR conversion widget source and visibility.</p>
+        </div>
+    </div>
+
+    @if (widgetUsdSaved()) {
+    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> Conversion settings saved.
+    </div>
+    }
+    @if (widgetUsdError()) {
+    <div class="admin-alert admin-alert--error">{{ widgetUsdError() }}</div>
+    }
+
+    <div class="settings-toggle-row">
+        <div>
+            <span class="settings-toggle-title">Enable USD → PKR widget</span>
+            <span class="settings-toggle-sub">Show currency conversion in the widget rotator.</span>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="widgetUsdEnabled">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="admin-form-grid" style="margin-top:1rem">
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Provider / Source</label>
+            <input class="admin-form-input" type="text" [(ngModel)]="widgetUsdProvider"
+                placeholder="e.g. exchangeratesapi.io">
+        </div>
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1rem">
+        <button class="btn-primary" (click)="saveUsd()" [disabled]="widgetUsdSaving()">
+            @if (widgetUsdSaving()) { <span class="contact-spinner"></span> Saving… } @else { <i
+                class="bi bi-check-lg"></i> Save Conversion }
+        </button>
+    </div>
+</div>
+
+}
 
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <!-- SECURITY TAB                                                             -->

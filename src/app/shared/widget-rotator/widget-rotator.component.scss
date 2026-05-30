@@ -1,0 +1,30 @@
+.widget-rotator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+:host {
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure hidden children are actually not displayed (resets that could override UA hidden) */
+.widget-rotator > *[hidden] {
+  display: none !important;
+}
+
+/* Animation wrapper: ensure height can be animated and children don't overflow */
+.widget-rotator .widget {
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.widget-rotator .widget > * {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .widget-rotator { display: none; }
+}

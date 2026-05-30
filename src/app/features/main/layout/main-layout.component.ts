@@ -3,6 +3,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { ViewportScroller, isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { ChatWidgetComponent } from '../../../shared/chat-widget/chat-widget.component';
+import { WidgetRotatorComponent } from '../../../shared/widget-rotator/widget-rotator.component';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { FcmService } from '../../../core/services/fcm.service';
 import { CookieConsentComponent } from '../../../shared/cookie-consent/cookie-consent.component';
@@ -14,7 +15,7 @@ import { FrontToastComponent } from '../../../shared/components/front-toast/fron
 @Component({
     selector: 'app-main-layout',
     standalone: true,
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ChatWidgetComponent, CookieConsentComponent, ExternalUrlPipe, TickerBannerComponent, FrontToastComponent],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ChatWidgetComponent, WidgetRotatorComponent, CookieConsentComponent, ExternalUrlPipe, TickerBannerComponent, FrontToastComponent],
     templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
