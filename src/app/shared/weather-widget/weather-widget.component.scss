@@ -28,16 +28,28 @@
       will-change: transform, opacity;
     }
 
-    &:hover svg, &:focus-within svg {
+    &:hover svg,
+    &:focus-within svg {
       transform: translateY(-2px) scale(1.04);
       opacity: 0.98;
     }
 
     // condition-specific colour hints
-    &--sunny      svg { filter: drop-shadow(0 4px 8px rgba(255,183,3,0.20)); }
-    &--rain       svg { filter: drop-shadow(0 4px 8px rgba(105,167,255,0.15)); }
-    &--thunderstorm svg { filter: drop-shadow(0 4px 8px rgba(255,209,102,0.15)); }
-    &--snow       svg { filter: drop-shadow(0 4px 8px rgba(216,233,255,0.12)); }
+    &--sunny svg {
+      filter: drop-shadow(0 4px 8px rgba(255, 183, 3, 0.20));
+    }
+
+    &--rain svg {
+      filter: drop-shadow(0 4px 8px rgba(105, 167, 255, 0.15));
+    }
+
+    &--thunderstorm svg {
+      filter: drop-shadow(0 4px 8px rgba(255, 209, 102, 0.15));
+    }
+
+    &--snow svg {
+      filter: drop-shadow(0 4px 8px rgba(216, 233, 255, 0.12));
+    }
   }
 
   .weather-text {
@@ -61,7 +73,11 @@
     text-transform: capitalize;
   }
 
-  &:hover .weather-cond { color: var(--text); }
+  &:hover .weather-cond {
+    color: var(--text);
+  }
 
-  @media (max-width: 640px) { display: none; }
+  @media (max-width: 640px) {
+    display: none;
+  }
 }

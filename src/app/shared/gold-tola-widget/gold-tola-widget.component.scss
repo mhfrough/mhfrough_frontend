@@ -1,4 +1,7 @@
-:host { -webkit-user-select: none; user-select: none; }
+:host {
+  -webkit-user-select: none;
+  user-select: none;
+}
 
 .gold-widget {
   display: flex;
@@ -23,10 +26,12 @@
       transition: transform var(--dur) var(--ease);
       transform-origin: center;
       will-change: transform;
-      filter: drop-shadow(0 3px 6px rgba(255,183,3,0.25));
+      filter: drop-shadow(0 3px 6px rgba(255, 183, 3, 0.25));
     }
 
-    &:hover svg { transform: translateY(-2px) scale(1.06); }
+    &:hover svg {
+      transform: translateY(-2px) scale(1.06);
+    }
   }
 
   .gold-text {
@@ -50,7 +55,11 @@
     text-transform: none;
   }
 
-  &:hover .gold-label { color: var(--text); }
+  &:hover .gold-label {
+    color: var(--text);
+  }
 
-  @media (max-width: 640px) { display: none; }
+  @media (max-width: 640px) {
+    display: none;
+  }
 }

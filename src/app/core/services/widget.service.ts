@@ -31,12 +31,12 @@ export type WidgetData = WeatherData | GoldData | UsdPkrData;
 // ── Cache TTLs ────────────────────────────────────────────────────────────────
 
 const WEATHER_TTL = 60 * 60 * 1000;      // 1 hour
-const GOLD_TTL    = 3 * 60 * 60 * 1000;  // 3 hours
-const USD_TTL     = 30 * 60 * 1000;      // 30 minutes
+const GOLD_TTL = 3 * 60 * 60 * 1000;  // 3 hours
+const USD_TTL = 30 * 60 * 1000;      // 30 minutes
 
 const LS_KEY_WEATHER = 'widget_weather_v1';
-const LS_KEY_GOLD    = 'widget_gold_v1';
-const LS_KEY_USD     = 'widget_usd_v1';
+const LS_KEY_GOLD = 'widget_gold_v1';
+const LS_KEY_USD = 'widget_usd_v1';
 
 interface CacheEntry<T> { data: T; ts: number; }
 
@@ -44,16 +44,16 @@ interface CacheEntry<T> { data: T; ts: number; }
 
 @Injectable({ providedIn: 'root' })
 export class WidgetService {
-    private readonly http       = inject(HttpClient);
+    private readonly http = inject(HttpClient);
     private readonly platformId = inject(PLATFORM_ID);
-    private readonly isBrowser  = isPlatformBrowser(this.platformId);
+    private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-    readonly weatherData  = signal<WeatherData | null>(null);
-    readonly goldData     = signal<GoldData | null>(null);
-    readonly usdPkrData   = signal<UsdPkrData | null>(null);
+    readonly weatherData = signal<WeatherData | null>(null);
+    readonly goldData = signal<GoldData | null>(null);
+    readonly usdPkrData = signal<UsdPkrData | null>(null);
     readonly weatherError = signal(false);
-    readonly goldError    = signal(false);
-    readonly usdError     = signal(false);
+    readonly goldError = signal(false);
+    readonly usdError = signal(false);
 
     // ── localStorage helpers ──────────────────────────────────────────────────
 
@@ -124,7 +124,7 @@ export class WidgetService {
             }).format(n);
         } catch {
             if (n >= 1_000_000) return Math.round(n / 1_000_000) + 'M';
-            if (n >= 1_000)     return Math.round(n / 1_000) + 'K';
+            if (n >= 1_000) return Math.round(n / 1_000) + 'K';
             return String(Math.round(n));
         }
     }
