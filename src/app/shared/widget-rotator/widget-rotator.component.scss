@@ -10,7 +10,7 @@
 }
 
 /* Ensure hidden children are actually not displayed (resets that could override UA hidden) */
-.widget-rotator > *[hidden] {
+.widget-rotator>*[hidden] {
   display: none !important;
 }
 
@@ -21,10 +21,12 @@
   vertical-align: middle;
 }
 
-.widget-rotator .widget > * {
+.widget-rotator .widget>* {
   display: block;
 }
 
 @media (max-width: 640px) {
-  .widget-rotator { display: none; }
+  .widget-rotator {
+    display: none;
+  }
 }
