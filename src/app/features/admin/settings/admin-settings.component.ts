@@ -12,6 +12,7 @@ import { PushNotificationAdminService } from '../../../core/services/push-notifi
 import { FcmService } from '../../../core/services/fcm.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { TickerService, TickerMessage } from '../../../core/services/ticker.service';
+import { VisitorAnalyticsService, VisitorSession, VisitorStats } from '../../../core/services/visitor-analytics.service';
 
 @Component({
     selector: 'app-admin-settings',
@@ -34,7 +35,27 @@ export class AdminSettingsComponent implements OnInit {
     @ViewChild('aboutEl') aboutEl!: HTMLTextAreaElement;
 
     // ── Section tabs — driven by route param ─────────────────────────────────
-    readonly activeTab = signal<'profile' | 'security' | 'notifications' | 'ticker'>('profile');
+    readonly activeTab = signal<'profile' | 'security' | 'notifications' | 'ticker' | 'visitors'>('profile');
+
+    // ── Visitors tab ─────────────────────────────────────────────────────────
+    private readonly visitorService = inject(VisitorAnalyticsService);
+    readonly visitorsLoading = signal(false);
+    readonly visitorsLoaded = signal(false);
+    readonly visitorStats = signal<VisitorStats | null>(null);
+    readonly visitorSessions = signal<VisitorSession[]>([]);
+    readonly visitorsTotal = signal(0);
+    readonly visitorsPage = signal(1);
+    readonly visitorsLimit = signal(25);
+    readonly visitorsTotalPages = signal(1);
+    readonly visitorsSearch = signal('');
+
+    get visitorsPageNumbers(): number[] {
+        const total = this.visitorsTotalPages();
+        const cur = this.visitorsPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) pages.push(i);
+        return pages;
+    }
 
     // ── Activity Logs (Security tab) ─────────────────────────────────────────
     readonly activityLogs = signal<ActivityLogEntry[]>([]);
@@ -180,14 +201,15 @@ export class AdminSettingsComponent implements OnInit {
     ngOnInit() {
         // Read :tab param from route and keep in sync
         this.route.paramMap.subscribe(params => {
-            const tab = params.get('tab') as 'profile' | 'security' | 'notifications' | 'ticker';
-            if (tab && ['profile', 'security', 'notifications', 'ticker'].includes(tab)) {
+            const tab = params.get('tab') as 'profile' | 'security' | 'notifications' | 'ticker' | 'visitors';
+            if (tab && ['profile', 'security', 'notifications', 'ticker', 'visitors'].includes(tab)) {
                 this.activeTab.set(tab);
                 const tabLabels: Record<string, string> = {
                     profile: 'Profile Settings',
                     security: 'Security Settings',
                     notifications: 'Notification Settings',
                     ticker: 'Ticker Settings',
+                    visitors: 'Visitor Analytics',
                 };
                 this.titleService.setTitle(`${tabLabels[tab] ?? 'Settings'} | Admin`);
                 if (tab === 'security' && !this.activityLogsLoaded()) {
@@ -195,6 +217,9 @@ export class AdminSettingsComponent implements OnInit {
                 }
                 if (tab === 'ticker' && !this.tickerLoaded()) {
                     this.loadTickers();
+                }
+                if (tab === 'visitors' && !this.visitorsLoaded()) {
+                    this.loadVisitors();
                 }
             }
         });
@@ -704,6 +729,65 @@ export class AdminSettingsComponent implements OnInit {
                 this.tickerError.set(err?.error?.message ?? 'Failed to delete ticker.');
             },
         });
+    }
+
+    // ── Visitors tab ──────────────────────────────────────────────────────────
+
+    loadVisitors() {
+        this.visitorsLoading.set(true);
+        this.visitorService.loadStats().subscribe({
+            next: (s) => { this.visitorStats.set(s); },
+            error: () => { },
+        });
+        this.fetchVisitorPage();
+    }
+
+    private fetchVisitorPage() {
+        this.visitorsLoading.set(true);
+        this.visitorService.list(this.visitorsPage(), this.visitorsLimit(), this.visitorsSearch() || undefined).subscribe({
+            next: (res) => {
+                this.visitorSessions.set(res.data);
+                this.visitorsTotal.set(res.total);
+                this.visitorsTotalPages.set(res.totalPages);
+                this.visitorsLoading.set(false);
+                this.visitorsLoaded.set(true);
+            },
+            error: () => this.visitorsLoading.set(false),
+        });
+    }
+
+    onVisitorsSearch(e: Event) {
+        this.visitorsSearch.set((e.target as HTMLInputElement).value);
+        this.visitorsPage.set(1);
+        this.fetchVisitorPage();
+    }
+
+    onVisitorsPageSizeChange(e: Event) {
+        this.visitorsLimit.set(+(e.target as HTMLSelectElement).value);
+        this.visitorsPage.set(1);
+        this.fetchVisitorPage();
+    }
+
+    visitorsGoToPage(page: number) {
+        this.visitorsPage.set(page);
+        this.fetchVisitorPage();
+    }
+
+    formatDuration(ms: number): string {
+        if (!ms || ms < 1000) return '< 1s';
+        const s = Math.floor(ms / 1000);
+        if (s < 60) return `${s}s`;
+        const m = Math.floor(s / 60);
+        const rem = s % 60;
+        return rem > 0 ? `${m}m ${rem}s` : `${m}m`;
+    }
+
+    visitorDeviceIcon(type: string | null): string {
+        switch (type) {
+            case 'mobile': return 'bi-phone';
+            case 'tablet': return 'bi-tablet';
+            default: return 'bi-display';
+        }
     }
 }
 

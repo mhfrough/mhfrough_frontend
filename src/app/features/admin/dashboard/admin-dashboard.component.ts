@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, signal, AfterViewChecked, ViewChild, ElementRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
@@ -8,6 +8,7 @@ import { AdminNotificationService } from '../../../core/services/admin-notificat
 import { FeedbackService, InquiriesService } from '../../../core/services/inquiry-feedback.service';
 import { BlogsService } from '../../../core/services/blogs.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
+import { VisitorAnalyticsService, VisitorStats } from '../../../core/services/visitor-analytics.service';
 
 @Component({
     selector: 'app-admin-dashboard',
@@ -15,13 +16,18 @@ import { RealtimeService } from '../../../core/services/realtime.service';
     imports: [CommonModule, RouterLink],
     templateUrl: './admin-dashboard.component.html',
 })
-export class AdminDashboardComponent implements OnInit, OnDestroy {
+export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewChecked {
     private readonly http = inject(HttpClient);
     private readonly notif = inject(AdminNotificationService);
     private readonly feedbackService = inject(FeedbackService);
     private readonly inquiriesService = inject(InquiriesService);
     private readonly blogsService = inject(BlogsService);
     private readonly realtime = inject(RealtimeService);
+    private readonly visitorService = inject(VisitorAnalyticsService);
+    private readonly platformId = inject(PLATFORM_ID);
+
+    @ViewChild('visitorChart') chartCanvas!: ElementRef<HTMLCanvasElement>;
+
     readonly stats = signal<any>(null);
     readonly recentInquiries = signal<any[]>([]);
     readonly allFeedback = signal<any[]>([]);
@@ -30,13 +36,17 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     // ratingDist[0] = 5★ count … ratingDist[4] = 1★ count (descending for display)
     readonly ratingDist = signal<number[]>([0, 0, 0, 0, 0]);
     readonly avgRating = signal(0);
+    readonly visitorStats = signal<VisitorStats | null>(null);
+
     private subs = new Subscription();
+    private chartDrawn = false;
 
     ngOnInit() {
         this.loadStats();
         this.loadRatings();
         this.loadInquiries();
         this.loadBlogs();
+        this.loadVisitorStats();
 
         // Reload on relevant events
         this.subs.add(this.realtime.on<any>('inquiry:new').subscribe(() => {
@@ -68,9 +78,70 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() { this.subs.unsubscribe(); }
 
+    ngAfterViewChecked() {
+        const data = this.visitorStats()?.dailySessions;
+        if (data?.length && !this.chartDrawn && this.chartCanvas?.nativeElement && isPlatformBrowser(this.platformId)) {
+            this.chartDrawn = true;
+            this.renderVisitorChart(data);
+        }
+    }
+
+    private renderVisitorChart(raw: { day: string; count: string }[]) {
+        const canvas = this.chartCanvas.nativeElement;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const W = canvas.parentElement?.clientWidth ?? 400;
+        const H = 100;
+        canvas.width = W;
+        canvas.height = H;
+
+        const counts = raw.map(d => Number(d.count));
+        const maxCount = Math.max(...counts, 1);
+        const padT = 8, padB = 8;
+        const chartH = H - padT - padB;
+
+        ctx.clearRect(0, 0, W, H);
+
+        const getX = (i: number) => (i / (counts.length - 1 || 1)) * W;
+        const getY = (v: number) => padT + chartH - (v / maxCount) * chartH;
+
+        // Area fill
+        const grad = ctx.createLinearGradient(0, padT, 0, H);
+        grad.addColorStop(0, 'rgba(99,102,241,0.28)');
+        grad.addColorStop(1, 'rgba(99,102,241,0)');
+
+        ctx.beginPath();
+        ctx.moveTo(getX(0), getY(counts[0]));
+        for (let i = 1; i < counts.length; i++) ctx.lineTo(getX(i), getY(counts[i]));
+        ctx.lineTo(getX(counts.length - 1), H);
+        ctx.lineTo(0, H);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Line
+        ctx.beginPath();
+        ctx.moveTo(getX(0), getY(counts[0]));
+        for (let i = 1; i < counts.length; i++) ctx.lineTo(getX(i), getY(counts[i]));
+        ctx.strokeStyle = '#818cf8';
+        ctx.lineWidth = 2;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+    }
+
     private loadStats() {
         this.http.get(`${environment.apiUrl}/admin/dashboard`).subscribe({
             next: (data) => this.stats.set(data),
+        });
+    }
+
+    private loadVisitorStats() {
+        this.visitorService.loadStats().subscribe({
+            next: (data) => {
+                this.visitorStats.set(data);
+                this.chartDrawn = false; // trigger re-draw in AfterViewChecked
+            },
         });
     }
 
@@ -151,5 +222,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         const s = this.stats();
         if (!s) return 0;
         return (s.inquiries.total ?? 0) + (s.feedback.total ?? 0) + (s.comments.total ?? 0);
+    }
+
+    visitorDeviceIcon(type: string | null): string {
+        switch (type) {
+            case 'mobile': return 'bi-phone';
+            case 'tablet': return 'bi-tablet';
+            default: return 'bi-display';
+        }
+    }
+
+    visitorDevicePct(count: string): number {
+        const total = this.visitorStats()?.total ?? 0;
+        return total > 0 ? Math.round(Number(count) / total * 100) : 0;
     }
 }

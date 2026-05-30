@@ -3455,6 +3455,72 @@ button.admin-nav-link:last-child:hover {
     color: var(--text-muted);
 }
 
+// ── Visitor Analytics ─────────────────────────────────────────────────────────
+
+.admin-visitor-stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+
+    @media (max-width: 500px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.admin-visitor-stat {
+    padding: 0.85rem 1.1rem;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    &:last-child { border-right: none; }
+
+    @media (max-width: 500px) {
+        &:nth-child(2) { border-right: none; }
+        border-bottom: 1px solid var(--border);
+        &:nth-child(3), &:nth-child(4) { border-bottom: none; }
+    }
+}
+
+.admin-visitor-stat-val {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    color: var(--text);
+    font-weight: 400;
+}
+
+.admin-visitor-stat-lbl {
+    font-family: var(--font-sans);
+    font-size: 0.58rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.admin-visitor-chart-wrap {
+    margin-top: 0.75rem;
+    width: 100%;
+}
+
+.admin-visitor-chart {
+    display: block;
+    width: 100%;
+    height: 100px;
+}
+
+.admin-visitor-chart-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+    opacity: 0.65;
+}
+
 // activity feed
 .admin-activity-feed {
     display: flex;

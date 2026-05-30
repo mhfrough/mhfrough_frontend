@@ -210,6 +210,107 @@
 
 </div>
 
+<!-- ── Visitor Analytics ──────────────────────────────────────────────────── -->
+@if (visitorStats()) {
+<div class="admin-analytics-split" style="margin-top:0">
+
+    <!-- Summary stats + chart -->
+    <div class="admin-analytics-panel">
+        <div class="admin-analytics-panel-header">
+            <p class="admin-analytics-panel-title">Visitor Analytics</p>
+            <a routerLink="/admin/settings/visitors" class="admin-dashboard-section-link">Details</a>
+        </div>
+
+        <!-- 4-stat row -->
+        <div class="admin-visitor-stat-row">
+            <div class="admin-visitor-stat">
+                <span class="admin-visitor-stat-val">{{ visitorStats()!.total }}</span>
+                <span class="admin-visitor-stat-lbl">Sessions</span>
+            </div>
+            <div class="admin-visitor-stat">
+                <span class="admin-visitor-stat-val">{{ visitorStats()!.unique }}</span>
+                <span class="admin-visitor-stat-lbl">Unique</span>
+            </div>
+            <div class="admin-visitor-stat">
+                <span class="admin-visitor-stat-val">{{ visitorStats()!.totalPageViews }}</span>
+                <span class="admin-visitor-stat-lbl">Page Views</span>
+            </div>
+            <div class="admin-visitor-stat">
+                <span class="admin-visitor-stat-val">{{ visitorStats()!.bounceRate }}%</span>
+                <span class="admin-visitor-stat-lbl">Bounce</span>
+            </div>
+        </div>
+
+        <!-- 30-day sessions line chart -->
+        @if (visitorStats()!.dailySessions.length > 1) {
+        <div class="admin-visitor-chart-wrap">
+            <canvas #visitorChart class="admin-visitor-chart"></canvas>
+            <div class="admin-visitor-chart-labels">
+                <span>{{ visitorStats()!.dailySessions[0].day | date:'MMM d' }}</span>
+                <span>last 30 days</span>
+                <span>{{ visitorStats()!.dailySessions[visitorStats()!.dailySessions.length - 1].day | date:'MMM d' }}</span>
+            </div>
+        </div>
+        }
+
+        <!-- Device distribution -->
+        @if (visitorStats()!.deviceDist.length > 0) {
+        <div style="margin-top:1rem">
+            @for (d of visitorStats()!.deviceDist; track d.deviceType) {
+            <div class="admin-analytics-metric">
+                <div class="admin-analytics-metric-head">
+                    <span><i class="bi {{ visitorDeviceIcon(d.deviceType) }}" style="margin-right:.3rem"></i>{{ d.deviceType | titlecase }}</span>
+                    <span class="admin-analytics-pct">{{ visitorDevicePct(d.count) }}%</span>
+                </div>
+                <div class="admin-analytics-track">
+                    <div class="admin-analytics-fill" [style.width.%]="visitorDevicePct(d.count)"></div>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+    <!-- Top countries + browsers -->
+    <div class="admin-analytics-panel">
+        <p class="admin-analytics-panel-title">Top Countries</p>
+        @if (visitorStats()!.topCountries.length === 0) {
+        <p class="admin-dashboard-empty">No data yet.</p>
+        } @else {
+        <div class="admin-activity-feed">
+            @for (c of visitorStats()!.topCountries; track c.country) {
+            <div class="admin-activity-item">
+                <i class="bi bi-geo-alt admin-activity-icon"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">{{ c.country || 'Unknown' }}</span>
+                </div>
+                <span class="admin-activity-badge">{{ c.count }}</span>
+            </div>
+            }
+        </div>
+        }
+
+        <p class="admin-analytics-panel-title" style="margin-top:1.5rem">Top Browsers</p>
+        @if (visitorStats()!.topBrowsers.length === 0) {
+        <p class="admin-dashboard-empty">No data yet.</p>
+        } @else {
+        <div class="admin-activity-feed">
+            @for (b of visitorStats()!.topBrowsers; track b.browser) {
+            <div class="admin-activity-item">
+                <i class="bi bi-browser-chrome admin-activity-icon"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">{{ b.browser || 'Unknown' }}</span>
+                </div>
+                <span class="admin-activity-badge">{{ b.count }}</span>
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+</div>
+}
+
 } @else {
 <div class="loading-state">
     <div class="spinner"></div>

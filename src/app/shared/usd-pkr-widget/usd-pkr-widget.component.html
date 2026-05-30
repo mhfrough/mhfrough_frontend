@@ -1,0 +1,20 @@
+<div class="currency-widget" title="Currency - {{ pair }}">
+  <div class="currency-icon" aria-hidden="true" [attr.aria-label]="displayLabel">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true" role="img" width="24" height="24">
+      <title>{{ displayLabel }}</title>
+      <!-- dollar symbol only: no round background, green -->
+      <text x="12" y="12" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" font-size="14" fill="#16a34a" font-family="sans-serif" font-weight="700">$</text>
+    </svg>
+  </div>
+  <div class="currency-text">
+    <span class="currency-rate">{{ rate }}</span>
+    <span class="currency-label">{{ displayLabel }}</span>
+  </div>
+
+  <div class="currency-dev" *ngIf="showDevControl">
+    <label class="visually-hidden">Currency dev control</label>
+    <select #devSel class="currency-dev-select" (change)="onDevChange(devSel.value)" [value]="displayKey">
+      <option *ngFor="let opt of RATE_OPTIONS" [value]="opt.key">{{ opt.label }}</option>
+    </select>
+  </div>
+</div>

@@ -20,6 +20,9 @@
     <a class="settings-tab" [class.is-active]="activeTab() === 'ticker'" routerLink="/admin/settings/ticker">
         <i class="bi bi-megaphone-fill"></i> Ticker
     </a>
+    <a class="settings-tab" [class.is-active]="activeTab() === 'visitors'" routerLink="/admin/settings/visitors">
+        <i class="bi bi-graph-up-arrow"></i> Visitors
+    </a>
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════════════ -->
@@ -835,6 +838,196 @@
 </div>
 
 } <!-- /ticker tab -->
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- VISITORS TAB                                                             -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+@if (activeTab() === 'visitors') {
+
+<!-- ── Stats summary ─────────────────────────────────────────────────────── -->
+@if (visitorStats()) {
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-graph-up-arrow"></i> Visitor Overview</h2>
+            <p class="settings-card-sub">Aggregated analytics for the last 30 days and all time.</p>
+        </div>
+    </div>
+    <div class="admin-visitor-stat-row" style="margin-top:0.5rem">
+        <div class="admin-visitor-stat">
+            <span class="admin-visitor-stat-val">{{ visitorStats()!.total }}</span>
+            <span class="admin-visitor-stat-lbl">Total Sessions</span>
+        </div>
+        <div class="admin-visitor-stat">
+            <span class="admin-visitor-stat-val">{{ visitorStats()!.unique }}</span>
+            <span class="admin-visitor-stat-lbl">Unique Visitors</span>
+        </div>
+        <div class="admin-visitor-stat">
+            <span class="admin-visitor-stat-val">{{ visitorStats()!.totalPageViews }}</span>
+            <span class="admin-visitor-stat-lbl">Page Views</span>
+        </div>
+        <div class="admin-visitor-stat">
+            <span class="admin-visitor-stat-val">{{ visitorStats()!.bounceRate }}%</span>
+            <span class="admin-visitor-stat-lbl">Bounce Rate</span>
+        </div>
+    </div>
+
+    <!-- Top Countries + Browsers -->
+    <div class="admin-analytics-split" style="margin-top:1.5rem">
+        <div>
+            <p class="settings-card-title" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;opacity:.5;margin-bottom:.6rem">Top Countries</p>
+            @if (visitorStats()!.topCountries.length === 0) {
+            <p style="opacity:.5;font-size:.85rem">No data yet.</p>
+            } @else {
+            @for (c of visitorStats()!.topCountries; track c.country) {
+            <div class="admin-analytics-metric">
+                <div class="admin-analytics-metric-head">
+                    <span>{{ c.country || 'Unknown' }}</span>
+                    <span class="admin-analytics-pct">{{ c.count }}</span>
+                </div>
+                <div class="admin-analytics-track">
+                    <div class="admin-analytics-fill"
+                        [style.width.%]="visitorStats()!.total ? (100 * +c.count / visitorStats()!.total) : 0"></div>
+                </div>
+            </div>
+            }
+            }
+        </div>
+        <div>
+            <p class="settings-card-title" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;opacity:.5;margin-bottom:.6rem">Top Browsers</p>
+            @if (visitorStats()!.topBrowsers.length === 0) {
+            <p style="opacity:.5;font-size:.85rem">No data yet.</p>
+            } @else {
+            @for (b of visitorStats()!.topBrowsers; track b.browser) {
+            <div class="admin-analytics-metric">
+                <div class="admin-analytics-metric-head">
+                    <span>{{ b.browser || 'Unknown' }}</span>
+                    <span class="admin-analytics-pct">{{ b.count }}</span>
+                </div>
+                <div class="admin-analytics-track">
+                    <div class="admin-analytics-fill"
+                        [style.width.%]="visitorStats()!.total ? (100 * +b.count / visitorStats()!.total) : 0"></div>
+                </div>
+            </div>
+            }
+            }
+        </div>
+    </div>
+</div>
+}
+
+<!-- ── Sessions table ─────────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-people"></i> Visitor Sessions</h2>
+            <p class="settings-card-sub">All tracked visitor sessions — search, paginate and inspect.</p>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="admin-list-toolbar">
+        <div class="admin-list-search">
+            <i class="bi bi-search"></i>
+            <input [value]="visitorsSearch()" (input)="onVisitorsSearch($event)"
+                placeholder="Search IP, country, browser…" autocomplete="off">
+        </div>
+        <select class="admin-page-size-select" [value]="visitorsLimit()" (change)="onVisitorsPageSizeChange($event)">
+            <option value="10">10 / page</option>
+            <option value="25">25 / page</option>
+            <option value="50">50 / page</option>
+            <option value="100">100 / page</option>
+        </select>
+        <span class="admin-list-toolbar-count">{{ visitorsTotal() }} session{{ visitorsTotal() !== 1 ? 's' : '' }}</span>
+    </div>
+
+    @if (visitorsLoading()) {
+    <div class="loading-state" style="padding:2rem 0"><div class="spinner"></div></div>
+    } @else if (visitorSessions().length === 0) {
+    <p class="admin-empty-state">No visitor sessions found.</p>
+    } @else {
+
+    <!-- Table -->
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Device</th>
+                    <th>Location</th>
+                    <th>Browser / OS</th>
+                    <th>IP</th>
+                    <th>Pages</th>
+                    <th>Duration</th>
+                    <th>Bounce</th>
+                    <th>Entry</th>
+                    <th>When</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (s of visitorSessions(); track s.id) {
+                <tr>
+                    <td>
+                        <i class="bi {{ visitorDeviceIcon(s.deviceType) }}" style="margin-right:.35rem"></i>
+                        <span style="text-transform:capitalize">{{ s.deviceType || 'desktop' }}</span>
+                        @if (s.screenRes) {
+                        <div style="font-size:.75rem;opacity:.5">{{ s.screenRes }}</div>
+                        }
+                    </td>
+                    <td>
+                        @if (s.country) {
+                        <span>{{ s.country }}</span>
+                        @if (s.city) { <span style="opacity:.55"> · {{ s.city }}</span> }
+                        } @else {
+                        <span style="opacity:.4">—</span>
+                        }
+                    </td>
+                    <td>
+                        <div>{{ s.browser || '—' }}{{ s.browserVersion ? ' ' + s.browserVersion : '' }}</div>
+                        <div style="font-size:.75rem;opacity:.55">{{ s.os || '' }}{{ s.osVersion ? ' ' + s.osVersion : '' }}</div>
+                    </td>
+                    <td style="font-family:monospace;font-size:.8rem">
+                        {{ s.ip || '—' }}
+                        @if (s.ipVersion) {
+                        <div style="font-size:.7rem;opacity:.45">{{ s.ipVersion }}</div>
+                        }
+                    </td>
+                    <td style="text-align:center">{{ s.pageViewCount }}</td>
+                    <td>{{ formatDuration(+s.sessionDurationMs) }}</td>
+                    <td>
+                        <span class="admin-badge" [class.admin-badge--warn]="s.bounced" [class.admin-badge--on]="!s.bounced">
+                            {{ s.bounced ? 'yes' : 'no' }}
+                        </span>
+                    </td>
+                    <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem" [title]="s.entryPath || ''">
+                        {{ s.entryPath || '—' }}
+                    </td>
+                    <td style="white-space:nowrap;font-size:.8rem">{{ s.startedAt | date:'MMM d, y · h:mm a' }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (visitorsTotalPages() > 1) {
+    <div class="settings-pagination">
+        <button class="btn-ghost" [disabled]="visitorsPage() === 1" (click)="visitorsGoToPage(visitorsPage() - 1)">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        @for (p of visitorsPageNumbers; track p) {
+        <button class="btn-ghost" [class.is-active]="p === visitorsPage()" (click)="visitorsGoToPage(p)">{{ p }}</button>
+        }
+        <button class="btn-ghost" [disabled]="visitorsPage() === visitorsTotalPages()" (click)="visitorsGoToPage(visitorsPage() + 1)">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <span style="font-size:.78rem;color:var(--text-muted);margin-left:.5rem">{{ visitorsTotal() }} total</span>
+    </div>
+    }
+
+    }
+</div>
+
+} <!-- /visitors tab -->
 
 <!-- Revoke session confirm modal -->
 @if (revokeConfirmId()) {

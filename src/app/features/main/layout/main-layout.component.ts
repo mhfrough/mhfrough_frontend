@@ -1,7 +1,9 @@
 import { Component, HostListener, inject, signal, computed, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { ViewportScroller, isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { ChatWidgetComponent } from '../../../shared/chat-widget/chat-widget.component';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { FcmService } from '../../../core/services/fcm.service';
@@ -10,6 +12,7 @@ import { FooterSettingsService } from '../../../core/services/footer-settings.se
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 import { TickerBannerComponent } from '../../../shared/ticker-banner/ticker-banner.component';
 import { FrontToastComponent } from '../../../shared/components/front-toast/front-toast.component';
+import { VisitorTrackingService } from '../../../core/services/visitor-tracking.service';
 
 @Component({
     selector: 'app-main-layout',
@@ -27,12 +30,24 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     private readonly fcm = inject(FcmService);
     private readonly platformId = inject(PLATFORM_ID);
     readonly footerSettings = inject(FooterSettingsService);
+    private readonly tracker = inject(VisitorTrackingService);
+    private readonly router = inject(Router);
+    private trackingSub = new Subscription();
     private permissionTimer: ReturnType<typeof setTimeout> | null = null;
 
     ngOnInit() {
         this.scroller.setOffset([0, 80]);
         this.realtime.connect();
         this.footerSettings.load();
+
+        // Visitor tracking — browser only
+        if (isPlatformBrowser(this.platformId)) {
+            this.tracker.init();
+            this.trackingSub.add(
+                this.router.events.pipe(filter(e => e instanceof NavigationEnd))
+                    .subscribe((e) => this.tracker.ping((e as NavigationEnd).urlAfterRedirects)),
+            );
+        }
 
         if (isPlatformBrowser(this.platformId)) {
             this.permissionTimer = setTimeout(() => {
@@ -45,6 +60,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         if (this.permissionTimer !== null) clearTimeout(this.permissionTimer);
+        this.tracker.sendLeave();
+        this.trackingSub.unsubscribe();
         // realtime stays connected across navigation; disconnect only when leaving the site
     }
 
