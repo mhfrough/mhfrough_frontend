@@ -24,7 +24,7 @@
         <i class="bi bi-graph-up-arrow"></i> Visitors
     </a>
     <a class="settings-tab" [class.is-active]="activeTab() === 'widgets'" routerLink="/admin/settings/widgets">
-        <i class="bi bi-cloud-sun"></i> Widgets
+        <i class="bi bi-puzzle"></i> Widgets
     </a>
 </div>
 
@@ -1074,11 +1074,10 @@
 <div class="settings-card">
     <div class="settings-card-header">
         <div>
-            <h2 class="settings-card-title"><i class="bi bi-cloud-sun"></i> Live Widget API Keys</h2>
+            <h2 class="settings-card-title"><i class="bi bi-puzzle"></i> Live Widget API Keys</h2>
             <p class="settings-card-sub">
                 API keys for the live data widgets (weather, gold price, USD/PKR rate) shown in the site
-                nav when you are logged in. Keys are stored securely on the server and never exposed to
-                visitors.
+                nav when admin is logged in.
             </p>
         </div>
     </div>
@@ -1093,13 +1092,13 @@
 
     <!-- ── Weather ─────────────────────────────────────────────────────── -->
     <h3 class="settings-section-label" style="margin-top:1rem">
-        <i class="bi bi-cloud-sun-fill" style="color:#FFB703"></i> WeatherAPI.com
+        <i class="bi bi-cloud-sun-fill"></i> WeatherAPI.com
     </h3>
-    <p class="form-hint">
+    <!-- <p class="form-hint">
         Free tier: 1 M req/month ·
         <a href="https://www.weatherapi.com/my/" target="_blank" rel="noopener" class="link-muted">Get key</a>
         · Data refreshed max once per hour per visit.
-    </p>
+    </p> -->
     <div class="admin-form-grid">
         <div class="admin-form-field">
             <label class="admin-form-label">API Key</label>
@@ -1114,13 +1113,8 @@
 
     <!-- ── Gold ────────────────────────────────────────────────────────── -->
     <h3 class="settings-section-label" style="margin-top:1.5rem">
-        <i class="bi bi-currency-exchange" style="color:#FFD166"></i> Metals-API.com (Gold)
+        <i class="bi bi-currency-exchange"></i> GoldAPI.io (Gold)
     </h3>
-    <p class="form-hint">
-        Free tier: 250 req/month ·
-        <a href="https://metals-api.com/dashboard" target="_blank" rel="noopener" class="link-muted">Get key</a>
-        · Data refreshed max once per 3 hours per visit.
-    </p>
     <div class="admin-form-field" style="max-width:440px">
         <label class="admin-form-label">API Key</label>
         <input type="password" class="admin-form-input" [(ngModel)]="widgetGoldKey" autocomplete="new-password"
@@ -1129,14 +1123,8 @@
 
     <!-- ── USD/PKR ──────────────────────────────────────────────────────── -->
     <h3 class="settings-section-label" style="margin-top:1.5rem">
-        <i class="bi bi-currency-dollar" style="color:#16a34a"></i> ExchangeRate-API.com (USD/PKR)
+        <i class="bi bi-currency-dollar"></i> ExchangeRate-API.com (USD/PKR)
     </h3>
-    <p class="form-hint">
-        Free tier: 1 500 req/month ·
-        <a href="https://www.exchangerate-api.com/docs/overview" target="_blank" rel="noopener" class="link-muted">Get
-            key</a>
-        · Data refreshed max once per 30 minutes per visit.
-    </p>
     <div class="admin-form-field" style="max-width:440px">
         <label class="admin-form-label">API Key</label>
         <input type="password" class="admin-form-input" [(ngModel)]="widgetCurrencyKey" autocomplete="new-password"

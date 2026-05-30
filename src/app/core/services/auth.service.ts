@@ -14,8 +14,15 @@ export class AuthService {
 
     private checkCookie(): boolean {
         if (!isPlatformBrowser(this.platformId)) return false;
-        return document.cookie.includes('access_token') ||
-            !!sessionStorage.getItem('admin_session');
+        try {
+            const cookie = typeof document !== 'undefined' ? document.cookie : '';
+            return cookie.includes('access_token') ||
+                cookie.includes('admin_rm') ||
+                !!sessionStorage.getItem('admin_session') ||
+                localStorage.getItem('admin_remember_me') === '1';
+        } catch (e) {
+            return false;
+        }
     }
 
     isLoggedIn(): boolean { return this._loggedIn(); }
