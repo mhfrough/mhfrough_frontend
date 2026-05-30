@@ -893,27 +893,26 @@
         </div>
     </div>
 
-    <!-- Top Countries + Browsers -->
+    <!-- Top Countries + Browsers (use dashboard list style for consistency) -->
     <div class="admin-analytics-split" style="margin-top:1.5rem">
         <div>
             <p class="settings-card-title"
                 style="font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;opacity:.5;margin-bottom:.6rem">Top
                 Countries</p>
             @if (visitorStats()!.topCountries.length === 0) {
-            <p style="opacity:.5;font-size:.85rem">No data yet.</p>
+            <p class="admin-dashboard-empty">No data yet.</p>
             } @else {
-            @for (c of visitorStats()!.topCountries; track c.country) {
-            <div class="admin-analytics-metric">
-                <div class="admin-analytics-metric-head">
-                    <span>{{ c.country || 'Unknown' }}</span>
-                    <span class="admin-analytics-pct">{{ c.count }}</span>
+            <div class="admin-activity-feed">
+                @for (c of visitorStats()!.topCountries; track c.country) {
+                <div class="admin-activity-item">
+                    <i class="bi bi-geo-alt admin-activity-icon"></i>
+                    <div class="admin-activity-body">
+                        <span class="admin-activity-text">{{ c.country || 'Unknown' }}</span>
+                    </div>
+                    <span class="admin-activity-badge">{{ c.count }}</span>
                 </div>
-                <div class="admin-analytics-track">
-                    <div class="admin-analytics-fill"
-                        [style.width.%]="visitorStats()!.total ? (100 * +c.count / visitorStats()!.total) : 0"></div>
-                </div>
+                }
             </div>
-            }
             }
         </div>
         <div>
@@ -921,20 +920,19 @@
                 style="font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;opacity:.5;margin-bottom:.6rem">Top
                 Browsers</p>
             @if (visitorStats()!.topBrowsers.length === 0) {
-            <p style="opacity:.5;font-size:.85rem">No data yet.</p>
+            <p class="admin-dashboard-empty">No data yet.</p>
             } @else {
-            @for (b of visitorStats()!.topBrowsers; track b.browser) {
-            <div class="admin-analytics-metric">
-                <div class="admin-analytics-metric-head">
-                    <span>{{ b.browser || 'Unknown' }}</span>
-                    <span class="admin-analytics-pct">{{ b.count }}</span>
+            <div class="admin-activity-feed">
+                @for (b of visitorStats()!.topBrowsers; track b.browser) {
+                <div class="admin-activity-item">
+                    <i class="bi bi-browser-chrome admin-activity-icon"></i>
+                    <div class="admin-activity-body">
+                        <span class="admin-activity-text">{{ b.browser || 'Unknown' }}</span>
+                    </div>
+                    <span class="admin-activity-badge">{{ b.count }}</span>
                 </div>
-                <div class="admin-analytics-track">
-                    <div class="admin-analytics-fill"
-                        [style.width.%]="visitorStats()!.total ? (100 * +b.count / visitorStats()!.total) : 0"></div>
-                </div>
+                }
             </div>
-            }
             }
         </div>
     </div>

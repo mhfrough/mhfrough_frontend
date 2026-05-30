@@ -29,10 +29,10 @@ export interface UsdPkrData {
 export type WidgetData = WeatherData | GoldData | UsdPkrData;
 
 // ── Cache TTLs ────────────────────────────────────────────────────────────────
-
-const WEATHER_TTL = 60 * 60 * 1000;      // 1 hour
-const GOLD_TTL = 3 * 60 * 60 * 1000;  // 3 hours
-const USD_TTL = 30 * 60 * 1000;      // 30 minutes
+// Millisecond TTLs used for client-side localStorage cache of widget data.
+const WEATHER_TTL = 15 * 60 * 1000;      // 15 minutes
+const GOLD_TTL = 8 * 60 * 60 * 1000;     // 8 hours
+const USD_TTL = 30 * 60 * 1000;          // 30 minutes
 
 const LS_KEY_WEATHER = 'widget_weather_v1';
 const LS_KEY_GOLD = 'widget_gold_v1';
