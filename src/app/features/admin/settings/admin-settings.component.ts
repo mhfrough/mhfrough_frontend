@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
 import { AdminSettingsService, AdminSettings, AdminProfile, LoginSession } from '../../../core/services/admin-settings.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
@@ -13,6 +14,7 @@ import { FcmService } from '../../../core/services/fcm.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { TickerService, TickerMessage } from '../../../core/services/ticker.service';
 import { VisitorAnalyticsService, VisitorSession, VisitorStats } from '../../../core/services/visitor-analytics.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
 
 @Component({
     selector: 'app-admin-settings',
@@ -20,7 +22,7 @@ import { VisitorAnalyticsService, VisitorSession, VisitorStats } from '../../../
     imports: [CommonModule, DatePipe, FormsModule, RouterLink, RteToolbarComponent, ImgFallbackDirective],
     templateUrl: './admin-settings.component.html',
 })
-export class AdminSettingsComponent implements OnInit {
+export class AdminSettingsComponent implements OnInit, OnDestroy {
     private readonly settingsService = inject(AdminSettingsService);
     private readonly footerService = inject(FooterSettingsService);
     private readonly auth = inject(AuthService);
@@ -31,11 +33,13 @@ export class AdminSettingsComponent implements OnInit {
     private readonly titleService = inject(Title);
     readonly fcm = inject(FcmService);
     private readonly tickerService = inject(TickerService);
+    private readonly realtime = inject(RealtimeService);
+    private rtSubs = new Subscription();
 
     @ViewChild('aboutEl') aboutEl!: HTMLTextAreaElement;
 
     // ── Section tabs — driven by route param ─────────────────────────────────
-    readonly activeTab = signal<'profile' | 'security' | 'notifications' | 'ticker' | 'visitors'>('profile');
+    readonly activeTab = signal<'profile' | 'security' | 'notifications' | 'ticker' | 'visitors' | 'widgets'>('profile');
 
     // ── Visitors tab ─────────────────────────────────────────────────────────
     private readonly visitorService = inject(VisitorAnalyticsService);
@@ -182,6 +186,25 @@ export class AdminSettingsComponent implements OnInit {
     readonly revokeLoading = signal<string | null>(null);
     readonly revokeConfirmId = signal<string | null>(null);
     readonly revokeAllConfirm = signal(false);
+    readonly sessionsPage = signal(1);
+    readonly sessionsPageSize = 10;
+
+    get pagedSessions(): LoginSession[] {
+        const start = (this.sessionsPage() - 1) * this.sessionsPageSize;
+        return this.sessions.slice(start, start + this.sessionsPageSize);
+    }
+
+    get sessionsTotalPages(): number {
+        return Math.max(1, Math.ceil(this.sessions.length / this.sessionsPageSize));
+    }
+
+    get sessionsPageNumbers(): number[] {
+        const total = this.sessionsTotalPages;
+        const cur = this.sessionsPage();
+        const pages: number[] = [];
+        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) pages.push(i);
+        return pages;
+    }
 
     // ── Change Password ──────────────────────────────────────────────────────
     readonly pwLoading = signal(false);
@@ -201,8 +224,8 @@ export class AdminSettingsComponent implements OnInit {
     ngOnInit() {
         // Read :tab param from route and keep in sync
         this.route.paramMap.subscribe(params => {
-            const tab = params.get('tab') as 'profile' | 'security' | 'notifications' | 'ticker' | 'visitors';
-            if (tab && ['profile', 'security', 'notifications', 'ticker', 'visitors'].includes(tab)) {
+            const tab = params.get('tab') as 'profile' | 'security' | 'notifications' | 'ticker' | 'visitors' | 'widgets';
+            if (tab && ['profile', 'security', 'notifications', 'ticker', 'visitors', 'widgets'].includes(tab)) {
                 this.activeTab.set(tab);
                 const tabLabels: Record<string, string> = {
                     profile: 'Profile Settings',
@@ -210,6 +233,7 @@ export class AdminSettingsComponent implements OnInit {
                     notifications: 'Notification Settings',
                     ticker: 'Ticker Settings',
                     visitors: 'Visitor Analytics',
+                    widgets: 'Widget API Keys',
                 };
                 this.titleService.setTitle(`${tabLabels[tab] ?? 'Settings'} | Admin`);
                 if (tab === 'security' && !this.activityLogsLoaded()) {
@@ -220,6 +244,9 @@ export class AdminSettingsComponent implements OnInit {
                 }
                 if (tab === 'visitors' && !this.visitorsLoaded()) {
                     this.loadVisitors();
+                }
+                if (tab === 'widgets') {
+                    this.syncWidgetFormFromSettings(this.settingsService.settings());
                 }
             }
         });
@@ -248,6 +275,35 @@ export class AdminSettingsComponent implements OnInit {
             next: (p) => this.syncFormFromProfile(p),
             error: () => { },
         });
+
+        // ── Realtime subscriptions ─────────────────────────────────────────
+        // Activity log: new entry prepended
+        this.rtSubs.add(this.realtime.on<ActivityLogEntry>('activity:log_created').subscribe(entry => {
+            if (this.activityLogsLoaded()) {
+                this.activityLogs.update(list => [entry, ...list]);
+            }
+        }));
+
+        // Login sessions: list refreshed from server
+        this.rtSubs.add(this.realtime.on<LoginSession[]>('session:list_updated').subscribe(sessions => {
+            this.settingsService.sessions.set(sessions);
+        }));
+
+        // Visitors: new session prepended (if on visitors tab, prepend to current page 1)
+        this.rtSubs.add(this.realtime.on<VisitorSession>('visitor:session_created').subscribe(session => {
+            if (this.activeTab() === 'visitors' && this.visitorsPage() === 1) {
+                this.visitorSessions.update(list => {
+                    const updated = [session, ...list];
+                    if (updated.length > this.visitorsLimit()) updated.pop();
+                    return updated;
+                });
+                this.visitorsTotal.update(n => n + 1);
+            }
+        }));
+    }
+
+    ngOnDestroy() {
+        this.rtSubs.unsubscribe();
     }
 
     private syncFormFromSettings(s: AdminSettings) {
@@ -261,6 +317,58 @@ export class AdminSettingsComponent implements OnInit {
         this.footerCopyrightOwner = s.copyrightOwner ?? 'mhfrough.dev';
         this.footerTagline = s.footerTagline ?? 'Made with \u2665 in Karāchi';
         this.footerShowTagline = s.showFooterTagline ?? true;
+        this.syncWidgetFormFromSettings(s);
+    }
+
+    // ── Widget API Keys (Widgets tab) ─────────────────────────────────────────
+    readonly widgetsSaving = signal(false);
+    readonly widgetsSaved = signal(false);
+    readonly widgetsError = signal('');
+
+    widgetWeatherKey = '';
+    widgetGoldKey = '';
+    widgetCurrencyKey = '';
+    widgetCity = 'Karachi';
+
+    private syncWidgetFormFromSettings(s: AdminSettings) {
+        // Server returns '••••••••' if key is set, null if not
+        this.widgetWeatherKey = s.weatherApiKey ? '••••••••' : '';
+        this.widgetGoldKey = s.goldApiKey ? '••••••••' : '';
+        this.widgetCurrencyKey = s.currencyApiKey ? '••••••••' : '';
+        this.widgetCity = s.weatherCity ?? 'Karachi';
+    }
+
+    /** Only send a key field if the user actually changed it (not the placeholder) */
+    private resolveKey(val: string): string | undefined {
+        return val && !val.startsWith('••') ? val : undefined;
+    }
+
+    saveWidgetKeys(): void {
+        this.widgetsSaving.set(true);
+        this.widgetsSaved.set(false);
+        this.widgetsError.set('');
+
+        const payload: Partial<AdminSettings> = {
+            weatherCity: this.widgetCity || 'Karachi',
+        };
+        const wk = this.resolveKey(this.widgetWeatherKey);
+        const gk = this.resolveKey(this.widgetGoldKey);
+        const ck = this.resolveKey(this.widgetCurrencyKey);
+        if (wk) payload['weatherApiKey'] = wk;
+        if (gk) payload['goldApiKey'] = gk;
+        if (ck) payload['currencyApiKey'] = ck;
+
+        this.settingsService.update(payload).subscribe({
+            next: () => {
+                this.widgetsSaving.set(false);
+                this.widgetsSaved.set(true);
+                setTimeout(() => this.widgetsSaved.set(false), 3000);
+            },
+            error: () => {
+                this.widgetsSaving.set(false);
+                this.widgetsError.set('Failed to save widget keys. Please try again.');
+            },
+        });
     }
 
     private syncFormFromProfile(p: AdminProfile) {

@@ -1,20 +1,30 @@
-<div class="currency-widget" title="Currency - {{ pair }}">
-  <div class="currency-icon" aria-hidden="true" [attr.aria-label]="displayLabel">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true" role="img" width="24" height="24">
-      <title>{{ displayLabel }}</title>
-      <!-- dollar symbol only: no round background, green -->
-      <text x="12" y="12" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" font-size="14" fill="#16a34a" font-family="sans-serif" font-weight="700">$</text>
+<div class="currency-widget" title="USD → PKR exchange rate">
+
+  <!-- ── Icon: currency exchange ──────────────────────────── -->
+  <div class="currency-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false" role="img">
+      <title>USD to PKR</title>
+      <!-- Dollar sign -->
+      <text x="6.5" y="15" text-anchor="middle"
+            font-size="11" font-weight="700"
+            font-family="Inconsolata, monospace"
+            fill="#16a34a">$</text>
+      <!-- Arrow -->
+      <path d="M11 12 L14 12 M12.5 10.5 L14 12 L12.5 13.5"
+            stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"
+            fill="none" opacity="0.6"/>
+      <!-- Rupee sign ₨ approximation -->
+      <text x="18" y="15" text-anchor="middle"
+            font-size="9" font-weight="700"
+            font-family="Inconsolata, monospace"
+            fill="#f59e0b">₨</text>
     </svg>
   </div>
+
+  <!-- ── Text ─────────────────────────────────────────────── -->
   <div class="currency-text">
-    <span class="currency-rate">{{ rate }}</span>
-    <span class="currency-label">{{ displayLabel }}</span>
+    <span class="currency-rate">{{ displayRate }}</span>
+    <span class="currency-label">USD → PKR</span>
   </div>
 
-  <div class="currency-dev" *ngIf="showDevControl">
-    <label class="visually-hidden">Currency dev control</label>
-    <select #devSel class="currency-dev-select" (change)="onDevChange(devSel.value)" [value]="displayKey">
-      <option *ngFor="let opt of RATE_OPTIONS" [value]="opt.key">{{ opt.label }}</option>
-    </select>
-  </div>
 </div>

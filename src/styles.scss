@@ -3475,12 +3475,21 @@ button.admin-nav-link:last-child:hover {
     flex-direction: column;
     gap: 0.2rem;
 
-    &:last-child { border-right: none; }
+    &:last-child {
+        border-right: none;
+    }
 
     @media (max-width: 500px) {
-        &:nth-child(2) { border-right: none; }
+        &:nth-child(2) {
+            border-right: none;
+        }
+
         border-bottom: 1px solid var(--border);
-        &:nth-child(3), &:nth-child(4) { border-bottom: none; }
+
+        &:nth-child(3),
+        &:nth-child(4) {
+            border-bottom: none;
+        }
     }
 }
 

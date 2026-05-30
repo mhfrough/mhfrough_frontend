@@ -74,6 +74,27 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewChec
         this.subs.add(this.realtime.on<any>('comment:approved').subscribe(() => this.loadStats()));
         this.subs.add(this.realtime.on<any>('comment:deleted').subscribe(() => this.loadStats()));
         this.subs.add(this.realtime.on<any>('inquiry:read').subscribe(() => this.loadStats()));
+
+        // inquiry deleted
+        this.subs.add(this.realtime.on<{ id: string }>('inquiry:deleted').subscribe(() => {
+            this.loadStats();
+            this.loadInquiries();
+        }));
+
+        // feedback unapproved
+        this.subs.add(this.realtime.on<any>('feedback:unapproved').subscribe(() => {
+            this.loadStats();
+            this.loadRatings();
+        }));
+
+        // project changes → refresh stats
+        this.subs.add(this.realtime.on<any>('project:created').subscribe(() => this.loadStats()));
+        this.subs.add(this.realtime.on<any>('project:updated').subscribe(() => this.loadStats()));
+        this.subs.add(this.realtime.on<any>('project:deleted').subscribe(() => this.loadStats()));
+        this.subs.add(this.realtime.on<any>('project:unpublished').subscribe(() => this.loadStats()));
+
+        // new visitor session → refresh visitor stats
+        this.subs.add(this.realtime.on<any>('visitor:session_created').subscribe(() => this.loadVisitorStats()));
     }
 
     ngOnDestroy() { this.subs.unsubscribe(); }

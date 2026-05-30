@@ -17,6 +17,8 @@
         </ul>
 
         <div class="nav-actions">
+            <!-- live data widgets — visible only when admin is logged in -->
+            <app-widgets-carousel></app-widgets-carousel>
             <button class="menu-btn" (click)="toggleNav()" aria-label="Menu">
                 <i class="bi" [class.bi-list]="!navOpen()" [class.bi-x-lg]="navOpen()"></i>
             </button>

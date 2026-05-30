@@ -1,7 +1,5 @@
 :host {
   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
@@ -18,6 +16,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 
     svg {
       width: 20px;
@@ -29,21 +28,16 @@
       will-change: transform, opacity;
     }
 
-    // subtle hover / focus lift
-    &:hover svg,
-    &:focus-within svg {
+    &:hover svg, &:focus-within svg {
       transform: translateY(-2px) scale(1.04);
       opacity: 0.98;
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.06));
     }
 
-    // condition-specific subtle shadows and color accent via class
-    &.sunny svg { filter: drop-shadow(0 6px 10px rgba(255,183,3,0.08)); }
-    &.partly-cloudy svg { filter: drop-shadow(0 6px 10px rgba(0,0,0,0.05)); }
-    &.cloudy svg { filter: drop-shadow(0 4px 8px rgba(0,0,0,0.04)); }
-    &.rain svg { filter: drop-shadow(0 6px 12px rgba(105,167,255,0.06)); }
-    &.snow svg { filter: drop-shadow(0 6px 10px rgba(216,233,255,0.04)); }
-    &.thunderstorm svg { filter: drop-shadow(0 6px 14px rgba(255,209,102,0.06)); }
+    // condition-specific colour hints
+    &--sunny      svg { filter: drop-shadow(0 4px 8px rgba(255,183,3,0.20)); }
+    &--rain       svg { filter: drop-shadow(0 4px 8px rgba(105,167,255,0.15)); }
+    &--thunderstorm svg { filter: drop-shadow(0 4px 8px rgba(255,209,102,0.15)); }
+    &--snow       svg { filter: drop-shadow(0 4px 8px rgba(216,233,255,0.12)); }
   }
 
   .weather-text {
@@ -67,30 +61,7 @@
     text-transform: capitalize;
   }
 
-  &:hover .weather-icon,
-  &:hover .weather-cond {
-    color: var(--text);
-  }
+  &:hover .weather-cond { color: var(--text); }
 
-  .weather-dev {
-    margin-left: 0.5rem;
-    display: flex;
-    align-items: center;
-
-    .weather-dev-select {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 0.62rem;
-      padding: 0.08rem 0.4rem;
-      border-radius: 6px;
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-  }
-
-  @media (max-width: 640px) {
-    display: none;
-  }
+  @media (max-width: 640px) { display: none; }
 }

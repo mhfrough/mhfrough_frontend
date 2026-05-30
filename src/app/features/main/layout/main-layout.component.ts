@@ -13,11 +13,12 @@ import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 import { TickerBannerComponent } from '../../../shared/ticker-banner/ticker-banner.component';
 import { FrontToastComponent } from '../../../shared/components/front-toast/front-toast.component';
 import { VisitorTrackingService } from '../../../core/services/visitor-tracking.service';
+import { WidgetsCarouselComponent } from '../../../shared/widgets-carousel/widgets-carousel.component';
 
 @Component({
     selector: 'app-main-layout',
     standalone: true,
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ChatWidgetComponent, CookieConsentComponent, ExternalUrlPipe, TickerBannerComponent, FrontToastComponent],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ChatWidgetComponent, CookieConsentComponent, ExternalUrlPipe, TickerBannerComponent, FrontToastComponent, WidgetsCarouselComponent],
     templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {

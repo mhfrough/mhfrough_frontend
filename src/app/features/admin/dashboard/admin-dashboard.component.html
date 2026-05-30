@@ -248,7 +248,8 @@
             <div class="admin-visitor-chart-labels">
                 <span>{{ visitorStats()!.dailySessions[0].day | date:'MMM d' }}</span>
                 <span>last 30 days</span>
-                <span>{{ visitorStats()!.dailySessions[visitorStats()!.dailySessions.length - 1].day | date:'MMM d' }}</span>
+                <span>{{ visitorStats()!.dailySessions[visitorStats()!.dailySessions.length - 1].day | date:'MMM d'
+                    }}</span>
             </div>
         </div>
         }
@@ -259,7 +260,8 @@
             @for (d of visitorStats()!.deviceDist; track d.deviceType) {
             <div class="admin-analytics-metric">
                 <div class="admin-analytics-metric-head">
-                    <span><i class="bi {{ visitorDeviceIcon(d.deviceType) }}" style="margin-right:.3rem"></i>{{ d.deviceType | titlecase }}</span>
+                    <span><i class="bi {{ visitorDeviceIcon(d.deviceType) }}" style="margin-right:.3rem"></i>{{
+                        d.deviceType | titlecase }}</span>
                     <span class="admin-analytics-pct">{{ visitorDevicePct(d.count) }}%</span>
                 </div>
                 <div class="admin-analytics-track">

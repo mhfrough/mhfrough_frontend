@@ -17,6 +17,11 @@ export interface AdminSettings {
     copyrightOwner: string;
     footerTagline: string;
     showFooterTagline: boolean;
+    // Widget API Keys
+    weatherApiKey: string | null;
+    goldApiKey: string | null;
+    currencyApiKey: string | null;
+    weatherCity: string;
     updatedAt: string;
 }
 
@@ -73,6 +78,10 @@ const DEFAULTS: AdminSettings = {
     copyrightOwner: 'mhfrough.dev',
     footerTagline: 'Made with \u2665 in Karāchi',
     showFooterTagline: true,
+    weatherApiKey: null,
+    goldApiKey: null,
+    currencyApiKey: null,
+    weatherCity: 'Karachi',
     updatedAt: '',
 };
 

@@ -1,24 +1,109 @@
-<div class="weather-widget" title="Weather - {{ location }}">
-    <div class="weather-icon" [ngClass]="conditionKey" aria-hidden="true" [attr.aria-label]="displayLabel">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true" role="img">
-            <title>{{ displayLabel }}</title>
-            <circle cx="12" cy="12" r="4" fill="#FFB703" />
-            <g stroke="#FFB703" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="1.8" x2="12" y2="4.2" />
-                <line x1="12" y1="19.8" x2="12" y2="22" />
-                <line x1="1.8" y1="12" x2="4.2" y2="12" />
-                <line x1="19.8" y1="12" x2="22" y2="12" />
-                <line x1="4.6" y1="4.6" x2="6.3" y2="6.3" />
-                <line x1="17.7" y1="17.7" x2="19.4" y2="19.4" />
-                <line x1="4.6" y1="19.4" x2="6.3" y2="17.7" />
-                <line x1="17.7" y1="6.3" x2="19.4" y2="4.6" />
-            </g>
-        </svg>
-    </div>
-    <div class="weather-text">
-        <span class="weather-temp">{{ temperature }}</span>
-        <span class="weather-cond">{{ displayLabel }}</span>
-    </div>
+<div class="weather-widget" [attr.title]="'Weather · ' + location">
 
-    
+  <!-- ── Icon ─────────────────────────────────────────────── -->
+  <div class="weather-icon" [class]="'weather-icon--' + conditionKey" aria-hidden="true">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false" role="img">
+      <title>{{ displayLabel }}</title>
+
+      @switch (conditionKey) {
+
+        @case ('sunny') {
+          <circle cx="12" cy="12" r="4" fill="#FFB703"/>
+          <g stroke="#FFB703" stroke-width="1.3" stroke-linecap="round">
+            <line x1="12" y1="2"  x2="12" y2="4.4"/>
+            <line x1="12" y1="19.6" x2="12" y2="22"/>
+            <line x1="2"  y1="12" x2="4.4" y2="12"/>
+            <line x1="19.6" y1="12" x2="22" y2="12"/>
+            <line x1="4.93" y1="4.93" x2="6.64" y2="6.64"/>
+            <line x1="17.36" y1="17.36" x2="19.07" y2="19.07"/>
+            <line x1="4.93" y1="19.07" x2="6.64" y2="17.36"/>
+            <line x1="17.36" y1="6.64"  x2="19.07" y2="4.93"/>
+          </g>
+        }
+
+        @case ('partly-cloudy') {
+          <circle cx="9" cy="10" r="3.2" fill="#FFB703" opacity="0.9"/>
+          <g stroke="#FFB703" stroke-width="1.1" stroke-linecap="round" opacity="0.9">
+            <line x1="9" y1="4.5"  x2="9" y2="6.2"/>
+            <line x1="9" y1="13.8" x2="9" y2="15.5"/>
+            <line x1="3.5" y1="10" x2="5.2" y2="10"/>
+            <line x1="12.8" y1="10" x2="14.5" y2="10"/>
+            <line x1="5.29" y1="6.29" x2="6.5" y2="7.5"/>
+            <line x1="11.5" y1="12.5" x2="12.71" y2="13.71"/>
+            <line x1="5.29" y1="13.71" x2="6.5" y2="12.5"/>
+            <line x1="11.5" y1="7.5"  x2="12.71" y2="6.29"/>
+          </g>
+          <path d="M7 19 Q5.5 19 5.5 17.25 Q5.5 15.5 7.5 15.5 Q7.8 13.5 10 13.5 Q12.5 13.5 12.5 16 Q14 16 14 17.5 Q14 19 12.5 19 Z"
+                fill="currentColor"/>
+        }
+
+        @case ('cloudy') {
+          <path d="M5 18 Q3 18 3 16 Q3 13.5 5.5 13.5 Q5.8 11 8.5 11 Q11.5 11 12 14 Q14 14 14 16 Q14 18 12 18 Z"
+                fill="currentColor" opacity="0.55"/>
+          <path d="M8 20 Q6 20 6 18 Q6 15.5 8.5 15.5 Q8.8 13 12 13 Q15.5 13 15.5 16 Q17.5 16 17.5 18 Q17.5 20 15.5 20 Z"
+                fill="currentColor"/>
+        }
+
+        @case ('fog') {
+          <path d="M5 13 Q3.5 13 3.5 11.5 Q3.5 9.5 6 9.5 Q6.2 7.5 9 7.5 Q12 7.5 12 10.5 Q13.5 10.5 13.5 12 Q13.5 13 12 13 Z"
+                fill="currentColor" opacity="0.6"/>
+          <g stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.7">
+            <line x1="3"  y1="15.5" x2="15" y2="15.5"/>
+            <line x1="5"  y1="18"   x2="17" y2="18"/>
+            <line x1="7"  y1="20.5" x2="19" y2="20.5"/>
+          </g>
+        }
+
+        @case ('rain') {
+          <path d="M5 14 Q3.5 14 3.5 12.5 Q3.5 10 6 10 Q6.3 8 9 8 Q12 8 12 11 Q13.5 11 13.5 12.5 Q13.5 14 12 14 Z"
+                fill="currentColor"/>
+          <g stroke="#69A7FF" stroke-width="1.5" stroke-linecap="round">
+            <line x1="6"  y1="16.5" x2="5"  y2="19.5"/>
+            <line x1="9"  y1="16.5" x2="8"  y2="19.5"/>
+            <line x1="12" y1="16.5" x2="11" y2="19.5"/>
+          </g>
+        }
+
+        @case ('snow') {
+          <path d="M5 13 Q3.5 13 3.5 11.5 Q3.5 9 6 9 Q6.3 7 9 7 Q12 7 12 10 Q13.5 10 13.5 11.5 Q13.5 13 12 13 Z"
+                fill="currentColor"/>
+          <g fill="#D8E9FF">
+            <circle cx="6"   cy="16.5" r="1.1"/>
+            <circle cx="9.5" cy="18.5" r="1.1"/>
+            <circle cx="13"  cy="16.5" r="1.1"/>
+          </g>
+        }
+
+        @case ('sleet') {
+          <path d="M5 13 Q3.5 13 3.5 11.5 Q3.5 9 6 9 Q6.3 7 9 7 Q12 7 12 10 Q13.5 10 13.5 11.5 Q13.5 13 12 13 Z"
+                fill="currentColor"/>
+          <g stroke="#69A7FF" stroke-width="1.4" stroke-linecap="round">
+            <line x1="7"  y1="16" x2="6.5" y2="18.5"/>
+            <line x1="12" y1="16" x2="11.5" y2="18.5"/>
+          </g>
+          <circle cx="10" cy="18" r="1.1" fill="#D8E9FF"/>
+        }
+
+        @case ('thunderstorm') {
+          <path d="M4 13.5 Q2.5 13.5 2.5 12 Q2.5 9.5 5 9.5 Q5.3 7 8.5 7 Q12 7 12 10.5 Q14 10.5 14 12.5 Q14 13.5 12.5 13.5 Z"
+                fill="currentColor"/>
+          <path d="M9 14 L6.5 18.5 L9.5 18.5 L8 22 L12 16 L9 16 Z"
+                fill="#FFD166"/>
+        }
+
+        @default {
+          <path d="M5 17 Q3 17 3 15 Q3 12.5 5.5 12.5 Q5.8 10 9 10 Q12.5 10 12.5 13 Q14.5 13 14.5 15 Q14.5 17 12.5 17 Z"
+                fill="currentColor"/>
+        }
+
+      }
+    </svg>
+  </div>
+
+  <!-- ── Text ─────────────────────────────────────────────── -->
+  <div class="weather-text">
+    <span class="weather-temp">{{ displayTemp }}</span>
+    <span class="weather-cond">{{ displayLabel }}</span>
+  </div>
+
 </div>
