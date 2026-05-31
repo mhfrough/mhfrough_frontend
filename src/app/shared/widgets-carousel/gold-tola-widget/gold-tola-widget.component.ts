@@ -1,5 +1,5 @@
 import { Component, Input, inject } from '@angular/core';
-import { WidgetService, GoldData } from '../../core/services/widget.service';
+import { WidgetService, GoldData } from '../../../core/services/widget.service';
 
 @Component({
   selector: 'app-gold-tola-widget',

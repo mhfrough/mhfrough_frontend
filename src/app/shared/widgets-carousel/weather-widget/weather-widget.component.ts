@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, inject } from '@angular/core';
-import { WidgetService, WeatherData } from '../../core/services/widget.service';
+import { WidgetService, WeatherData } from '../../../core/services/widget.service';
 
 const CONDITION_LABELS: Record<string, string> = {
   'sunny': 'Sunny',

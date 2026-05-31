@@ -1,5 +1,5 @@
 import { Component, Input, inject } from '@angular/core';
-import { WidgetService, UsdPkrData } from '../../core/services/widget.service';
+import { WidgetService, UsdPkrData } from '../../../core/services/widget.service';
 
 @Component({
   selector: 'app-usd-pkr-widget',
