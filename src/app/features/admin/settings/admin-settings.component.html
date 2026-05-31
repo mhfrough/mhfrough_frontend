@@ -52,23 +52,23 @@
 
     <!-- Avatar row -->
     <div class="profile-avatar-row">
-        <div class="profile-avatar-wrap">
+        <div class="profile-avatar-wrap" style="width:64px;height:64px">
             @if (avatarPreview()) {
-            <img class="profile-avatar-img" [src]="avatarPreview()" alt="Avatar" loading="lazy">
+            <img class="profile-avatar-img" [src]="avatarPreview()" alt="Avatar" loading="lazy" width="64" height="64" style="width:64px;height:64px">
             } @else {
-            <div class="profile-avatar-initials">{{ profileInitials }}</div>
+            <div class="profile-avatar-initials" style="width:64px;height:64px">{{ profileInitials }}</div>
             }
             @if (avatarUploading()) {
             <div class="profile-avatar-overlay"><span class="contact-spinner"></span></div>
             }
         </div>
         <div class="profile-avatar-actions">
-            <label class="btn-ghost profile-avatar-btn" style="cursor:pointer">
+            <label class="btn-ghost profile-avatar-btn" style="cursor:pointer;width:max-content;">
                 <i class="bi bi-upload"></i> Upload photo
                 <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onAvatarSelect($event)"
                     style="display:none">
             </label>
-            <p class="form-hint">JPG, PNG or WebP · max 5 MB · Recommended 400×400 px</p>
+            <p class="form-hint mb-0">JPG, PNG or WebP · max 5 MB · Recommended 400×400 px</p>
         </div>
     </div>
 

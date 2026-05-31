@@ -137,6 +137,7 @@ export class TickerBannerComponent implements OnInit, OnDestroy {
     private readonly platformId = inject(PLATFORM_ID);
     private readonly realtime = inject(RealtimeService);
     private subs = new Subscription();
+    private showTimer: ReturnType<typeof setTimeout> | null = null;
 
     readonly tickers = signal<TickerMessage[]>([]);
     readonly visible = signal(false);
@@ -152,28 +153,23 @@ export class TickerBannerComponent implements OnInit, OnDestroy {
     ngOnInit() {
         if (!isPlatformBrowser(this.platformId)) return;
         if (sessionStorage.getItem(SESSION_KEY)) return;
+        // Show after 10s (same delay as cookie consent) regardless of cookie consent
+        this.showTimer = setTimeout(() => {
+            if (sessionStorage.getItem(SESSION_KEY)) return;
+            this.loadPublished();
+        }, 10000);
 
-        this.tickerService.getPublished().subscribe({
-            next: (items) => {
-                if (items.length > 0) {
-                    this.tickers.set(items);
-                    this.visible.set(true);
-                }
-            },
-            error: () => { /* non-critical — silently ignore */ },
-        });
-
-        // Realtime: reflect ticker changes instantly
+        // Realtime: reflect ticker changes instantly and auto-show (unless dismissed)
         this.subs.add(this.realtime.on<TickerMessage>('ticker:created').subscribe(msg => {
             this.tickers.update(list => [msg, ...list]);
-            this.visible.set(true);
+            if (!sessionStorage.getItem(SESSION_KEY)) this.visible.set(true);
         }));
         this.subs.add(this.realtime.on<TickerMessage>('ticker:updated').subscribe(msg => {
             this.tickers.update(list => {
                 const idx = list.findIndex(t => t.id === msg.id);
                 return idx >= 0 ? list.map(t => t.id === msg.id ? msg : t) : [msg, ...list];
             });
-            if (this.tickers().length > 0) this.visible.set(true);
+            if (this.tickers().length > 0 && !sessionStorage.getItem(SESSION_KEY)) this.visible.set(true);
         }));
         this.subs.add(this.realtime.on<{ id: string }>('ticker:deleted').subscribe(({ id }) => {
             this.tickers.update(list => list.filter(t => t.id !== id));
@@ -183,6 +179,7 @@ export class TickerBannerComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.subs.unsubscribe();
+        if (this.showTimer !== null) clearTimeout(this.showTimer);
     }
 
     dismiss() {
@@ -190,5 +187,17 @@ export class TickerBannerComponent implements OnInit, OnDestroy {
         if (isPlatformBrowser(this.platformId)) {
             sessionStorage.setItem(SESSION_KEY, '1');
         }
+    }
+
+    private loadPublished() {
+        this.tickerService.getPublished().subscribe({
+            next: (items) => {
+                if (items.length > 0) {
+                    this.tickers.set(items);
+                    this.visible.set(true);
+                }
+            },
+            error: () => { /* non-critical — silently ignore */ },
+        });
     }
 }
