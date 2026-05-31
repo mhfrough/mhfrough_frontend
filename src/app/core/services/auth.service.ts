@@ -11,13 +11,30 @@ export class AuthService {
     private readonly router = inject(Router);
     private readonly platformId = inject(PLATFORM_ID);
     private readonly _loggedIn = signal<boolean>(this.checkCookie());
+    /** Signal representing explicit admin widget visibility. */
+    readonly adminWidgetVisible = signal<boolean>(this.checkAdminWidgetVisible());
+
+    constructor() {
+        if (isPlatformBrowser(this.platformId)) {
+            window.addEventListener('storage', (ev: StorageEvent) => {
+                // Update the signal when the admin widget key changes in another tab
+                if (ev.key === 'admin_widget_visible' || ev.key === null) {
+                    this.adminWidgetVisible.set(this.checkAdminWidgetVisible());
+                }
+            });
+        }
+    }
 
     private checkCookie(): boolean {
         if (!isPlatformBrowser(this.platformId)) return false;
         try {
             const cookie = typeof document !== 'undefined' ? document.cookie : '';
-            return cookie.includes('access_token') ||
-                cookie.includes('admin_rm') ||
+            // Only consider admin-specific markers here. `access_token` is
+            // used for regular site auth and can cause non-admin users to be
+            // treated as signed-in for the admin UI. Use admin cookies/flags
+            // instead: `admin_rm`, sessionStorage `admin_session`, or
+            // localStorage `admin_remember_me`.
+            return cookie.includes('admin_rm') ||
                 !!sessionStorage.getItem('admin_session') ||
                 localStorage.getItem('admin_remember_me') === '1';
         } catch (e) {
@@ -33,6 +50,18 @@ export class AuthService {
         return localStorage.getItem('admin_remember_me') === '1';
     }
 
+    /** Explicit admin flag for UI (widgets) visibility. */
+    private checkAdminWidgetVisible(): boolean {
+        if (!isPlatformBrowser(this.platformId)) return false;
+        return sessionStorage.getItem('admin_widget_visible') === '1' ||
+            localStorage.getItem('admin_widget_visible') === '1';
+    }
+
+    // Backwards-compatible accessor (returns current value)
+    isAdminSignedIn(): boolean {
+        return this.adminWidgetVisible();
+    }
+
     login(email: string, password: string, rememberMe = false) {
         return this.http.post(`${environment.apiUrl}/auth/login`, { email, password, rememberMe }).pipe(
             tap(() => {
@@ -42,6 +71,14 @@ export class AuthService {
                     localStorage.removeItem('admin_remember_me');
                 }
                 sessionStorage.setItem('admin_session', '1');
+                // Mark widget-visible flag so UI can rely on an explicit key.
+                if (rememberMe) {
+                    localStorage.setItem('admin_widget_visible', '1');
+                } else {
+                    sessionStorage.setItem('admin_widget_visible', '1');
+                }
+                // Update signal so UI reacts immediately in this tab
+                this.adminWidgetVisible.set(true);
                 this._loggedIn.set(true);
             }),
         );
@@ -51,7 +88,11 @@ export class AuthService {
         return this.http.post(`${environment.apiUrl}/auth/logout`, {}).pipe(
             tap(() => {
                 sessionStorage.removeItem('admin_session');
+                sessionStorage.removeItem('admin_widget_visible');
+                localStorage.removeItem('admin_widget_visible');
                 localStorage.removeItem('admin_remember_me');
+                // Update signal so UI reacts immediately in this tab
+                this.adminWidgetVisible.set(false);
                 this._loggedIn.set(false);
                 this.router.navigate(['/admin/login']);
             }),
@@ -60,7 +101,11 @@ export class AuthService {
 
     forceLogout() {
         sessionStorage.removeItem('admin_session');
+        sessionStorage.removeItem('admin_widget_visible');
+        localStorage.removeItem('admin_widget_visible');
         localStorage.removeItem('admin_remember_me');
+        // Update signal so UI reacts immediately in this tab
+        this.adminWidgetVisible.set(false);
         this._loggedIn.set(false);
         this.router.navigate(['/admin/login']);
     }

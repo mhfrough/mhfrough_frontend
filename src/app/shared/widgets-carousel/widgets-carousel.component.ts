@@ -58,7 +58,7 @@ export class WidgetsCarouselComponent implements OnInit, OnDestroy {
   readonly active = signal(0);
   readonly fading = signal(false);
 
-  get isAdmin(): boolean { return this.authService.isLoggedIn(); }
+  get isAdmin(): boolean { return this.authService.adminWidgetVisible(); }
 
   private timer: ReturnType<typeof setInterval> | null = null;
   private visibleTimer: ReturnType<typeof setTimeout> | null = null;
