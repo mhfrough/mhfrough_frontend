@@ -5,27 +5,28 @@
         <svg class="cookie-consent__icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
                 <mask id="cc-bite">
-                    <rect width="32" height="32" fill="white"/>
-                    <circle cx="26" cy="6"  r="8" fill="black"/>
+                    <rect width="32" height="32" fill="white" />
+                    <circle cx="26" cy="6" r="8" fill="black" />
                 </mask>
             </defs>
             <!-- Cookie body -->
-            <circle cx="15" cy="17" r="13" fill="currentColor" opacity="0.12" mask="url(#cc-bite)"/>
-            <circle cx="15" cy="17" r="13" fill="none" stroke="currentColor" stroke-width="1.4" mask="url(#cc-bite)"/>
+            <circle cx="15" cy="17" r="13" fill="currentColor" opacity="0.12" mask="url(#cc-bite)" />
+            <circle cx="15" cy="17" r="13" fill="none" stroke="currentColor" stroke-width="1.4" mask="url(#cc-bite)" />
             <!-- Chips -->
-            <circle cx="11" cy="13" r="1.6" fill="currentColor" mask="url(#cc-bite)"/>
-            <circle cx="18" cy="12" r="1.4" fill="currentColor" mask="url(#cc-bite)"/>
-            <circle cx="10" cy="20" r="1.5" fill="currentColor" mask="url(#cc-bite)"/>
-            <circle cx="18" cy="20" r="1.6" fill="currentColor" mask="url(#cc-bite)"/>
-            <circle cx="14" cy="24" r="1.3" fill="currentColor" mask="url(#cc-bite)"/>
+            <circle cx="11" cy="13" r="1.6" fill="currentColor" mask="url(#cc-bite)" />
+            <circle cx="18" cy="12" r="1.4" fill="currentColor" mask="url(#cc-bite)" />
+            <circle cx="10" cy="20" r="1.5" fill="currentColor" mask="url(#cc-bite)" />
+            <circle cx="18" cy="20" r="1.6" fill="currentColor" mask="url(#cc-bite)" />
+            <circle cx="14" cy="24" r="1.3" fill="currentColor" mask="url(#cc-bite)" />
             <!-- Crumbs near bite -->
-            <circle cx="21" cy="8"  r="0.9" fill="currentColor" opacity="0.6"/>
-            <circle cx="25" cy="13" r="0.7" fill="currentColor" opacity="0.6"/>
+            <circle cx="21" cy="8" r="0.9" fill="currentColor" opacity="0.6" />
+            <circle cx="25" cy="13" r="0.7" fill="currentColor" opacity="0.6" />
         </svg>
 
         <p class="cookie-consent__text">
             This site uses cookies &amp; local storage to improve your experience and enable push notifications.
-            <a href="/privacy" class="cookie-consent__link">Privacy policy</a> &middot; <a href="/terms" class="cookie-consent__link">Terms</a>
+            <a href="/privacy" class="cookie-consent__link">Privacy policy</a> &middot; <a href="/terms"
+                class="cookie-consent__link">Terms</a>
         </p>
         <div class="cookie-consent__actions">
             <button class="cookie-consent__btn cookie-consent__btn--decline" (click)="decline()">Decline</button>
