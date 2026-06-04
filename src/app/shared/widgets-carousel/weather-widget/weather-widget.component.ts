@@ -1,14 +1,14 @@
 import { Component, Input, OnChanges, inject } from '@angular/core';
 import { WidgetService, WeatherData } from '../../../core/services/widget.service';
 
-const CONDITION_LABELS: Record<string, string> = {
+export type WeatherIcon = 'sunny' | 'cloudy' | 'fog' | 'rain' | 'snow' | 'thunderstorm';
+
+const CONDITION_LABELS: Record<WeatherIcon, string> = {
   'sunny': 'Sunny',
-  'partly-cloudy': 'Partly Cloudy',
   'cloudy': 'Cloudy',
   'fog': 'Fog',
   'rain': 'Rain',
   'snow': 'Snow',
-  'sleet': 'Sleet',
   'thunderstorm': 'Thunderstorm',
 };
 
@@ -39,7 +39,7 @@ export class WeatherWidgetComponent implements OnChanges {
   }
 
   get displayLabel(): string {
-    return CONDITION_LABELS[this.conditionKey] ?? this.data?.conditionText ?? 'Weather';
+    return CONDITION_LABELS[this.conditionKey as WeatherIcon] ?? this.data?.conditionText ?? 'Weather';
   }
 
   get location(): string {

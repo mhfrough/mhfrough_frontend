@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 
 export interface WeatherData {
     temp: number;
-    condition: string;       // 'sunny' | 'partly-cloudy' | 'cloudy' | 'fog' | 'rain' | 'snow' | 'sleet' | 'thunderstorm'
+    condition: string;       // 'sunny' | 'cloudy' | 'fog' | 'rain' | 'snow' | 'thunderstorm'
     conditionText: string;
     location: string;
     humidity: number;
