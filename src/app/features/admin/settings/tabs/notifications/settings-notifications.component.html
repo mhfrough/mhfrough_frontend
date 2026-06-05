@@ -1,0 +1,68 @@
+<!-- Browser Subscription Status -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-megaphone"></i> Push Notifications</h2>
+            <p class="settings-card-sub">Send a push notification to all subscribed browsers.</p>
+        </div>
+        @switch (fcm.permissionState) {
+        @case ('granted') {
+        <span class="admin-badge admin-badge--on" style="white-space:nowrap"><i class="bi bi-check-circle"></i> This browser subscribed</span>
+        }
+        @case ('denied') {
+        <span class="admin-badge admin-badge--danger" style="white-space:nowrap"><i class="bi bi-x-circle"></i> Blocked in browser</span>
+        }
+        @default {
+        <button class="btn-primary" (click)="requestPushPermission()">
+            <i class="bi bi-bell"></i> Enable Notifications
+        </button>
+        }
+        }
+    </div>
+</div>
+
+<!-- Compose -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-send"></i> Compose Message</h2>
+            <p class="settings-card-sub">Fill in the fields below and broadcast to all subscribers.</p>
+        </div>
+    </div>
+
+    @if (pushSuccess()) {
+    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle"></i> {{ pushSuccess() }}</div>
+    }
+    @if (pushError()) {
+    <div class="admin-alert admin-alert--error"><i class="bi bi-exclamation-triangle"></i> {{ pushError() }}</div>
+    }
+
+    <form #pushForm="ngForm" (ngSubmit)="sendPush(pushForm)" novalidate>
+        <div class="settings-form">
+            <div class="admin-form-field">
+                <label class="admin-form-label label-required">Title</label>
+                <input class="admin-form-input" type="text" [(ngModel)]="pushTitle" name="pushTitle"
+                    placeholder="e.g. New blog post published!" maxlength="100" required
+                    [class.is-invalid]="(pushForm.submitted || pushForm.controls['pushTitle']?.touched) && pushForm.controls['pushTitle']?.invalid" />
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label label-required">Body</label>
+                <textarea class="admin-form-textarea" rows="3" [(ngModel)]="pushBody" name="pushBody"
+                    placeholder="Notification message text…" maxlength="300" required
+                    [class.is-invalid]="(pushForm.submitted || pushForm.controls['pushBody']?.touched) && pushForm.controls['pushBody']?.invalid"></textarea>
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label label-optional">Click URL <span class="admin-form-hint">(optional)</span></label>
+                <input class="admin-form-input" type="url" [(ngModel)]="pushUrl" name="pushUrl"
+                    placeholder="https://mhfrough.dev/blog" />
+                <span class="form-hint">Leave blank to open the home page on click.</span>
+            </div>
+            <div class="settings-actions">
+                <button type="submit" class="btn-primary" [disabled]="pushing()">
+                    @if (pushing()) { <span class="contact-spinner"></span> Sending… }
+                    @else { <i class="bi bi-send"></i> Send to All Subscribers }
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

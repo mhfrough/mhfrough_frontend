@@ -22,6 +22,13 @@ export interface AdminSettings {
     goldApiKey: string | null;
     currencyApiKey: string | null;
     weatherCity: string;
+    // AI Chat Auto-Reply
+    geminiApiKey: string | null;
+    aiEnabled: boolean;
+    aiTone: string;
+    aiInstruction: string | null;
+    aiAutoReplyDelay: number;
+    aiMaxResponseLength: number;
     updatedAt: string;
 }
 
@@ -82,6 +89,12 @@ const DEFAULTS: AdminSettings = {
     goldApiKey: null,
     currencyApiKey: null,
     weatherCity: 'Karachi',
+    geminiApiKey: null,
+    aiEnabled: false,
+    aiTone: 'professional',
+    aiInstruction: null,
+    aiAutoReplyDelay: 1500,
+    aiMaxResponseLength: 300,
     updatedAt: '',
 };
 

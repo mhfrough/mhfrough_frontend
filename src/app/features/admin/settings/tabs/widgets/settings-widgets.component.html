@@ -1,0 +1,76 @@
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-puzzle"></i> Live Widget API Keys</h2>
+            <p class="settings-card-sub">
+                API keys for the live data widgets (weather, gold price, USD/PKR rate) shown in the site
+                nav when admin is logged in.
+            </p>
+        </div>
+    </div>
+
+    @if (widgetsSaved()) {
+    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> Widget keys saved successfully.</div>
+    }
+    @if (widgetsError()) {
+    <div class="admin-alert admin-alert--error">{{ widgetsError() }}</div>
+    }
+
+    <h3 class="settings-section-label" style="margin-top:1rem">
+        <i class="bi bi-cloud-sun-fill"></i> WeatherAPI.com
+    </h3>
+    <div class="admin-form-grid">
+        <div class="admin-form-field">
+            <label class="admin-form-label">API Key</label>
+            <input type="password" class="admin-form-input" [(ngModel)]="widgetWeatherKey" autocomplete="new-password"
+                placeholder="{{ settings.weatherApiKey ? 'Key configured — paste to replace' : 'Paste API key…' }}">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">City / Location</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="widgetCity" placeholder="Karachi" maxlength="100">
+        </div>
+    </div>
+
+    <h3 class="settings-section-label" style="margin-top:1.5rem">
+        <i class="bi bi-currency-exchange"></i> GoldAPI.io (Gold)
+    </h3>
+    <div class="admin-form-field" style="max-width:440px">
+        <label class="admin-form-label">API Key</label>
+        <input type="password" class="admin-form-input" [(ngModel)]="widgetGoldKey" autocomplete="new-password"
+            placeholder="{{ settings.goldApiKey ? 'Key configured — paste to replace' : 'Paste API key…' }}">
+    </div>
+
+    <h3 class="settings-section-label" style="margin-top:1.5rem">
+        <i class="bi bi-currency-dollar"></i> ExchangeRate-API.com (USD/PKR)
+    </h3>
+    <div class="admin-form-field" style="max-width:440px">
+        <label class="admin-form-label">API Key</label>
+        <input type="password" class="admin-form-input" [(ngModel)]="widgetCurrencyKey" autocomplete="new-password"
+            placeholder="{{ settings.currencyApiKey ? 'Key configured — paste to replace' : 'Paste API key…' }}">
+    </div>
+
+    <div class="widget-key-status" style="margin-top:1.25rem;display:flex;gap:0.75rem;flex-wrap:wrap">
+        <span class="admin-badge" [style.color]="settings.weatherApiKey ? '#4ade80' : 'var(--text-muted)'"
+            [style.border-color]="settings.weatherApiKey ? 'rgba(74,222,128,0.3)' : 'var(--border)'">
+            <i class="bi" [class.bi-check-circle-fill]="settings.weatherApiKey" [class.bi-exclamation-circle]="!settings.weatherApiKey"></i>
+            &nbsp;Weather: {{ settings.weatherApiKey ? 'Configured' : 'Not set' }}
+        </span>
+        <span class="admin-badge" [style.color]="settings.goldApiKey ? '#4ade80' : 'var(--text-muted)'"
+            [style.border-color]="settings.goldApiKey ? 'rgba(74,222,128,0.3)' : 'var(--border)'">
+            <i class="bi" [class.bi-check-circle-fill]="settings.goldApiKey" [class.bi-exclamation-circle]="!settings.goldApiKey"></i>
+            &nbsp;Gold: {{ settings.goldApiKey ? 'Configured' : 'Not set' }}
+        </span>
+        <span class="admin-badge" [style.color]="settings.currencyApiKey ? '#4ade80' : 'var(--text-muted)'"
+            [style.border-color]="settings.currencyApiKey ? 'rgba(74,222,128,0.3)' : 'var(--border)'">
+            <i class="bi" [class.bi-check-circle-fill]="settings.currencyApiKey" [class.bi-exclamation-circle]="!settings.currencyApiKey"></i>
+            &nbsp;Currency: {{ settings.currencyApiKey ? 'Configured' : 'Not set' }}
+        </span>
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1.5rem">
+        <button class="btn-primary" (click)="saveWidgetKeys()" [disabled]="widgetsSaving()">
+            @if (widgetsSaving()) { <span class="contact-spinner"></span> Saving… }
+            @else { <i class="bi bi-check-lg"></i> Save Keys }
+        </button>
+    </div>
+</div>

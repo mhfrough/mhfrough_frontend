@@ -1,0 +1,172 @@
+<!-- ── Avatar + Identity ──────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-person-badge"></i> Identity &amp; About</h2>
+            <p class="settings-card-sub">Your public profile — display name, avatar and about section content.</p>
+        </div>
+    </div>
+
+    @if (profileSaved() === 'identity') {
+    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> Profile saved successfully.</div>
+    }
+    @if (profileError()?.section === 'identity') {
+    <div class="admin-alert admin-alert--error">{{ profileError()!.msg }}</div>
+    }
+
+    <div class="profile-avatar-row">
+        <div class="profile-avatar-wrap" style="width:64px;height:64px">
+            @if (avatarPreview()) {
+            <img class="profile-avatar-img" [src]="avatarPreview()" alt="Avatar" loading="lazy" width="64" height="64" style="width:64px;height:64px">
+            } @else {
+            <div class="profile-avatar-initials" style="width:64px;height:64px">{{ profileInitials }}</div>
+            }
+            @if (avatarUploading()) {
+            <div class="profile-avatar-overlay"><span class="contact-spinner"></span></div>
+            }
+        </div>
+        <div class="profile-avatar-actions">
+            <label class="btn-ghost profile-avatar-btn" style="cursor:pointer;width:max-content;">
+                <i class="bi bi-upload"></i> Upload photo
+                <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onAvatarSelect($event)" style="display:none">
+            </label>
+            <p class="form-hint mb-0">JPG, PNG or WebP · max 5 MB · Recommended 400×400 px</p>
+        </div>
+    </div>
+
+    <div class="admin-form-grid">
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Display name</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="profileDisplayName" placeholder="e.g. Mohammad Hamza" maxlength="80">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Timezone</label>
+            <select class="admin-form-input admin-form-select" [(ngModel)]="profileTimezone">
+                @for (tz of TIMEZONES; track tz) {
+                <option [value]="tz">{{ tz }}</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="admin-form-field" style="margin-top:1rem">
+        <label class="admin-form-label label-optional">About HTML</label>
+        <p class="form-hint" style="margin-bottom:0.4rem">This content appears in the About section on the home page. Supports rich text formatting.</p>
+        <app-rte-toolbar [el]="aboutEl ?? null" mode="full"></app-rte-toolbar>
+        <textarea #aboutEl class="admin-form-textarea admin-rte-textarea" [(ngModel)]="profileAboutHtml"
+            placeholder="<p>Write your about section content here…</p>" rows="12"></textarea>
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1.25rem">
+        <button class="btn-primary" (click)="saveProfile('identity')" [disabled]="profileSaving() === 'identity'">
+            @if (profileSaving() === 'identity') { <span class="contact-spinner"></span> Saving… } @else { <i class="bi bi-check-lg"></i> Save Profile }
+        </button>
+    </div>
+</div>
+
+<!-- ── Contact & Links ────────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-link-45deg"></i> Contact &amp; Social Links</h2>
+            <p class="settings-card-sub">Control which fields appear in the footer icon row and the Contact page info block.</p>
+        </div>
+        <div class="social-vis-legend">
+            <span>Footer</span>
+            <span>Contact</span>
+        </div>
+    </div>
+
+    <div class="social-links-list">
+        @for (field of SOCIAL_FIELDS; track field.key) {
+        <div class="social-link-row">
+            <span class="social-link-label"><i class="bi {{ field.icon }}"></i> {{ field.label }}</span>
+            <input [type]="field.type ?? 'text'" class="admin-form-input social-link-input"
+                [(ngModel)]="profileLinks[field.key]" [placeholder]="field.placeholder" maxlength="200"
+                [name]="'link-' + field.key">
+            <div class="social-vis-pills">
+                @if (field.hasFooter) {
+                <div class="admin-form-check checkbox-field">
+                    <input type="checkbox" [id]="'vis-footer-' + field.key"
+                        [checked]="getSocialVis(field.key, 'footer')"
+                        (change)="setSocialVis(field.key, 'footer', $any($event.target).checked)">
+                    <label [for]="'vis-footer-' + field.key">Footer</label>
+                </div>
+                } @else {
+                <span class="social-vis-pill-gap"></span>
+                }
+                <div class="admin-form-check checkbox-field">
+                    <input type="checkbox" [id]="'vis-contact-' + field.key"
+                        [checked]="getSocialVis(field.key, 'contact')"
+                        (change)="setSocialVis(field.key, 'contact', $any($event.target).checked)">
+                    <label [for]="'vis-contact-' + field.key">Contact</label>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1.25rem">
+        <button class="btn-primary" (click)="saveProfile('links')" [disabled]="profileSaving() === 'links'">
+            @if (profileSaving() === 'links') { <span class="contact-spinner"></span> Saving… } @else { <i class="bi bi-check-lg"></i> Save Links }
+        </button>
+        @if (profileSaved() === 'links') { <span class="settings-saved-msg"><i class="bi bi-check-circle-fill"></i> Saved!</span> }
+        @if (profileError()?.section === 'links') { <span class="settings-error-msg">{{ profileError()!.msg }}</span> }
+    </div>
+</div>
+
+<!-- ── Footer Branding ────────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-layout-text-window-reverse"></i> Footer Branding</h2>
+            <p class="settings-card-sub">Controls the copyright and tagline shown in the site footer.</p>
+        </div>
+    </div>
+
+    @if (footerSaved()) {
+    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> Footer settings saved. Changes are live on the site.</div>
+    }
+    @if (footerError()) {
+    <div class="admin-alert admin-alert--error">{{ footerError() }}</div>
+    }
+
+    <div class="footer-preview">
+        <span class="footer-preview-label">Preview</span>
+        <div class="footer-preview-bar">
+            <span>© {{ year }} {{ footerCopyrightOwner || 'mhfrough.dev' }}</span>
+            @if (footerShowTagline && footerTagline) {
+            <span> &nbsp;·&nbsp; {{ footerTagline }}</span>
+            }
+        </div>
+    </div>
+
+    <div class="admin-form-grid">
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Copyright owner</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="footerCopyrightOwner" placeholder="mhfrough.dev" maxlength="120">
+            <p class="form-hint">Appears as: © {{ year }} {{ footerCopyrightOwner || 'mhfrough.dev' }}</p>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Tagline</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="footerTagline" placeholder="Made with ♥ in Karāchi" maxlength="200">
+        </div>
+    </div>
+
+    <div class="settings-toggle-row" style="margin-top:0.75rem">
+        <div>
+            <span class="settings-toggle-title">Show tagline in footer</span>
+            <span class="settings-toggle-sub">Display the tagline next to the copyright notice.</span>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="footerShowTagline">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1.25rem">
+        <button class="btn-primary" (click)="saveFooterBranding()" [disabled]="footerLoading()">
+            @if (footerLoading()) { <span class="contact-spinner"></span> Saving… } @else { <i class="bi bi-check-lg"></i> Save Footer }
+        </button>
+    </div>
+</div>

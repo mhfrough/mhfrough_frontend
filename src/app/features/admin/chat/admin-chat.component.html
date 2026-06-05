@@ -198,7 +198,12 @@
                 } @else {
                 <span class="ac-msg-bubble">{{ msg.content }}</span>
                 }
-                <span class="ac-msg-time">{{ msg.createdAt | date:'HH:mm' }}</span>
+                <span class="ac-msg-time">
+                    {{ msg.createdAt | date:'HH:mm' }}
+                    @if (msg.isBot) {
+                    <span class="ac-bot-badge"><i class="bi bi-stars"></i> AI</span>
+                    }
+                </span>
             </div>
             }
 
