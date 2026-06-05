@@ -127,13 +127,6 @@
         </div>
     </div>
 
-    @if (settingsSaved()) {
-    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> Settings saved successfully.</div>
-    }
-    @if (settingsError()) {
-    <div class="admin-alert admin-alert--error">{{ settingsError() }}</div>
-    }
-
     <div class="settings-form">
         <div class="settings-section-label">Inactivity Logout</div>
 
@@ -213,6 +206,8 @@
             <button class="btn-primary" (click)="saveSecuritySettings()" [disabled]="settingsLoading()">
                 @if (settingsLoading()) { <span class="contact-spinner"></span> Saving… } @else { <i class="bi bi-check-lg"></i> Save Settings }
             </button>
+            @if (settingsSaved()) { <span class="settings-saved-msg"><i class="bi bi-check-circle-fill"></i> Saved!</span> }
+            @if (settingsError()) { <span class="settings-error-msg">{{ settingsError() }}</span> }
         </div>
     </div>
 </div>
@@ -225,13 +220,6 @@
             <p class="settings-card-sub">Update your admin password. All sessions will be signed out after the change.</p>
         </div>
     </div>
-
-    @if (pwSuccess()) {
-    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> {{ pwSuccess() }}</div>
-    }
-    @if (pwError()) {
-    <div class="admin-alert admin-alert--error">{{ pwError() }}</div>
-    }
 
     <div class="settings-form settings-form--pw">
         <div class="admin-form-field">
@@ -268,6 +256,8 @@
             <button class="btn-primary" (click)="changePassword()" [disabled]="pwLoading()">
                 @if (pwLoading()) { <span class="contact-spinner"></span> Updating… } @else { <i class="bi bi-shield-check"></i> Update Password }
             </button>
+            @if (pwSuccess()) { <span class="settings-saved-msg"><i class="bi bi-check-circle-fill"></i> {{ pwSuccess() }}</span> }
+            @if (pwError()) { <span class="settings-error-msg">{{ pwError() }}</span> }
         </div>
     </div>
 </div>
@@ -444,13 +434,6 @@
         </div>
     </div>
 
-    @if (aiSaved()) {
-    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> AI settings saved successfully.</div>
-    }
-    @if (aiError()) {
-    <div class="admin-alert admin-alert--error">{{ aiError() }}</div>
-    }
-
     <!-- Enable toggle -->
     <div class="settings-toggle-row">
         <div>
@@ -509,13 +492,11 @@
     </div>
 
     <div class="admin-form-actions" style="margin-top:1.25rem">
-        @if (aiSaved()) {
-        <span class="admin-form-saved"><i class="bi bi-check-circle-fill"></i> Saved</span>
-        }
         <button class="btn-primary" (click)="saveAiSettings()" [disabled]="aiSaving()">
-            @if (aiSaving()) { <span class="contact-spinner"></span> } @else { <i class="bi bi-stars"></i> }
-            Save AI Settings
+            @if (aiSaving()) { <span class="contact-spinner"></span> Saving… } @else { <i class="bi bi-stars"></i> Save AI Settings }
         </button>
+        @if (aiSaved()) { <span class="settings-saved-msg"><i class="bi bi-check-circle-fill"></i> Saved!</span> }
+        @if (aiError()) { <span class="settings-error-msg">{{ aiError() }}</span> }
     </div>
 </div>
 
