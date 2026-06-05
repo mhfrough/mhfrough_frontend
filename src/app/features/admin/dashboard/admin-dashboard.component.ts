@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, AfterViewChecked, ViewChild, ElementRef, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, effect, ViewChild, ElementRef, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -16,7 +16,7 @@ import { VisitorAnalyticsService, VisitorStats } from '../../../core/services/vi
     imports: [CommonModule, RouterLink],
     templateUrl: './admin-dashboard.component.html',
 })
-export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
     private readonly http = inject(HttpClient);
     private readonly notif = inject(AdminNotificationService);
     private readonly feedbackService = inject(FeedbackService);
@@ -39,7 +39,20 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewChec
     readonly visitorStats = signal<VisitorStats | null>(null);
 
     private subs = new Subscription();
-    private chartDrawn = false;
+
+    constructor() {
+        effect(() => {
+            const data = this.visitorStats()?.dailySessions;
+            if (!data || data.length <= 1) return;
+            if (!isPlatformBrowser(this.platformId)) return;
+            const captured = data;
+            setTimeout(() => {
+                if (this.chartCanvas?.nativeElement) {
+                    this.renderVisitorChart(captured);
+                }
+            });
+        });
+    }
 
 
 
@@ -101,15 +114,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewChec
 
     ngOnDestroy() { this.subs.unsubscribe(); }
 
-    ngAfterViewChecked() {
-        const data = this.visitorStats()?.dailySessions;
-        if (data?.length && !this.chartDrawn && this.chartCanvas?.nativeElement && isPlatformBrowser(this.platformId)) {
-            this.chartDrawn = true;
-            const captured = data;
-            requestAnimationFrame(() => this.renderVisitorChart(captured));
-        }
-    }
-
     private renderVisitorChart(raw: { day: string; count: string }[]) {
         const canvas = this.chartCanvas.nativeElement;
         const ctx = canvas.getContext('2d');
@@ -164,7 +168,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewChec
         this.visitorService.loadStats().subscribe({
             next: (data) => {
                 this.visitorStats.set(data);
-                this.chartDrawn = false; // trigger re-draw in AfterViewChecked
             },
         });
     }

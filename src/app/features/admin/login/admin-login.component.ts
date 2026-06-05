@@ -2,9 +2,11 @@ import { Component, OnInit, inject, signal, HostBinding, OnDestroy } from '@angu
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { Title } from '@angular/platform-browser';
 import { SoundService } from '../../../core/services/sound.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
 
 @Component({
     selector: 'app-admin-login',
@@ -18,21 +20,33 @@ export class AdminLoginComponent implements OnInit, OnDestroy {
     private router = inject(Router);
     private sound = inject(SoundService);
     private titleService = inject(Title);
+    private realtime = inject(RealtimeService);
     readonly loading = signal(false);
     readonly error = signal('');
     readonly warning = signal('');
     readonly lockInfo = signal<{ lockedUntil: Date; remainingSeconds: number } | null>(null);
+    readonly unlocked = signal(false);
     readonly showPassword = signal(false);
     readonly rememberMe = signal(false);
 
     private lockTimer: ReturnType<typeof setInterval> | null = null;
+    private realtimeSub?: Subscription;
 
     ngOnDestroy(): void {
         this.clearTimer();
+        this.realtimeSub?.unsubscribe();
     }
 
     ngOnInit(): void {
         this.titleService.setTitle('Admin Login | Mohammad Hamza');
+        this.realtime.connect().then(() => {
+            this.realtimeSub = this.realtime.on<unknown>('account_unlocked').subscribe(() => {
+                this.lockInfo.set(null);
+                this.clearTimer();
+                this.unlocked.set(true);
+                this.sound.play('success');
+            });
+        });
     }
 
     private clearTimer(): void {

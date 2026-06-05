@@ -18,6 +18,11 @@
                 (unlocks at {{ lockInfo()!.lockedUntil | date:'shortTime' }}).
             </span>
         </div>
+        } @else if (unlocked()) {
+        <div class="admin-alert admin-alert--success">
+            <i class="bi bi-unlock-fill" style="flex-shrink:0"></i>
+            <span><strong>Account unlocked!</strong> You can now sign in.</span>
+        </div>
         } @else if (warning()) {
         <div class="admin-alert admin-alert--warning">
             <i class="bi bi-exclamation-triangle-fill" style="flex-shrink:0"></i>
