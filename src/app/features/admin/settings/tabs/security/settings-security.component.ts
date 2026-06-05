@@ -90,7 +90,6 @@ export class SettingsSecurityComponent implements OnInit, OnDestroy {
     readonly aiSaving = signal(false);
     readonly aiSaved = signal(false);
     readonly aiError = signal('');
-    readonly showGeminiKey = signal(false);
 
     aiEnabled = false;
     aiApiKey = '';

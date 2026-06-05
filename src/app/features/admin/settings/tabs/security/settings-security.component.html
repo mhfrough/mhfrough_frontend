@@ -450,14 +450,8 @@
     <div class="admin-form-field" style="margin-top:1.25rem">
         <label class="admin-form-label">Google Gemini API Key</label>
         <p class="form-hint">Get your free API key from <strong>Google AI Studio</strong> at aistudio.google.com. The key is stored securely and never exposed in full.</p>
-        <div style="position:relative">
-            <input [type]="showGeminiKey() ? 'text' : 'password'" class="admin-form-input" [(ngModel)]="aiApiKey"
-                placeholder="AIza..." autocomplete="off" style="padding-right:2.75rem">
-            <button type="button" class="btn-ghost" (click)="showGeminiKey.set(!showGeminiKey())"
-                style="position:absolute;right:.25rem;top:50%;transform:translateY(-50%);padding:.3rem .55rem;border:none;background:transparent">
-                <i class="bi" [class.bi-eye]="!showGeminiKey()" [class.bi-eye-slash]="showGeminiKey()"></i>
-            </button>
-        </div>
+        <input type="password" class="admin-form-input" [(ngModel)]="aiApiKey"
+            placeholder="AIza..." autocomplete="off">
     </div>
 
     <!-- Tone + Delay + Max Length -->
