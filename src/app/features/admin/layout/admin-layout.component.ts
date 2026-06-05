@@ -59,14 +59,16 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         this.realtime.connect().then(() => this.realtime.joinAdmin());
         // Load settings first, then start inactivity (so timeout is correct)
         this.adminSettings.load();
+        let settingsReady = false;
         const waitForSettings = setInterval(() => {
             if (this.adminSettings.loaded()) {
                 clearInterval(waitForSettings);
+                settingsReady = true;
                 this.inactivity.start();
             }
         }, 50);
-        // Fallback: start after 2s even if settings failed
-        setTimeout(() => { clearInterval(waitForSettings); if (!this.inactivity.showWarning()) this.inactivity.start(); }, 2000);
+        // Fallback: start after 2s only if settings never loaded (e.g. network error)
+        setTimeout(() => { clearInterval(waitForSettings); if (!settingsReady) this.inactivity.start(); }, 2000);
         this.subs.add(
             this.router.events.pipe(filter(e => e instanceof NavigationEnd))
                 .subscribe((e) => {

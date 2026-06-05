@@ -219,7 +219,7 @@
                     </span>
                 </td>
                 <td>
-                    <span class="admin-badge" [class.admin-badge--on]="item.isPublished">
+                    <span class="admin-badge" [class.admin-badge--on]="item.isPublished" [class.admin-badge--warn]="!item.isPublished">
                         {{ item.isPublished ? 'Published' : 'Hidden' }}
                     </span>
                 </td>

@@ -184,7 +184,7 @@
                 </td>
                 <td style="color:var(--text-muted);font-size:0.78rem">{{ p.techStack?.slice(0,3).join(', ') }}</td>
                 <td>
-                    <span class="admin-badge" [class.admin-badge--on]="p.isPublished">
+                    <span class="admin-badge" [class.admin-badge--on]="p.isPublished" [class.admin-badge--warn]="!p.isPublished">
                         {{ p.isPublished ? 'Published' : 'Draft' }}
                     </span>
                 </td>

@@ -21,6 +21,7 @@ export class InactivityService {
     private countdownInterval: ReturnType<typeof setInterval> | null = null;
     private readonly events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
     private boundReset: () => void;
+    private isRunning = false;
 
     constructor() {
         this.boundReset = () => this.reset();
@@ -28,15 +29,18 @@ export class InactivityService {
 
     start() {
         if (!isPlatformBrowser(this.platformId)) return;
+        if (this.isRunning) return;
         const settings = this.settingsService.settings();
         // Skip inactivity logout if disabled or user chose Remember Me
         if (!settings.enableInactivityLogout || this.auth.isRememberMe()) return;
+        this.isRunning = true;
         this.events.forEach(e => window.addEventListener(e, this.boundReset, { passive: true }));
         this.scheduleWarning();
     }
 
     stop() {
         if (!isPlatformBrowser(this.platformId)) return;
+        this.isRunning = false;
         this.events.forEach(e => window.removeEventListener(e, this.boundReset));
         this.clearTimers();
         this.showWarning.set(false);

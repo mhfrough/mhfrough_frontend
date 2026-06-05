@@ -42,7 +42,7 @@
                 }
             </div>
             <div class="admin-card-actions">
-                <span class="admin-badge" [class.admin-badge--warn]="inq.status === 'new'"
+                <span class="admin-badge" [class.admin-badge--danger]="inq.status === 'new'"
                     [class.admin-badge--on]="inq.status !== 'new'">
                     {{ inq.status }}
                 </span>

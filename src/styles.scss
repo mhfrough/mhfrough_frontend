@@ -32,6 +32,14 @@
 
     // Shared / admin
     --indigo: #6366f1;
+
+    // Badge semantic color tokens
+    --badge-success: #4ade80;
+    --badge-success-rgb: 74, 222, 128;
+    --badge-warn: #d97706;
+    --badge-warn-rgb: 217, 119, 6;
+    --badge-danger: #dc2626;
+    --badge-danger-rgb: 220, 38, 38;
 }
 
 // --- Scrollbar ---------------------------------------------------------------
@@ -3061,15 +3069,15 @@ button.admin-nav-link:last-child:hover {
     line-height: 1;
 
     &--danger {
-        color: #dc2626;
-        border-color: rgba(220, 38, 38, 0.5);
-        background: rgba(220, 38, 38, 0.06);
+        color: var(--badge-danger);
+        border-color: rgba(var(--badge-danger-rgb), 0.5);
+        background: rgba(var(--badge-danger-rgb), 0.06);
     }
 
     &--warn {
-        color: #d97706;
-        border-color: rgba(217, 119, 6, 0.5);
-        background: rgba(217, 119, 6, 0.06);
+        color: var(--badge-warn);
+        border-color: rgba(var(--badge-warn-rgb), 0.5);
+        background: rgba(var(--badge-warn-rgb), 0.06);
     }
 }
 
@@ -3204,13 +3212,13 @@ button.admin-nav-link:last-child:hover {
     margin-top: 0.5rem;
 
     &--danger {
-        border-color: #dc2626;
-        color: #dc2626;
+        border-color: var(--badge-danger);
+        color: var(--badge-danger);
     }
 
     &--warn {
-        border-color: #d97706;
-        color: #d97706;
+        border-color: var(--badge-warn);
+        color: var(--badge-warn);
     }
 }
 
@@ -3597,13 +3605,13 @@ button.admin-nav-link:last-child:hover {
     align-self: flex-start;
 
     &--warn {
-        border-color: #d97706;
-        color: #d97706;
+        border-color: var(--badge-warn);
+        color: var(--badge-warn);
     }
 
     &--danger {
-        border-color: #dc2626;
-        color: #dc2626;
+        border-color: var(--badge-danger);
+        color: var(--badge-danger);
     }
 }
 
@@ -3726,18 +3734,18 @@ button.admin-nav-link:last-child:hover {
     color: var(--text-muted);
 
     &--on {
-        color: var(--text);
-        border-color: var(--text);
+        color: var(--badge-success);
+        border-color: var(--badge-success);
     }
 
     &--warn {
-        color: #d97706;
-        border-color: #d97706;
+        color: var(--badge-warn);
+        border-color: var(--badge-warn);
     }
 
     &--danger {
-        color: #dc2626;
-        border-color: rgba(220, 38, 38, 0.4);
+        color: var(--badge-danger);
+        border-color: rgba(var(--badge-danger-rgb), 0.4);
     }
 }
 
@@ -6427,7 +6435,7 @@ button.admin-nav-link:last-child:hover {
     gap: 0.1rem;
     font-size: 0.7rem;
     font-weight: 500;
-    color: var(--green, #4ade80);
+    color: var(--badge-success);
     margin-top: 0.2rem;
 }
 

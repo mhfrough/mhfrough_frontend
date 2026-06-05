@@ -163,7 +163,7 @@
                 </td>
                 <td style="color:var(--text-muted);font-size:0.78rem;font-family:var(--font-mono)">{{ b.slug }}</td>
                 <td>
-                    <span class="admin-badge" [class.admin-badge--on]="b.isPublished">
+                    <span class="admin-badge" [class.admin-badge--on]="b.isPublished" [class.admin-badge--warn]="!b.isPublished">
                         {{ b.isPublished ? 'Published' : 'Draft' }}
                     </span>
                 </td>

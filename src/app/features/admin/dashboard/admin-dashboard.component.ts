@@ -222,7 +222,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             text: i.subject ?? i.message?.slice(0, 60) ?? '(no subject)',
             name: i.name,
             badge: i.status,
-            badgeMod: i.status === 'new' ? '--danger' : '',
+            badgeMod: i.status === 'new' ? '--danger' : '--on',
             time: i.createdAt,
         }));
         const feedback = this.allFeedback().map(f => ({
@@ -231,7 +231,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             text: f.review?.slice(0, 60) ?? '(no review text)',
             name: f.name,
             badge: f.isApproved ? 'approved' : 'pending',
-            badgeMod: f.isApproved ? '' : '--warn',
+            badgeMod: f.isApproved ? '--on' : '--warn',
             time: f.createdAt,
         }));
         return [...inquiries, ...feedback]
