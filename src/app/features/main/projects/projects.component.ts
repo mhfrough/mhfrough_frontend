@@ -115,7 +115,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         if (p['page']) this.currentPage.set(+p['page']);
         if (p['tag']) this.selectedTag.set(p['tag']);
 
-        this.projectsService.getTags().subscribe({ next: t => this.allTags.set(t) });
+        this.subs.add(this.projectsService.getTags().subscribe({ next: t => this.allTags.set(t) }));
         this.load();
 
         this.subs.add(this.realtime.on<any>('project:created').subscribe(() => this.load()));

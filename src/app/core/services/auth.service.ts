@@ -1,4 +1,4 @@
-import { Injectable, signal, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, signal, PLATFORM_ID, inject, DestroyRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
@@ -16,12 +16,14 @@ export class AuthService {
 
     constructor() {
         if (isPlatformBrowser(this.platformId)) {
-            window.addEventListener('storage', (ev: StorageEvent) => {
+            const handler = (ev: StorageEvent) => {
                 // Update the signal when the admin widget key changes in another tab
                 if (ev.key === 'admin_widget_visible' || ev.key === null) {
                     this.adminWidgetVisible.set(this.checkAdminWidgetVisible());
                 }
-            });
+            };
+            window.addEventListener('storage', handler);
+            inject(DestroyRef).onDestroy(() => window.removeEventListener('storage', handler));
         }
     }
 

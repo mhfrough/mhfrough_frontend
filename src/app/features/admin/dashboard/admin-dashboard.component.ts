@@ -41,6 +41,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewChec
     private subs = new Subscription();
     private chartDrawn = false;
 
+
+
     ngOnInit() {
         this.loadStats();
         this.loadRatings();
@@ -103,7 +105,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewChec
         const data = this.visitorStats()?.dailySessions;
         if (data?.length && !this.chartDrawn && this.chartCanvas?.nativeElement && isPlatformBrowser(this.platformId)) {
             this.chartDrawn = true;
-            this.renderVisitorChart(data);
+            const captured = data;
+            requestAnimationFrame(() => this.renderVisitorChart(captured));
         }
     }
 
