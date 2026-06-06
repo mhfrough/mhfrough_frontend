@@ -28,7 +28,7 @@ export class GalleryService {
         const fd = new FormData();
         fd.append('file', file);
         return this.http.post<{ url: string; mimeType: string; fileSize: number; mediaType: string }>(
-            `${environment.apiUrl}/upload/media`, fd
+            `${environment.apiUrl}/upload/media?type=gallery`, fd
         );
     }
 

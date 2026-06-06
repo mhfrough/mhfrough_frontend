@@ -1,37 +1,70 @@
 import {
     Component, OnInit, OnDestroy, inject, signal, computed, PLATFORM_ID,
-    ViewChild, ElementRef, effect, untracked, afterRenderEffect, NgZone,
+    ViewChild, ElementRef, effect, untracked, afterRenderEffect, NgZone, Injector, HostListener,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatService, ChatSession, ChatMessage } from '../../../core/services/chat.service';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { ChatService, ChatSession, ChatMessage, VisitorActivity } from '../../../core/services/chat.service';
 import { ActivityLogService } from '../../../core/services/activity-log.service';
 import { SoundService } from '../../../core/services/sound.service';
+import { VisitorAnalyticsService, VisitorSession } from '../../../core/services/visitor-analytics.service';
+import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
+import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+
+export interface PendingFile {
+    file: File;
+    previewUrl: string | null;
+    uploading: boolean;
+    done: boolean;
+    error: boolean;
+}
 
 @Component({
     selector: 'app-admin-chat',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RteToolbarComponent, ImgFallbackDirective],
     templateUrl: './admin-chat.component.html',
     styleUrl: './admin-chat.component.scss',
 })
 export class AdminChatComponent implements OnInit, OnDestroy {
     private readonly chatService = inject(ChatService);
+    private readonly visitorAnalytics = inject(VisitorAnalyticsService);
     private readonly platformId = inject(PLATFORM_ID);
-    private readonly activityLog = inject(ActivityLogService);
+    private readonly errLog = inject(ActivityLogService);
     private readonly sound = inject(SoundService);
     private readonly zone = inject(NgZone);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly injector = inject(Injector);
 
     @ViewChild('msgsEl') msgsEl!: ElementRef<HTMLDivElement>;
+    @ViewChild('sessionListEl') sessionListEl!: ElementRef<HTMLUListElement>;
+    @ViewChild('fileInputEl') fileInputEl!: ElementRef<HTMLInputElement>;
+    @ViewChild('editorEl') editorEl!: ElementRef<HTMLTextAreaElement>;
 
     readonly sessions = this.chatService.sessions;
     readonly activeMsgs = this.chatService.activeMsgs;
     readonly activeSessionId = this.chatService.activeSessionId;
     readonly visitorTyping = this.chatService.visitorTyping;
     readonly settings = this.chatService.settings;
+    readonly currentPageMap = this.chatService.currentPageMap;
+    readonly activityLog = this.chatService.activityLog;
+
+    readonly activeVisitorSession = signal<VisitorSession | null>(null);
+    readonly visitorInfoOpen = signal(false);
 
     activeTab: 'chat' | 'settings' = 'chat';
     messageText = '';
+
+    // ─── Rich text editor ─────────────────────────────────────────────────────
+    readonly editorHasContent = signal(false);
+
+    // ─── Session notes ────────────────────────────────────────────────────────
+    readonly notesText = signal('');
+    readonly notesSaved = signal(false);
+    private _notesSaveTimeout?: ReturnType<typeof setTimeout>;
 
     // ─── Audio recording ──────────────────────────────────────────────────────
     readonly isRecording = signal(false);
@@ -53,6 +86,30 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     private audioEls = new Map<string, HTMLAudioElement>();
     private _audioBarsCache = new Map<string, number[]>();
     private _rafId: number | null = null;
+
+    // ─── File upload ──────────────────────────────────────────────────────────
+    readonly pendingFiles = signal<PendingFile[]>([]);
+    readonly isDragOver = signal(false);
+    readonly isSendingFiles = signal(false);
+
+    // send button shows when text OR files are pending
+    readonly canSend = computed(() => this.editorHasContent() || this.pendingFiles().length > 0);
+
+    // ─── Lightbox ─────────────────────────────────────────────────────────────
+    readonly lightboxIndex = signal<number>(-1);
+
+    readonly lightboxImgs = computed(() =>
+        this.activeMsgs().filter(m => m.messageType === 'file' && m.fileUrl && this.isImage(m.fileType))
+    );
+
+    readonly lightboxMsg = computed(() => {
+        const idx = this.lightboxIndex();
+        const imgs = this.lightboxImgs();
+        return idx >= 0 && idx < imgs.length ? imgs[idx] : null;
+    });
+
+    // ─── Notes expand ─────────────────────────────────────────────────────────
+    readonly notesExpanded = signal(false);
 
     readonly deleteTargetId = signal<string | null>(null);
     readonly closeTargetId = signal<string | null>(null);
@@ -79,7 +136,9 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     settingsSaved = false;
 
     private typingTimeout?: ReturnType<typeof setTimeout>;
+    private _subs = new Subscription();
     private _shouldScroll = signal(false);
+    private _shouldScrollSidebar = signal(false);
     private _prevActiveMsgsCount = -1;
     private _prevSessionsCount = -1;
     private _titleBlinkInterval?: ReturnType<typeof setInterval>;
@@ -163,33 +222,174 @@ export class AdminChatComponent implements OnInit, OnDestroy {
                     if (el) el.scrollTop = el.scrollHeight;
                 });
             }
+            if (this._shouldScrollSidebar()) {
+                untracked(() => {
+                    this._shouldScrollSidebar.set(false);
+                    const list = this.sessionListEl?.nativeElement;
+                    const active = list?.querySelector<HTMLElement>('.is-active');
+                    active?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                });
+            }
         });
     }
 
     ngOnInit() {
         this.chatService.loadSettings();
+
+        // Restore active session from URL query param once sessions are loaded
+        const targetId = this.route.snapshot.queryParamMap.get('s');
+        if (targetId) {
+            // Sessions may not be loaded yet — wait until the list arrives
+            const unsub = effect(() => {
+                const sessions = this.sessions();
+                if (sessions.length === 0) return;
+                untracked(() => {
+                    const match = sessions.find(s => s.id === targetId);
+                    if (match) {
+                        this.selectSession(match);
+                        this._shouldScrollSidebar.set(true);
+                    }
+                    unsub.destroy();
+                });
+            }, { injector: this.injector });
+        }
     }
 
     ngOnDestroy() {
+        this._subs.unsubscribe();
         // socket managed by AdminLayoutComponent
         this._stopTitleBlink();
         this._stopScrubberLoop();
         this._cleanupRecording();
         this.audioEls.forEach(el => { el.pause(); el.src = ''; });
         this.audioEls.clear();
+        this.clearPendingFiles();
+        clearTimeout(this._notesSaveTimeout);
     }
 
     selectSession(session: ChatSession) {
         this.chatService.selectSession(session.id);
-        // Title will reset automatically once unreadChatCount drops to 0 via sessions:update
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { s: session.id },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+        this._shouldScrollSidebar.set(true);
+        this.activeVisitorSession.set(null);
+        // Load notes for this session
+        this.notesText.set(session.notes ?? '');
+        clearTimeout(this._notesSaveTimeout);
+        if (session.visitorSessionId) {
+            this.visitorAnalytics.getSession(session.visitorSessionId).subscribe({
+                next: (vs) => this.activeVisitorSession.set(vs),
+                error: () => { },
+            });
+        }
+    }
+
+    onNotesInput(value: string) {
+        this.notesText.set(value);
+        clearTimeout(this._notesSaveTimeout);
+        this._notesSaveTimeout = setTimeout(() => this.saveNotes(), 1200);
+    }
+
+    saveNotes() {
+        const sessionId = this.activeSessionId();
+        if (!sessionId) return;
+        this.chatService.updateSessionNotes(sessionId, this.notesText()).subscribe({
+            next: () => {
+                this.chatService.sessions.update(list =>
+                    list.map(s => s.id === sessionId ? { ...s, notes: this.notesText() } : s)
+                );
+                this.notesSaved.set(true);
+                setTimeout(() => this.notesSaved.set(false), 2000);
+            },
+        });
+    }
+
+    private notesLeaveTimer: ReturnType<typeof setTimeout> | null = null;
+
+    onNotesFocus() {
+        if (this.notesLeaveTimer) { clearTimeout(this.notesLeaveTimer); this.notesLeaveTimer = null; }
+        this.notesExpanded.set(true);
+    }
+
+    onNotesBlur() {
+        this.notesLeaveTimer = setTimeout(() => {
+            this.saveNotes();
+            this.notesExpanded.set(false);
+            this.notesLeaveTimer = null;
+        }, 400);
+    }
+
+    getActiveVisitorCurrentPage(): string | null {
+        const vsId = this.getActiveSession()?.visitorSessionId;
+        if (!vsId) return null;
+        return this.currentPageMap()[vsId] ?? null;
+    }
+
+    getActiveVisitorActivity(): VisitorActivity[] {
+        const vsId = this.getActiveSession()?.visitorSessionId;
+        if (!vsId) return [];
+        return this.activityLog()[vsId] ?? [];
+    }
+
+    formatActivityTime(ts: string): string {
+        const d = new Date(ts);
+        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    formatEventLabel(label: string): string {
+        return label.replace(/_/g, ' ');
     }
 
     sendMessage() {
-        const content = this.messageText.trim();
+        const el = this.editorEl?.nativeElement;
+        if (!el) return;
         const sessionId = this.activeSessionId();
-        if (!content || !sessionId) return;
-        this.chatService.sendAdminMessage(sessionId, content);
-        this.messageText = '';
+        if (!sessionId) return;
+
+        const html = el.value.trim();
+        const files = this.pendingFiles();
+
+        if (files.length > 0) {
+            if (this.isSendingFiles()) return;
+            this.isSendingFiles.set(true);
+            const rawFiles = files.map(f => f.file);
+            const caption = html;
+            this.chatService.uploadAdminFiles(rawFiles, sessionId).subscribe({
+                next: (results) => {
+                    for (const r of results) {
+                        this.chatService.sendAdminFileMessage(sessionId, r.url, r.name, r.type, r.size, caption);
+                    }
+                    for (const pf of files) { if (pf.previewUrl) URL.revokeObjectURL(pf.previewUrl); }
+                    this.pendingFiles.set([]);
+                    el.value = '';
+                    this.editorHasContent.set(false);
+                    this.isSendingFiles.set(false);
+                },
+                error: (err) => {
+                    this.isSendingFiles.set(false);
+                    this.errLog.reportClientError(err?.message ?? 'Upload failed', err?.stack, 'admin-chat:sendMessage').subscribe();
+                },
+            });
+            return;
+        }
+
+        if (!html) return;
+        this.chatService.sendAdminMessage(sessionId, html);
+        el.value = '';
+        this.editorHasContent.set(false);
+    }
+
+    @HostListener('document:keydown', ['$event'])
+    onGlobalKeydown(event: KeyboardEvent) {
+        if (this.lightboxIndex() >= 0) {
+            if (event.key === 'Escape') { this.closeLightbox(); return; }
+            if (event.key === 'ArrowLeft') { this.lightboxPrev(); return; }
+            if (event.key === 'ArrowRight') { this.lightboxNext(); return; }
+        }
     }
 
     onKeydown(event: KeyboardEvent) {
@@ -199,7 +399,10 @@ export class AdminChatComponent implements OnInit, OnDestroy {
         }
     }
 
-    onInput() {
+    onEditorInput() {
+        const el = this.editorEl?.nativeElement;
+        if (!el) return;
+        this.editorHasContent.set(el.value.trim() !== '');
         const sessionId = this.activeSessionId();
         if (!sessionId) return;
         this.chatService.sendAdminTyping(sessionId, true);
@@ -207,10 +410,8 @@ export class AdminChatComponent implements OnInit, OnDestroy {
         this.typingTimeout = setTimeout(() => this.chatService.sendAdminTyping(sessionId, false), 1500);
     }
 
-    autoResize(event: Event) {
-        const el = event.target as HTMLTextAreaElement;
-        el.style.height = 'auto';
-        el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    onInput() {
+        this.onEditorInput();
     }
 
     closeSession(sessionId?: string) {
@@ -244,7 +445,17 @@ export class AdminChatComponent implements OnInit, OnDestroy {
             if (this.activeSessionId() === id) {
                 this.chatService.activeSessionId.set(null);
                 this.chatService.activeMsgs.set([]);
+                this._clearSessionUrl();
             }
+        });
+    }
+
+    private _clearSessionUrl() {
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { s: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
         });
     }
 
@@ -299,6 +510,170 @@ export class AdminChatComponent implements OnInit, OnDestroy {
 
     trackById(_: number, m: { id: string }) { return m.id; }
     trackBySessionId(_: number, s: ChatSession) { return s.id; }
+
+    // ─── File upload & drag-drop ──────────────────────────────────────────────
+
+    openFilePicker() {
+        if (!isPlatformBrowser(this.platformId)) return;
+        this.fileInputEl?.nativeElement.click();
+    }
+
+    onFileInputChange(event: Event) {
+        const input = event.target as HTMLInputElement;
+        if (input.files?.length) {
+            this.handleFiles(Array.from(input.files));
+            input.value = '';
+        }
+    }
+
+    onDragOver(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+        this.isDragOver.set(true);
+    }
+
+    onDragLeave(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isDragOver.set(false);
+    }
+
+    onDrop(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isDragOver.set(false);
+        const files = event.dataTransfer?.files;
+        if (files?.length) this.handleFiles(Array.from(files));
+    }
+
+    handleFiles(files: File[]) {
+        const ALLOWED = /^(image\/|video\/|audio\/|application\/pdf|application\/msword|application\/vnd\.|text\/plain|application\/zip)/;
+        const MAX = 25 * 1024 * 1024;
+        const valid = files.filter(f => ALLOWED.test(f.type) && f.size <= MAX);
+        if (!valid.length) return;
+
+        const items: PendingFile[] = valid.map(f => ({
+            file: f,
+            previewUrl: (f.type.startsWith('image/') || f.type.startsWith('video/')) ? URL.createObjectURL(f) : null,
+            uploading: false,
+            done: false,
+            error: false,
+        }));
+        this.pendingFiles.update(list => [...list, ...items]);
+    }
+
+    removePendingFile(index: number) {
+        this.pendingFiles.update(list => {
+            const copy = [...list];
+            const removed = copy.splice(index, 1)[0];
+            if (removed.previewUrl) URL.revokeObjectURL(removed.previewUrl);
+            return copy;
+        });
+    }
+
+    sendPendingFiles() {
+        const sessionId = this.activeSessionId();
+        const files = this.pendingFiles();
+        if (!sessionId || !files.length || this.isSendingFiles()) return;
+
+        this.isSendingFiles.set(true);
+        const rawFiles = files.map(f => f.file);
+
+        this.chatService.uploadAdminFiles(rawFiles, sessionId).subscribe({
+            next: (results) => {
+                for (const r of results) {
+                    this.chatService.sendAdminFileMessage(sessionId, r.url, r.name, r.type, r.size);
+                }
+                // revoke object URLs
+                for (const pf of files) {
+                    if (pf.previewUrl) URL.revokeObjectURL(pf.previewUrl);
+                }
+                this.pendingFiles.set([]);
+                this.isSendingFiles.set(false);
+            },
+            error: (err) => {
+                this.isSendingFiles.set(false);
+                this.errLog.reportClientError(
+                    err?.message ?? 'File upload failed',
+                    err?.stack,
+                    'admin-chat:sendPendingFiles',
+                ).subscribe();
+            },
+        });
+    }
+
+    clearPendingFiles() {
+        for (const pf of this.pendingFiles()) {
+            if (pf.previewUrl) URL.revokeObjectURL(pf.previewUrl);
+        }
+        this.pendingFiles.set([]);
+    }
+
+    // ─── Lightbox ─────────────────────────────────────────────────────────────
+
+    readonly lbZoom = signal(1);
+    lbZoomIn()    { this.lbZoom.update(z => Math.min(z + 0.5, 3)); }
+    lbZoomOut()   { this.lbZoom.update(z => Math.max(z - 0.5, 0.5)); }
+    lbZoomReset() { this.lbZoom.set(1); }
+
+    openLightbox(msgId: string) {
+        const idx = this.lightboxImgs().findIndex(m => m.id === msgId);
+        if (idx >= 0) { this.lightboxIndex.set(idx); this.lbZoom.set(1); }
+    }
+
+    closeLightbox() { this.lightboxIndex.set(-1); this.lbZoom.set(1); }
+
+    lightboxNext() {
+        const max = this.lightboxImgs().length - 1;
+        this.lightboxIndex.update(i => i < max ? i + 1 : 0);
+        this.lbZoom.set(1);
+    }
+
+    lightboxPrev() {
+        const max = this.lightboxImgs().length - 1;
+        this.lightboxIndex.update(i => i > 0 ? i - 1 : max);
+        this.lbZoom.set(1);
+    }
+
+    lightboxCaption(msg: ChatMessage | null): string {
+        if (!msg?.content) return '';
+        if (msg.content.startsWith('[File:') && msg.content.endsWith(']')) return '';
+        // Strip HTML tags for caption display
+        const div = document.createElement('div');
+        div.innerHTML = msg.content;
+        return div.textContent?.trim() ?? '';
+    }
+
+    // ─── File helpers ─────────────────────────────────────────────────────────
+
+    isImage(type: string | null | undefined): boolean {
+        return !!type?.startsWith('image/');
+    }
+
+    isVideo(type: string | null | undefined): boolean {
+        return !!type?.startsWith('video/');
+    }
+
+    fileIcon(type: string | null | undefined): string {
+        if (!type) return 'bi-file-earmark';
+        if (type.startsWith('image/')) return 'bi-file-earmark-image';
+        if (type.startsWith('video/')) return 'bi-file-earmark-play';
+        if (type.startsWith('audio/')) return 'bi-file-earmark-music';
+        if (type === 'application/pdf') return 'bi-file-earmark-pdf';
+        if (type.includes('word') || type.includes('document')) return 'bi-file-earmark-word';
+        if (type.includes('sheet') || type.includes('excel')) return 'bi-file-earmark-spreadsheet';
+        if (type.includes('zip') || type.includes('archive')) return 'bi-file-earmark-zip';
+        if (type.startsWith('text/')) return 'bi-file-earmark-text';
+        return 'bi-file-earmark';
+    }
+
+    formatFileSize(bytes: number | null | undefined): string {
+        if (!bytes) return '';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
 
     // ─── Title blink ──────────────────────────────────────────────────────────
 
@@ -365,7 +740,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
             }, 80);
 
         } catch (err) {
-            this.activityLog.reportClientError(
+            this.errLog.reportClientError(
                 (err as Error).message,
                 (err as Error).stack,
                 'admin-chat:startRecording',
@@ -391,7 +766,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
                 },
                 error: (err) => {
                     this.isUploadingAudio.set(false);
-                    this.activityLog.reportClientError(
+                    this.errLog.reportClientError(
                         err?.message ?? 'Audio upload failed',
                         err?.stack,
                         'admin-chat:stopAndSend',
@@ -503,7 +878,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
         } else {
             if (playing) this.audioEls.get(playing)?.pause();
             el.play().catch(err => {
-                this.activityLog.reportClientError(
+                this.errLog.reportClientError(
                     err?.message ?? 'Audio playback failed',
                     err?.stack,
                     'admin-chat:audio-play',

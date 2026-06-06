@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { CommonModule, NgOptimizedImage, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -12,6 +12,7 @@ import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback
 import { FrontToastService } from '../../../../core/services/front-toast.service';
 import { Title } from '@angular/platform-browser';
 import { EditorHelperService } from '../../../../core/services/editor-helper.service';
+import { VisitorTrackingService } from '../../../../core/services/visitor-tracking.service';
 
 @Component({
     selector: 'app-blog-detail',
@@ -28,7 +29,9 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     private readonly realtime = inject(RealtimeService);
     private preconnect = inject(PreconnectService);
     private toast = inject(FrontToastService);
+    private tracking = inject(VisitorTrackingService);
     private titleService = inject(Title);
+    private platformId = inject(PLATFORM_ID);
 
     readonly blog = signal<any>(null);
     readonly loading = signal(true);
@@ -38,6 +41,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     readonly commentCount = signal(0);
     readonly commentSending = signal(false);
     readonly commentError = signal('');
+    readonly commentSuccess = signal(false);
 
     commentData = { authorName: '', authorEmail: '', content: '' };
     private subs = new Subscription();
@@ -57,6 +61,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
                 this.titleService.setTitle(`${data.title} | Mohammad Hamza`);
                 this.loading.set(false);
                 this.preconnect.add(data?.coverImage);
+                this.tracking.trackEvent('blog_read', { title: data.title, slug: data.slug ?? '' });
                 this.loadComments(data.id);
                 this.subscribeToRealtimeEvents(data.id);
                 this.subscribeToCommentEvents(data.id);
@@ -134,14 +139,20 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
         if (form.invalid) return;
         this.commentSending.set(true);
         this.commentError.set('');
+        this.commentSuccess.set(false);
         const { authorName, authorEmail, content } = this.commentData;
         this.service.submitComment(this.blog().id, { authorName, authorEmail, content }).subscribe({
             next: () => {
                 this.userInfo.save({ name: authorName, email: authorEmail });
-                this.pendingReviewToastId = this.toast.success('Comment submitted — it will appear after review.');
+                this.commentSuccess.set(true);
                 this.commentSending.set(false);
                 this.commentData.content = '';
                 form.resetForm({ authorName, authorEmail, content: '' });
+                if (isPlatformBrowser(this.platformId)) {
+                    setTimeout(() => {
+                        document.getElementById('blog-comments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                }
             },
             error: () => {
                 this.commentError.set('Failed to submit. Please try again.');

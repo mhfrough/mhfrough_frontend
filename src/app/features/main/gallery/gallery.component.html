@@ -101,40 +101,36 @@
 @if (lightboxItem()) {
 <div class="gallery-lightbox" (click)="closeLightbox()" role="dialog" aria-modal="true" aria-label="Media viewer">
 
-    <!-- Close -->
-    <button class="lb-btn lb-close" (click)="closeLightbox()" aria-label="Close lightbox">
-        <i class="bi bi-x-lg"></i>
-    </button>
-
-    <!-- Counter -->
-    <span class="lb-counter">{{ (lightboxIndex() ?? 0) + 1 }} / {{ total() }}</span>
-
-    <!-- Prev -->
-    @if (items().length > 1) {
-    <button class="lb-btn lb-prev" (click)="$event.stopPropagation(); prevItem()" aria-label="Previous">
-        <i class="bi bi-chevron-left"></i>
-    </button>
-    }
-
-    <!-- Media area -->
-    <div class="lb-stage" (click)="$event.stopPropagation()">
-
-        <!-- Zoom controls (image only) -->
+    <!-- Top bar -->
+    <div class="lb-topbar" (click)="$event.stopPropagation()">
+        <span class="lb-counter">{{ (lightboxIndex() ?? 0) + 1 }} / {{ items().length }}</span>
+        <span class="lb-caption lb-caption--topbar">{{ lightboxItem()!.caption || lightboxItem()!.title || '' }}</span>
         @if (lightboxItem()!.mediaType !== 'video') {
         <div class="lb-zoom-bar">
-            <button class="lb-zoom-btn" (click)="zoomOut()" [disabled]="zoomLevel() <= 0.5" aria-label="Zoom out">
-                <i class="bi bi-dash"></i>
-            </button>
-            <span class="lb-zoom-val" (click)="resetZoom()" title="Reset zoom">{{ (zoomLevel() * 100).toFixed(0)
-                }}%</span>
-            <button class="lb-zoom-btn" (click)="zoomIn()" [disabled]="zoomLevel() >= 3" aria-label="Zoom in">
-                <i class="bi bi-plus"></i>
-            </button>
+            <button class="lb-zoom-btn" (click)="zoomOut()" [disabled]="zoomLevel() <= 0.5" aria-label="Zoom out"><i class="bi bi-dash"></i></button>
+            <span class="lb-zoom-val" (click)="resetZoom()" title="Reset zoom">{{ (zoomLevel() * 100).toFixed(0) }}%</span>
+            <button class="lb-zoom-btn" (click)="zoomIn()" [disabled]="zoomLevel() >= 3" aria-label="Zoom in"><i class="bi bi-plus"></i></button>
         </div>
         }
+        @if (lightboxItem()!.mediaType !== 'video') {
+        <a class="lb-btn lb-download" [href]="lightboxItem()!.mediaUrl" [download]="lightboxItem()!.title || 'image'"
+            target="_blank" rel="noopener" aria-label="Download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 3v13M6 11l6 6 6-6M4 20h16"/></svg>
+        </a>
+        }
+        <button class="lb-btn lb-close" (click)="closeLightbox()" aria-label="Close lightbox">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
 
-        <!-- Media -->
+    <!-- Media row -->
+    <div class="lb-row" (click)="$event.stopPropagation()">
         <div class="lb-media-wrap" [class.lb-scrollable]="zoomLevel() > 1">
+            @if (items().length > 1) {
+            <button class="lb-btn lb-prev" (click)="prevItem()" aria-label="Previous">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            }
             @if (lightboxItem()!.mediaType === 'image' || lightboxItem()!.mediaType === 'gif') {
             <img class="lb-media" [src]="lightboxItem()!.mediaUrl"
                 [alt]="lightboxItem()!.altText || lightboxItem()!.title || ''"
@@ -143,45 +139,56 @@
             } @else {
             <video class="lb-media" [src]="lightboxItem()!.mediaUrl" controls autoplay playsinline></video>
             }
-        </div>
-
-        <!-- Info panel -->
-        <div class="lb-info">
-            @if (lightboxItem()!.caption) {
-            <p class="lb-caption">{{ lightboxItem()!.caption }}</p>
+            @if (items().length > 1) {
+            <button class="lb-btn lb-next" (click)="nextItem()" aria-label="Next">
+                <i class="bi bi-chevron-right"></i>
+            </button>
             }
-            <div class="lb-meta">
-                @if (lightboxItem()!.title) {
-                <span class="lb-meta-item"><i class="bi bi-type"></i> {{ lightboxItem()!.title }}</span>
-                }
-                @if (lightboxItem()!.category) {
-                <span class="lb-meta-item"><i class="bi bi-tag"></i> {{ lightboxItem()!.category }}</span>
-                }
-                <span class="lb-meta-item lb-meta-type">
-                    <i class="bi" [class.bi-image]="lightboxItem()!.mediaType === 'image'"
-                        [class.bi-filetype-gif]="lightboxItem()!.mediaType === 'gif'"
-                        [class.bi-camera-video]="lightboxItem()!.mediaType === 'video'"></i>
-                    {{ lightboxItem()!.mediaType | uppercase }}
-                </span>
-                @if (lightboxItem()!.fileSize) {
-                <span class="lb-meta-item"><i class="bi bi-hdd"></i> {{ formatBytes(lightboxItem()!.fileSize!) }}</span>
-                }
-                @if (lightboxItem()!.mimeType) {
-                <span class="lb-meta-item"><i class="bi bi-file-earmark"></i> {{ lightboxItem()!.mimeType }}</span>
-                }
-                <span class="lb-meta-item">
-                    <i class="bi bi-calendar3"></i> {{ lightboxItem()!.createdAt | date:'mediumDate' }}
-                </span>
-            </div>
         </div>
-
     </div>
 
-    <!-- Next -->
+    <!-- Meta -->
+    <div class="lb-info" (click)="$event.stopPropagation()">
+        <div class="lb-meta">
+            @if (lightboxItem()!.title) {
+            <span class="lb-meta-item"><i class="bi bi-type"></i> {{ lightboxItem()!.title }}</span>
+            }
+            @if (lightboxItem()!.category) {
+            <span class="lb-meta-item"><i class="bi bi-tag"></i> {{ lightboxItem()!.category }}</span>
+            }
+            <span class="lb-meta-item lb-meta-type">
+                <i class="bi" [class.bi-image]="lightboxItem()!.mediaType === 'image'"
+                    [class.bi-filetype-gif]="lightboxItem()!.mediaType === 'gif'"
+                    [class.bi-camera-video]="lightboxItem()!.mediaType === 'video'"></i>
+                {{ lightboxItem()!.mediaType | uppercase }}
+            </span>
+            @if (lightboxItem()!.fileSize) {
+            <span class="lb-meta-item"><i class="bi bi-hdd"></i> {{ formatBytes(lightboxItem()!.fileSize!) }}</span>
+            }
+            @if (lightboxItem()!.mimeType) {
+            <span class="lb-meta-item"><i class="bi bi-file-earmark"></i> {{ lightboxItem()!.mimeType }}</span>
+            }
+            <span class="lb-meta-item">
+                <i class="bi bi-calendar3"></i> {{ lightboxItem()!.createdAt | date:'mediumDate' }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Thumbnail strip -->
     @if (items().length > 1) {
-    <button class="lb-btn lb-next" (click)="$event.stopPropagation(); nextItem()" aria-label="Next">
-        <i class="bi bi-chevron-right"></i>
-    </button>
+    <div class="lb-thumbs" (click)="$event.stopPropagation()">
+        @for (item of items(); track item.id; let i = $index) {
+        <button class="lb-thumb" [class.is-active]="i === (lightboxIndex() ?? 0)"
+            (click)="openLightbox(i)" [attr.aria-label]="'Item ' + (i + 1)" type="button">
+            @if (item.mediaType === 'video') {
+            <video [src]="item.mediaUrl" preload="metadata" muted playsinline></video>
+            <i class="bi bi-play-fill lb-thumb-play"></i>
+            } @else {
+            <img [src]="item.mediaUrl" [alt]="item.altText || item.title || ''" loading="lazy" />
+            }
+        </button>
+        }
+    </div>
     }
 
 </div>

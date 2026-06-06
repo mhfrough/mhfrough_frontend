@@ -171,6 +171,6 @@ export class AdminSettingsService {
     uploadAvatar(file: File) {
         const form = new FormData();
         form.append('file', file);
-        return this.http.post<{ url: string }>(`${environment.apiUrl}/upload/image`, form);
+        return this.http.post<{ url: string }>(`${environment.apiUrl}/upload/image?type=profile`, form);
     }
 }

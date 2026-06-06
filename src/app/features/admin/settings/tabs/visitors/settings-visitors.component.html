@@ -1,4 +1,4 @@
-<!-- ── Stats summary ─────────────────────────────────────────────────────── -->
+<!-- ── Stats overview ──────────────────────────────────────────────────────── -->
 @if (visitorStats()) {
 <div class="settings-card">
     <div class="settings-card-header">
@@ -6,7 +6,12 @@
             <h2 class="settings-card-title"><i class="bi bi-graph-up-arrow"></i> Visitor Overview</h2>
             <p class="settings-card-sub">Aggregated analytics for the last 30 days and all time.</p>
         </div>
+        <button class="btn-text-danger" (click)="confirmClearAll()">
+            <i class="bi bi-trash"></i> Reset All Data
+        </button>
     </div>
+
+    <!-- KPI stats row -->
     <div class="admin-visitor-stat-row" style="margin-top:0.5rem">
         <div class="admin-visitor-stat">
             <span class="admin-visitor-stat-val">{{ visitorStats()!.total }}</span>
@@ -26,6 +31,7 @@
         </div>
     </div>
 
+    <!-- Daily sessions chart -->
     @if (visitorStats()!.dailySessions.length > 1) {
     <div class="admin-visitor-chart-wrap">
         <canvas #visitorChart class="admin-visitor-chart"></canvas>
@@ -37,6 +43,7 @@
     </div>
     }
 
+    <!-- Analytics split: countries / browsers / devices -->
     <div class="admin-analytics-split" style="margin-top:1.5rem">
         <div>
             <p class="admin-analytics-panel-title" style="margin-bottom:.6rem">Top Countries</p>
@@ -75,6 +82,80 @@
             }
         </div>
     </div>
+
+    <!-- Device distribution bars -->
+    @if (visitorStats()!.deviceDist.length > 0) {
+    <div style="margin-top:1.25rem">
+        <p class="admin-analytics-panel-title" style="margin-bottom:.6rem">Device Distribution</p>
+        <div class="vt-device-dist">
+            @for (d of deviceDistPercent(visitorStats()!.deviceDist); track d.label) {
+            <div class="vt-device-bar-row">
+                <i class="bi {{ d.icon }}" style="color:var(--text-muted);width:1rem;text-align:center"></i>
+                <span class="vt-device-label">{{ d.label }}</span>
+                <div class="vt-device-track">
+                    <div class="vt-device-fill" [style.width.%]="d.pct"></div>
+                </div>
+                <span class="vt-device-pct">{{ d.pct }}%</span>
+            </div>
+            }
+        </div>
+    </div>
+    }
+
+    <!-- Top pages & top events -->
+    <div class="admin-analytics-split" style="margin-top:1.5rem">
+        <div>
+            <p class="admin-analytics-panel-title" style="margin-bottom:.6rem">Top Pages</p>
+            @if (!visitorStats()!.topPages || visitorStats()!.topPages.length === 0) {
+            <p class="admin-dashboard-empty">No data yet.</p>
+            } @else {
+            <div class="admin-activity-feed">
+                @for (p of (showAllTopPages() ? visitorStats()!.topPages : visitorStats()!.topPages.slice(0, 5)); track p.path) {
+                <div class="admin-activity-item">
+                    <i class="bi bi-file-earmark-text admin-activity-icon"></i>
+                    <div class="admin-activity-body">
+                        <span class="admin-activity-text" style="font-family:monospace;font-size:.8rem" [title]="p.path">{{ p.path }}</span>
+                        @if (p.avgTimeMs && +p.avgTimeMs > 0) {
+                        <span class="admin-activity-sub">avg {{ formatDuration(+p.avgTimeMs) }}</span>
+                        }
+                    </div>
+                    <span class="admin-activity-badge">{{ p.count }}</span>
+                </div>
+                }
+            </div>
+            @if (visitorStats()!.topPages.length > 5) {
+            <button class="btn-text" style="margin-top:.5rem" (click)="showAllTopPages.set(!showAllTopPages())">
+                <i class="bi {{ showAllTopPages() ? 'bi-chevron-up' : 'bi-chevron-down' }}"></i>
+                {{ showAllTopPages() ? 'Show less' : 'View all ' + visitorStats()!.topPages.length }}
+            </button>
+            }
+            }
+        </div>
+        <div>
+            <p class="admin-analytics-panel-title" style="margin-bottom:.6rem">Top Actions</p>
+            @if (!visitorStats()!.topEvents || visitorStats()!.topEvents.length === 0) {
+            <p class="admin-dashboard-empty">No tracked actions yet.</p>
+            } @else {
+            <div class="admin-activity-feed">
+                @for (e of (showAllTopActions() ? visitorStats()!.topEvents : visitorStats()!.topEvents.slice(0, 5)); track e.eventName) {
+                <div class="admin-activity-item">
+                    <i class="bi {{ eventIcon(e.eventName) }} admin-activity-icon"></i>
+                    <div class="admin-activity-body">
+                        <span class="admin-activity-text">{{ formatEventName(e.eventName) }}</span>
+                    </div>
+                    <span class="admin-activity-badge">{{ e.count }}</span>
+                </div>
+                }
+            </div>
+            @if (visitorStats()!.topEvents.length > 5) {
+            <button class="btn-text" style="margin-top:.5rem" (click)="showAllTopActions.set(!showAllTopActions())">
+                <i class="bi {{ showAllTopActions() ? 'bi-chevron-up' : 'bi-chevron-down' }}"></i>
+                {{ showAllTopActions() ? 'Show less' : 'View all ' + visitorStats()!.topEvents.length }}
+            </button>
+            }
+            }
+        </div>
+    </div>
 </div>
 }
 
@@ -83,7 +164,7 @@
     <div class="settings-card-header">
         <div>
             <h2 class="settings-card-title"><i class="bi bi-people"></i> Visitor Sessions</h2>
-            <p class="settings-card-sub">All tracked visitor sessions — search, paginate and inspect.</p>
+            <p class="settings-card-sub">Click any row to expand the full journey — pages visited, time on each page, and actions taken.</p>
         </div>
     </div>
 
@@ -99,6 +180,11 @@
             <option value="100">100 / page</option>
         </select>
         <span class="admin-list-toolbar-count">{{ visitorsTotal() }} session{{ visitorsTotal() !== 1 ? 's' : '' }}</span>
+        @if (visitorSessions().length > 0) {
+        <button class="btn-text-danger" (click)="confirmClearAll()">
+            <i class="bi bi-trash"></i> Clear All
+        </button>
+        }
     </div>
 
     @if (visitorsLoading()) {
@@ -108,9 +194,10 @@
     } @else {
 
     <div class="admin-table-wrap">
-        <table class="admin-table">
+        <table class="admin-table vt-sessions-table">
             <thead>
                 <tr>
+                    <th style="width:1.5rem"></th>
                     <th>Device</th>
                     <th>Location</th>
                     <th>Browser / OS</th>
@@ -120,14 +207,21 @@
                     <th>Bounce</th>
                     <th>Entry</th>
                     <th>When</th>
+                    <th style="width:2rem"></th>
                 </tr>
             </thead>
             <tbody>
                 @for (s of visitorSessions(); track s.id) {
-                <tr>
+                <!-- Main session row -->
+                <tr class="vt-session-row" [class.vt-session-row--expanded]="expandedSessionId() === s.id" (click)="toggleJourney(s.id)">
+                    <td style="text-align:center;padding-right:0">
+                        <i class="bi {{ expandedSessionId() === s.id ? 'bi-chevron-down' : 'bi-chevron-right' }}" style="font-size:.7rem;opacity:.5;transition:transform 200ms"></i>
+                    </td>
                     <td>
-                        <i class="bi {{ visitorDeviceIcon(s.deviceType) }}" style="margin-right:.35rem"></i>
-                        <span style="text-transform:capitalize">{{ s.deviceType || 'desktop' }}</span>
+                        <div style="display:flex;align-items:center;gap:.35rem">
+                            <i class="bi {{ visitorDeviceIcon(s.deviceType) }}"></i>
+                            <span style="text-transform:capitalize">{{ s.deviceType || 'desktop' }}</span>
+                        </div>
                         @if (s.screenRes) {
                         <div style="font-size:.75rem;opacity:.5">{{ s.screenRes }}</div>
                         }
@@ -164,8 +258,111 @@
                     <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem" [title]="s.entryPath || ''">
                         {{ s.entryPath || '—' }}
                     </td>
-                    <td style="white-space:nowrap;font-size:.8rem">{{ s.startedAt | date:'MMM d, y · h:mm a' }}</td>
+                    <td style="white-space:nowrap;font-size:.8rem">
+                        <div>{{ s.startedAt | date:'MMM d · h:mm a' }}</div>
+                        @if (isActive(s)) {
+                        <div class="vt-active-badge">
+                            <span class="vt-active-dot"></span>
+                            @if (currentPage(s.id)) {
+                            <span style="font-family:monospace;max-width:10rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block" [title]="currentPage(s.id)!">{{ currentPage(s.id) }}</span>
+                            } @else {
+                            <span>Active now</span>
+                            }
+                        </div>
+                        }
+                    </td>
+                    <td style="text-align:right;padding-left:0" (click)="$event.stopPropagation()">
+                        <button class="btn-text-danger" style="padding:.2rem .4rem;font-size:.7rem" (click)="confirmDeleteSession(s.id)" title="Delete session">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
                 </tr>
+
+                <!-- Expanded journey panel -->
+                @if (expandedSessionId() === s.id) {
+                <tr class="vt-journey-row">
+                    <td colspan="11" style="padding:0">
+                        <div class="vt-journey-panel">
+                            @if (journeyLoading() && !journeyMap()[s.id]) {
+                            <div class="loading-state" style="padding:1.5rem 0"><div class="spinner"></div></div>
+                            } @else if (journeyMap()[s.id]) {
+
+                            <div class="vt-journey-inner">
+                                <!-- Session meta summary -->
+                                <div class="vt-journey-meta">
+                                    @if (s.referrer) {
+                                    <span><i class="bi bi-box-arrow-in-right"></i> Came from: <span style="font-family:monospace;font-size:.8rem;max-width:22rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle" [title]="s.referrer">{{ s.referrer }}</span></span>
+                                    }
+                                    @if (s.language) {
+                                    <span><i class="bi bi-translate"></i> {{ s.language }}</span>
+                                    }
+                                    @if (s.screenRes) {
+                                    <span><i class="bi bi-aspect-ratio"></i> {{ s.screenRes }}</span>
+                                    }
+                                </div>
+
+                                <div class="vt-journey-columns">
+                                    <!-- Timeline column -->
+                                    <div class="vt-journey-timeline-col">
+                                        <p class="admin-analytics-panel-title" style="margin-bottom:.75rem">
+                                            <i class="bi bi-clock-history"></i> Journey Timeline
+                                        </p>
+
+                                        @if (journeyTimeline(journeyMap()[s.id]).length === 0) {
+                                        <p class="admin-dashboard-empty">No journey data recorded.</p>
+                                        } @else {
+                                        <div class="vt-timeline">
+                                            @for (item of journeyTimeline(journeyMap()[s.id]); track item.time + item.label) {
+                                            <div class="vt-timeline-item" [class.vt-timeline-item--event]="item.type === 'event'">
+                                                <div class="vt-timeline-dot" [class.vt-timeline-dot--event]="item.type === 'event'">
+                                                    <i class="bi {{ item.icon }}"></i>
+                                                </div>
+                                                <div class="vt-timeline-body">
+                                                    <span class="vt-timeline-label" [title]="item.label">{{ item.label }}</span>
+                                                    <span class="vt-timeline-time">{{ item.time | date:'h:mm:ss a' }}</span>
+                                                    @if (item.sub) {
+                                                    <span class="vt-timeline-sub" [title]="item.sub">{{ item.sub }}</span>
+                                                    }
+                                                    @if (item.meta) {
+                                                    <span class="vt-timeline-meta">{{ item.meta }}</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+
+                                    <!-- Time-on-page bars column -->
+                                    <div class="vt-journey-chart-col">
+                                        <p class="admin-analytics-panel-title" style="margin-bottom:.75rem">
+                                            <i class="bi bi-bar-chart-steps"></i> Time per Page
+                                        </p>
+                                        @if (journeyMap()[s.id].pageViews.length === 0) {
+                                        <p class="admin-dashboard-empty">No page view data.</p>
+                                        } @else {
+                                        <div class="vt-device-dist">
+                                            @for (pv of journeyMap()[s.id].pageViews; track pv.id) {
+                                            <div class="vt-device-bar-row">
+                                                <i class="bi bi-file-earmark-text" style="color:var(--text-muted);width:1rem;text-align:center;font-size:.75rem;opacity:.5"></i>
+                                                <span class="vt-device-label" style="width:6rem" [title]="pv.path || '/'">{{ shortPath(pv.path) }}</span>
+                                                <div class="vt-device-track">
+                                                    <div class="vt-device-fill" [style.width.%]="pageTimePct(journeyMap()[s.id].pageViews, pv)"></div>
+                                                </div>
+                                                <span class="vt-device-pct" style="width:3.5rem;text-align:left">{{ pv.timeOnPageMs && +pv.timeOnPageMs > 0 ? formatDuration(+pv.timeOnPageMs) : '—' }}</span>
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            }
+                        </div>
+                    </td>
+                </tr>
+                }
                 }
             </tbody>
         </table>
@@ -188,3 +385,31 @@
 
     }
 </div>
+
+<!-- Delete session confirm modal -->
+@if (deleteSessionTargetId()) {
+<div class="admin-modal-overlay" (click)="cancelDeleteSession()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Delete Session</p>
+        <p class="admin-modal-body">This will permanently delete this visitor session along with all its page views and events. This action cannot be undone.</p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelDeleteSession()">Cancel</button>
+            <button class="btn-danger" (click)="executeDeleteSession()">Delete</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Clear all confirm modal -->
+@if (clearAllConfirm()) {
+<div class="admin-modal-overlay" (click)="cancelClearAll()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Reset All Visitor Data</p>
+        <p class="admin-modal-body">This will permanently delete all visitor sessions, page views, and events. This action cannot be undone.</p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelClearAll()">Cancel</button>
+            <button class="btn-danger" (click)="executeClearAll()">Reset All</button>
+        </div>
+    </div>
+</div>
+}

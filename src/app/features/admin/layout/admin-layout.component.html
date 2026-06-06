@@ -99,6 +99,9 @@
         <router-outlet />
     </main>
 
+    <!-- Floating chat widget (hidden on /admin/chat page) -->
+    <app-admin-floating-chat />
+
     <!-- Toast notifications -->
     @if (notif.toasts().length > 0) {
     <div class="admin-toasts">

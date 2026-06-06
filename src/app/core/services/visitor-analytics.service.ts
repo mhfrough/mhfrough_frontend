@@ -28,6 +28,28 @@ export interface VisitorSession {
     lastSeenAt: string | null;
 }
 
+export interface VisitorPageView {
+    id: string;
+    sessionId: string;
+    path: string | null;
+    timeOnPageMs: number | null;
+    createdAt: string;
+}
+
+export interface VisitorEvent {
+    id: string;
+    sessionId: string;
+    eventName: string;
+    path: string | null;
+    metadata: Record<string, string> | null;
+    createdAt: string;
+}
+
+export interface VisitorJourney {
+    pageViews: VisitorPageView[];
+    events: VisitorEvent[];
+}
+
 export interface VisitorStats {
     total: number;
     unique: number;
@@ -37,6 +59,8 @@ export interface VisitorStats {
     topBrowsers: { browser: string; count: string }[];
     deviceDist: { deviceType: string; count: string }[];
     dailySessions: { day: string; count: string }[];
+    topPages: { path: string; count: string; avgTimeMs: string }[];
+    topEvents: { eventName: string; count: string }[];
 }
 
 export interface VisitorListResponse {
@@ -62,5 +86,21 @@ export class VisitorAnalyticsService {
         let url = `${this.base}?page=${page}&limit=${limit}`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
         return this.http.get<VisitorListResponse>(url);
+    }
+
+    getSession(sessionId: string) {
+        return this.http.get<VisitorSession>(`${this.base}/${sessionId}`);
+    }
+
+    getJourney(sessionId: string) {
+        return this.http.get<VisitorJourney>(`${this.base}/${sessionId}/journey`);
+    }
+
+    deleteSession(sessionId: string) {
+        return this.http.delete(`${this.base}/${sessionId}`);
+    }
+
+    clearAll() {
+        return this.http.delete(this.base);
     }
 }

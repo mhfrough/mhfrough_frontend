@@ -96,8 +96,16 @@
                 moderated before publishing.</p>
         </div>
 
-        @if (error()) {
-        <div class="contact-banner contact-banner--error">{{ error() }}</div>
+        @if (success()) {
+        <div class="admin-alert admin-alert--success">
+            <i class="bi bi-check-circle-fill" style="flex-shrink:0"></i>
+            <span><strong>Thank you!</strong> Your review has been submitted for approval.</span>
+        </div>
+        } @else if (error()) {
+        <div class="admin-alert admin-alert--error">
+            <i class="bi bi-exclamation-octagon-fill" style="flex-shrink:0"></i>
+            <span>{{ error() }}</span>
+        </div>
         }
 
         <form #f="ngForm" (ngSubmit)="submit(f)" novalidate class="contact-form">

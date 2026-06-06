@@ -45,7 +45,7 @@
     </article>
 
     <!-- ─── Comments ────────────────────────────────────────────────── -->
-    <section class="blog-comments">
+    <section class="blog-comments" id="blog-comments">
 
         <div class="blog-comments-header">
             <p class="blog-eyebrow">Discussion</p>
@@ -76,11 +76,22 @@
 
         <!-- Submit form -->
         <div class="blog-comment-form-wrap">
-            <p class="blog-comment-form-title">Leave a Comment</p>
-            <p class="blog-comment-form-note">Comments are reviewed before publishing.</p>
+            <div class="blog-comment-form-header">
+                <p class="blog-comment-form-eyebrow">Join the discussion</p>
+                <h2 class="blog-comment-form-heading">Leave a Comment</h2>
+                <p class="blog-comment-form-subtext">Comments are reviewed before publishing.</p>
+            </div>
 
-            @if (commentError()) {
-            <div class="contact-banner contact-banner--error">{{ commentError() }}</div>
+            @if (commentSuccess()) {
+            <div class="admin-alert admin-alert--success" style="margin-bottom:1.5rem">
+                <i class="bi bi-check-circle-fill" style="flex-shrink:0"></i>
+                <span><strong>Comment submitted!</strong> It will appear here after review.</span>
+            </div>
+            } @else if (commentError()) {
+            <div class="admin-alert admin-alert--error" style="margin-bottom:1.5rem">
+                <i class="bi bi-exclamation-octagon-fill" style="flex-shrink:0"></i>
+                <span>{{ commentError() }}</span>
+            </div>
             }
 
             <form #cf="ngForm" (ngSubmit)="submitComment(cf)" novalidate class="contact-form">

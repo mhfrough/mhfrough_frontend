@@ -39,7 +39,7 @@
             </thead>
             <tbody>
                 @for (s of pagedSessions; track s.id) {
-                <tr [class.session-revoked]="!s.isActive">
+                <tr [class.session-revoked]="!s.isActive" [class.session-current-row]="s.id === currentSessionId">
                     <td>
                         <span class="session-browser">
                             <i class="bi" [class.bi-globe]="s.browser === 'Chrome' || s.browser === 'Edge'"
@@ -50,7 +50,10 @@
                         </span>
                         <span class="session-os">{{ s.os || 'Unknown OS' }}</span>
                         @if (s.id === currentSessionId) {
-                        <span class="session-current-badge"><i class="bi bi-record-circle"></i> Current session</span>
+                        <span class="session-current-badge">
+                            <span class="session-current-dot"></span>
+                            Current session
+                        </span>
                         }
                     </td>
                     <td>
@@ -70,7 +73,12 @@
                         }
                     </td>
                     <td>
-                        @if (s.isActive) {
+                        @if (s.isActive && s.id === currentSessionId) {
+                        <span class="session-active-now">
+                            <span class="session-current-dot"></span>
+                            Active now
+                        </span>
+                        } @else if (s.isActive) {
                         <span class="admin-badge admin-badge--on">Active</span>
                         } @else {
                         <span class="admin-badge admin-badge--danger">Revoked</span>

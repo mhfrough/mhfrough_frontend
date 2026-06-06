@@ -1,3 +1,7 @@
+<!-- Hidden file input (admin only) -->
+<input #fileInputEl type="file" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+    style="display:none" (change)="onFileInputChange($event)">
+
 <div class="ac-wrap">
 
     <!-- ─── Sidebar: sessions list ─────────────────────────────────────────── -->
@@ -20,7 +24,7 @@
                     autocomplete="off">
             </div>
         </div>
-        <ul class="ac-session-list">
+        <ul class="ac-session-list" #sessionListEl>
             @if (filteredSessions().length === 0) {
             <li class="ac-session-empty">{{ sessionSearch() ? 'No results' : 'No active sessions' }}</li>
             }
@@ -33,6 +37,11 @@
                 <div class="ac-session-info">
                     <span class="ac-session-name">{{ session.visitorName || 'Visitor' }}</span>
                     <span class="ac-session-time">{{ session.lastActivityAt | date:'MMM d, HH:mm' }}</span>
+                    @if (session.visitorSessionId && currentPageMap()[session.visitorSessionId]) {
+                    <span class="ac-session-page" title="{{ currentPageMap()[session.visitorSessionId] }}">
+                        <i class="bi bi-circle-fill ac-vs-live-dot"></i>{{ currentPageMap()[session.visitorSessionId] }}
+                    </span>
+                    }
                 </div>
                 <div class="ac-session-meta">
                     @if (session.unreadCount > 0) {
@@ -144,21 +153,97 @@
                 <div>
                     <p class="ac-chat-visitor-name">{{ getActiveSession()?.visitorName ?? 'Visitor' }}</p>
                     <p class="ac-chat-visitor-since">Since {{ getActiveSession()?.createdAt | date:'MMM d, HH:mm' }}</p>
+                    @let headerPage = getActiveVisitorCurrentPage();
+                    @if (headerPage) {
+                    <p class="ac-chat-visitor-page">
+                        <i class="bi bi-circle-fill ac-vs-live-dot"></i>{{ headerPage }}
+                    </p>
+                    }
                 </div>
             </div>
-            @if (getActiveSession()?.status === 'active') {
-            <button class="ac-close-btn" (click)="closeSession()" title="End chat">
-                <i class="bi bi-x-circle"></i> End Chat
-            </button>
-            }
+            <div class="ac-header-actions">
+                @if (getActiveSession()?.visitorSessionId) {
+                <button class="ac-icon-btn" [class.is-active]="visitorInfoOpen()"
+                    (click)="visitorInfoOpen.set(!visitorInfoOpen())" title="Visitor info">
+                    <i class="bi bi-person-lines-fill"></i>
+                </button>
+                }
+                @if (getActiveSession()?.status === 'active') {
+                <button class="ac-close-btn" (click)="closeSession()" title="End chat">
+                    <i class="bi bi-x-circle"></i> End Chat
+                </button>
+                }
+            </div>
         </div>
 
+        <!-- Visitor activity strip -->
+        @if (visitorInfoOpen() && getActiveSession()?.visitorSessionId) {
+        <div class="ac-visitor-strip">
+            @let currentPage = getActiveVisitorCurrentPage();
+            @let activity = getActiveVisitorActivity();
+
+            <!-- Current page (live) -->
+            <div class="ac-vs-current">
+                <span class="ac-vs-label">Current page</span>
+                @if (currentPage) {
+                <span class="ac-vs-live-pill">
+                    <i class="bi bi-circle-fill ac-vs-live-dot"></i>{{ currentPage }}
+                </span>
+                } @else {
+                <span class="ac-vs-none">—</span>
+                }
+            </div>
+
+            <!-- Activity feed -->
+            @if (activity.length > 0) {
+            <div class="ac-vs-feed">
+                @for (item of activity.slice(0, 3); track $index) {
+                <div class="ac-vs-feed-item" [class.ac-vs-feed-item--event]="item.type === 'event'">
+                    <i class="bi"
+                        [class.bi-arrow-right-short]="item.type === 'page'"
+                        [class.bi-lightning-charge-fill]="item.type === 'event'"></i>
+                    <span class="ac-vs-feed-label">{{ item.type === 'event' ? formatEventLabel(item.label) : item.label }}</span>
+                    <span class="ac-vs-feed-time">{{ formatActivityTime(item.timestamp) }}</span>
+                </div>
+                }
+            </div>
+            } @else if (!currentPage) {
+            <span class="ac-vs-none">No activity yet — visitor may not have tracking linked</span>
+            }
+        </div>
+        }
+
+        <!-- Session notes -->
+        @if (activeSessionId()) {
+        <div class="ac-notes-bar" [class.is-expanded]="notesExpanded()"
+             (mouseenter)="onNotesFocus()" (mouseleave)="onNotesBlur()">
+            <i class="bi bi-sticky ac-notes-icon"></i>
+            <textarea class="ac-notes-input" [value]="notesText()"
+                (input)="onNotesInput($any($event.target).value)"
+                placeholder="Notes…" rows="1"></textarea>
+            @if (notesSaved()) {
+            <span class="ac-notes-saved"><i class="bi bi-check2"></i></span>
+            }
+        </div>
+        }
+
         <!-- Messages -->
-        <div class="ac-messages" #msgsEl>
+        <div class="ac-messages" #msgsEl
+            (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)"
+            [class.ac-drag-over]="isDragOver()">
+            <!-- Drag overlay -->
+            @if (isDragOver()) {
+            <div class="ac-drag-overlay">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span>Drop files to send</span>
+            </div>
+            }
+
             @for (msg of activeMsgs(); track trackById($index, msg)) {
             <div class="ac-msg" [class.ac-msg--admin]="msg.sender === 'admin'"
                 [class.ac-msg--visitor]="msg.sender === 'visitor'"
                 [class.ac-msg--unread]="msg.sender === 'visitor' && !msg.read">
+
                 @if (msg.messageType === 'audio' && msg.audioUrl) {
                 @let bars = audioBarsFor(msg.id);
                 <div class="ac-audio-msg ac-msg-bubble">
@@ -195,9 +280,41 @@
                         </div>
                     </div>
                 </div>
+
+                } @else if (msg.messageType === 'file' && msg.fileUrl) {
+
+                @if (isImage(msg.fileType)) {
+                <div class="ac-file-msg ac-file-msg--image ac-msg-bubble"
+                    (click)="openLightbox(msg.id)">
+                    <img [src]="msg.fileUrl" [alt]="msg.fileName ?? 'image'" loading="lazy" />
+                    @if (msg.content && !msg.content.startsWith('[File:')) {
+                    <span class="ac-file-caption" [innerHTML]="msg.content"></span>
+                    }
+                </div>
+                } @else if (isVideo(msg.fileType)) {
+                <div class="ac-video-msg">
+                    <video class="ac-video-player" [src]="msg.fileUrl" controls preload="metadata" playsinline>
+                        Your browser does not support video playback.
+                    </video>
+                    @if (msg.content && !msg.content.startsWith('[File:')) {
+                    <span class="ac-video-caption" [innerHTML]="msg.content"></span>
+                    }
+                </div>
                 } @else {
-                <span class="ac-msg-bubble">{{ msg.content }}</span>
+                <a class="ac-file-msg ac-msg-bubble" [href]="msg.fileUrl" target="_blank" rel="noopener">
+                    <i class="bi" [class]="fileIcon(msg.fileType)"></i>
+                    <div class="ac-file-doc-meta">
+                        <span class="ac-file-name">{{ msg.fileName }}</span>
+                        <span class="ac-file-size">{{ formatFileSize(msg.fileSize) }}</span>
+                    </div>
+                    <i class="bi bi-download ac-file-dl"></i>
+                </a>
                 }
+
+                } @else {
+                <span class="ac-msg-bubble ac-msg-bubble--rich" [innerHTML]="msg.content"></span>
+                }
+
                 <span class="ac-msg-time">
                     {{ msg.createdAt | date:'HH:mm' }}
                     @if (msg.isBot) {
@@ -216,6 +333,29 @@
             </div>
             }
         </div>
+
+        <!-- Pending files preview strip — send via main send button -->
+        @if (pendingFiles().length > 0) {
+        <div class="ac-pending-files">
+            @for (pf of pendingFiles(); track $index; let i = $index) {
+            <div class="ac-pending-file">
+                @if (pf.previewUrl && pf.file.type.startsWith('video/')) {
+                <video class="ac-pending-thumb ac-pending-thumb--video" [src]="pf.previewUrl" preload="metadata" muted playsinline></video>
+                } @else if (pf.previewUrl) {
+                <img class="ac-pending-thumb" [src]="pf.previewUrl" [alt]="pf.file.name" />
+                } @else {
+                <div class="ac-pending-icon">
+                    <i class="bi" [class]="fileIcon(pf.file.type)"></i>
+                </div>
+                }
+                <span class="ac-pending-name">{{ pf.file.name }}</span>
+                <button class="ac-pending-remove" type="button" (click)="removePendingFile(i)" aria-label="Remove">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            }
+        </div>
+        }
 
         <!-- Input -->
         @if (getActiveSession()?.status === 'active') {
@@ -252,15 +392,31 @@
                 <span class="ac-uploading-label">Sending audio…</span>
             </div>
             } @else {
-            <textarea class="ac-textarea" [(ngModel)]="messageText" (keydown)="onKeydown($event)" (input)="onInput()"
-                (input)="autoResize($event)" placeholder="Type a reply…" rows="1"></textarea>
-            @if (messageText.trim()) {
-            <button class="ac-send-btn" (click)="sendMessage()" [disabled]="!messageText.trim()">
+            <div class="ac-editor-wrap">
+                <div class="ac-editor-toolbar">
+                    <app-rte-toolbar [el]="editorEl ?? null" mode="minimal"></app-rte-toolbar>
+                    <div class="ac-editor-toolbar-extra">
+                        <button type="button" class="ac-fmt-btn" (click)="openFilePicker()" title="Attach files">
+                            <i class="bi bi-paperclip"></i>
+                        </button>
+                        @if (!canSend()) {
+                        <button type="button" class="ac-fmt-btn" (click)="startRecording()" title="Record audio note">
+                            <i class="bi bi-mic"></i>
+                        </button>
+                        }
+                    </div>
+                </div>
+                <textarea #editorEl class="ac-editor" placeholder="Type a reply…"
+                    (keydown)="onKeydown($event)" (input)="onEditorInput()"
+                    aria-label="Message input" rows="2"></textarea>
+            </div>
+            @if (canSend()) {
+            <button class="ac-send-btn" (click)="sendMessage()" [disabled]="isSendingFiles()">
+                @if (isSendingFiles()) {
+                <span class="ac-send-spinner"></span>
+                } @else {
                 <i class="bi bi-send-fill"></i>
-            </button>
-            } @else {
-            <button class="ac-mic-btn" (click)="startRecording()" type="button" aria-label="Record audio note">
-                <i class="bi bi-mic"></i>
+                }
             </button>
             }
             }
@@ -278,6 +434,66 @@
     </main>
 
 </div>
+
+<!-- Lightbox -->
+@if (lightboxMsg(); as lbMsg) {
+<div class="ac-lightbox-overlay" (click)="closeLightbox()" role="dialog" aria-modal="true" aria-label="Image viewer">
+
+    <!-- Top bar -->
+    <div class="ac-lightbox-topbar" (click)="$event.stopPropagation()">
+        @if (lightboxImgs().length > 1) {
+        <span class="ac-lightbox-counter">{{ lightboxIndex() + 1 }} / {{ lightboxImgs().length }}</span>
+        }
+        @let caption = lightboxCaption(lbMsg);
+        <span class="ac-lightbox-caption">{{ caption || lbMsg.fileName || '' }}</span>
+        <div class="ac-lightbox-zoom-bar">
+            <button class="ac-lightbox-zoom-btn" type="button" (click)="lbZoomOut()" [disabled]="lbZoom() <= 0.5" aria-label="Zoom out"><i class="bi bi-dash"></i></button>
+            <span class="ac-lightbox-zoom-val" (click)="lbZoomReset()" title="Reset zoom">{{ (lbZoom() * 100).toFixed(0) }}%</span>
+            <button class="ac-lightbox-zoom-btn" type="button" (click)="lbZoomIn()" [disabled]="lbZoom() >= 3" aria-label="Zoom in"><i class="bi bi-plus"></i></button>
+        </div>
+        <a class="ac-lightbox-dl" [href]="lbMsg.fileUrl!" download [attr.download]="lbMsg.fileName"
+            target="_blank" rel="noopener" aria-label="Download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 3v13M6 11l6 6 6-6M4 20h16"/></svg>
+        </a>
+        <button class="ac-lightbox-close" type="button" (click)="closeLightbox()" aria-label="Close">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <!-- Image stage -->
+    <div class="ac-lightbox-stage" (click)="$event.stopPropagation()">
+        @if (lightboxImgs().length > 1) {
+        <button class="ac-lightbox-arrow ac-lightbox-arrow--prev" type="button"
+            (click)="lightboxPrev()" aria-label="Previous image">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        }
+        <div class="ac-lightbox-img-wrap" [class.ac-lb-scrollable]="lbZoom() > 1">
+            <img class="ac-lightbox-img" [src]="lbMsg.fileUrl!" [alt]="lbMsg.fileName ?? 'image'"
+                [style.transform]="'scale(' + lbZoom() + ')'" [style.cursor]="lbZoom() > 1 ? 'move' : 'default'" />
+        </div>
+        @if (lightboxImgs().length > 1) {
+        <button class="ac-lightbox-arrow ac-lightbox-arrow--next" type="button"
+            (click)="lightboxNext()" aria-label="Next image">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        }
+    </div>
+
+    <!-- Thumbnail strip -->
+    @if (lightboxImgs().length > 1) {
+    <div class="ac-lightbox-thumbs" (click)="$event.stopPropagation()">
+        @for (img of lightboxImgs(); track img.id; let i = $index) {
+        <button class="ac-lightbox-thumb" [class.is-active]="i === lightboxIndex()"
+            (click)="lightboxIndex.set(i)" [attr.aria-label]="'Image ' + (i + 1)" type="button">
+            <img [src]="img.fileUrl!" [alt]="img.fileName ?? ''" loading="lazy" />
+        </button>
+        }
+    </div>
+    }
+
+</div>
+}
 
 <!-- Confirm End Chat Modal -->
 @if (closeTargetId()) {

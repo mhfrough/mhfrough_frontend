@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy, inject, signal, HostBinding, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, inject, signal, HostBinding, ViewChild, ElementRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
+import { AdminFloatingChatComponent } from '../floating-chat/admin-floating-chat.component';
 import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
@@ -14,10 +15,10 @@ import { AdminSettingsService } from '../../../core/services/admin-settings.serv
 @Component({
     selector: 'app-admin-layout',
     standalone: true,
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, AdminFloatingChatComponent],
     templateUrl: './admin-layout.component.html',
 })
-export class AdminLayoutComponent implements OnInit, OnDestroy {
+export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     @HostBinding('attr.data-bs-theme') readonly darkTheme = 'dark';
     @ViewChild('sidebarNav') sidebarNav?: ElementRef<HTMLUListElement>;
     readonly auth = inject(AuthService);
@@ -74,14 +75,35 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
                 .subscribe((e) => {
                     this.setTitleFromUrl((e as NavigationEnd).urlAfterRedirects);
                     this.menuOpen.set(false);
-                    setTimeout(() => {
-                        const active = this.sidebarNav?.nativeElement?.querySelector<HTMLElement>('.is-active');
-                        active?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                    }, 50);
+                    this.scrollActiveIntoView();
                 })
+        );
+        // Track visitor current pages and activity for linking to chat sessions
+        this.subs.add(
+            this.realtime.on<{ sessionId: string; path: string; timestamp: string }>('visitor:page_view')
+                .subscribe(({ sessionId, path, timestamp }) => this.chat.updateCurrentPage(sessionId, path, timestamp))
+        );
+        this.subs.add(
+            this.realtime.on<{ sessionId: string; eventName: string; path: string | null; timestamp: string }>('visitor:event')
+                .subscribe(({ sessionId, eventName, path, timestamp }) => this.chat.logVisitorEvent(sessionId, eventName, path, timestamp))
+        );
+        this.subs.add(
+            this.realtime.on<{ sessionId: string }>('visitor:left')
+                .subscribe(({ sessionId }) => this.chat.clearCurrentPage(sessionId))
         );
         // Set title for the initial load
         this.setTitleFromUrl(this.router.url);
+    }
+
+    private scrollActiveIntoView(): void {
+        setTimeout(() => {
+            const active = this.sidebarNav?.nativeElement?.querySelector<HTMLElement>('.is-active');
+            active?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }, 50);
+    }
+
+    ngAfterViewInit() {
+        this.scrollActiveIntoView();
     }
 
     ngOnDestroy() {

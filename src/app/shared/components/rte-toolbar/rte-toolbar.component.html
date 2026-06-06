@@ -66,7 +66,7 @@
         <button type="button" class="rte-btn" title="Emoji" (click)="toggleEmoji($event)"><i
                 class="bi bi-emoji-smile"></i></button>
         @if (showEmoji()) {
-        <div class="rte-dropdown-panel rte-emoji-grid">
+        <div class="rte-dropdown-panel rte-emoji-grid" [class.rte-dropdown-panel--right]="emojiAlignRight()">
             @for (emoji of emojis; track emoji) {
             <button type="button" class="rte-emoji-btn" (click)="insertEmoji(emoji)">{{ emoji }}</button>
             }
@@ -80,7 +80,7 @@
         <button type="button" class="rte-btn" title="Text Color" (click)="toggleColor($event)"><i
                 class="bi bi-fonts"></i></button>
         @if (showColor()) {
-        <div class="rte-dropdown-panel rte-palette">
+        <div class="rte-dropdown-panel rte-palette" [class.rte-dropdown-panel--right]="colorAlignRight()">
             @for (c of textColors; track c) {
             <button type="button" class="rte-swatch" [style.background]="c" [title]="c"
                 (click)="applyColor(c)"></button>
@@ -92,7 +92,7 @@
         <button type="button" class="rte-btn" title="Background Color" (click)="toggleBg($event)"><i
                 class="bi bi-brush"></i></button>
         @if (showBg()) {
-        <div class="rte-dropdown-panel rte-palette">
+        <div class="rte-dropdown-panel rte-palette" [class.rte-dropdown-panel--right]="bgAlignRight()">
             @for (c of bgColors; track c) {
             <button type="button" class="rte-swatch" [style.background]="c" [title]="c" (click)="applyBg(c)"></button>
             }

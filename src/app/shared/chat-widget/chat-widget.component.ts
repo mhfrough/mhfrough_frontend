@@ -1,6 +1,6 @@
 import {
     Component, OnInit, OnDestroy, inject, signal, computed, PLATFORM_ID,
-    ViewChild, ElementRef, effect, untracked, afterRenderEffect, NgZone,
+    ViewChild, ElementRef, effect, untracked, afterRenderEffect, NgZone, HostListener,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -9,6 +9,7 @@ import { FooterSettingsService } from '../../core/services/footer-settings.servi
 import { ActivityLogService } from '../../core/services/activity-log.service';
 import { SoundService } from '../../core/services/sound.service';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
+import { UserInfoService } from '../../core/services/user-info.service';
 
 @Component({
     selector: 'app-chat-widget',
@@ -24,6 +25,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     private readonly activityLog = inject(ActivityLogService);
     private readonly sound = inject(SoundService);
     private readonly zone = inject(NgZone);
+    private readonly userInfo = inject(UserInfoService);
 
     @ViewChild('messagesEl') messagesEl!: ElementRef<HTMLDivElement>;
 
@@ -132,10 +134,11 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
                 this.visitorName = visitorName;
                 this.started.set(true);
                 this.chatService.connectAsVisitor(visitorName);
-                // Already in an active session — show widget immediately
                 this.visible.set(true);
             } else {
-                // Delay trigger appearance by 7 seconds
+                // Pre-fill from mhf_contact_user localStorage if available
+                const saved = this.userInfo.get();
+                if (saved?.name) this.visitorName = saved.name;
                 this._visibleTimer = setTimeout(() => this.visible.set(true), 7000);
             }
         }
@@ -203,6 +206,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         this.started.set(true);
         this._shouldScroll.set(true);
         this.chatService.connectAsVisitor(name);
+        // Persist name to shared localStorage contact key
+        this.userInfo.save({ name });
     }
 
     startNewChat() {
@@ -446,6 +451,89 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         const m = Math.floor(secs / 60);
         const s = Math.floor(secs % 60).toString().padStart(2, '0');
         return `${m}:${s}`;
+    }
+
+    // ─── Lightbox ─────────────────────────────────────────────────────────────
+    readonly lightboxIndex = signal<number>(-1);
+    readonly lbZoom = signal(1);
+
+    readonly lightboxImgs = computed(() =>
+        this.messages().filter(m => m.messageType === 'file' && m.fileUrl && this.isImage(m.fileType))
+    );
+
+    readonly lightboxMsg = computed(() => {
+        const idx = this.lightboxIndex();
+        const imgs = this.lightboxImgs();
+        return idx >= 0 && idx < imgs.length ? imgs[idx] : null;
+    });
+
+    lbZoomIn()    { this.lbZoom.update(z => Math.min(z + 0.5, 3)); }
+    lbZoomOut()   { this.lbZoom.update(z => Math.max(z - 0.5, 0.5)); }
+    lbZoomReset() { this.lbZoom.set(1); }
+
+    openLightbox(msgId: string) {
+        const idx = this.lightboxImgs().findIndex(m => m.id === msgId);
+        if (idx >= 0) { this.lightboxIndex.set(idx); this.lbZoom.set(1); }
+    }
+
+    closeLightbox() { this.lightboxIndex.set(-1); this.lbZoom.set(1); }
+
+    lightboxNext() {
+        const max = this.lightboxImgs().length - 1;
+        this.lightboxIndex.update(i => i < max ? i + 1 : 0);
+        this.lbZoom.set(1);
+    }
+
+    lightboxPrev() {
+        const max = this.lightboxImgs().length - 1;
+        this.lightboxIndex.update(i => i > 0 ? i - 1 : max);
+        this.lbZoom.set(1);
+    }
+
+    @HostListener('document:keydown', ['$event'])
+    onLightboxKey(e: KeyboardEvent) {
+        if (this.lightboxIndex() < 0) return;
+        if (e.key === 'Escape') { this.closeLightbox(); return; }
+        if (e.key === 'ArrowLeft') { this.lightboxPrev(); return; }
+        if (e.key === 'ArrowRight') { this.lightboxNext(); return; }
+        if (e.key === '+' || e.key === '=') { this.lbZoomIn(); return; }
+        if (e.key === '-') { this.lbZoomOut(); return; }
+    }
+
+    lightboxCaption(msg: { content?: string | null } | null): string {
+        if (!msg?.content) return '';
+        if (msg.content.startsWith('[File:') && msg.content.endsWith(']')) return '';
+        const div = document.createElement('div');
+        div.innerHTML = msg.content;
+        return div.textContent?.trim() ?? '';
+    }
+
+    isImage(type: string | null | undefined): boolean {
+        return !!type?.startsWith('image/');
+    }
+
+    isVideo(type: string | null | undefined): boolean {
+        return !!type?.startsWith('video/');
+    }
+
+    fileIcon(type: string | null | undefined): string {
+        if (!type) return 'bi-file-earmark';
+        if (type.startsWith('image/')) return 'bi-file-earmark-image';
+        if (type.startsWith('video/')) return 'bi-file-earmark-play';
+        if (type.startsWith('audio/')) return 'bi-file-earmark-music';
+        if (type === 'application/pdf') return 'bi-file-earmark-pdf';
+        if (type.includes('word') || type.includes('document')) return 'bi-file-earmark-word';
+        if (type.includes('sheet') || type.includes('excel')) return 'bi-file-earmark-spreadsheet';
+        if (type.includes('zip')) return 'bi-file-earmark-zip';
+        if (type.startsWith('text/')) return 'bi-file-earmark-text';
+        return 'bi-file-earmark';
+    }
+
+    formatFileSize(bytes: number | null | undefined): string {
+        if (!bytes) return '';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     }
 
     audioBarsFor(msgId: string): number[] {

@@ -4,7 +4,7 @@
     <div class="legal-header">
       <p class="legal-eyebrow">Legal</p>
       <h1 class="legal-heading">Terms &amp; Conditions</h1>
-      <p class="legal-meta">Last updated: May 2025</p>
+      <p class="legal-meta">Last updated: June 2025</p>
     </div>
 
     <div class="legal-body">
@@ -88,21 +88,41 @@
         accurate and that you consent to me using it to respond to your inquiry as described in the <a
           routerLink="/privacy">Privacy Policy</a>.</p>
 
-      <h2>10. Governing Law</h2>
+      <h2>10. Visitor Analytics &amp; Tracking</h2>
+      <p>By using this site you acknowledge that anonymous usage data is collected automatically. This includes pages
+        visited, time on page, screen resolution, browser language, referrer URL, and named interaction events. This
+        data is used solely to improve the site experience and is not sold or shared with third parties. See the <a
+          routerLink="/privacy">Privacy Policy</a> for full details.</p>
+
+      <h2>11. AI-Assisted Chat</h2>
+      <p>The live-chat feature may use an AI language model (Google Gemini) to generate automatic replies. You
+        acknowledge that:</p>
+      <ul>
+        <li>AI-generated responses are automated and may not always be accurate or complete.</li>
+        <li>I am not liable for any decisions you make based solely on an AI-generated chat reply.</li>
+        <li>Your chat messages may be processed by Google&rsquo;s Gemini API in accordance with Google&rsquo;s terms
+          and privacy policy.</li>
+      </ul>
+
+      <h2>12. Governing Law</h2>
       <p>These Terms are governed by the laws of <strong>Pakistan</strong>. Any disputes shall first be attempted to be
         resolved through good-faith communication. I am a simple individual developer and not a large corporation
         &mdash; I ask that you contact me directly before pursuing any formal action.</p>
 
-      <h2>11. Changes to These Terms</h2>
+      <h2>13. Changes to These Terms</h2>
       <p>I may update these Terms from time to time. The &ldquo;Last updated&rdquo; date at the top will reflect
         changes. Continued use of the site constitutes acceptance of the updated Terms.</p>
 
-      <h2>12. Contact</h2>
+      <h2>14. Contact</h2>
       <p>For any questions about these Terms, please contact:</p>
       <p>
-        <strong>Mohammad Hamza</strong><br>
-        Karāchi, Pakistan<br>
-        <a href="mailto:mhfrough@yahoo.com">mhfrough&#64;yahoo.com</a>
+        <strong>{{ footerSettings.data().displayName || 'Mohammad Hamza' }}</strong><br>
+        @if (footerSettings.data().location && isSocialVisible('location')) {
+        {{ footerSettings.data().location }}<br>
+        }
+        @if (footerSettings.data().contactEmail && isSocialVisible('contactEmail')) {
+        <a [href]="'mailto:' + footerSettings.data().contactEmail">{{ footerSettings.data().contactEmail }}</a>
+        }
       </p>
 
     </div>

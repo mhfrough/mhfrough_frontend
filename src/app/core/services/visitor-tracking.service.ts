@@ -23,15 +23,16 @@ export class VisitorTrackingService {
     ping(path: string) {
         if (!isPlatformBrowser(this.platformId)) return;
 
-        // Send leave event for previous page before tracking new one
+        const cleanPath = path.split('?')[0].split('#')[0] || '/';
+
         if (this.currentPath && this.sessionId) {
             this.emitLeave(this.currentPath);
         }
 
-        this.currentPath = path;
+        this.currentPath = cleanPath;
         this.pageStartMs = Date.now();
 
-        const body: Record<string, unknown> = { path };
+        const body: Record<string, unknown> = { path: cleanPath };
         if (this.sessionId) body['sessionId'] = this.sessionId;
         body['screenRes'] = `${screen.width}x${screen.height}`;
         body['language'] = (navigator.language ?? '').slice(0, 10) || undefined;
@@ -43,11 +44,22 @@ export class VisitorTrackingService {
                 this.sessionId = res.sessionId;
                 sessionStorage.setItem(SESSION_KEY, res.sessionId);
             },
-            error: () => { /* silent — never block UX */ },
+            error: () => { },
         });
     }
 
-    /** Call on navigation away or page unload via sendBeacon */
+    /** Track a named user action — call from components on meaningful interactions */
+    trackEvent(eventName: string, metadata?: Record<string, string>) {
+        if (!isPlatformBrowser(this.platformId) || !this.sessionId) return;
+        const body: Record<string, unknown> = {
+            sessionId: this.sessionId,
+            eventName,
+            path: this.currentPath ?? undefined,
+        };
+        if (metadata) body['metadata'] = metadata;
+        this.http.post(`${this.api}/event`, body).subscribe({ error: () => { } });
+    }
+
     sendLeave(path?: string) {
         if (!isPlatformBrowser(this.platformId) || !this.sessionId) return;
         this.emitLeave(path ?? this.currentPath ?? '');

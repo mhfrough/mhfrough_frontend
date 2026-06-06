@@ -48,6 +48,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
                 this.router.events.pipe(filter(e => e instanceof NavigationEnd))
                     .subscribe((e) => this.tracker.ping((e as NavigationEnd).urlAfterRedirects)),
             );
+            document.addEventListener('visibilitychange', this.onVisibilityChange);
         }
 
         if (isPlatformBrowser(this.platformId)) {
@@ -63,8 +64,15 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         if (this.permissionTimer !== null) clearTimeout(this.permissionTimer);
         this.tracker.sendLeave();
         this.trackingSub.unsubscribe();
-        // realtime stays connected across navigation; disconnect only when leaving the site
+        document.removeEventListener('visibilitychange', this.onVisibilityChange);
     }
+
+    @HostListener('window:beforeunload')
+    onBeforeUnload() { this.tracker.sendLeave(); }
+
+    private readonly onVisibilityChange = () => {
+        if (document.visibilityState === 'hidden') this.tracker.sendLeave();
+    };
 
     @HostListener('window:scroll')
     onScroll() { this.showBackToTop.set(window.scrollY > 500); }

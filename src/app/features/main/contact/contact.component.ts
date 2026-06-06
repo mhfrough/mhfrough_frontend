@@ -9,6 +9,7 @@ import { FooterSettingsService } from '../../../core/services/footer-settings.se
 import { EditorHelperService } from '../../../core/services/editor-helper.service';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 import { FrontToastService } from '../../../core/services/front-toast.service';
+import { VisitorTrackingService } from '../../../core/services/visitor-tracking.service';
 import { Title } from '@angular/platform-browser';
 
 @Component({
@@ -25,6 +26,7 @@ export class ContactComponent implements OnInit {
     private userInfo = inject(UserInfoService);
     readonly footerSettings = inject(FooterSettingsService);
     private toast = inject(FrontToastService);
+    private tracking = inject(VisitorTrackingService);
     private titleService = inject(Title);
 
     isSocialVisible(key: string): boolean {
@@ -34,6 +36,7 @@ export class ContactComponent implements OnInit {
 
     readonly sending = signal(false);
     readonly error = signal('');
+    readonly success = signal(false);
     readonly dynamicSubject = signal<string | null>(null);
 
     private readonly knownSubjects = [
@@ -70,6 +73,7 @@ export class ContactComponent implements OnInit {
         if (form.invalid) return;
         this.sending.set(true);
         this.error.set('');
+        this.success.set(false);
 
         const raw = this.formData;
         const payload: Record<string, string> = { name: raw.name, email: raw.email, message: raw.message };
@@ -78,11 +82,15 @@ export class ContactComponent implements OnInit {
 
         this.service.submit(payload).subscribe({
             next: () => {
+                this.tracking.trackEvent('contact_submit', { subject: raw.subject || 'none' });
                 this.userInfo.save({ name: raw.name, email: raw.email, phone: raw.phone });
-                this.toast.success('Message sent — I\'ll get back to you soon.');
+                this.success.set(true);
                 this.sending.set(false);
                 this.formData = { ...this.formData, subject: '', message: '' };
                 form.resetForm(this.formData);
+                if (isPlatformBrowser(this.platformId)) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             },
             error: () => { this.error.set('Something went wrong. Please try again.'); this.sending.set(false); },
         });
@@ -92,6 +100,17 @@ export class ContactComponent implements OnInit {
         this.formData = { name: '', email: '', phone: '', subject: '', message: '' };
         form.resetForm(this.formData);
         this.error.set('');
+        this.success.set(false);
+    }
+
+    filterPhoneInput(e: KeyboardEvent) {
+        if (e.key.length === 1 && !/[\d+\-\s().]/.test(e.key)) e.preventDefault();
+    }
+
+    filterPhonePaste(e: ClipboardEvent) {
+        e.preventDefault();
+        const clean = (e.clipboardData?.getData('text') ?? '').replace(/[^\d+\-\s().]/g, '').slice(0, 20);
+        this.formData.phone = clean;
     }
 
     format(el: HTMLTextAreaElement, open: string, close: string): void {

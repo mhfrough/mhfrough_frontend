@@ -10,7 +10,7 @@ export class ProjectsService {
     uploadImage(file: File) {
         const fd = new FormData();
         fd.append('file', file);
-        return this.http.post<{ url: string }>(`${environment.apiUrl}/upload/image`, fd);
+        return this.http.post<{ url: string }>(`${environment.apiUrl}/upload/image?type=project`, fd);
     }
 
     getAll() { return this.http.get<any[]>(this.base); }

@@ -22,6 +22,9 @@ export class RteToolbarComponent {
     readonly showEmoji = signal(false);
     readonly showColor = signal(false);
     readonly showBg = signal(false);
+    readonly emojiAlignRight = signal(false);
+    readonly colorAlignRight = signal(false);
+    readonly bgAlignRight = signal(false);
     readonly linkModal = signal<{ url: string; text: string } | null>(null);
     readonly imageModal = signal<{ url: string; alt: string } | null>(null);
 
@@ -76,10 +79,17 @@ export class RteToolbarComponent {
 
     // ─── Emoji dropdown ────────────────────────────────────────────────────
 
+    private alignRight(e: MouseEvent): boolean {
+        const btn = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        // panel is ~180px wide; check if it would overflow the right edge
+        return btn.left + 180 > window.innerWidth - 8;
+    }
+
     toggleEmoji(e: MouseEvent) {
         e.stopPropagation();
         const next = !this.showEmoji();
         this.closeDropdowns();
+        if (next) this.emojiAlignRight.set(this.alignRight(e));
         this.showEmoji.set(next);
     }
 
@@ -99,6 +109,7 @@ export class RteToolbarComponent {
         e.stopPropagation();
         const next = !this.showColor();
         this.closeDropdowns();
+        if (next) this.colorAlignRight.set(this.alignRight(e));
         this.showColor.set(next);
     }
 
@@ -106,6 +117,7 @@ export class RteToolbarComponent {
         e.stopPropagation();
         const next = !this.showBg();
         this.closeDropdowns();
+        if (next) this.bgAlignRight.set(this.alignRight(e));
         this.showBg.set(next);
     }
 
@@ -202,7 +214,7 @@ export class RteToolbarComponent {
         const fd = new FormData();
         fd.append('file', file);
         this.imageUploading.set(true);
-        this.http.post<{ url: string }>(`${environment.apiUrl}/upload/image`, fd).subscribe({
+        this.http.post<{ url: string }>(`${environment.apiUrl}/upload/image?type=content`, fd).subscribe({
             next: ({ url }) => {
                 this.imagePreview.set(url);
                 this.imageModal.update(m => m ? { ...m, url } : null);

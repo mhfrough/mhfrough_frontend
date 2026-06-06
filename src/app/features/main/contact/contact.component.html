@@ -9,9 +9,17 @@
                 I'll get back to you.</p>
         </div>
 
-        <!-- ─── Error banner (inline validation) ───────────────────── -->
-        @if (error()) {
-        <div class="contact-banner contact-banner--error">{{ error() }}</div>
+        <!-- ─── Alerts ──────────────────────────────────────────────── -->
+        @if (success()) {
+        <div class="admin-alert admin-alert--success">
+            <i class="bi bi-check-circle-fill" style="flex-shrink:0"></i>
+            <span><strong>Message sent!</strong> I'll get back to you soon.</span>
+        </div>
+        } @else if (error()) {
+        <div class="admin-alert admin-alert--error">
+            <i class="bi bi-exclamation-octagon-fill" style="flex-shrink:0"></i>
+            <span>{{ error() }}</span>
+        </div>
         }
 
         <!-- ─── Form ─────────────────────────────────────────────────── -->
@@ -45,7 +53,9 @@
                 <div class="contact-field">
                     <label class="contact-label label-optional">Phone</label>
                     <input [(ngModel)]="formData.phone" name="phone" type="tel" maxlength="20" class="contact-input"
-                        placeholder="+92 300 0000000">
+                        placeholder="+92 300 0000000"
+                        (keydown)="filterPhoneInput($event)"
+                        (paste)="filterPhonePaste($event)">
                 </div>
                 <div class="contact-field">
                     <label class="contact-label label-optional">Subject</label>

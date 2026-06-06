@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -23,8 +23,10 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     private router = inject(Router);
     private toast = inject(FrontToastService);
     private titleService = inject(Title);
+    private platformId = inject(PLATFORM_ID);
     readonly sending = signal(false);
     readonly error = signal('');
+    readonly success = signal(false);
     readonly reviews = signal<any[]>([]);
     readonly loadingReviews = signal(true);
     selectedRating = 5;
@@ -126,13 +128,17 @@ export class FeedbackComponent implements OnInit, OnDestroy {
         if (form.invalid) return;
         this.sending.set(true);
         this.error.set('');
+        this.success.set(false);
         this.service.submit({ ...form.value, rating: this.selectedRating }).subscribe({
             next: () => {
                 this.userInfo.save({ name: form.value.name, email: form.value.email });
-                this.toast.success('Thank you! Your review has been submitted for approval.');
+                this.success.set(true);
                 this.sending.set(false);
                 form.reset();
                 this.selectedRating = 5;
+                if (isPlatformBrowser(this.platformId)) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             },
             error: () => { this.error.set('Something went wrong. Please try again.'); this.sending.set(false); },
         });
