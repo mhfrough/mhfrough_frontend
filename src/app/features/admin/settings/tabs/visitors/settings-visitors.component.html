@@ -272,8 +272,8 @@
                         }
                     </td>
                     <td style="text-align:right;padding-left:0" (click)="$event.stopPropagation()">
-                        <button class="btn-text-danger" style="padding:.2rem .4rem;font-size:.7rem" (click)="confirmDeleteSession(s.id)" title="Delete session">
-                            <i class="bi bi-trash"></i>
+                        <button class="btn-text-danger" (click)="confirmDeleteSession(s.id)" title="Delete session">
+                            <i class="bi bi-trash"></i> Delete
                         </button>
                     </td>
                 </tr>

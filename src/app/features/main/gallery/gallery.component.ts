@@ -5,7 +5,9 @@ import {
 import { isPlatformBrowser, CommonModule, DatePipe } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 
 @Component({
@@ -16,8 +18,10 @@ import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.di
 })
 export class GalleryComponent implements OnInit, OnDestroy {
     private galleryService = inject(GalleryService);
+    private realtime = inject(RealtimeService);
     private platformId = inject(PLATFORM_ID);
     private titleService = inject(Title);
+    private subs = new Subscription();
 
     readonly PAGE_SIZE = 24;
 
@@ -54,10 +58,37 @@ export class GalleryComponent implements OnInit, OnDestroy {
             next: (tags) => this.allTags.set(tags),
         });
         this.loadPage(1, true);
+
+        this.subs.add(this.realtime.on<GalleryItem>('gallery:published').subscribe(item => {
+            this.items.update(list => [item, ...list]);
+            this.total.update(t => t + 1);
+        }));
+
+        this.subs.add(this.realtime.on<GalleryItem>('gallery:updated').subscribe(item => {
+            this.items.update(list => list.map(i => i.id === item.id ? item : i));
+        }));
+
+        this.subs.add(this.realtime.on<{ id: string }>('gallery:unpublished').subscribe(({ id }) => {
+            this.items.update(list => list.filter(i => i.id !== id));
+            this.total.update(t => Math.max(0, t - 1));
+        }));
+
+        this.subs.add(this.realtime.on<{ id: string }>('gallery:deleted').subscribe(({ id }) => {
+            this.items.update(list => list.filter(i => i.id !== id));
+            this.total.update(t => Math.max(0, t - 1));
+        }));
+
+        this.subs.add(this.realtime.on<{ items: { id: string; sortOrder: number }[] }>('gallery:reordered').subscribe(({ items }) => {
+            this.items.update(list => list.map(i => {
+                const match = items.find(r => r.id === i.id);
+                return match ? { ...i, sortOrder: match.sortOrder } : i;
+            }).sort((a, b) => a.sortOrder - b.sortOrder));
+        }));
     }
 
     ngOnDestroy() {
         clearTimeout(this.searchTimer);
+        this.subs.unsubscribe();
         this.closeLightbox();
     }
 

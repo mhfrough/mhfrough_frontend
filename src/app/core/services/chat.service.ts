@@ -33,6 +33,7 @@ export interface ChatSession {
     unreadCount: number;
     visitorSessionId?: string | null;
     notes?: string | null;
+    botEnabled?: boolean;
 }
 
 export interface ChatSettings {
@@ -314,6 +315,13 @@ export class ChatService {
 
     updateSessionNotes(sessionId: string, notes: string) {
         return this.http.post(`${environment.apiUrl}/chat/sessions/${sessionId}/notes`, { notes });
+    }
+
+    toggleSessionBot(sessionId: string, enabled: boolean) {
+        this.socket?.emit('admin:toggle_bot', { sessionId, enabled });
+        this.sessions.update(list =>
+            list.map(s => s.id === sessionId ? { ...s, botEnabled: enabled } : s)
+        );
     }
 
     disconnectAdmin() {

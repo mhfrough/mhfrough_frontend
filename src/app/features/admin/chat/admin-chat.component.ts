@@ -472,6 +472,13 @@ export class AdminChatComponent implements OnInit, OnDestroy {
         return this.sessions().find(s => s.id === this.activeSessionId());
     }
 
+    toggleBot() {
+        const session = this.getActiveSession();
+        if (!session) return;
+        const next = !(session.botEnabled ?? true);
+        this.chatService.toggleSessionBot(session.id, next);
+    }
+
     // ─── Settings tab ─────────────────────────────────────────────────────────
 
     openSettings() {

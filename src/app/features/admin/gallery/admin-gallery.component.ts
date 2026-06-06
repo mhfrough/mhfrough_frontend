@@ -1,7 +1,9 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { TagInputComponent } from '../../../shared/components/tag-input/tag-input.component';
 
@@ -11,8 +13,10 @@ import { TagInputComponent } from '../../../shared/components/tag-input/tag-inpu
     imports: [CommonModule, DatePipe, FormsModule, ImgFallbackDirective, TagInputComponent],
     templateUrl: './admin-gallery.component.html',
 })
-export class AdminGalleryComponent implements OnInit {
+export class AdminGalleryComponent implements OnInit, OnDestroy {
     private service = inject(GalleryService);
+    private realtime = inject(RealtimeService);
+    private subs = new Subscription();
 
     readonly items = signal<GalleryItem[]>([]);
     readonly loading = signal(true);
@@ -79,7 +83,30 @@ export class AdminGalleryComponent implements OnInit {
     ];
     readonly MAX_SIZE = 100 * 1024 * 1024;
 
-    ngOnInit() { this.load(); }
+    ngOnInit() {
+        this.load();
+
+        this.subs.add(this.realtime.on<GalleryItem>('gallery:created').subscribe(item => {
+            this.items.update(list => [item, ...list]);
+        }));
+
+        this.subs.add(this.realtime.on<GalleryItem>('gallery:updated').subscribe(item => {
+            this.items.update(list => list.map(i => i.id === item.id ? item : i));
+        }));
+
+        this.subs.add(this.realtime.on<{ id: string }>('gallery:deleted').subscribe(({ id }) => {
+            this.items.update(list => list.filter(i => i.id !== id));
+        }));
+
+        this.subs.add(this.realtime.on<{ items: { id: string; sortOrder: number }[] }>('gallery:reordered').subscribe(({ items }) => {
+            this.items.update(list => list.map(i => {
+                const match = items.find(r => r.id === i.id);
+                return match ? { ...i, sortOrder: match.sortOrder } : i;
+            }));
+        }));
+    }
+
+    ngOnDestroy() { this.subs.unsubscribe(); }
 
     load() {
         this.service.getAllAdmin().subscribe({
@@ -130,7 +157,7 @@ export class AdminGalleryComponent implements OnInit {
             mediaUrl: preview?.url ?? this.editing()?.mediaUrl ?? '',
             mediaType: (preview?.mediaType as GalleryItem['mediaType']) ?? this.editing()?.mediaType ?? 'image',
             mimeType: preview?.mimeType || this.editing()?.mimeType,
-            fileSize: preview?.fileSize || this.editing()?.fileSize,
+            fileSize: Number(preview?.fileSize || this.editing()?.fileSize) || undefined,
         };
 
         this.saving.set(true);
@@ -139,7 +166,7 @@ export class AdminGalleryComponent implements OnInit {
             : this.service.create(payload);
 
         obs.subscribe({
-            next: () => { this.cancel(); this.saving.set(false); this.load(); },
+            next: () => { this.cancel(); this.saving.set(false); },
             error: () => this.saving.set(false),
         });
     }
@@ -151,7 +178,7 @@ export class AdminGalleryComponent implements OnInit {
         const id = this.deleteTargetId();
         if (!id) return;
         this.deleteTargetId.set(null);
-        this.service.remove(id).subscribe({ next: () => this.load() });
+        this.service.remove(id).subscribe();
     }
 
     openHideModal(id: string) { this.statusModal.set({ id }); }

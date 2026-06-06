@@ -168,6 +168,12 @@
                     <i class="bi bi-person-lines-fill"></i>
                 </button>
                 }
+                @let botOn = (getActiveSession()?.botEnabled ?? true);
+                <button class="ac-bot-toggle" [class.is-on]="botOn" (click)="toggleBot()"
+                    [title]="botOn ? 'AI bot is ON — click to disable for this chat' : 'AI bot is OFF — click to enable for this chat'">
+                    <i class="bi" [class.bi-robot]="botOn" [class.bi-slash-circle]="!botOn"></i>
+                    <span>Bot {{ botOn ? 'ON' : 'OFF' }}</span>
+                </button>
                 @if (getActiveSession()?.status === 'active') {
                 <button class="ac-close-btn" (click)="closeSession()" title="End chat">
                     <i class="bi bi-x-circle"></i> End Chat
