@@ -24,6 +24,9 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
     private readonly realtime = inject(RealtimeService);
     private readonly platformId = inject(PLATFORM_ID);
     private rtSubs = new Subscription();
+    private _chartRaw: { day: string; count: string }[] = [];
+    private _chartW = 0;
+    private _chartHoverSetup = false;
 
     @ViewChild('visitorChart') chartCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -297,14 +300,22 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
 
     private renderVisitorChart(raw: { day: string; count: string }[]) {
         const canvas = this.chartCanvas.nativeElement;
+        this._chartRaw = raw;
+        this._chartW = canvas.parentElement?.clientWidth ?? 400;
+        canvas.width = this._chartW;
+        canvas.height = 110;
+        this._drawVisitorChart(null);
+        this._setupChartHover();
+    }
+
+    private _drawVisitorChart(hoverIdx: number | null) {
+        const canvas = this.chartCanvas.nativeElement;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const W = canvas.parentElement?.clientWidth ?? 400;
+        const raw = this._chartRaw;
+        const W = this._chartW || canvas.width;
         const H = 110;
-        canvas.width = W;
-        canvas.height = H;
-
         const counts = raw.map(d => Number(d.count));
         const maxCount = Math.max(...counts, 1);
         const padT = 12, padB = 8, padL = 4, padR = 4;
@@ -329,7 +340,6 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
         const grad = ctx.createLinearGradient(0, padT, 0, H);
         grad.addColorStop(0, 'rgba(99,102,241,0.25)');
         grad.addColorStop(1, 'rgba(99,102,241,0)');
-
         ctx.beginPath();
         ctx.moveTo(getX(0), getY(counts[0]));
         for (let i = 1; i < counts.length; i++) {
@@ -361,6 +371,82 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
                 ctx.fill();
             });
         }
+
+        if (hoverIdx !== null) {
+            const hx = getX(hoverIdx);
+            const hy = getY(counts[hoverIdx]);
+
+            ctx.save();
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = 'rgba(129,140,248,0.45)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(hx, padT);
+            ctx.lineTo(hx, H - padB);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.arc(hx, hy, 5, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(129,140,248,0.3)';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(hx, hy, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#818cf8';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(hx, hy, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#e0e7ff';
+            ctx.fill();
+
+            const date = new Date(raw[hoverIdx].day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const text = `${date}  ${counts[hoverIdx]}`;
+            ctx.font = '10px monospace';
+            const tw = ctx.measureText(text).width + 14;
+            const th = 18;
+            let tx = hx - tw / 2;
+            if (tx < 2) tx = 2;
+            if (tx + tw > W - 2) tx = W - tw - 2;
+            const ty = padT - 2;
+
+            ctx.fillStyle = 'rgba(15,12,41,0.92)';
+            ctx.strokeStyle = 'rgba(129,140,248,0.4)';
+            ctx.lineWidth = 1;
+            if ((ctx as any).roundRect) {
+                ctx.beginPath();
+                (ctx as any).roundRect(tx, ty, tw, th, 3);
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.fillRect(tx, ty, tw, th);
+                ctx.strokeRect(tx, ty, tw, th);
+            }
+            ctx.fillStyle = '#c7d2fe';
+            ctx.fillText(text, tx + 7, ty + 12);
+        }
+    }
+
+    private _setupChartHover() {
+        if (this._chartHoverSetup) return;
+        this._chartHoverSetup = true;
+        const canvas = this.chartCanvas.nativeElement;
+        const padL = 4, padR = 4;
+
+        canvas.addEventListener('mousemove', (e: MouseEvent) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const n = this._chartRaw.length;
+            const W = this._chartW;
+            const getX = (i: number) => padL + (i / (n - 1 || 1)) * (W - padL - padR);
+            let closest = 0, minDist = Infinity;
+            for (let i = 0; i < n; i++) {
+                const dist = Math.abs(getX(i) - mx);
+                if (dist < minDist) { minDist = dist; closest = i; }
+            }
+            this._drawVisitorChart(closest);
+        });
+
+        canvas.addEventListener('mouseleave', () => this._drawVisitorChart(null));
     }
 
     // ── Delete session ───────────────────────────────────────────────────────
