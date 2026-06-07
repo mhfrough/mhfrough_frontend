@@ -1,4 +1,4 @@
-﻿<!-- ─── Hero ──────────────────────────────────────────────────────────────── -->
+<!-- ─── Hero ──────────────────────────────────────────────────────────────── -->
 <section class="hero">
     <div class="hero-left">
         <p class="hero-greeting">
@@ -15,6 +15,10 @@
         <div class="hero-actions">
             <a routerLink="/projects" class="btn-primary">View Projects</a>
             <a routerLink="/contact" class="btn-ghost">Work with me</a>
+        </div>
+        <div class="hero-availability">
+            <span class="avail-dot"></span>
+            <span class="avail-text">Available for new projects</span>
         </div>
     </div>
     <div class="hero-right">
@@ -48,6 +52,28 @@
         </div>
     </div>
 </section>
+
+<!-- ─── Stats Strip ──────────────────────────────────────────────────────── -->
+<div class="stats-strip">
+    <div class="stats-container">
+        <div class="stat-item">
+            <span class="stat-value">5+</span>
+            <span class="stat-label">Years Experience</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">30+</span>
+            <span class="stat-label">Projects Delivered</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">10+</span>
+            <span class="stat-label">Happy Clients</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">100%</span>
+            <span class="stat-label">On-time Delivery</span>
+        </div>
+    </div>
+</div>
 
 <!-- ─── Projects ─────────────────────────────────────────────────────────── -->
 <section class="section" id="projects">
@@ -142,6 +168,22 @@
                     <h3 class="honor-title">Web Designing</h3>
                     <p class="honor-issuer">Issued by <strong>Flair' 17</strong> · Jan 2017</p>
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Tech Stack ───────────────────────────────────────────────────────── -->
+<section class="section" id="stack">
+    <div class="section-container about-grid">
+        <div class="about-left">
+            <h2 class="section-title">Tech Stack</h2>
+        </div>
+        <div class="about-right">
+            <div class="stack-chips">
+                @for (tech of techStack; track tech) {
+                <span class="stack-chip">{{ tech }}</span>
+                }
             </div>
         </div>
     </div>
@@ -294,6 +336,43 @@
     </div>
 </section>
 
+<!-- ─── How I Work ───────────────────────────────────────────────────────── -->
+<section class="section process-section" id="process">
+    <div class="section-container">
+        <h2 class="section-title">How I Work</h2>
+        <div class="process-steps">
+            <div class="process-step">
+                <span class="process-num">01</span>
+                <i class="bi bi-chat-text process-icon"></i>
+                <h3 class="process-name">Discover</h3>
+                <p class="process-desc">We define your goals, audience, and constraints together — I listen before I
+                    build.</p>
+            </div>
+            <div class="process-step">
+                <span class="process-num">02</span>
+                <i class="bi bi-bezier2 process-icon"></i>
+                <h3 class="process-name">Design</h3>
+                <p class="process-desc">Wireframes and prototypes shaped around real user needs — validated before a
+                    line of code is written.</p>
+            </div>
+            <div class="process-step">
+                <span class="process-num">03</span>
+                <i class="bi bi-code-slash process-icon"></i>
+                <h3 class="process-name">Build</h3>
+                <p class="process-desc">Clean, tested code delivered in iterative sprints with full visibility into
+                    progress.</p>
+            </div>
+            <div class="process-step">
+                <span class="process-num">04</span>
+                <i class="bi bi-rocket-takeoff process-icon"></i>
+                <h3 class="process-name">Deliver</h3>
+                <p class="process-desc">Deployed, documented, and supported after go-live — the relationship doesn't
+                    end at launch.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- ─── Clients ─────────────────────────────────────────────────────────── -->
 <section class="section clients-section" id="clients">
     <div class="section-container">
@@ -318,6 +397,109 @@
                     <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'" loading="lazy">
                     <span class="client-name">{{ client.name }}</span>
                 </a>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Featured Reviews ─────────────────────────────────────────────────── -->
+<section class="section" id="reviews">
+    <div class="section-container">
+        <div class="home-projects-header">
+            <h2 class="section-title" style="margin:0">What Clients Say</h2>
+            <a routerLink="/feedback" class="view-all">All Reviews <i class="bi bi-arrow-right"></i></a>
+        </div>
+
+        @if (loadingFeaturedReviews()) {
+        <div class="loading-state" style="padding:2rem 0">
+            <div class="spinner"></div>
+        </div>
+        } @else if (featuredReviews().length === 0) {
+        <div class="reviews-empty-cta">
+            <i class="bi bi-star"></i>
+            <p>No reviews yet — be the first to share your experience.</p>
+            <a routerLink="/feedback" class="btn-ghost" style="margin-top:1rem">Leave a Review</a>
+        </div>
+        } @else {
+        <div class="home-reviews-grid">
+            @for (r of featuredReviews(); track r.id) {
+            <article class="home-review-card">
+                <div class="review-stars">
+                    @for (s of stars; track s) {
+                    <span [class.star--filled]="s <= r.rating">{{ s <= r.rating ? '★' : '☆' }}</span>
+                    }
+                </div>
+                <p class="review-quote">"{{ r.review }}"</p>
+                <div class="review-author">
+                    <p class="review-author-name">{{ r.name }}</p>
+                    @if (r.role || r.company) {
+                    <p class="review-author-role">
+                        {{ r.role }}{{ r.role && r.company ? ' · ' : '' }}{{ r.company }}
+                    </p>
+                    }
+                </div>
+            </article>
+            }
+        </div>
+        <div class="section-cta">
+            <a routerLink="/feedback" class="view-all">See all reviews <i class="bi bi-arrow-right"></i></a>
+        </div>
+        }
+    </div>
+</section>
+
+<!-- ─── Pricing ──────────────────────────────────────────────────────────── -->
+<section class="section" id="pricing">
+    <div class="section-container">
+        <h2 class="section-title">Pricing</h2>
+        <div class="pricing-grid">
+            @for (tier of pricingTiers; track tier.tier) {
+            <div class="pricing-card" [class.pricing-card--featured]="tier.featured">
+                @if (tier.featured) {
+                <div class="pricing-badge">Most Popular</div>
+                }
+                <p class="pricing-tier">{{ tier.tier }}</p>
+                <div class="pricing-price">
+                    <span class="pricing-amount">{{ tier.amount }}</span>
+                    @if (tier.suffix) {
+                    <span class="pricing-suffix">{{ tier.suffix }}</span>
+                    }
+                </div>
+                <p class="pricing-desc">{{ tier.desc }}</p>
+                <ul class="pricing-features">
+                    @for (f of tier.features; track f) {
+                    <li><i class="bi bi-check-lg"></i>{{ f }}</li>
+                    }
+                </ul>
+                <a routerLink="/contact" [queryParams]="{subject: tier.subject}" class="btn-primary">
+                    {{ tier.cta }} <i class="bi bi-arrow-right"></i>
+                </a>
+                <p class="pricing-note">* {{ tier.note }}</p>
+            </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ─── FAQ ──────────────────────────────────────────────────────────────── -->
+<section class="section" id="faq">
+    <div class="section-container about-grid">
+        <div class="about-left">
+            <h2 class="section-title">FAQ</h2>
+        </div>
+        <div class="about-right">
+            <div class="faq-list">
+                @for (faq of faqs; track faq.q; let i = $index) {
+                <div class="faq-item" [class.is-open]="openFaqItems().includes(i)">
+                    <button class="faq-question" (click)="toggleFaq(i)" [attr.aria-expanded]="openFaqItems().includes(i)">
+                        <span class="faq-q-text">{{ faq.q }}</span>
+                        <i class="bi bi-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p class="faq-answer-inner">{{ faq.a }}</p>
+                    </div>
+                </div>
                 }
             </div>
         </div>
