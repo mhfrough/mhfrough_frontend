@@ -25,6 +25,9 @@
     <a class="settings-tab" [class.is-active]="activeTab() === 'widgets'" routerLink="/admin/settings/widgets">
         <i class="bi bi-puzzle"></i> Widgets
     </a>
+    <a class="settings-tab" [class.is-active]="activeTab() === 'health'" routerLink="/admin/settings/health">
+        <i class="bi bi-heart-pulse"></i> Deployment Health
+    </a>
 </div>
 
 @if (activeTab() === 'profile') {
@@ -49,4 +52,8 @@
 
 @if (activeTab() === 'widgets') {
 <app-settings-widgets />
+}
+
+@if (activeTab() === 'health') {
+<app-settings-health />
 }

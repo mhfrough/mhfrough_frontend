@@ -16,10 +16,6 @@
             <a routerLink="/projects" class="btn-primary">View Projects</a>
             <a routerLink="/contact" class="btn-ghost">Work with me</a>
         </div>
-        <div class="hero-availability">
-            <span class="avail-dot"></span>
-            <span class="avail-text">Available for new projects</span>
-        </div>
     </div>
     <div class="hero-right">
         <!-- prettier-ignore -->
@@ -509,6 +505,10 @@
 <!-- ─── Contact CTA ──────────────────────────────────────────────────────── -->
 <section class="section" id="contact">
     <div class="section-container contact-cta">
+        <div class="hero-availability">
+            <span class="avail-dot"></span>
+            <span class="avail-text">Available for new projects</span>
+        </div>
         <h2>Got a project in mind?</h2>
         <p>Always open to hearing about what you are building.</p>
         <a routerLink="/contact" [queryParams]="{subject: 'Project Inquiry'}" class="btn-primary">Get in touch</a>

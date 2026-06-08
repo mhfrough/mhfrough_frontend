@@ -1,0 +1,235 @@
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-heart-pulse-fill"></i> Deployment Health</h2>
+            <p class="settings-card-sub">
+                Live status of the GitHub repositories, Render deployments and connected integrations.
+            </p>
+        </div>
+        <button class="btn-primary" (click)="loadOverview()" [disabled]="overviewLoading()">
+            @if (overviewLoading()) { <span class="contact-spinner"></span> Refreshing… }
+            @else { <i class="bi bi-arrow-clockwise"></i> Refresh }
+        </button>
+    </div>
+
+    @if (overviewError()) {
+    <div class="admin-alert admin-alert--error">{{ overviewError() }}</div>
+    }
+
+    <!-- ── Latest Commits ──────────────────────────────────────────────────── -->
+    <h3 class="settings-section-label"><i class="bi bi-github"></i> Latest Commits</h3>
+    <div class="admin-analytics-split" style="margin-bottom:0">
+        @for (entry of commitEntries; track entry.label) {
+        <div class="admin-analytics-panel">
+            <p class="admin-analytics-panel-title">{{ entry.label }}</p>
+            @if (entry.info.error === 'not_configured') {
+            <div class="admin-activity-item">
+                <i class="bi bi-exclamation-circle admin-activity-icon"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">Repository not configured.</span>
+                </div>
+            </div>
+            } @else if (entry.info.error === 'fetch_failed') {
+            <div class="admin-activity-item">
+                <i class="bi bi-x-circle admin-activity-icon" style="color:#dc2626;opacity:1"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">Failed to fetch latest commit.</span>
+                </div>
+            </div>
+            } @else if (entry.info.sha) {
+            <div class="admin-activity-item">
+                <i class="bi bi-git admin-activity-icon"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">
+                        <a [href]="entry.info.url" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">
+                            <code>{{ entry.info.sha }}</code>
+                        </a>
+                        &nbsp;{{ entry.info.message }}
+                    </span>
+                    <span class="admin-activity-sub">{{ entry.info.author }} · {{ entry.info.date | date:'MMM d, y · h:mm a' }}</span>
+                </div>
+            </div>
+            } @else {
+            <div class="admin-activity-item">
+                <i class="bi bi-dash-circle admin-activity-icon"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">No data yet.</span>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+    <!-- ── Render Deployments ──────────────────────────────────────────────── -->
+    <h3 class="settings-section-label" style="margin-top:1.5rem"><i class="bi bi-cloud-arrow-up-fill"></i> Render Deployments</h3>
+    <div class="admin-analytics-split" style="margin-bottom:0">
+        @for (entry of renderEntries; track entry.label) {
+        <div class="admin-analytics-panel">
+            <p class="admin-analytics-panel-title">{{ entry.label }}</p>
+            @if (entry.info.error === 'not_configured') {
+            <div class="admin-activity-item">
+                <i class="bi bi-exclamation-circle admin-activity-icon"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">Service not configured.</span>
+                </div>
+            </div>
+            } @else if (entry.info.error === 'fetch_failed') {
+            <div class="admin-activity-item">
+                <i class="bi bi-x-circle admin-activity-icon" style="color:#dc2626;opacity:1"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">Failed to fetch deploy status.</span>
+                </div>
+            </div>
+            } @else if (entry.info.status) {
+            <div class="admin-activity-item">
+                <i class="bi bi-circle-fill admin-activity-icon" [style.color]="statusColor(entry.info.status)" style="opacity:1;font-size:0.5rem;padding-top:0.35rem"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">
+                        <span [style.color]="statusColor(entry.info.status)">{{ entry.info.status }}</span>
+                        @if (entry.info.commitMessage) {
+                        &nbsp;&mdash; {{ entry.info.commitMessage }}
+                        }
+                    </span>
+                    <span class="admin-activity-sub">{{ (entry.info.finishedAt ?? entry.info.createdAt) | date:'MMM d, y · h:mm a' }}</span>
+                </div>
+            </div>
+            } @else {
+            <div class="admin-activity-item">
+                <i class="bi bi-dash-circle admin-activity-icon"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">No data yet.</span>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+    <!-- ── Render PostgreSQL ───────────────────────────────────────────────── -->
+    <h3 class="settings-section-label" style="margin-top:1.5rem"><i class="bi bi-database-fill"></i> PostgreSQL</h3>
+    @let pg = overview()?.render?.postgres;
+    <div class="admin-analytics-panel">
+        <p class="admin-analytics-panel-title">Render Postgres</p>
+        @if (!pg || pg.error === 'not_configured') {
+        <div class="admin-activity-item">
+            <i class="bi bi-exclamation-circle admin-activity-icon"></i>
+            <div class="admin-activity-body">
+                <span class="admin-activity-text">Database not configured.</span>
+            </div>
+        </div>
+        } @else if (pg.error === 'fetch_failed') {
+        <div class="admin-activity-item">
+            <i class="bi bi-x-circle admin-activity-icon" style="color:#dc2626;opacity:1"></i>
+            <div class="admin-activity-body">
+                <span class="admin-activity-text">Failed to fetch database status.</span>
+            </div>
+        </div>
+        } @else {
+        <div class="admin-activity-item">
+            <i class="bi bi-circle-fill admin-activity-icon" [style.color]="statusColor(pg.status)" style="opacity:1;font-size:0.5rem;padding-top:0.35rem"></i>
+            <div class="admin-activity-body">
+                <span class="admin-activity-text">
+                    <span [style.color]="statusColor(pg.status)">{{ pg.status }}</span>
+                    &nbsp;&mdash; {{ pg.name }}
+                </span>
+                <span class="admin-activity-sub">
+                    PostgreSQL {{ pg.version }}&nbsp;·&nbsp;{{ pg.plan }}&nbsp;·&nbsp;{{ pg.region }}
+                </span>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- ── Integrations ───────────────────────────────────────────────────── -->
+    <h3 class="settings-section-label" style="margin-top:1.5rem"><i class="bi bi-plug-fill"></i> Integrations</h3>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+        <span class="admin-badge" [style.color]="overview()?.integrations?.supabase ? '#4ade80' : 'var(--text-muted)'"
+            [style.border-color]="overview()?.integrations?.supabase ? 'rgba(74,222,128,0.3)' : 'var(--border)'">
+            <i class="bi" [class.bi-check-circle-fill]="overview()?.integrations?.supabase" [class.bi-exclamation-circle]="!overview()?.integrations?.supabase"></i>
+            &nbsp;Supabase: {{ overview()?.integrations?.supabase ? 'Configured' : 'Not set' }}
+        </span>
+        <span class="admin-badge" [style.color]="overview()?.integrations?.firebase ? '#4ade80' : 'var(--text-muted)'"
+            [style.border-color]="overview()?.integrations?.firebase ? 'rgba(74,222,128,0.3)' : 'var(--border)'">
+            <i class="bi" [class.bi-check-circle-fill]="overview()?.integrations?.firebase" [class.bi-exclamation-circle]="!overview()?.integrations?.firebase"></i>
+            &nbsp;Firebase: {{ overview()?.integrations?.firebase ? 'Configured' : 'Not set' }}
+        </span>
+    </div>
+</div>
+
+<!-- ── Configuration ──────────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-gear-fill"></i> Health Check Configuration</h2>
+            <p class="settings-card-sub">
+                Credentials and identifiers used to query GitHub and Render for deployment status.
+            </p>
+        </div>
+    </div>
+
+    @if (healthSaved()) {
+    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> Deployment health settings saved successfully.</div>
+    }
+    @if (healthError()) {
+    <div class="admin-alert admin-alert--error">{{ healthError() }}</div>
+    }
+
+    <h3 class="settings-section-label" style="margin-top:1rem"><i class="bi bi-github"></i> GitHub</h3>
+    <div class="admin-form-grid">
+        <div class="admin-form-field">
+            <label class="admin-form-label">Personal Access Token</label>
+            <input type="password" class="admin-form-input" [(ngModel)]="githubToken" autocomplete="new-password"
+                placeholder="{{ settings.githubToken ? 'Token configured — paste to replace' : 'Paste token…' }}">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Backend Repo (owner/repo)</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="githubRepoBackend" placeholder="owner/repo or full GitHub URL" maxlength="200">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Frontend Repo (owner/repo)</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="githubRepoFrontend" placeholder="owner/repo or full GitHub URL" maxlength="200">
+        </div>
+    </div>
+
+    <h3 class="settings-section-label" style="margin-top:1.5rem"><i class="bi bi-cloud-arrow-up-fill"></i> Render</h3>
+    <div class="admin-form-grid">
+        <div class="admin-form-field">
+            <label class="admin-form-label">API Key</label>
+            <input type="password" class="admin-form-input" [(ngModel)]="renderApiKey" autocomplete="new-password"
+                placeholder="{{ settings.renderApiKey ? 'Key configured — paste to replace' : 'Paste API key…' }}">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Backend Service ID</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="renderServiceIdBackend" placeholder="srv-xxxxxxxxxxxx" maxlength="100">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Frontend Service ID</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="renderServiceIdFrontend" placeholder="srv-xxxxxxxxxxxx" maxlength="100">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">PostgreSQL Database ID</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="renderPostgresId" placeholder="dpg-xxxxxxxxxxxx" maxlength="100">
+        </div>
+    </div>
+
+    <div style="margin-top:1.25rem;display:flex;gap:0.75rem;flex-wrap:wrap">
+        <span class="admin-badge" [style.color]="settings.githubToken ? '#4ade80' : 'var(--text-muted)'"
+            [style.border-color]="settings.githubToken ? 'rgba(74,222,128,0.3)' : 'var(--border)'">
+            <i class="bi" [class.bi-check-circle-fill]="settings.githubToken" [class.bi-exclamation-circle]="!settings.githubToken"></i>
+            &nbsp;GitHub: {{ settings.githubToken ? 'Configured' : 'Not set' }}
+        </span>
+        <span class="admin-badge" [style.color]="settings.renderApiKey ? '#4ade80' : 'var(--text-muted)'"
+            [style.border-color]="settings.renderApiKey ? 'rgba(74,222,128,0.3)' : 'var(--border)'">
+            <i class="bi" [class.bi-check-circle-fill]="settings.renderApiKey" [class.bi-exclamation-circle]="!settings.renderApiKey"></i>
+            &nbsp;Render: {{ settings.renderApiKey ? 'Configured' : 'Not set' }}
+        </span>
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1.5rem">
+        <button class="btn-primary" (click)="saveHealthConfig()" [disabled]="healthSaving()">
+            @if (healthSaving()) { <span class="contact-spinner"></span> Saving… }
+            @else { <i class="bi bi-check-lg"></i> Save Configuration }
+        </button>
+    </div>
+</div>

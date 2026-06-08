@@ -29,7 +29,59 @@ export interface AdminSettings {
     aiInstruction: string | null;
     aiAutoReplyDelay: number;
     aiMaxResponseLength: number;
+    // Deployment Health
+    githubToken: string | null;
+    githubRepoBackend: string | null;
+    githubRepoFrontend: string | null;
+    renderApiKey: string | null;
+    renderServiceIdBackend: string | null;
+    renderServiceIdFrontend: string | null;
+    renderPostgresId: string | null;
     updatedAt: string;
+}
+
+export interface RenderPostgresInfo {
+    name?: string;
+    status?: string;
+    plan?: string;
+    region?: string;
+    version?: number;
+    createdAt?: string;
+    error?: 'not_configured' | 'fetch_failed';
+}
+
+export interface DeploymentOverview {
+    github: {
+        backend: GithubCommitInfo;
+        frontend: GithubCommitInfo;
+    };
+    render: {
+        backend: RenderStatusInfo;
+        frontend: RenderStatusInfo;
+        postgres: RenderPostgresInfo;
+    };
+    integrations: {
+        supabase: boolean;
+        firebase: boolean;
+    };
+}
+
+export interface GithubCommitInfo {
+    sha?: string;
+    message?: string;
+    author?: string;
+    date?: string;
+    url?: string;
+    repo?: string;
+    error?: 'not_configured' | 'fetch_failed';
+}
+
+export interface RenderStatusInfo {
+    status?: string;
+    createdAt?: string;
+    finishedAt?: string;
+    commitMessage?: string;
+    error?: 'not_configured' | 'fetch_failed';
 }
 
 export interface LoginSession {
@@ -95,6 +147,13 @@ const DEFAULTS: AdminSettings = {
     aiInstruction: null,
     aiAutoReplyDelay: 1500,
     aiMaxResponseLength: 300,
+    githubToken: null,
+    githubRepoBackend: null,
+    githubRepoFrontend: null,
+    renderApiKey: null,
+    renderServiceIdBackend: null,
+    renderServiceIdFrontend: null,
+    renderPostgresId: null,
     updatedAt: '',
 };
 
@@ -115,6 +174,10 @@ export class AdminSettingsService {
             next: (s) => { this.settings.set(s); this.loaded.set(true); },
             error: () => { this.loaded.set(true); },
         });
+    }
+
+    getDeploymentOverview() {
+        return this.http.get<DeploymentOverview>(`${environment.apiUrl}/health/deployment`);
     }
 
     update(dto: Partial<AdminSettings>) {

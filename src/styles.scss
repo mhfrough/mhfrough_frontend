@@ -1840,6 +1840,15 @@ body::before {
 
 // --- Contact CTA -------------------------------------------------------------
 .contact-cta {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .hero-availability {
+        margin: 0 0 1.25rem;
+    }
+
     h2 {
         font-family: var(--font-sans);
         font-size: clamp(1.8rem, 4.5dvw, 2.8rem);
@@ -1854,8 +1863,9 @@ body::before {
         font-family: var(--font-sans);
         font-size: 0.88rem;
         color: var(--text-muted);
-        margin-bottom: 2rem;
+        margin: 0 auto 2rem;
         line-height: 1.7;
+        max-width: 32rem;
     }
 }
 
