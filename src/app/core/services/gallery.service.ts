@@ -10,7 +10,6 @@ export interface GalleryItem {
     mediaType: 'image' | 'video' | 'gif';
     category?: string;
     tags?: string[];
-    sortOrder: number;
     isPublished: boolean;
     altText?: string;
     mimeType?: string;
@@ -50,6 +49,5 @@ export class GalleryService {
     getOne(id: string) { return this.http.get<GalleryItem>(`${this.base}/${id}`); }
     create(data: Partial<GalleryItem>) { return this.http.post<GalleryItem>(this.base, data); }
     update(id: string, data: Partial<GalleryItem>) { return this.http.put<GalleryItem>(`${this.base}/${id}`, data); }
-    reorder(items: { id: string; sortOrder: number }[]) { return this.http.patch(`${this.base}/reorder`, { items }); }
     remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
 }

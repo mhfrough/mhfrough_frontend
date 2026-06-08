@@ -101,11 +101,6 @@
             </p>
             }
         </div>
-        <div class="admin-form-field" style="max-width:200px">
-            <label class="admin-form-label label-optional">Sort Order <span class="form-hint">(optional)</span></label>
-            <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number"
-                class="admin-form-input">
-        </div>
         <div class="admin-form-checks">
             <div class="admin-form-check checkbox-field">
                 <input ngModel [ngModel]="editing()?.isPublished ?? true" name="isPublished" type="checkbox" id="pub">
@@ -162,7 +157,6 @@
                 <th>Tech</th>
                 <th>Status</th>
                 <th>Featured</th>
-                <th>Order</th>
                 <th></th>
             </tr>
         </thead>
@@ -192,7 +186,6 @@
                     <i class="bi" [class.bi-star-fill]="p.featured" [class.bi-star]="!p.featured"
                         [style.color]="p.featured ? '#d97706' : 'var(--text-muted)'"></i>
                 </td>
-                <td style="color:var(--text-muted)">{{ p.sortOrder }}</td>
                 <td style="text-align:right;white-space:nowrap">
                     <button class="btn-text" (click)="edit(p)" style="margin-right:1.25rem">
                         <i class="bi bi-pencil"></i> Edit

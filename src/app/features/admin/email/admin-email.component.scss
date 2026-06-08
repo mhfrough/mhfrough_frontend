@@ -162,7 +162,7 @@
     &.is-active {
         color: var(--text);
         background: rgba(228, 224, 216, 0.07);
-        border-left: 2px solid var(--indigo);
+        border-left: 2px solid var(--text);
         padding-left: calc(0.75rem - 2px);
     }
 }
@@ -257,11 +257,11 @@
     margin-top: 0.1rem;
 
     &.is-starred {
-        color: #f59e0b;
+        color: #d97706;
     }
 
     &:hover {
-        color: #f59e0b;
+        color: #d97706;
     }
 }
 

@@ -84,13 +84,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
             this.items.update(list => list.filter(i => i.id !== id));
             this.total.update(t => Math.max(0, t - 1));
         }));
-
-        this.subs.add(this.realtime.on<{ items: { id: string; sortOrder: number }[] }>('gallery:reordered').subscribe(({ items }) => {
-            this.items.update(list => list.map(i => {
-                const match = items.find(r => r.id === i.id);
-                return match ? { ...i, sortOrder: match.sortOrder } : i;
-            }).sort((a, b) => a.sortOrder - b.sortOrder));
-        }));
     }
 
     ngOnDestroy() {

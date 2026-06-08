@@ -98,12 +98,6 @@ export class AdminGalleryComponent implements OnInit, OnDestroy {
             this.items.update(list => list.filter(i => i.id !== id));
         }));
 
-        this.subs.add(this.realtime.on<{ items: { id: string; sortOrder: number }[] }>('gallery:reordered').subscribe(({ items }) => {
-            this.items.update(list => list.map(i => {
-                const match = items.find(r => r.id === i.id);
-                return match ? { ...i, sortOrder: match.sortOrder } : i;
-            }));
-        }));
     }
 
     ngOnDestroy() { this.subs.unsubscribe(); }
@@ -204,30 +198,6 @@ export class AdminGalleryComponent implements OnInit, OnDestroy {
         });
     }
 
-    moveSortOrder(item: GalleryItem, direction: -1 | 1) {
-        const list = [...this.items()].sort((a, b) => a.sortOrder - b.sortOrder);
-        const idx = list.findIndex(i => i.id === item.id);
-        const swapIdx = idx + direction;
-        if (swapIdx < 0 || swapIdx >= list.length) return;
-
-        const a = list[idx];
-        const b = list[swapIdx];
-        const aOrd = a.sortOrder;
-        const bOrd = b.sortOrder;
-
-        // Optimistic
-        this.items.update(li => li.map(i => {
-            if (i.id === a.id) return { ...i, sortOrder: bOrd };
-            if (i.id === b.id) return { ...i, sortOrder: aOrd };
-            return i;
-        }));
-
-        this.service.reorder([
-            { id: a.id, sortOrder: bOrd },
-            { id: b.id, sortOrder: aOrd },
-        ]).subscribe({ error: () => this.load() });
-    }
-
     onDragOver(e: DragEvent) { e.preventDefault(); this.dragOver.set(true); }
     onDragLeave() { this.dragOver.set(false); }
 
@@ -274,6 +244,6 @@ export class AdminGalleryComponent implements OnInit, OnDestroy {
     }
 
     sortedItems() {
-        return [...this.items()].sort((a, b) => a.sortOrder - b.sortOrder);
+        return [...this.items()].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 }

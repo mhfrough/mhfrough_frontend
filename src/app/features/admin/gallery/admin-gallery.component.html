@@ -85,18 +85,13 @@
                 placeholder="A short description shown in the lightbox"></textarea>
         </div>
 
-        <!-- Alt Text & Sort Order -->
+        <!-- Alt Text -->
         <div class="admin-form-grid">
             <div class="admin-form-field">
                 <label class="admin-form-label label-optional">Alt Text <span
                         class="form-hint">(accessibility)</span></label>
                 <input ngModel [ngModel]="editing()?.altText" name="altText" class="admin-form-input"
                     placeholder="Describe the image for screen readers">
-            </div>
-            <div class="admin-form-field">
-                <label class="admin-form-label label-optional">Sort Order</label>
-                <input ngModel [ngModel]="editing()?.sortOrder ?? 0" name="sortOrder" type="number" min="0"
-                    class="admin-form-input">
             </div>
         </div>
 
@@ -152,7 +147,6 @@
     <table class="admin-table">
         <thead>
             <tr>
-                <th>Order</th>
                 <th>Preview</th>
                 <th>Title / Category</th>
                 <th>Type</th>
@@ -163,21 +157,8 @@
             </tr>
         </thead>
         <tbody>
-            @for (item of pagedItems(); track item.id; let first = $first; let last = $last) {
+            @for (item of pagedItems(); track item.id) {
             <tr>
-                <td>
-                    <div style="display:flex;flex-direction:column;gap:2px;align-items:center">
-                        <button class="btn-text" style="padding:0.1rem 0.3rem" (click)="moveSortOrder(item, -1)"
-                            [disabled]="first" title="Move up" aria-label="Move up">
-                            <i class="bi bi-chevron-up"></i>
-                        </button>
-                        <span style="font-size:0.72rem;color:var(--text-muted)">{{ item.sortOrder }}</span>
-                        <button class="btn-text" style="padding:0.1rem 0.3rem" (click)="moveSortOrder(item, 1)"
-                            [disabled]="last" title="Move down" aria-label="Move down">
-                            <i class="bi bi-chevron-down"></i>
-                        </button>
-                    </div>
-                </td>
                 <td>
                     <div class="gallery-admin-thumb">
                         @if (item.mediaType === 'video') {

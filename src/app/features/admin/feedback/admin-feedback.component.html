@@ -31,19 +31,7 @@
 } @else {
 <div class="admin-card-list">
     @for (fb of pagedFeedback(); track fb.id) {
-    <div class="admin-card" draggable="true" [class.drag-over-card]="dragOverCardId() === fb.id"
-        (dragstart)="onCardDragStart(fb.id)" (dragover)="onCardDragOver($event, fb.id)" (dragleave)="onCardDragLeave()"
-        (drop)="onCardDrop(fb.id)" (dragend)="onCardDragEnd()">
-        <div class="admin-card-drag-handle">
-            <svg class="drag-icon" width="8" height="14" viewBox="0 0 8 14" fill="currentColor" aria-hidden="true">
-                <circle cx="2" cy="2" r="1.4" />
-                <circle cx="6" cy="2" r="1.4" />
-                <circle cx="2" cy="7" r="1.4" />
-                <circle cx="6" cy="7" r="1.4" />
-                <circle cx="2" cy="12" r="1.4" />
-                <circle cx="6" cy="12" r="1.4" />
-            </svg>
-        </div>
+    <div class="admin-card">
         <div class="admin-card-header">
             <div>
                 <span class="admin-card-name">{{ fb.name }}</span>

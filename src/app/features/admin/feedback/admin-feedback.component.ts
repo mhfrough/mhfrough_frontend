@@ -26,7 +26,7 @@ export class AdminFeedbackComponent extends AdminListBase implements OnInit, OnD
 
     readonly filteredFeedback = computed(() => {
         const q = this.searchQuery().toLowerCase().trim();
-        const sorted = [...this.feedback()].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+        const sorted = this.feedback();
         if (!q) return sorted;
         return sorted.filter(fb =>
             fb.name?.toLowerCase().includes(q) ||
@@ -101,33 +101,5 @@ export class AdminFeedbackComponent extends AdminListBase implements OnInit, OnD
         this.service.unapprove(m.id, reason || undefined).subscribe(() => {
             this.notif.fetchCounts();
         });
-    }
-
-    readonly dragCardId = signal<string | null>(null);
-    readonly dragOverCardId = signal<string | null>(null);
-
-    onCardDragStart(id: string): void { this.dragCardId.set(id); }
-    onCardDragOver(e: DragEvent, id: string): void { e.preventDefault(); this.dragOverCardId.set(id); }
-    onCardDragLeave(): void { this.dragOverCardId.set(null); }
-    onCardDragEnd(): void { this.dragCardId.set(null); this.dragOverCardId.set(null); }
-    onCardDrop(targetId: string): void {
-        const srcId = this.dragCardId();
-        this.dragCardId.set(null); this.dragOverCardId.set(null);
-        if (!srcId || srcId === targetId) { return; }
-        const list = [...this.feedback()].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-        const src = list.find(f => f.id === srcId);
-        const tgt = list.find(f => f.id === targetId);
-        if (!src || !tgt) { return; }
-        const srcOrd = src.sortOrder ?? 0;
-        const tgtOrd = tgt.sortOrder ?? 0;
-        this.feedback.update(li => li.map(f => {
-            if (f.id === srcId) return { ...f, sortOrder: tgtOrd };
-            if (f.id === targetId) return { ...f, sortOrder: srcOrd };
-            return f;
-        }));
-        this.service.reorder([
-            { id: srcId, sortOrder: tgtOrd },
-            { id: targetId, sortOrder: srcOrd },
-        ]).subscribe({ error: () => this.load() });
     }
 }
