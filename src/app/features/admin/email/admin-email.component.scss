@@ -131,7 +131,6 @@
     flex-direction: column;
     gap: 0.15rem;
     flex: 1;
-    overflow-y: scroll;
 }
 
 .em-folder-link {
@@ -226,6 +225,7 @@
     }
 
     &.is-unread {
+
         .em-msg-name,
         .em-msg-subject {
             font-weight: 700;

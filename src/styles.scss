@@ -43,7 +43,7 @@
 }
 
 // --- Scrollbar ---------------------------------------------------------------
-html {
+* {
     scrollbar-width: thin;
     scrollbar-color: var(--text-muted) transparent;
 }
