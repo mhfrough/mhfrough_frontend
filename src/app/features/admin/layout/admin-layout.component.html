@@ -63,6 +63,11 @@
                 </a>
             </li>
             <li>
+                <a class="admin-nav-link" routerLink="/admin/email" routerLinkActive="is-active">
+                    <i class="bi bi-envelope-paper"></i>Email
+                </a>
+            </li>
+            <li>
                 <a class="admin-nav-link" routerLink="/admin/comments" routerLinkActive="is-active">
                     <i class="bi bi-chat-left-text"></i>Comments
                     @if (notif.pendingComments() > 0) {

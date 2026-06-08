@@ -1,0 +1,431 @@
+<div class="em-wrap" [class.em-wrap--menu-open]="menuOpen()">
+
+    <!-- Mobile top bar -->
+    <header class="em-mobile-bar">
+        <p class="em-mobile-title"><i class="bi bi-envelope-paper"></i> Email</p>
+        <button class="em-hamburger" (click)="toggleMenu()" [attr.aria-label]="menuOpen() ? 'Close menu' : 'Open menu'">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
+
+    <div class="em-drawer-overlay" (click)="closeMenu()"></div>
+
+    <!-- ─── Sidebar: folders ─────────────────────────────────────────────── -->
+    <aside class="em-sidebar" [class.em-sidebar--open]="menuOpen()">
+        <button class="em-compose-btn" (click)="goTo('compose')">
+            <i class="bi bi-pencil-square"></i> Compose
+        </button>
+
+        <ul class="em-folder-nav">
+            <li>
+                <button class="em-folder-link" [class.is-active]="activeFolder() === 'inbox'" (click)="goTo('inbox')">
+                    <i class="bi bi-inbox"></i> Inbox
+                    @if (folderCounts().unread > 0) {
+                    <span class="em-folder-badge">{{ folderCounts().unread }}</span>
+                    }
+                </button>
+            </li>
+            <li>
+                <button class="em-folder-link" [class.is-active]="activeFolder() === 'sent'" (click)="goTo('sent')">
+                    <i class="bi bi-send"></i> Sent
+                    @if (folderCounts().sent > 0) {
+                    <span class="em-folder-badge em-folder-badge--muted">{{ folderCounts().sent }}</span>
+                    }
+                </button>
+            </li>
+            <li>
+                <button class="em-folder-link" [class.is-active]="activeFolder() === 'drafts'" (click)="goTo('drafts')">
+                    <i class="bi bi-file-earmark-text"></i> Drafts
+                    @if (folderCounts().drafts > 0) {
+                    <span class="em-folder-badge em-folder-badge--muted">{{ folderCounts().drafts }}</span>
+                    }
+                </button>
+            </li>
+            <li>
+                <button class="em-folder-link" [class.is-active]="activeFolder() === 'settings'" (click)="goTo('settings')">
+                    <i class="bi bi-gear"></i> Settings
+                </button>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- ─── Main content ─────────────────────────────────────────────────── -->
+    <main class="em-main">
+
+        <!-- ============ INBOX / SENT / DRAFTS ============ -->
+        @if (activeFolder() === 'inbox' || activeFolder() === 'sent' || activeFolder() === 'drafts') {
+
+            @if (selectedMessage(); as msg) {
+                <!-- Reading pane -->
+                <div class="em-reading-pane">
+                    <div class="em-reading-toolbar">
+                        <button class="btn-text" (click)="closeMessage()">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </button>
+                        <button class="btn-text-danger" (click)="confirmDeleteMessage(msg, $event)">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                    <div class="em-reading-header">
+                        <h2 class="em-reading-subject">{{ msg.subject }}</h2>
+                        <div class="em-reading-meta">
+                            <div class="em-reading-avatar">{{ initials(msg.from) }}</div>
+                            <div>
+                                <p class="em-reading-from">{{ msg.from }} <span class="em-reading-email">&lt;{{ msg.fromEmail }}&gt;</span></p>
+                                <p class="em-reading-to">to {{ msg.to || 'me' }}</p>
+                            </div>
+                            <span class="em-reading-date">{{ msg.date | date:'MMM d, y, h:mm a' }}</span>
+                        </div>
+                    </div>
+                    <div class="em-reading-body">{{ msg.body }}</div>
+
+                    <div class="em-reading-actions">
+                        <button class="btn-primary" (click)="goTo('compose')"><i class="bi bi-reply-fill"></i> Reply</button>
+                        <button class="btn-ghost" (click)="goTo('compose')"><i class="bi bi-arrow-right"></i> Forward</button>
+                    </div>
+                </div>
+            } @else {
+                <!-- Message list -->
+                <div class="admin-page-header">
+                    <h1 class="admin-page-title">{{ activeFolder() === 'inbox' ? 'Inbox' : activeFolder() === 'sent' ? 'Sent' : 'Drafts' }}</h1>
+                </div>
+
+                <div class="admin-list-toolbar">
+                    <div class="admin-list-search">
+                        <i class="bi bi-search"></i>
+                        <input [value]="searchQuery()" (input)="onSearch($event)" placeholder="Search mail…" autocomplete="off">
+                    </div>
+                    <span class="admin-list-toolbar-count">
+                        {{ filteredMessages().length }} message{{ filteredMessages().length !== 1 ? 's' : '' }}
+                    </span>
+                </div>
+
+                @if (filteredMessages().length === 0) {
+                    <p class="empty-state">
+                        @if (searchQuery()) { No messages match your search. }
+                        @else if (activeFolder() === 'inbox') { Your inbox is empty. }
+                        @else if (activeFolder() === 'sent') { You haven't sent any messages yet. }
+                        @else { No drafts saved. }
+                    </p>
+                } @else {
+                    <ul class="em-msg-list">
+                        @for (msg of filteredMessages(); track msg.id) {
+                        <li class="em-msg-row" [class.is-unread]="!msg.read && activeFolder() === 'inbox'" (click)="openMessage(msg)">
+                            <button class="em-star-btn" [class.is-starred]="msg.starred" (click)="toggleStar(msg, $event)"
+                                [attr.aria-label]="msg.starred ? 'Unstar' : 'Star'">
+                                <i class="bi" [class.bi-star-fill]="msg.starred" [class.bi-star]="!msg.starred"></i>
+                            </button>
+                            <div class="em-msg-avatar">{{ initials(activeFolder() === 'inbox' ? msg.from : (msg.to || msg.from)) }}</div>
+                            <div class="em-msg-info">
+                                <div class="em-msg-top">
+                                    <span class="em-msg-name">
+                                        {{ activeFolder() === 'inbox' ? msg.from : (msg.to ? 'To: ' + msg.to : 'To: (no recipient)') }}
+                                    </span>
+                                    <span class="em-msg-date">{{ msg.date | date:'MMM d' }}</span>
+                                </div>
+                                <p class="em-msg-subject">{{ msg.subject }}</p>
+                                <p class="em-msg-preview">{{ msg.preview }}</p>
+                            </div>
+                        </li>
+                        }
+                    </ul>
+                }
+            }
+        }
+
+        <!-- ============ COMPOSE ============ -->
+        @if (activeFolder() === 'compose') {
+            <div class="admin-page-header">
+                <h1 class="admin-page-title">Compose</h1>
+            </div>
+
+            @if (sentNotice()) {
+            <div class="admin-alert admin-alert--success">
+                <i class="bi bi-check-circle-fill" style="flex-shrink:0"></i>
+                <span><strong>Message sent!</strong> (demo only — nothing was actually delivered)</span>
+            </div>
+            }
+            @if (draftSavedNotice()) {
+            <div class="admin-alert admin-alert--warning">
+                <i class="bi bi-file-earmark-check-fill" style="flex-shrink:0"></i>
+                <span><strong>Draft saved.</strong></span>
+            </div>
+            }
+
+            <form #composeForm="ngForm" (ngSubmit)="submitCompose(composeForm)" novalidate class="em-compose-form">
+                <div class="admin-form-field">
+                    <label class="admin-form-label label-required">To</label>
+                    <div class="tag-input-wrap" [class.is-invalid]="composeForm.submitted && toEmails().length === 0">
+                        <div class="tag-input-inner">
+                            @for (email of toEmails(); track email) {
+                            <span class="tag-chip">
+                                <span class="tag-chip-label">{{ email }}</span>
+                                @if (!isSavedContact(email)) {
+                                <button type="button" class="tag-chip-save" title="Save address as a contact" (click)="startSaveContact(email, $event)">
+                                    <i class="bi bi-bookmark-plus"></i>
+                                </button>
+                                }
+                                <button type="button" class="tag-chip-remove" title="Remove" (click)="removeEmail(email, 'to')">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </span>
+                            }
+                            <div class="tag-input-field-wrap">
+                                <input class="tag-text-input" type="text" name="toChipInput" autocomplete="off"
+                                    [(ngModel)]="toInputValue"
+                                    (keydown)="onEmailInputKeydown($event, 'to')"
+                                    (blur)="commitEmailInput('to')"
+                                    placeholder="recipient@example.com, another@example.com">
+                                @if (contactSuggestions(toInputValue).length > 0) {
+                                <div class="tag-suggestions">
+                                    @for (c of contactSuggestions(toInputValue); track c.email) {
+                                    <button type="button" class="tag-suggestion-item" (mousedown)="$event.preventDefault()" (click)="pickContact(c, 'to')">
+                                        {{ c.name }} <span class="em-contact-email">&lt;{{ c.email }}&gt;</span>
+                                    </button>
+                                    }
+                                </div>
+                                }
+                            </div>
+                        </div>
+                        <p class="admin-form-hint tag-input-hint">Comma or Enter to add an address · Backspace to remove last</p>
+                    </div>
+                </div>
+
+                @if (savingContactEmail(); as savingEmail) {
+                <div class="em-save-contact">
+                    <span class="em-save-contact-label">Save <strong>{{ savingEmail }}</strong> with a short profile name:</span>
+                    <input type="text" class="admin-form-input settings-input-sm" [(ngModel)]="contactNameInput" name="contactNameInput"
+                        placeholder="e.g. Ayesha" autocomplete="off">
+                    <button type="button" class="btn-text" (click)="confirmSaveContact()"><i class="bi bi-check-lg"></i> Save</button>
+                    <button type="button" class="btn-text" (click)="cancelSaveContact()">Cancel</button>
+                </div>
+                }
+
+                @if (showCc()) {
+                <div class="admin-form-field">
+                    <label class="admin-form-label">Cc</label>
+                    <div class="tag-input-wrap">
+                        <div class="tag-input-inner">
+                            @for (email of ccEmails(); track email) {
+                            <span class="tag-chip">
+                                <span class="tag-chip-label">{{ email }}</span>
+                                @if (!isSavedContact(email)) {
+                                <button type="button" class="tag-chip-save" title="Save address as a contact" (click)="startSaveContact(email, $event)">
+                                    <i class="bi bi-bookmark-plus"></i>
+                                </button>
+                                }
+                                <button type="button" class="tag-chip-remove" title="Remove" (click)="removeEmail(email, 'cc')">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </span>
+                            }
+                            <div class="tag-input-field-wrap">
+                                <input class="tag-text-input" type="text" name="ccChipInput" autocomplete="off"
+                                    [(ngModel)]="ccInputValue"
+                                    (keydown)="onEmailInputKeydown($event, 'cc')"
+                                    (blur)="commitEmailInput('cc')"
+                                    placeholder="cc@example.com">
+                                @if (contactSuggestions(ccInputValue).length > 0) {
+                                <div class="tag-suggestions">
+                                    @for (c of contactSuggestions(ccInputValue); track c.email) {
+                                    <button type="button" class="tag-suggestion-item" (mousedown)="$event.preventDefault()" (click)="pickContact(c, 'cc')">
+                                        {{ c.name }} <span class="em-contact-email">&lt;{{ c.email }}&gt;</span>
+                                    </button>
+                                    }
+                                </div>
+                                }
+                            </div>
+                        </div>
+                        <p class="admin-form-hint tag-input-hint">Comma or Enter to add an address · Backspace to remove last</p>
+                    </div>
+                </div>
+                } @else {
+                <button type="button" class="btn-text em-cc-toggle" (click)="showCc.set(true)">
+                    <i class="bi bi-plus-lg"></i> Add Cc
+                </button>
+                }
+
+                <div class="admin-form-field">
+                    <label class="admin-form-label label-required">Subject</label>
+                    <input ngModel name="subject" required type="text" class="admin-form-input"
+                        [class.is-invalid]="(composeForm.submitted || composeForm.controls['subject']?.touched) && composeForm.controls['subject']?.invalid"
+                        placeholder="Subject" autocomplete="off">
+                </div>
+
+                <div class="admin-form-field">
+                    <label class="admin-form-label label-required">Message</label>
+                    <div class="rte-wrap">
+                        <app-rte-toolbar [el]="bodyArea" mode="full"></app-rte-toolbar>
+                        <textarea #bodyArea ngModel name="body" required class="admin-form-textarea rte-textarea" rows="10"
+                            [class.is-invalid]="(composeForm.submitted || composeForm.controls['body']?.touched) && composeForm.controls['body']?.invalid"
+                            placeholder="Write your message…" style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
+                    </div>
+                </div>
+
+                <div class="admin-form-field">
+                    <label class="admin-form-label label-optional">Attachments</label>
+                    <div class="img-upload-zone" [class.drag-over]="attachmentDragOver()"
+                        (dragover)="onAttachmentDragOver($event)" (dragleave)="onAttachmentDragLeave()" (drop)="onAttachmentDrop($event)">
+                        <div class="img-upload-placeholder">
+                            <i class="bi bi-paperclip" style="font-size:1.5rem"></i>
+                            <span>Drag &amp; drop files, or <label class="img-upload-browse">browse<input type="file"
+                                        multiple (change)="onAttachmentInput($event)" hidden></label></span>
+                            <span style="font-size:0.75rem;color:var(--text-muted)">Any file type · max 10 MB each</span>
+                        </div>
+                    </div>
+                    @if (attachments().length > 0) {
+                    <ul class="em-attachment-list">
+                        @for (file of attachments(); track file.name) {
+                        <li class="em-attachment-row">
+                            <i class="bi bi-file-earmark"></i>
+                            <span class="em-attachment-name">{{ file.name }}</span>
+                            <span class="em-attachment-size">{{ formatFileSize(file.size) }}</span>
+                            <button type="button" class="tag-chip-remove" title="Remove" (click)="removeAttachment(file.name)">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </li>
+                        }
+                    </ul>
+                    }
+                </div>
+
+                <div class="admin-form-actions">
+                    <button type="submit" class="btn-primary" [disabled]="sending()">
+                        @if (sending()) {
+                        <span class="contact-spinner"></span> Sending…
+                        } @else {
+                        <i class="bi bi-send-fill"></i> Send
+                        }
+                    </button>
+                    <button type="button" class="btn-ghost" (click)="saveDraft(composeForm)">
+                        <i class="bi bi-file-earmark-text"></i> Save Draft
+                    </button>
+                    <button type="button" class="btn-text-danger" (click)="confirmDiscard(composeForm)">
+                        <i class="bi bi-trash"></i> Discard
+                    </button>
+                </div>
+            </form>
+
+            @if (discardConfirmOpen()) {
+            <app-confirm-modal title="Discard Message"
+                body="Any unsaved changes will be lost. Are you sure you want to discard this message?"
+                confirmLabel="Discard" (confirmed)="executeDiscard()" (cancelled)="cancelDiscard()" />
+            }
+        }
+
+        <!-- ============ SETTINGS ============ -->
+        @if (activeFolder() === 'settings') {
+            <div class="admin-page-header">
+                <div>
+                    <h1 class="admin-page-title">Mail Settings</h1>
+                    <p class="admin-page-sub">Manage your signature, replies, and account security.</p>
+                </div>
+            </div>
+
+            @if (settingsSavedNotice()) {
+            <div class="admin-alert admin-alert--success">
+                <i class="bi bi-check-circle-fill" style="flex-shrink:0"></i>
+                <span><strong>Settings saved.</strong></span>
+            </div>
+            }
+
+            <div class="admin-form-panel">
+                <h2 class="admin-form-title"><i class="bi bi-pencil"></i> Signature</h2>
+                <div class="admin-form-field">
+                    <label class="admin-form-label">Signature text</label>
+                    <textarea class="admin-form-textarea" rows="3" [ngModel]="signature()"
+                        (ngModelChange)="signature.set($event)" name="signature"
+                        placeholder="Your name and title…"></textarea>
+                </div>
+            </div>
+
+            <div class="admin-form-panel">
+                <h2 class="admin-form-title"><i class="bi bi-reply"></i> Auto-Reply</h2>
+                <div class="settings-toggle-row">
+                    <div>
+                        <span class="settings-toggle-title">Enable automatic replies</span>
+                        <span class="settings-toggle-sub">Send an automatic reply to incoming mail while I'm away.</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" [checked]="autoReplyEnabled()"
+                            (change)="autoReplyEnabled.set($any($event.target).checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                @if (autoReplyEnabled()) {
+                <div class="admin-form-field">
+                    <label class="admin-form-label">Auto-reply message</label>
+                    <textarea class="admin-form-textarea" rows="3" [ngModel]="autoReplyMessage()"
+                        (ngModelChange)="autoReplyMessage.set($event)" name="autoReplyMessage"></textarea>
+                </div>
+                }
+                <div class="settings-toggle-row">
+                    <div>
+                        <span class="settings-toggle-title">New mail notifications</span>
+                        <span class="settings-toggle-sub">Notify me when new mail arrives.</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" [checked]="notifyOnNewMail()"
+                            (change)="notifyOnNewMail.set($any($event.target).checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Security section — mirrors the admin-login / unlock-account UX patterns -->
+            <div class="admin-form-panel">
+                <h2 class="admin-form-title"><i class="bi bi-shield-lock"></i> Account Security</h2>
+
+                @if (lockInfo()) {
+                <div class="admin-alert admin-alert--error">
+                    <i class="bi bi-lock-fill" style="flex-shrink:0"></i>
+                    <span><strong>Account locked.</strong> Too many failed sign-in attempts were detected.</span>
+                </div>
+                } @else {
+                <div class="admin-alert admin-alert--success">
+                    <i class="bi bi-unlock-fill" style="flex-shrink:0"></i>
+                    <span><strong>Account is secure.</strong> No suspicious activity detected.</span>
+                </div>
+                }
+
+                <div class="settings-toggle-row">
+                    <div>
+                        <span class="settings-toggle-title">Require two-factor authentication for sign-in</span>
+                        <span class="settings-toggle-sub">Adds an extra verification step, just like the admin dashboard login.</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" [checked]="twoFactorEnabled()"
+                            (change)="twoFactorEnabled.set($any($event.target).checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <h3 class="em-security-subtitle">Recent Activity</h3>
+                <ul class="em-security-events">
+                    @for (ev of recentSecurityEvents; track ev.label) {
+                    <li class="em-security-event">
+                        <span class="admin-badge" [class.admin-badge--on]="ev.kind === 'ok'" [class.admin-badge--warn]="ev.kind === 'warn'">
+                            <i class="bi" [class.bi-check-lg]="ev.kind === 'ok'" [class.bi-exclamation-triangle-fill]="ev.kind === 'warn'"></i>
+                        </span>
+                        <span class="em-security-event-label">{{ ev.label }}</span>
+                        <span class="em-security-event-time">{{ ev.time | date:'MMM d, h:mm a' }}</span>
+                    </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="admin-form-actions">
+                <button type="button" class="btn-primary" (click)="saveSettings()">
+                    <i class="bi bi-check-lg"></i> Save Settings
+                </button>
+            </div>
+        }
+
+    </main>
+
+    @if (deleteTarget(); as target) {
+    <app-confirm-modal title="Delete Message"
+        body="This action cannot be undone. Are you sure you want to delete this message?"
+        (confirmed)="executeDeleteMessage()" (cancelled)="cancelDeleteMessage()" />
+    }
+</div>

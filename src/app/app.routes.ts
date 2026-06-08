@@ -78,6 +78,10 @@ export const routes: Routes = [
                 path: 'gallery',
                 loadComponent: () => import('./features/admin/gallery/admin-gallery.component').then(m => m.AdminGalleryComponent),
             },
+            {
+                path: 'email',
+                loadComponent: () => import('./features/admin/email/admin-email.component').then(m => m.AdminEmailComponent),
+            },
             { path: '**', redirectTo: 'dashboard', pathMatch: 'full' },
         ],
     },
