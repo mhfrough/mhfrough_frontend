@@ -8,6 +8,7 @@ import { RealtimeService } from '../../../core/services/realtime.service';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
 import { FeedbackService } from '../../../core/services/inquiry-feedback.service';
 import { PreconnectService } from '../../../core/services/preconnect.service';
+import { SeoService } from '../../../core/services/seo.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 
@@ -25,6 +26,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private feedbackService = inject(FeedbackService);
     private preconnect = inject(PreconnectService);
     private titleService = inject(Title);
+    private seo = inject(SeoService);
     readonly projects = signal<any[]>([]);
     readonly loadingProjects = signal(true);
     readonly featuredReviews = signal<any[]>([]);
@@ -137,7 +139,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     private subs = new Subscription();
 
     ngOnInit() {
-        this.titleService.setTitle('Mohammad Hamza — Application Developer & Product Designer');
+        this.seo.update({
+            title: 'Mohammad Hamza — Application Developer & Product Designer',
+            description: 'Portfolio of Mohammad Hamza, an application developer and product designer crafting modern web experiences.',
+            url: '/',
+            type: 'profile',
+        });
         this.footerSettings.load();
         this.projectsService.getFeatured().subscribe({
             next: (data: any[]) => { this.projects.set(data); this.loadingProjects.set(false); this.preconnect.add(data[0]?.thumbnail); },

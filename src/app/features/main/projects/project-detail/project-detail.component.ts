@@ -8,6 +8,7 @@ import { ExternalUrlPipe } from '../../../../shared/pipes/external-url.pipe';
 import { PreconnectService } from '../../../../core/services/preconnect.service';
 import { VisitorTrackingService } from '../../../../core/services/visitor-tracking.service';
 import { Title } from '@angular/platform-browser';
+import { SeoService } from '../../../../core/services/seo.service';
 
 @Component({
     selector: 'app-project-detail',
@@ -22,22 +23,45 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     private preconnect = inject(PreconnectService);
     private tracking = inject(VisitorTrackingService);
     private titleService = inject(Title);
+    private seo = inject(SeoService);
 
     readonly project = signal<any>(null);
     readonly loading = signal(true);
     private subs = new Subscription();
 
-    ngOnDestroy() { this.subs.unsubscribe(); }
+    ngOnDestroy() {
+        this.subs.unsubscribe();
+        this.seo.removeJsonLd();
+    }
+
+    private applySeo(project: any, slug: string): void {
+        this.titleService.setTitle(`${project.title} | Mohammad Hamza`);
+        this.seo.update({
+            title: `${project.title} | Mohammad Hamza`,
+            description: project.description || project.title,
+            url: `/projects/${project.slug ?? slug}`,
+            image: project.thumbnail,
+            type: 'article',
+        });
+        this.seo.setJsonLd({
+            '@context': 'https://schema.org',
+            '@type': 'CreativeWork',
+            name: project.title,
+            description: project.description || project.title,
+            image: project.thumbnail ? [project.thumbnail] : undefined,
+            author: { '@type': 'Person', name: 'Mohammad Hamza' },
+        });
+    }
 
     ngOnInit() {
         const slug = this.route.snapshot.paramMap.get('slug') ?? '';
         // Try slug endpoint first; if it fails (not a valid slug), try by id
         this.subs.add(this.service.getBySlug(slug).subscribe({
-            next: (data: any) => { this.project.set(data); this.titleService.setTitle(`${data.title} | Mohammad Hamza`); this.loading.set(false); this.preconnect.add(data?.thumbnail); this.tracking.trackEvent('project_view', { title: data.title, slug: data.slug ?? slug }); },
+            next: (data: any) => { this.project.set(data); this.applySeo(data, slug); this.loading.set(false); this.preconnect.add(data?.thumbnail); this.tracking.trackEvent('project_view', { title: data.title, slug: data.slug ?? slug }); },
             error: () => {
                 // fallback: try by UUID id
                 this.subs.add(this.service.getOne(slug).subscribe({
-                    next: (data: any) => { this.project.set(data); this.titleService.setTitle(`${data.title} | Mohammad Hamza`); this.loading.set(false); this.preconnect.add(data?.thumbnail); this.tracking.trackEvent('project_view', { title: data.title, slug: data.slug ?? slug }); },
+                    next: (data: any) => { this.project.set(data); this.applySeo(data, slug); this.loading.set(false); this.preconnect.add(data?.thumbnail); this.tracking.trackEvent('project_view', { title: data.title, slug: data.slug ?? slug }); },
                     error: () => {
                         this.router.navigate(['/not-found'], {
                             replaceUrl: true,

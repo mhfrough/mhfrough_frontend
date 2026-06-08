@@ -49,7 +49,7 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    overflow-y: auto;
+    overflow-y: scroll;
     flex: 1;
 }
 
@@ -443,7 +443,7 @@
 // ─── Messages ─────────────────────────────────────────────────────────────────
 .ac-messages {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: scroll;
     padding: 1.25rem 1.25rem 2rem;
     display: flex;
     flex-direction: column;
@@ -649,7 +649,7 @@
 // ─── Settings Panel ───────────────────────────────────────────────────────────
 .ac-settings {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: scroll;
     padding: 1.5rem 1.25rem;
     display: flex;
     flex-direction: column;

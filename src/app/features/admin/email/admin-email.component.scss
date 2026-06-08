@@ -2,12 +2,13 @@
 .em-wrap {
     display: grid;
     grid-template-columns: 240px 1fr;
-    min-height: calc(100dvh - 6rem);
+    height: calc(100dvh - 6rem);
+    overflow: hidden;
     border-top: 1px solid var(--border);
 
     @media (max-width: 768px) {
         grid-template-columns: 1fr;
-        min-height: calc(100dvh - 56px - 4.75rem);
+        height: calc(100dvh - 56px - 4.75rem);
     }
 }
 
@@ -80,6 +81,7 @@
     flex-direction: column;
     padding: 1.25rem 1rem;
     gap: 1.25rem;
+    overflow: hidden;
 
     @media (max-width: 768px) {
         position: fixed;
@@ -128,6 +130,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
+    flex: 1;
+    overflow-y: scroll;
 }
 
 .em-folder-link {
@@ -191,7 +195,7 @@
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 .em-main {
-    overflow: hidden;
+    overflow-y: scroll;
     padding: 1.5rem 1.75rem 2.5rem;
 
     @media (max-width: 480px) {

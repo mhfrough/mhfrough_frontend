@@ -11,6 +11,7 @@ import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/r
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
 import { FrontToastService } from '../../../../core/services/front-toast.service';
 import { Title } from '@angular/platform-browser';
+import { SeoService } from '../../../../core/services/seo.service';
 import { EditorHelperService } from '../../../../core/services/editor-helper.service';
 import { VisitorTrackingService } from '../../../../core/services/visitor-tracking.service';
 
@@ -31,6 +32,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     private toast = inject(FrontToastService);
     private tracking = inject(VisitorTrackingService);
     private titleService = inject(Title);
+    private seo = inject(SeoService);
     private platformId = inject(PLATFORM_ID);
 
     readonly blog = signal<any>(null);
@@ -58,7 +60,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
         this.service.getBySlug(slug).subscribe({
             next: (data: any) => {
                 this.blog.set(data);
-                this.titleService.setTitle(`${data.title} | Mohammad Hamza`);
+                this.applySeo(data);
                 this.loading.set(false);
                 this.preconnect.add(data?.coverImage);
                 this.tracking.trackEvent('blog_read', { title: data.title, slug: data.slug ?? '' });
@@ -76,14 +78,38 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
         });
     }
 
-    ngOnDestroy() { this.subs.unsubscribe(); }
+    ngOnDestroy() {
+        this.subs.unsubscribe();
+        this.seo.removeJsonLd();
+    }
+
+    private applySeo(blog: any): void {
+        this.titleService.setTitle(`${blog.title} | Mohammad Hamza`);
+        this.seo.update({
+            title: `${blog.title} | Mohammad Hamza`,
+            description: blog.excerpt || blog.title,
+            url: `/blog/${blog.slug}`,
+            image: blog.coverImage,
+            type: 'article',
+        });
+        this.seo.setJsonLd({
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: blog.title,
+            description: blog.excerpt || blog.title,
+            image: blog.coverImage ? [blog.coverImage] : undefined,
+            datePublished: blog.publishedAt,
+            dateModified: blog.updatedAt ?? blog.publishedAt,
+            author: { '@type': 'Person', name: 'Mohammad Hamza' },
+        });
+    }
 
     private subscribeToRealtimeEvents(blogId: string) {
         // Blog updated in-place (e.g. content, title edited)
         this.subs.add(this.realtime.on<any>('blog:updated').subscribe(blog => {
             if (blog.id !== this.blog()?.id) return;
             this.blog.set(blog);
-            this.titleService.setTitle(`${blog.title} | Mohammad Hamza`);
+            this.applySeo(blog);
         }));
 
         // Blog unpublished or deleted → redirect away

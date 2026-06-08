@@ -31,6 +31,8 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly titleService = inject(Title);
     readonly menuOpen = signal(false);
     private subs = new Subscription();
+    private waitForSettingsInterval: ReturnType<typeof setInterval> | null = null;
+    private waitForSettingsTimeout: ReturnType<typeof setTimeout> | null = null;
 
     private static readonly ROUTE_TITLES: Record<string, string> = {
         dashboard: 'Dashboard',
@@ -62,15 +64,18 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         // Load settings first, then start inactivity (so timeout is correct)
         this.adminSettings.load();
         let settingsReady = false;
-        const waitForSettings = setInterval(() => {
+        this.waitForSettingsInterval = setInterval(() => {
             if (this.adminSettings.loaded()) {
-                clearInterval(waitForSettings);
+                this.clearWaitForSettings();
                 settingsReady = true;
                 this.inactivity.start();
             }
         }, 50);
         // Fallback: start after 2s only if settings never loaded (e.g. network error)
-        setTimeout(() => { clearInterval(waitForSettings); if (!settingsReady) this.inactivity.start(); }, 2000);
+        this.waitForSettingsTimeout = setTimeout(() => {
+            this.clearWaitForSettings();
+            if (!settingsReady) this.inactivity.start();
+        }, 2000);
         this.subs.add(
             this.router.events.pipe(filter(e => e instanceof NavigationEnd))
                 .subscribe((e) => {
@@ -107,7 +112,19 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         this.scrollActiveIntoView();
     }
 
+    private clearWaitForSettings(): void {
+        if (this.waitForSettingsInterval !== null) {
+            clearInterval(this.waitForSettingsInterval);
+            this.waitForSettingsInterval = null;
+        }
+        if (this.waitForSettingsTimeout !== null) {
+            clearTimeout(this.waitForSettingsTimeout);
+            this.waitForSettingsTimeout = null;
+        }
+    }
+
     ngOnDestroy() {
+        this.clearWaitForSettings();
         this.notif.disconnect();
         this.chat.disconnectAdmin();
         this.realtime.disconnect();

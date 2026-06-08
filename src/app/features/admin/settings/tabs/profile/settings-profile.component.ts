@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminSettingsService, AdminProfile, AdminSettings } from '../../../../../core/services/admin-settings.service';
@@ -12,7 +12,7 @@ import { ImgFallbackDirective } from '../../../../../shared/directives/img-fallb
     imports: [CommonModule, FormsModule, RteToolbarComponent, ImgFallbackDirective],
     templateUrl: './settings-profile.component.html',
 })
-export class SettingsProfileComponent implements OnInit {
+export class SettingsProfileComponent implements OnInit, OnDestroy {
     private readonly settingsService = inject(AdminSettingsService);
     private readonly footerService = inject(FooterSettingsService);
 
@@ -63,14 +63,20 @@ export class SettingsProfileComponent implements OnInit {
     footerShowTagline = true;
     readonly year = new Date().getFullYear();
 
+    private settingsPoll: ReturnType<typeof setInterval> | null = null;
+
     ngOnInit() {
         this.settingsService.load();
         this.syncFooterFromSettings(this.settingsService.settings());
         if (!this.settingsService.loaded()) {
-            const poll = setInterval(() => {
+            let attempts = 0;
+            this.settingsPoll = setInterval(() => {
+                attempts++;
                 if (this.settingsService.loaded()) {
                     this.syncFooterFromSettings(this.settingsService.settings());
-                    clearInterval(poll);
+                    this.stopSettingsPoll();
+                } else if (attempts >= 50) {
+                    this.stopSettingsPoll();
                 }
             }, 100);
         }
@@ -84,6 +90,17 @@ export class SettingsProfileComponent implements OnInit {
                 error: () => { },
             });
         }
+    }
+
+    private stopSettingsPoll() {
+        if (this.settingsPoll !== null) {
+            clearInterval(this.settingsPoll);
+            this.settingsPoll = null;
+        }
+    }
+
+    ngOnDestroy() {
+        this.stopSettingsPoll();
     }
 
     private syncFooterFromSettings(s: AdminSettings) {

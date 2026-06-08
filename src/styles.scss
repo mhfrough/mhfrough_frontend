@@ -4370,7 +4370,7 @@ button.admin-nav-link:last-child:hover {
 
 .img-upload-zone {
     border: 2px dashed var(--border);
-    border-radius: 8px;
+    // border-radius: 8px;
     transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
     overflow: hidden;
 
@@ -8804,7 +8804,6 @@ tr.session-current-row {
     color: var(--text-muted);
     letter-spacing: 0.03em;
     margin: 0;
-    opacity: 0.55;
 }
 
 // ─── Home: FAQ ────────────────────────────────────────────────────────────────

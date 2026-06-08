@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, HostListener, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule, NgOptimizedImage } from '@angular/common';
 import { Title } from '@angular/platform-browser';
+import { SeoService } from '../../../core/services/seo.service';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
@@ -23,6 +24,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private router = inject(Router);
     private preconnect = inject(PreconnectService);
     private titleService = inject(Title);
+    private seo = inject(SeoService);
     readonly projects = signal<any[]>([]);
     readonly loading = signal(true);
     readonly lightboxSrc = signal<string | null>(null);
@@ -110,6 +112,11 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.titleService.setTitle('Projects | Mohammad Hamza');
+        this.seo.update({
+            title: 'Projects | Mohammad Hamza',
+            description: 'A showcase of projects built by Mohammad Hamza — web apps, products and experiments.',
+            url: '/projects',
+        });
         const p = this.route.snapshot.queryParams;
         if (p['q']) this.searchQuery.set(p['q']);
         if (p['page']) this.currentPage.set(+p['page']);

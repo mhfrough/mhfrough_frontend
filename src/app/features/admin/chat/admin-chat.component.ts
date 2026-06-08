@@ -12,6 +12,7 @@ import { SoundService } from '../../../core/services/sound.service';
 import { VisitorAnalyticsService, VisitorSession } from '../../../core/services/visitor-analytics.service';
 import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { formatDuration, lightboxCaption } from '../../../shared/chat-widget/chat-message.utils';
 
 export interface PendingFile {
     file: File;
@@ -644,12 +645,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     }
 
     lightboxCaption(msg: ChatMessage | null): string {
-        if (!msg?.content) return '';
-        if (msg.content.startsWith('[File:') && msg.content.endsWith(']')) return '';
-        // Strip HTML tags for caption display
-        const div = document.createElement('div');
-        div.innerHTML = msg.content;
-        return div.textContent?.trim() ?? '';
+        return lightboxCaption(msg);
     }
 
     // ─── File helpers ─────────────────────────────────────────────────────────
@@ -809,9 +805,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     }
 
     formatDuration(seconds: number): string {
-        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const s = (seconds % 60).toString().padStart(2, '0');
-        return `${m}:${s}`;
+        return formatDuration(seconds);
     }
 
     // ─── Audio playback ───────────────────────────────────────────────────────

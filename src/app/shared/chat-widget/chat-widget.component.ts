@@ -10,6 +10,7 @@ import { ActivityLogService } from '../../core/services/activity-log.service';
 import { SoundService } from '../../core/services/sound.service';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { UserInfoService } from '../../core/services/user-info.service';
+import { formatDuration, lightboxCaption } from './chat-message.utils';
 
 @Component({
     selector: 'app-chat-widget',
@@ -347,9 +348,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     }
 
     formatDuration(seconds: number): string {
-        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const s = (seconds % 60).toString().padStart(2, '0');
-        return `${m}:${s}`;
+        return formatDuration(seconds);
     }
 
     // ─── Audio playback ───────────────────────────────────────────────────────
@@ -501,11 +500,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     }
 
     lightboxCaption(msg: { content?: string | null } | null): string {
-        if (!msg?.content) return '';
-        if (msg.content.startsWith('[File:') && msg.content.endsWith(']')) return '';
-        const div = document.createElement('div');
-        div.innerHTML = msg.content;
-        return div.textContent?.trim() ?? '';
+        return lightboxCaption(msg);
     }
 
     isImage(type: string | null | undefined): boolean {

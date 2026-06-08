@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule, DatePipe } from '@angular/common';
 import { Title } from '@angular/platform-browser';
+import { SeoService } from '../../../core/services/seo.service';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
@@ -21,6 +22,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     private realtime = inject(RealtimeService);
     private platformId = inject(PLATFORM_ID);
     private titleService = inject(Title);
+    private seo = inject(SeoService);
     private subs = new Subscription();
 
     readonly PAGE_SIZE = 24;
@@ -51,6 +53,11 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.titleService.setTitle('Gallery | Mohammad Hamza');
+        this.seo.update({
+            title: 'Gallery | Mohammad Hamza',
+            description: 'A visual gallery of work and moments from Mohammad Hamza.',
+            url: '/gallery',
+        });
         this.galleryService.getCategories().subscribe({
             next: (cats) => this.categories.set(cats),
         });
