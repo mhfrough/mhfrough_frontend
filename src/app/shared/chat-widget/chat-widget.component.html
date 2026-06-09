@@ -69,7 +69,8 @@
 
         @for (msg of messages(); track trackById($index, msg)) {
         <div class="cw-bubble" [class.cw-bubble--admin]="msg.sender === 'admin'"
-            [class.cw-bubble--visitor]="msg.sender === 'visitor'" [class.cw-bubble--unread]="msg.isUnread">
+            [class.cw-bubble--visitor]="msg.sender === 'visitor'" [class.cw-bubble--unread]="msg.isUnread"
+            [class.cw-bubble--pending]="msg.pending">
             @if (msg.messageType === 'audio' && msg.audioUrl) {
             @let bars = audioBarsFor(msg.id);
             <div class="cw-audio-msg">
@@ -138,7 +139,14 @@
             } @else {
             <span class="cw-bubble-text" [innerHTML]="msg.content"></span>
             }
+            @if (msg.pending) {
+            <span class="cw-bubble-time cw-bubble-time--sending" aria-label="Sending…">
+                <span class="cw-sending-dots"><span></span><span></span><span></span></span>
+                Sending
+            </span>
+            } @else {
             <span class="cw-bubble-time">{{ msg.createdAt | date:'HH:mm' }}</span>
+            }
         </div>
         }
 
@@ -163,6 +171,14 @@
         <div class="cw-closed-notice">
             <i class="bi bi-check2-all"></i> Chat ended. Thanks for reaching out!
             <button class="cw-new-chat-btn" (click)="startNewChat()">Start New Chat</button>
+        </div>
+        }
+
+        <!-- Offline / queued notice -->
+        @if (chatService.chatQueued()) {
+        <div class="cw-offline-notice">
+            <span class="cw-offline-dot"></span>
+            You're offline — messages will send when reconnected
         </div>
         }
     </div>

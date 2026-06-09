@@ -20,7 +20,7 @@ import { formatDuration, lightboxCaption } from './chat-message.utils';
     styleUrl: './chat-widget.component.scss',
 })
 export class ChatWidgetComponent implements OnInit, OnDestroy {
-    private readonly chatService = inject(ChatService);
+    readonly chatService = inject(ChatService);
     private readonly platformId = inject(PLATFORM_ID);
     readonly footerSettings = inject(FooterSettingsService);
     private readonly activityLog = inject(ActivityLogService);

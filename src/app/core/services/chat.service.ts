@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type { Socket } from 'socket.io-client';
+import { IdbService } from './idb.service';
 
 export interface ChatMessage {
     id: string;
@@ -22,6 +23,8 @@ export interface ChatMessage {
     isBot?: boolean;
     /** Client-side only: true when this admin message arrived while the widget was closed */
     isUnread?: boolean;
+    /** Client-side only: true when queued for sending while offline */
+    pending?: boolean;
 }
 
 export interface ChatSession {
@@ -57,6 +60,7 @@ const VISITOR_NAME_KEY = 'chat_visitor_name';
 export class ChatService {
     private readonly http = inject(HttpClient);
     private readonly platformId = inject(PLATFORM_ID);
+    private readonly idb = inject(IdbService);
 
     private socket?: Socket;
     private socketUrl = environment.apiUrl.replace('/api/v1', '');
@@ -66,6 +70,8 @@ export class ChatService {
     readonly visitorMessages = signal<ChatMessage[]>([]);
     readonly adminIsTyping = signal(false);
     readonly sessionClosed = signal(false);
+    /** True when there are messages queued offline waiting to be sent */
+    readonly chatQueued = signal(false);
 
     // ─── Admin state ─────────────────────────────────────────────────────────
     readonly sessions = signal<ChatSession[]>([]);
@@ -93,8 +99,6 @@ export class ChatService {
 
     // ─── Visitor WebSocket ────────────────────────────────────────────────────
 
-    private _offlineQueue: string[] = [];
-
     async connectAsVisitor(visitorName: string) {
         if (!isPlatformBrowser(this.platformId)) return;
 
@@ -103,29 +107,64 @@ export class ChatService {
         this.socket = undefined;
 
         const sessionId = sessionStorage.getItem(SESSION_KEY);
+
+        // Show cached messages immediately (stale-while-revalidate) before socket connects
+        if (sessionId) {
+            const cached = await this.idb.getAllByIndex<ChatMessage>('chat_messages', 'sessionId', sessionId);
+            if (cached.length) {
+                const confirmed = cached.filter(m => !m.pending);
+                const pending = cached.filter(m => m.pending);
+                this.visitorMessages.set([...confirmed, ...pending].map(m => ({ ...m, isUnread: false })));
+                if (pending.length) this.chatQueued.set(true);
+            }
+        }
+
         const { io } = await import('socket.io-client');
 
         this.socket = io(`${this.socketUrl}/chat`, {
             transports: ['websocket', 'polling'],
         });
 
-        this.socket.on('connect', () => {
+        this.socket.on('connect', async () => {
             const visitorSessionId = sessionStorage.getItem('vst_sid') ?? undefined;
             this.socket!.emit(
                 'visitor:join',
                 { visitorName, sessionId: sessionId ?? undefined, visitorSessionId },
-                (res: { sessionId: string; messages: ChatMessage[] }) => {
+                async (res: { sessionId: string; messages: ChatMessage[] }) => {
                     sessionStorage.setItem(SESSION_KEY, res.sessionId);
                     sessionStorage.setItem(VISITOR_NAME_KEY, visitorName);
                     this.visitorSessionId.set(res.sessionId);
-                    // Mark all loaded history as already-read so the counter starts at 0
-                    this.visitorMessages.set(res.messages.map(m => ({ ...m, isUnread: false })));
-                    // Flush any messages queued while the socket was offline
-                    const queued = this._offlineQueue.splice(0);
-                    for (const content of queued) {
-                        this.socket!.emit('visitor:message', { sessionId: res.sessionId, content }, (msg: ChatMessage) => {
-                            if (msg) this.visitorMessages.update(m => [...m, msg]);
-                        });
+
+                    // Persist server history to IDB
+                    if (res.messages.length) {
+                        await this.idb.putMany<ChatMessage>('chat_messages', res.messages);
+                    }
+
+                    // Fetch IDB pending messages for this session (survive page refresh)
+                    const allCached = await this.idb.getAllByIndex<ChatMessage>('chat_messages', 'sessionId', res.sessionId);
+                    const pendingMsgs = allCached.filter(m => m.pending);
+
+                    // Show server history + any still-pending messages
+                    this.visitorMessages.set([
+                        ...res.messages.map(m => ({ ...m, isUnread: false })),
+                        ...pendingMsgs,
+                    ]);
+
+                    // Flush pending messages to the server
+                    let remaining = pendingMsgs.length;
+                    if (remaining === 0) {
+                        this.chatQueued.set(false);
+                    } else {
+                        for (const pendingMsg of pendingMsgs) {
+                            this.socket!.emit('visitor:message', { sessionId: res.sessionId, content: pendingMsg.content }, async (msg: ChatMessage) => {
+                                if (msg) {
+                                    this.visitorMessages.update(msgs => [...msgs.filter(m => m.id !== pendingMsg.id), msg]);
+                                    await this.idb.delete('chat_messages', pendingMsg.id);
+                                    await this.idb.put<ChatMessage>('chat_messages', msg);
+                                }
+                                if (--remaining === 0) this.chatQueued.set(false);
+                            });
+                        }
                     }
                 },
             );
@@ -134,6 +173,7 @@ export class ChatService {
         this.socket.on('message:new', (msg: ChatMessage) => {
             // New admin messages are unread until the widget is opened
             this.visitorMessages.update(m => [...m, { ...msg, isUnread: msg.sender === 'admin' }]);
+            this.idb.put<ChatMessage>('chat_messages', msg);
         });
 
         this.socket.on('admin:typing', (data: { isTyping: boolean }) => {
@@ -157,12 +197,35 @@ export class ChatService {
     sendVisitorMessage(content: string) {
         const sessionId = this.visitorSessionId();
         if (!sessionId) return;
+
+        // Always show the message immediately as pending — socket.io may still
+        // report connected:true for seconds after going offline (heartbeat delay),
+        // so we can't rely on the connected flag to decide whether to show it.
+        const localId = `local_${Date.now()}`;
+        const localMsg: ChatMessage = {
+            id: localId,
+            sessionId,
+            content,
+            sender: 'visitor',
+            read: false,
+            createdAt: new Date().toISOString(),
+            messageType: 'text',
+            pending: true,
+        };
+        this.visitorMessages.update(m => [...m, localMsg]);
+
         if (!this.socket?.connected) {
-            this._offlineQueue.push(content);
+            this.idb.put<ChatMessage>('chat_messages', localMsg);
+            this.chatQueued.set(true);
             return;
         }
+
         this.socket.emit('visitor:message', { sessionId, content }, (msg: ChatMessage) => {
-            if (msg) this.visitorMessages.update(m => [...m, msg]);
+            if (msg) {
+                // Replace the optimistic pending msg with the server-confirmed one
+                this.visitorMessages.update(msgs => [...msgs.filter(m => m.id !== localId), msg]);
+                this.idb.put<ChatMessage>('chat_messages', msg);
+            }
         });
     }
 
@@ -204,7 +267,12 @@ export class ChatService {
     }
 
     resetVisitorSession() {
-        this._offlineQueue = [];
+        const sessionId = this.visitorSessionId();
+        if (sessionId) {
+            // Clear IDB messages for this session (including any pending ones)
+            this.idb.getAllByIndex<ChatMessage>('chat_messages', 'sessionId', sessionId)
+                .then(msgs => Promise.all(msgs.map(m => this.idb.delete('chat_messages', m.id))));
+        }
         this.socket?.disconnect();
         this.socket = undefined;
         sessionStorage.removeItem(SESSION_KEY);
@@ -213,6 +281,7 @@ export class ChatService {
         this.visitorMessages.set([]);
         this.adminIsTyping.set(false);
         this.sessionClosed.set(false);
+        this.chatQueued.set(false);
     }
 
     disconnectVisitor() {
