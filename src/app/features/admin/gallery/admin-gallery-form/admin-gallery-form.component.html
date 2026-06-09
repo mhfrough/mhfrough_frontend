@@ -6,7 +6,9 @@
 </div>
 
 @if (loading()) {
-<div class="loading-state"><div class="spinner"></div></div>
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
 } @else {
 <div class="admin-form-panel">
     <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
@@ -72,7 +74,7 @@
         </div>
 
         <div class="admin-form-field">
-            <label class="admin-form-label label-optional">Tags <span class="form-hint">(SEO keywords)</span></label>
+            <label class="admin-form-label label-optional">Tags</label>
             <app-tag-input [tags]="formTags()" [suggestions]="allTags()"
                 (tagsChange)="formTags.set($event)"></app-tag-input>
         </div>
@@ -85,7 +87,8 @@
 
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label label-optional">Alt Text <span class="form-hint">(accessibility)</span></label>
+                <label class="admin-form-label label-optional">Alt Text <span
+                        class="form-hint">(accessibility)</span></label>
                 <input ngModel [ngModel]="editing()?.altText" name="altText" class="admin-form-input"
                     placeholder="Describe the image for screen readers">
             </div>

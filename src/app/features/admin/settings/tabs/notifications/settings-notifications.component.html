@@ -7,10 +7,12 @@
         </div>
         @switch (fcm.permissionState) {
         @case ('granted') {
-        <span class="admin-badge admin-badge--on" style="white-space:nowrap"><i class="bi bi-check-circle"></i> This browser subscribed</span>
+        <span class="admin-badge admin-badge--on" style="white-space:nowrap"><i class="bi bi-check-circle"></i> This
+            browser subscribed</span>
         }
         @case ('denied') {
-        <span class="admin-badge admin-badge--danger" style="white-space:nowrap"><i class="bi bi-x-circle"></i> Blocked in browser</span>
+        <span class="admin-badge admin-badge--danger" style="white-space:nowrap"><i class="bi bi-x-circle"></i> Blocked
+            in browser</span>
         }
         @default {
         <button class="btn-primary" (click)="requestPushPermission()">
@@ -52,7 +54,7 @@
                     [class.is-invalid]="(pushForm.submitted || pushForm.controls['pushBody']?.touched) && pushForm.controls['pushBody']?.invalid"></textarea>
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label label-optional">Click URL <span class="admin-form-hint">(optional)</span></label>
+                <label class="admin-form-label label-optional">Click URL</label>
                 <input class="admin-form-input" type="url" [(ngModel)]="pushUrl" name="pushUrl"
                     placeholder="https://mhfrough.dev/blog" />
                 <span class="form-hint">Leave blank to open the home page on click.</span>

@@ -37,10 +37,8 @@
 
         <form #f="ngForm" (ngSubmit)="login(f)" novalidate>
             <div class="admin-form-field">
-                <label class="admin-form-label label-required">Email</label>
-                <input ngModel name="email" required email type="email" class="admin-form-input"
-                    [class.is-invalid]="(f.submitted || f.controls['email']?.touched) && f.controls['email']?.invalid"
-                    placeholder="mhfrough&#64;yahoo.com" autocomplete="username">
+                <label class="admin-form-label">User</label>
+                <input type="text" class="admin-form-input" value="Mohammad Hamza" readonly>
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label label-required">Password</label>

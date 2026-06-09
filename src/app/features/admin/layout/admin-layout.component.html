@@ -149,3 +149,42 @@
     </div>
 </div>
 }
+
+<!-- Session Displaced Modal -->
+@if (displacedBy()) {
+<div class="admin-modal-overlay">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Signed In From Another Device</p>
+        <p class="admin-modal-body">
+            Your session was ended because someone signed in from a new device.
+        </p>
+        <div class="admin-modal-device-info">
+            @if (displacedBy()!.browser || displacedBy()!.os) {
+            <div class="admin-modal-device-row">
+                <i class="bi bi-laptop"></i>
+                <span>{{ displacedBy()!.browser ?? 'Unknown browser' }} on {{ displacedBy()!.os ?? 'Unknown OS' }}</span>
+            </div>
+            }
+            @if (displacedBy()!.city || displacedBy()!.country) {
+            <div class="admin-modal-device-row">
+                <i class="bi bi-geo-alt"></i>
+                <span>{{ [displacedBy()!.city, displacedBy()!.country].filter(v => !!v).join(', ') }}</span>
+            </div>
+            }
+            @if (displacedBy()!.ip) {
+            <div class="admin-modal-device-row">
+                <i class="bi bi-hdd-network"></i>
+                <span>{{ displacedBy()!.ip }}</span>
+            </div>
+            }
+            <div class="admin-modal-device-row">
+                <i class="bi bi-clock"></i>
+                <span>{{ displacedBy()!.loginAt | date:'medium' }}</span>
+            </div>
+        </div>
+        <div class="admin-modal-actions">
+            <button class="btn-primary" (click)="goToLoginAfterDisplacement()">Go to Login</button>
+        </div>
+    </div>
+</div>
+}

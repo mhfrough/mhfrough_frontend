@@ -87,7 +87,7 @@ export class AdminLoginComponent implements OnInit, OnDestroy {
         this.error.set('');
         this.warning.set('');
         this.lockInfo.set(null);
-        this.auth.login(form.value.email, form.value.password, this.rememberMe()).subscribe({
+        this.auth.login('mhfrough@yahoo.com', form.value.password, this.rememberMe()).subscribe({
             next: () => this.router.navigate(['/admin']),
             error: (err) => {
                 this.loading.set(false);

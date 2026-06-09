@@ -5,6 +5,32 @@
     </div>
 </div>
 
+<!-- ── Today's Reminders ─────────────────────────────────────────────────── -->
+@if (todayReminders().length > 0) {
+<div class="admin-today-reminders">
+    <div class="admin-today-reminders-header">
+        <i class="bi bi-bell-fill"></i>
+        <span>Today's Reminders</span>
+        <span class="admin-today-reminders-count">{{ todayReminders().length }}</span>
+        <a routerLink="/admin/appointments" class="admin-dashboard-section-link" style="margin-left:auto">View all</a>
+    </div>
+    <div class="admin-today-reminders-list">
+        @for (r of todayReminders(); track r.id) {
+        <div class="admin-today-reminder-item">
+            <span class="admin-today-reminder-time">{{ r.startTime }}</span>
+            <div class="admin-today-reminder-body">
+                <span class="admin-today-reminder-title">{{ r.title }}</span>
+                @if (r.clientName) {
+                <span class="admin-today-reminder-client">{{ r.clientName }}</span>
+                }
+            </div>
+            <span class="admin-today-reminder-badge admin-today-reminder-badge--{{ r.status }}">{{ r.status }}</span>
+        </div>
+        }
+    </div>
+</div>
+}
+
 @if (stats()) {
 
 <!-- ── Stats ──────────────────────────────────────────────────────────────── -->

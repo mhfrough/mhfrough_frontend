@@ -9,6 +9,7 @@ import { FeedbackService, InquiriesService } from '../../../core/services/inquir
 import { BlogsService } from '../../../core/services/blogs.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { VisitorAnalyticsService, VisitorStats } from '../../../core/services/visitor-analytics.service';
+import { AppointmentsService, Appointment } from '../../../core/services/appointments.service';
 
 @Component({
     selector: 'app-admin-dashboard',
@@ -24,6 +25,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     private readonly blogsService = inject(BlogsService);
     private readonly realtime = inject(RealtimeService);
     private readonly visitorService = inject(VisitorAnalyticsService);
+    private readonly appointmentsService = inject(AppointmentsService);
     private readonly platformId = inject(PLATFORM_ID);
 
     @ViewChild('visitorChart') chartCanvas!: ElementRef<HTMLCanvasElement>;
@@ -37,6 +39,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     readonly ratingDist = signal<number[]>([0, 0, 0, 0, 0]);
     readonly avgRating = signal(0);
     readonly visitorStats = signal<VisitorStats | null>(null);
+    readonly todayReminders = signal<Appointment[]>([]);
 
     private subs = new Subscription();
     private _chartRaw: { day: string; count: string }[] = [];
@@ -65,6 +68,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.loadInquiries();
         this.loadBlogs();
         this.loadVisitorStats();
+        this.loadTodayReminders();
 
         // Reload on relevant events
         this.subs.add(this.realtime.on<any>('inquiry:new').subscribe(() => {
@@ -113,6 +117,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
         // new visitor session → refresh visitor stats
         this.subs.add(this.realtime.on<any>('visitor:session_created').subscribe(() => this.loadVisitorStats()));
+
+        // reminder changes → refresh today's reminders
+        this.subs.add(this.realtime.on<any>('reminder:created').subscribe(() => this.loadTodayReminders()));
+        this.subs.add(this.realtime.on<any>('reminder:updated').subscribe(() => this.loadTodayReminders()));
+        this.subs.add(this.realtime.on<any>('reminder:deleted').subscribe(() => this.loadTodayReminders()));
     }
 
     ngOnDestroy() { this.subs.unsubscribe(); }
@@ -266,6 +275,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         });
 
         canvas.addEventListener('mouseleave', () => this._drawVisitorChart(null));
+    }
+
+    private loadTodayReminders() {
+        const today = new Date().toISOString().slice(0, 10);
+        this.appointmentsService.getAll().subscribe({
+            next: (data) => {
+                const todays = data
+                    .filter(a => a.date === today && a.status !== 'cancelled')
+                    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+                this.todayReminders.set(todays);
+            },
+        });
     }
 
     private loadStats() {

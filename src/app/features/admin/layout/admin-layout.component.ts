@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, inject, signal, HostBinding, ViewChild, ElementRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { AdminFloatingChatComponent } from '../floating-chat/admin-floating-chat.component';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -15,7 +15,7 @@ import { AdminSettingsService } from '../../../core/services/admin-settings.serv
 @Component({
     selector: 'app-admin-layout',
     standalone: true,
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, AdminFloatingChatComponent],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, DatePipe, AdminFloatingChatComponent],
     templateUrl: './admin-layout.component.html',
 })
 export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -30,6 +30,7 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly realtime = inject(RealtimeService);
     private readonly titleService = inject(Title);
     readonly menuOpen = signal(false);
+    readonly displacedBy = signal<{ ip: string | null; browser: string | null; os: string | null; country: string | null; city: string | null; loginAt: string } | null>(null);
     private subs = new Subscription();
     private waitForSettingsInterval: ReturnType<typeof setInterval> | null = null;
     private waitForSettingsTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -98,6 +99,10 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
             this.realtime.on<{ sessionId: string }>('visitor:left')
                 .subscribe(({ sessionId }) => this.chat.clearCurrentPage(sessionId))
         );
+        this.subs.add(
+            this.realtime.on<{ newSession: { ip: string | null; browser: string | null; os: string | null; country: string | null; city: string | null; loginAt: string } }>('session:force_logout')
+                .subscribe(({ newSession }) => this.displacedBy.set(newSession))
+        );
         // Set title for the initial load
         this.setTitleFromUrl(this.router.url);
     }
@@ -136,4 +141,5 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
     toggleMenu() { this.menuOpen.update(v => !v); }
     closeMenu() { this.menuOpen.set(false); }
     logout() { this.auth.logout().subscribe(); }
+    goToLoginAfterDisplacement() { this.auth.forceLogout(); }
 }

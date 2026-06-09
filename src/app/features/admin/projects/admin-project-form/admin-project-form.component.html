@@ -6,7 +6,9 @@
 </div>
 
 @if (loading()) {
-<div class="loading-state"><div class="spinner"></div></div>
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
 } @else {
 <div class="admin-form-panel">
     <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
@@ -18,7 +20,8 @@
                     placeholder="Project name">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label label-optional">Slug <span class="form-hint">(URL-friendly)</span></label>
+                <label class="admin-form-label label-optional">Slug <span
+                        class="form-hint">(URL-friendly)</span></label>
                 <div style="display:flex;gap:0.5rem">
                     <input ngModel [ngModel]="editing()?.slug" name="slug" class="admin-form-input"
                         placeholder="my-project-name" style="flex:1">
@@ -28,12 +31,13 @@
             </div>
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label label-optional">Tech Stack <span class="form-hint">(comma-separated, optional)</span></label>
+            <label class="admin-form-label label-optional">Tech Stack <span class="form-hint">(comma-separated,
+                    optional)</span></label>
             <input ngModel [ngModel]="editing()?.techStack" name="techStack" class="admin-form-input"
                 placeholder="Angular, NestJS, PostgreSQL">
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label label-optional">Tags <span class="form-hint">(SEO keywords)</span></label>
+            <label class="admin-form-label label-optional">Tags</label>
             <app-tag-input [tags]="formTags()" [suggestions]="allTags()"
                 (tagsChange)="formTags.set($event)"></app-tag-input>
         </div>
@@ -47,7 +51,8 @@
             </div>
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label label-optional">Case Study / Content <span class="form-hint">(optional, HTML supported)</span></label>
+            <label class="admin-form-label label-optional">Case Study / Content <span class="form-hint">(optional, HTML
+                    supported)</span></label>
             <div class="rte-wrap">
                 <app-rte-toolbar [el]="contentArea" mode="full"></app-rte-toolbar>
                 <textarea #contentArea ngModel [ngModel]="editing()?.content" name="content" rows="14"
@@ -57,18 +62,18 @@
         </div>
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label label-optional">Live URL <span class="form-hint">(optional)</span></label>
+                <label class="admin-form-label label-optional">Live URL</label>
                 <input ngModel [ngModel]="editing()?.liveUrl" name="liveUrl" class="admin-form-input" type="url"
                     placeholder="https://…">
             </div>
             <div class="admin-form-field">
-                <label class="admin-form-label label-optional">GitHub URL <span class="form-hint">(optional)</span></label>
+                <label class="admin-form-label label-optional">GitHub URL</label>
                 <input ngModel [ngModel]="editing()?.githubUrl" name="githubUrl" class="admin-form-input" type="url"
                     placeholder="https://github.com/…">
             </div>
         </div>
         <div class="admin-form-field" style="width:100%">
-            <label class="admin-form-label label-optional">Thumbnail <span class="form-hint">(optional)</span></label>
+            <label class="admin-form-label label-optional">Thumbnail</label>
             <div class="img-upload-zone" [class.drag-over]="dragOver()" (dragover)="onDragOver($event)"
                 (dragleave)="onDragLeave()" (drop)="onDrop($event)">
                 @if (uploading()) {
