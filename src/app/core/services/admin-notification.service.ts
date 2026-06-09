@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 import { SoundService } from './sound.service';
+import { IdbService } from './idb.service';
 
 export interface AdminToast {
     id: number;
@@ -16,6 +17,8 @@ export class AdminNotificationService {
     private readonly http = inject(HttpClient);
     private readonly platformId = inject(PLATFORM_ID);
     private readonly sound = inject(SoundService);
+    private readonly idb = inject(IdbService);
+    private static readonly CACHE_KEY = 'admin_counts';
 
     readonly unreadInquiries = signal(0);
     readonly pendingFeedback = signal(0);
@@ -41,10 +44,20 @@ export class AdminNotificationService {
     }
 
     fetchCounts(): void {
+        // Serve cached counts immediately
+        this.idb.get<any>('admin_cache', AdminNotificationService.CACHE_KEY).then(cached => {
+            if (cached?.data) {
+                const data = cached.data;
+                this.unreadInquiries.set(data.inquiries.new);
+                this.pendingFeedback.set(data.feedback.pending);
+                this.pendingComments.set(data.comments?.pending ?? 0);
+            }
+        });
         this.http.get<{ inquiries: { new: number }; feedback: { pending: number }; comments: { pending: number } }>(
             `${environment.apiUrl}/admin/counts`,
         ).subscribe({
             next: (data) => {
+                this.idb.put('admin_cache', { key: AdminNotificationService.CACHE_KEY, data }).catch(() => {});
                 this.unreadInquiries.set(data.inquiries.new);
                 this.pendingFeedback.set(data.feedback.pending);
                 this.pendingComments.set(data.comments?.pending ?? 0);

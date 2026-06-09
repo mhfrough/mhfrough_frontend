@@ -1,10 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { IdbService } from './idb.service';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectsService {
     private readonly http = inject(HttpClient);
+    private readonly idb = inject(IdbService);
     private readonly base = `${environment.apiUrl}/projects`;
 
     uploadImage(file: File) {
@@ -14,13 +17,49 @@ export class ProjectsService {
     }
 
     getAll() { return this.http.get<any[]>(this.base); }
-    getPublic(page: number, limit: number, q?: string, tag?: string) {
+
+    getPublic(page: number, limit: number, q?: string, tag?: string): Observable<{ data: any[]; total: number; page: number; limit: number; totalPages: number }> {
         const params: Record<string, any> = { page, limit };
         if (q) params['q'] = q;
         if (tag && tag !== 'all') params['tag'] = tag;
-        return this.http.get<{ data: any[]; total: number; page: number; limit: number; totalPages: number }>(this.base, { params });
+        return new Observable(subscriber => {
+            if (page === 1 && !q && !tag) {
+                this.idb.getAll<any>('projects').then(cached => {
+                    if (cached.length) {
+                        subscriber.next({ data: cached.slice(0, limit), total: cached.length, page: 1, limit, totalPages: Math.ceil(cached.length / limit) });
+                    }
+                });
+            }
+            this.http.get<{ data: any[]; total: number; page: number; limit: number; totalPages: number }>(this.base, { params }).subscribe({
+                next: fresh => {
+                    if (page === 1 && !q && !tag) {
+                        this.idb.putMany('projects', fresh.data).catch(() => {});
+                    }
+                    subscriber.next(fresh);
+                    subscriber.complete();
+                },
+                error: err => subscriber.error(err),
+            });
+        });
     }
-    getFeatured() { return this.http.get<any[]>(`${this.base}/featured`); }
+
+    getFeatured(): Observable<any[]> {
+        return new Observable(subscriber => {
+            this.idb.getAll<any>('projects').then(cached => {
+                const featured = cached.filter(p => p.isFeatured);
+                if (featured.length) subscriber.next(featured);
+            });
+            this.http.get<any[]>(`${this.base}/featured`).subscribe({
+                next: fresh => {
+                    this.idb.putMany('projects', fresh).catch(() => {});
+                    subscriber.next(fresh);
+                    subscriber.complete();
+                },
+                error: err => subscriber.error(err),
+            });
+        });
+    }
+
     getTags() { return this.http.get<string[]>(`${this.base}/tags`); }
     getAllAdmin() { return this.http.get<any[]>(`${this.base}/all`); }
     getOne(id: string) { return this.http.get<any>(`${this.base}/${id}`); }

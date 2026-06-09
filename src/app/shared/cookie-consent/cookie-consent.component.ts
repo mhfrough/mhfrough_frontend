@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { NetworkStatusService } from '../../core/services/network-status.service';
 
 const STORAGE_KEY = 'cookie_consent';
 
@@ -12,6 +13,7 @@ const STORAGE_KEY = 'cookie_consent';
 })
 export class CookieConsentComponent implements OnInit, OnDestroy {
     private readonly platformId = inject(PLATFORM_ID);
+    protected readonly network = inject(NetworkStatusService);
     readonly visible = signal(false);
     private timer: ReturnType<typeof setTimeout> | null = null;
 

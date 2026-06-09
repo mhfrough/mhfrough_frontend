@@ -8,6 +8,7 @@ import { credentialsInterceptor } from './core/interceptors/credentials.intercep
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorLogInterceptor } from './core/interceptors/error-log.interceptor';
 import { GlobalErrorHandler } from './core/global-error-handler';
+import { SyncQueueService } from './core/services/sync-queue.service';
 
 function registerFirebaseSW() {
   const platformId = inject(PLATFORM_ID);
@@ -16,6 +17,15 @@ function registerFirebaseSW() {
     navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' }).catch(() => {
       // Non-critical — FCM background messaging won't work but app continues
     });
+  };
+}
+
+function initSyncQueue() {
+  const syncQueue = inject(SyncQueueService);
+  const platformId = inject(PLATFORM_ID);
+  return async () => {
+    if (!isPlatformBrowser(platformId)) return;
+    await syncQueue.init();
   };
 }
 
@@ -29,6 +39,7 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000',
     }),
     { provide: APP_INITIALIZER, useFactory: registerFirebaseSW, multi: true },
+    { provide: APP_INITIALIZER, useFactory: initSyncQueue, multi: true },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: IMAGE_LOADER, useValue: (config: ImageLoaderConfig) => config.src },
   ],
