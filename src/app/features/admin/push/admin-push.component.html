@@ -53,6 +53,9 @@
             <input class="admin-form-input" type="text" [(ngModel)]="title" name="title"
                 placeholder="e.g. New blog post published!" maxlength="100" required
                 [class.is-invalid]="(f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid" />
+            @if ((f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid) {
+            <span class="form-error">Title is required.</span>
+            }
         </div>
 
         <div class="admin-form-field">
@@ -60,6 +63,9 @@
             <textarea #bodyArea class="admin-form-textarea" rows="3" [(ngModel)]="body" name="body"
                 placeholder="Notification message text…" maxlength="300" required
                 [class.is-invalid]="(f.submitted || f.controls['body']?.touched) && f.controls['body']?.invalid"></textarea>
+            @if ((f.submitted || f.controls['body']?.touched) && f.controls['body']?.invalid) {
+            <span class="form-error">Body is required.</span>
+            }
             <div class="char-count"><span [class.near-limit]="bodyArea.value.length >= 270"
                     [class.over-limit]="bodyArea.value.length >= 300">{{ 300 - bodyArea.value.length }} / 300</span>
             </div>

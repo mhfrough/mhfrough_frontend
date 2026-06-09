@@ -93,6 +93,8 @@ export class ChatService {
 
     // ─── Visitor WebSocket ────────────────────────────────────────────────────
 
+    private _offlineQueue: string[] = [];
+
     async connectAsVisitor(visitorName: string) {
         if (!isPlatformBrowser(this.platformId)) return;
 
@@ -118,6 +120,13 @@ export class ChatService {
                     this.visitorSessionId.set(res.sessionId);
                     // Mark all loaded history as already-read so the counter starts at 0
                     this.visitorMessages.set(res.messages.map(m => ({ ...m, isUnread: false })));
+                    // Flush any messages queued while the socket was offline
+                    const queued = this._offlineQueue.splice(0);
+                    for (const content of queued) {
+                        this.socket!.emit('visitor:message', { sessionId: res.sessionId, content }, (msg: ChatMessage) => {
+                            if (msg) this.visitorMessages.update(m => [...m, msg]);
+                        });
+                    }
                 },
             );
         });
@@ -148,7 +157,11 @@ export class ChatService {
     sendVisitorMessage(content: string) {
         const sessionId = this.visitorSessionId();
         if (!sessionId) return;
-        this.socket?.emit('visitor:message', { sessionId, content }, (msg: ChatMessage) => {
+        if (!this.socket?.connected) {
+            this._offlineQueue.push(content);
+            return;
+        }
+        this.socket.emit('visitor:message', { sessionId, content }, (msg: ChatMessage) => {
             if (msg) this.visitorMessages.update(m => [...m, msg]);
         });
     }
@@ -191,6 +204,7 @@ export class ChatService {
     }
 
     resetVisitorSession() {
+        this._offlineQueue = [];
         this.socket?.disconnect();
         this.socket = undefined;
         sessionStorage.removeItem(SESSION_KEY);

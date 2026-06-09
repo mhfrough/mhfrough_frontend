@@ -75,7 +75,7 @@
         }
 
         <!-- Submit form -->
-        <div class="blog-comment-form-wrap">
+        <div class="blog-comment-form-wrap" id="comment-form-wrap">
             <div class="blog-comment-form-header">
                 <p class="blog-comment-form-eyebrow">Join the discussion</p>
                 <h2 class="blog-comment-form-heading">Leave a Comment</h2>
@@ -86,6 +86,11 @@
             <div class="admin-alert admin-alert--success" style="margin-bottom:1.5rem">
                 <i class="bi bi-check-circle-fill" style="flex-shrink:0"></i>
                 <span><strong>Comment submitted!</strong> It will appear here after review.</span>
+            </div>
+            } @else if (commentQueued()) {
+            <div class="admin-alert admin-alert--warning" style="margin-bottom:1.5rem">
+                <i class="bi bi-clock" style="flex-shrink:0"></i>
+                <span><strong>Queued!</strong> Your comment will be submitted once your connection is restored.</span>
             </div>
             } @else if (commentError()) {
             <div class="admin-alert admin-alert--error" style="margin-bottom:1.5rem">
@@ -147,6 +152,7 @@
                         }
                     </button>
                 </div>
+
             </form>
         </div>
     </section>

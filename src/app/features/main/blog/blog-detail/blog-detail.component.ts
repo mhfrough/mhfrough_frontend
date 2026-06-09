@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angu
 import { CommonModule, NgOptimizedImage, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, skip } from 'rxjs';
 import { BlogsService } from '../../../../core/services/blogs.service';
 import { UserInfoService } from '../../../../core/services/user-info.service';
 import { RealtimeService } from '../../../../core/services/realtime.service';
@@ -10,6 +10,7 @@ import { PreconnectService } from '../../../../core/services/preconnect.service'
 import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
 import { FrontToastService } from '../../../../core/services/front-toast.service';
+import { NetworkStatusService } from '../../../../core/services/network-status.service';
 import { Title } from '@angular/platform-browser';
 import { SeoService } from '../../../../core/services/seo.service';
 import { EditorHelperService } from '../../../../core/services/editor-helper.service';
@@ -34,6 +35,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     private titleService = inject(Title);
     private seo = inject(SeoService);
     private platformId = inject(PLATFORM_ID);
+    readonly network = inject(NetworkStatusService);
 
     readonly blog = signal<any>(null);
     readonly loading = signal(true);
@@ -44,6 +46,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     readonly commentSending = signal(false);
     readonly commentError = signal('');
     readonly commentSuccess = signal(false);
+    readonly commentQueued = signal(false);
 
     commentData = { authorName: '', authorEmail: '', content: '' };
     private subs = new Subscription();
@@ -55,6 +58,19 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
             this.commentData.authorName = saved.name ?? '';
             this.commentData.authorEmail = saved.email ?? '';
         }
+
+        const skipInitial = this.network.isOnline() ? 1 : 0;
+        this.subs.add(this.network.online$.pipe(skip(skipInitial)).subscribe(() => {
+            if (this.commentQueued()) {
+                this.commentQueued.set(false);
+                this.commentSuccess.set(true);
+                if (isPlatformBrowser(this.platformId)) {
+                    setTimeout(() => {
+                        document.getElementById('blog-comments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                }
+            }
+        }));
 
         const slug = this.route.snapshot.paramMap.get('slug') ?? '';
         this.service.getBySlug(slug).subscribe({
@@ -166,17 +182,22 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
         this.commentSending.set(true);
         this.commentError.set('');
         this.commentSuccess.set(false);
+        this.commentQueued.set(false);
         const { authorName, authorEmail, content } = this.commentData;
         this.service.submitComment(this.blog().id, { authorName, authorEmail, content }).subscribe({
-            next: () => {
+            next: (res: any) => {
                 this.userInfo.save({ name: authorName, email: authorEmail });
-                this.commentSuccess.set(true);
                 this.commentSending.set(false);
                 this.commentData.content = '';
                 form.resetForm({ authorName, authorEmail, content: '' });
+                if (res?.queued) {
+                    this.commentQueued.set(true);
+                } else {
+                    this.commentSuccess.set(true);
+                }
                 if (isPlatformBrowser(this.platformId)) {
                     setTimeout(() => {
-                        document.getElementById('blog-comments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        document.getElementById('comment-form-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 50);
                 }
             },

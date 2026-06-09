@@ -1,7 +1,8 @@
-import { Component, inject, signal, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription, skip } from 'rxjs';
 import { InquiriesService } from '../../../core/services/inquiry-feedback.service';
 import { UserInfoService } from '../../../core/services/user-info.service';
 import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
@@ -10,6 +11,7 @@ import { EditorHelperService } from '../../../core/services/editor-helper.servic
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 import { FrontToastService } from '../../../core/services/front-toast.service';
 import { VisitorTrackingService } from '../../../core/services/visitor-tracking.service';
+import { NetworkStatusService } from '../../../core/services/network-status.service';
 import { Title } from '@angular/platform-browser';
 
 @Component({
@@ -18,7 +20,7 @@ import { Title } from '@angular/platform-browser';
     imports: [CommonModule, FormsModule, RteToolbarComponent, ExternalUrlPipe],
     templateUrl: './contact.component.html',
 })
-export class ContactComponent implements OnInit {
+export class ContactComponent implements OnInit, OnDestroy {
     private editor = inject(EditorHelperService);
     private service = inject(InquiriesService);
     private route = inject(ActivatedRoute);
@@ -28,6 +30,7 @@ export class ContactComponent implements OnInit {
     private toast = inject(FrontToastService);
     private tracking = inject(VisitorTrackingService);
     private titleService = inject(Title);
+    readonly network = inject(NetworkStatusService);
 
     isSocialVisible(key: string): boolean {
         const vis = this.footerSettings.data().socialVisibility;
@@ -37,7 +40,9 @@ export class ContactComponent implements OnInit {
     readonly sending = signal(false);
     readonly error = signal('');
     readonly success = signal(false);
+    readonly queued = signal(false);
     readonly dynamicSubject = signal<string | null>(null);
+    private onlineSub?: Subscription;
 
     private readonly knownSubjects = [
         'Project Inquiry', 'Freelance Collaboration', 'Job Opportunity', 'Consulting', 'Just Saying Hello',
@@ -54,6 +59,17 @@ export class ContactComponent implements OnInit {
                 this.formData = { ...this.formData, ...saved };
             }
         }
+
+        const skipInitial = this.network.isOnline() ? 1 : 0;
+        this.onlineSub = this.network.online$.pipe(skip(skipInitial)).subscribe(() => {
+            if (this.queued()) {
+                this.queued.set(false);
+                this.success.set(true);
+                if (isPlatformBrowser(this.platformId)) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+        });
 
         this.route.queryParams.subscribe(params => {
             if (params['subject']) {
@@ -74,6 +90,7 @@ export class ContactComponent implements OnInit {
         this.sending.set(true);
         this.error.set('');
         this.success.set(false);
+        this.queued.set(false);
 
         const raw = this.formData;
         const payload: Record<string, string> = { name: raw.name, email: raw.email, message: raw.message };
@@ -81,15 +98,19 @@ export class ContactComponent implements OnInit {
         if (raw.subject?.trim()) payload['subject'] = raw.subject.trim();
 
         this.service.submit(payload).subscribe({
-            next: () => {
+            next: (res: any) => {
                 this.tracking.trackEvent('contact_submit', { subject: raw.subject || 'none' });
                 this.userInfo.save({ name: raw.name, email: raw.email, phone: raw.phone });
-                this.success.set(true);
                 this.sending.set(false);
                 this.formData = { ...this.formData, subject: '', message: '' };
                 form.resetForm(this.formData);
                 if (isPlatformBrowser(this.platformId)) {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                if (res?.queued) {
+                    this.queued.set(true);
+                } else {
+                    this.success.set(true);
                 }
             },
             error: () => { this.error.set('Something went wrong. Please try again.'); this.sending.set(false); },
@@ -101,7 +122,10 @@ export class ContactComponent implements OnInit {
         form.resetForm(this.formData);
         this.error.set('');
         this.success.set(false);
+        this.queued.set(false);
     }
+
+    ngOnDestroy() { this.onlineSub?.unsubscribe(); }
 
     filterPhoneInput(e: KeyboardEvent) {
         if (e.key.length === 1 && !/[\d+\-\s().]/.test(e.key)) e.preventDefault();

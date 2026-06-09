@@ -15,6 +15,11 @@
             <i class="bi bi-check-circle-fill" style="flex-shrink:0"></i>
             <span><strong>Message sent!</strong> I'll get back to you soon.</span>
         </div>
+        } @else if (queued()) {
+        <div class="admin-alert admin-alert--warning">
+            <i class="bi bi-clock" style="flex-shrink:0"></i>
+            <span><strong>Queued!</strong> Your message will be delivered once your connection is restored.</span>
+        </div>
         } @else if (error()) {
         <div class="admin-alert admin-alert--error">
             <i class="bi bi-exclamation-octagon-fill" style="flex-shrink:0"></i>

@@ -5,53 +5,37 @@
         display: flex;
         align-items: center;
         margin-bottom: 0.25rem;
-
-        .required {
-            color: red;
-            margin-left: 0.25rem;
-        }
-
-        .optional {
-            color: #666;
-            font-size: 0.9em;
-            margin-left: 0.5rem;
-        }
+        font-family: var(--font);
     }
 
     .field-input {
         width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        outline: none;
-        transition: border-color 0.15s;
-    }
-
-    .field-input:focus {
-        border-color: #3f51b5;
     }
 
     &.invalid .field-input {
-        border-color: #e53935;
+        border-color: #e53935 !important;
     }
 
     .validation {
         color: #e53935;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
+        font-size: 0.78rem;
+        font-family: var(--font);
+        margin-top: 0.2rem;
+        display: block;
     }
 
     .char-count {
-        font-size: 0.75rem;
+        font-size: 0.78rem;
+        font-family: var(--font);
         text-align: right;
-        color: #666;
+        color: var(--text-muted);
 
         .near-limit {
             color: orange;
         }
 
         .over-limit {
-            color: red;
+            color: #e53935;
         }
     }
 }

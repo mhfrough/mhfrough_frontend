@@ -18,6 +18,9 @@
                 <input ngModel [ngModel]="editing()?.title" name="title" required class="admin-form-input"
                     [class.is-invalid]="(f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid"
                     placeholder="Post title">
+                @if ((f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid) {
+                <span class="form-error">Title is required.</span>
+                }
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label label-required">Slug</label>
@@ -28,6 +31,9 @@
                     <button type="button" class="btn-ghost" style="white-space:nowrap;padding:0 0.75rem"
                         (click)="generateSlug(f)">Auto</button>
                 </div>
+                @if ((f.submitted || f.controls['slug']?.touched) && f.controls['slug']?.invalid) {
+                <span class="form-error">Slug is required.</span>
+                }
             </div>
         </div>
         <div class="admin-form-field">
@@ -35,6 +41,9 @@
             <textarea ngModel [ngModel]="editing()?.excerpt" name="excerpt" required rows="2"
                 class="admin-form-textarea"
                 [class.is-invalid]="(f.submitted || f.controls['excerpt']?.touched) && f.controls['excerpt']?.invalid"></textarea>
+            @if ((f.submitted || f.controls['excerpt']?.touched) && f.controls['excerpt']?.invalid) {
+            <span class="form-error">Excerpt is required.</span>
+            }
         </div>
         <div class="admin-form-field">
             <label class="admin-form-label label-required">Content</label>
@@ -45,6 +54,9 @@
                     [class.is-invalid]="(f.submitted || f.controls['content']?.touched) && f.controls['content']?.invalid"
                     style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
             </div>
+            @if ((f.submitted || f.controls['content']?.touched) && f.controls['content']?.invalid) {
+            <span class="form-error">Content is required.</span>
+            }
         </div>
         <div class="admin-form-grid">
             <div class="admin-form-field">

@@ -189,6 +189,9 @@
                         </div>
                         <p class="admin-form-hint tag-input-hint">Comma or Enter to add an address · Backspace to remove last</p>
                     </div>
+                    @if (composeForm.submitted && toEmails().length === 0) {
+                    <span class="form-error">At least one recipient is required.</span>
+                    }
                 </div>
 
                 @if (savingContactEmail(); as savingEmail) {
@@ -250,6 +253,9 @@
                     <input ngModel name="subject" required type="text" class="admin-form-input"
                         [class.is-invalid]="(composeForm.submitted || composeForm.controls['subject']?.touched) && composeForm.controls['subject']?.invalid"
                         placeholder="Subject" autocomplete="off">
+                    @if ((composeForm.submitted || composeForm.controls['subject']?.touched) && composeForm.controls['subject']?.invalid) {
+                    <span class="form-error">Subject is required.</span>
+                    }
                 </div>
 
                 <div class="admin-form-field">
@@ -260,6 +266,9 @@
                             [class.is-invalid]="(composeForm.submitted || composeForm.controls['body']?.touched) && composeForm.controls['body']?.invalid"
                             placeholder="Write your message…" style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
                     </div>
+                    @if ((composeForm.submitted || composeForm.controls['body']?.touched) && composeForm.controls['body']?.invalid) {
+                    <span class="form-error">Message body is required.</span>
+                    }
                 </div>
 
                 <div class="admin-form-field">

@@ -2,11 +2,12 @@ import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angu
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, skip } from 'rxjs';
 import { FeedbackService } from '../../../core/services/inquiry-feedback.service';
 import { UserInfoService } from '../../../core/services/user-info.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { FrontToastService } from '../../../core/services/front-toast.service';
+import { NetworkStatusService } from '../../../core/services/network-status.service';
 import { Title } from '@angular/platform-browser';
 
 @Component({
@@ -24,9 +25,11 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     private toast = inject(FrontToastService);
     private titleService = inject(Title);
     private platformId = inject(PLATFORM_ID);
+    readonly network = inject(NetworkStatusService);
     readonly sending = signal(false);
     readonly error = signal('');
     readonly success = signal(false);
+    readonly queued = signal(false);
     readonly reviews = signal<any[]>([]);
     readonly loadingReviews = signal(true);
     selectedRating = 5;
@@ -111,9 +114,28 @@ export class FeedbackComponent implements OnInit, OnDestroy {
 
         const saved = this.userInfo.get();
         if (saved) {
-            this.formData = { ...this.formData, name: saved.name ?? '', email: saved.email ?? '' };
+            this.formData = {
+                ...this.formData,
+                name: saved.name ?? '',
+                email: saved.email ?? '',
+                company: saved.company ?? '',
+                role: saved.role ?? '',
+            };
         }
         this.loadReviews();
+
+        const skipInitial = this.network.isOnline() ? 1 : 0;
+        this.subs.add(this.network.online$.pipe(skip(skipInitial)).subscribe(() => {
+            if (this.queued()) {
+                this.queued.set(false);
+                this.success.set(true);
+                if (isPlatformBrowser(this.platformId)) {
+                    setTimeout(() => {
+                        document.getElementById('feedback-submit')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                }
+            }
+        }));
 
         // Admin approved/unapproved/deleted → reload current page
         this.subs.add(this.realtime.on<any>('feedback:approved').subscribe(() => this.loadReviews()));
@@ -129,15 +151,28 @@ export class FeedbackComponent implements OnInit, OnDestroy {
         this.sending.set(true);
         this.error.set('');
         this.success.set(false);
+        this.queued.set(false);
         this.service.submit({ ...form.value, rating: this.selectedRating }).subscribe({
-            next: () => {
-                this.userInfo.save({ name: form.value.name, email: form.value.email });
-                this.success.set(true);
+            next: (res: any) => {
+                const v = form.value;
+                this.userInfo.save({
+                    name: v.name,
+                    email: v.email,
+                    ...(v.company?.trim() && { company: v.company.trim() }),
+                    ...(v.role?.trim() && { role: v.role.trim() }),
+                });
                 this.sending.set(false);
-                form.reset();
+                form.resetForm();
                 this.selectedRating = 5;
                 if (isPlatformBrowser(this.platformId)) {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setTimeout(() => {
+                        document.getElementById('feedback-submit')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                }
+                if (res?.queued) {
+                    this.queued.set(true);
+                } else {
+                    this.success.set(true);
                 }
             },
             error: () => { this.error.set('Something went wrong. Please try again.'); this.sending.set(false); },

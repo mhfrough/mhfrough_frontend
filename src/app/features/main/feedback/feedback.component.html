@@ -88,7 +88,7 @@
     }
 
     <!-- ─── Submit Form ──────────────────────────────────────────────── -->
-    <div class="feedback-submit-section">
+    <div class="feedback-submit-section" id="feedback-submit">
         <div class="feedback-submit-header">
             <p class="feedback-submit-eyebrow">Share your experience</p>
             <h2 class="feedback-submit-heading">Leave a review</h2>
@@ -100,6 +100,11 @@
         <div class="admin-alert admin-alert--success">
             <i class="bi bi-check-circle-fill" style="flex-shrink:0"></i>
             <span><strong>Thank you!</strong> Your review has been submitted for approval.</span>
+        </div>
+        } @else if (queued()) {
+        <div class="admin-alert admin-alert--warning">
+            <i class="bi bi-clock" style="flex-shrink:0"></i>
+            <span><strong>Queued!</strong> Your review will be submitted once your connection is restored.</span>
         </div>
         } @else if (error()) {
         <div class="admin-alert admin-alert--error">

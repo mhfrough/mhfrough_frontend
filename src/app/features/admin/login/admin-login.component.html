@@ -52,6 +52,9 @@
                         <i class="bi" [class.bi-eye]="!showPassword()" [class.bi-eye-slash]="showPassword()"></i>
                     </button>
                 </div>
+                @if ((f.submitted || f.controls['password']?.touched) && f.controls['password']?.invalid) {
+                <span class="form-error">Password is required.</span>
+                }
             </div>
             <div class="admin-remember-row">
                 <label class="admin-remember-label checkbox-field">

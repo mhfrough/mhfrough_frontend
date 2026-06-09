@@ -5436,7 +5436,7 @@ button.admin-nav-link:last-child:hover {
 
 .feedback-submit-section {
     max-width: 640px;
-    padding-top: 4rem;
+    padding-top: 6rem;
     border-top: 1px solid var(--border);
 }
 
@@ -5973,8 +5973,9 @@ button.admin-nav-link:last-child:hover {
 
 // --- Blog Comments Section ---------------------------------------------------
 .blog-comments {
-    padding-top: 4rem;
+    padding-top: 6rem;
     border-top: 1px solid var(--border);
+    scroll-margin-top: 68px;
 }
 
 .blog-comments-header {
@@ -6069,7 +6070,8 @@ button.admin-nav-link:last-child:hover {
 }
 
 .blog-comment-form-wrap {
-    padding-top: 3rem;
+    padding-top: 5rem;
+    scroll-margin-top: 20px;
 }
 
 .blog-comment-form-header {

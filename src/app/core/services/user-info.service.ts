@@ -5,6 +5,8 @@ export interface UserInfo {
     name: string;
     email: string;
     phone?: string;
+    company?: string;
+    role?: string;
 }
 
 /** Single localStorage key shared across all public forms (contact, feedback, comments) */

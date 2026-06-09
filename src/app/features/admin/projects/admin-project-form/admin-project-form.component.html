@@ -18,6 +18,9 @@
                 <input ngModel [ngModel]="editing()?.title" name="title" required class="admin-form-input"
                     [class.is-invalid]="(f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid"
                     placeholder="Project name">
+                @if ((f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid) {
+                <span class="form-error">Title is required.</span>
+                }
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label label-optional">Slug <span
@@ -49,6 +52,9 @@
                     class="admin-form-textarea rte-textarea"
                     [class.is-invalid]="(f.submitted || f.controls['description']?.touched) && f.controls['description']?.invalid"></textarea>
             </div>
+            @if ((f.submitted || f.controls['description']?.touched) && f.controls['description']?.invalid) {
+            <span class="form-error">Description is required.</span>
+            }
         </div>
         <div class="admin-form-field">
             <label class="admin-form-label label-optional">Case Study / Content <span class="form-hint">(optional, HTML

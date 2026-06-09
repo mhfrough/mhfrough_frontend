@@ -22,11 +22,17 @@
                 <label class="admin-form-label label-required">Issue Date</label>
                 <input type="date" class="admin-form-input" formControlName="issueDate"
                     [class.is-invalid]="form.get('issueDate')?.invalid && form.get('issueDate')?.touched">
+                @if (form.get('issueDate')?.invalid && form.get('issueDate')?.touched) {
+                <span class="form-error">Issue date is required.</span>
+                }
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label label-required">Due Date</label>
                 <input type="date" class="admin-form-input" formControlName="dueDate"
                     [class.is-invalid]="form.get('dueDate')?.invalid && form.get('dueDate')?.touched">
+                @if (form.get('dueDate')?.invalid && form.get('dueDate')?.touched) {
+                <span class="form-error">Due date is required.</span>
+                }
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label label-optional">Status</label>
@@ -50,12 +56,24 @@
                 <input type="text" class="admin-form-input" formControlName="clientName"
                     [class.is-invalid]="form.get('clientName')?.invalid && form.get('clientName')?.touched"
                     placeholder="Jane Doe / Acme Corp">
+                @if (form.get('clientName')?.touched) {
+                    @if (form.get('clientName')?.errors?.['required']) {
+                    <span class="form-error">Client name is required.</span>
+                    }
+                }
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label label-required">Email Address</label>
                 <input type="email" class="admin-form-input" formControlName="clientEmail"
                     [class.is-invalid]="form.get('clientEmail')?.invalid && form.get('clientEmail')?.touched"
                     placeholder="client@example.com">
+                @if (form.get('clientEmail')?.touched) {
+                    @if (form.get('clientEmail')?.errors?.['required']) {
+                    <span class="form-error">Email address is required.</span>
+                    } @else if (form.get('clientEmail')?.errors?.['email']) {
+                    <span class="form-error">Enter a valid email address.</span>
+                    }
+                }
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label label-optional">Phone</label>
@@ -67,6 +85,9 @@
                 <textarea class="admin-form-textarea" formControlName="clientAddress" rows="2"
                     [class.is-invalid]="form.get('clientAddress')?.invalid && form.get('clientAddress')?.touched"
                     placeholder="123 Main St&#10;City, State, ZIP, Country"></textarea>
+                @if (form.get('clientAddress')?.invalid && form.get('clientAddress')?.touched) {
+                <span class="form-error">Client address is required.</span>
+                }
             </div>
         </div>
 
