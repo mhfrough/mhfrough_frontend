@@ -4,12 +4,10 @@ import { Router } from '@angular/router';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { Subscription } from 'rxjs';
-import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
-
 @Component({
     selector: 'app-admin-projects',
     standalone: true,
-    imports: [CommonModule, ImgFallbackDirective],
+    imports: [CommonModule],
     templateUrl: './admin-projects.component.html',
 })
 export class AdminProjectsComponent implements OnInit, OnDestroy {

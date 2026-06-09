@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AppointmentsService, Appointment, AppointmentStatus, CreateAppointmentPayload } from '../../../core/services/appointments.service';
@@ -17,7 +17,7 @@ interface CalendarDay {
 @Component({
     selector: 'app-admin-appointments',
     standalone: true,
-    imports: [CommonModule, FormsModule, ConfirmModalComponent, DatePipe],
+    imports: [CommonModule, FormsModule, ConfirmModalComponent],
     templateUrl: './admin-appointments.component.html',
     styleUrl: './admin-appointments.component.scss',
 })

@@ -2,12 +2,11 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { BlogsService } from '../../../core/services/blogs.service';
-import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 
 @Component({
     selector: 'app-admin-blogs',
     standalone: true,
-    imports: [CommonModule, ImgFallbackDirective],
+    imports: [CommonModule],
     templateUrl: './admin-blogs.component.html',
 })
 export class AdminBlogsComponent implements OnInit {
