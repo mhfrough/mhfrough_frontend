@@ -204,13 +204,8 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
         });
     }
 
-    private renderJourneyChartForSession(sessionId: string) {
-        if (!isPlatformBrowser(this.platformId)) return;
-        const el = document.getElementById(`journey-chart-${sessionId}`) as HTMLCanvasElement | null;
-        if (!el) return;
-        const journey = this.journeyMap()[sessionId];
-        if (!journey) return;
-        this.renderJourneyChart(el, journey.pageViews);
+    private renderJourneyChartForSession(_sessionId: string) {
+        // no-op: Time per Page chart removed
     }
 
     isActive(session: VisitorSession): boolean {
@@ -222,8 +217,8 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
         return this.currentPageMap()[sessionId] ?? null;
     }
 
-    journeyTimeline(journey: VisitorJourney): Array<{ type: 'page' | 'event'; time: string; label: string; sub?: string; icon: string; meta?: string }> {
-        const items: Array<{ type: 'page' | 'event'; time: string; label: string; sub?: string; icon: string; meta?: string }> = [];
+    journeyTimeline(journey: VisitorJourney): Array<{ type: 'page' | 'event'; time: string; label: string; sub?: string; icon: string; meta?: string; elapsed?: string }> {
+        const items: Array<{ type: 'page' | 'event'; time: string; label: string; sub?: string; icon: string; meta?: string; elapsed?: string }> = [];
 
         for (const pv of journey.pageViews) {
             items.push({
@@ -235,13 +230,29 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
             });
         }
 
+        const sortedPageViews = [...journey.pageViews].sort(
+            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+
         for (const ev of journey.events) {
+            const evTs = new Date(ev.createdAt).getTime();
+            // Find the most recent page view that started before this event
+            let elapsed: string | undefined;
+            for (let i = sortedPageViews.length - 1; i >= 0; i--) {
+                const pvTs = new Date(sortedPageViews[i].createdAt).getTime();
+                if (pvTs <= evTs) {
+                    const ms = evTs - pvTs;
+                    elapsed = this.formatDuration(ms);
+                    break;
+                }
+            }
             items.push({
                 type: 'event',
                 time: ev.createdAt,
                 label: this.formatEventName(ev.eventName),
                 sub: ev.path ?? undefined,
                 icon: this.eventIcon(ev.eventName),
+                elapsed: elapsed ? `+${elapsed}` : undefined,
                 meta: ev.metadata ? Object.entries(ev.metadata).map(([k, v]) => `${k}: ${v}`).join(' · ') : undefined,
             });
         }
@@ -256,10 +267,23 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
     eventIcon(name: string): string {
         if (name.includes('contact')) return 'bi-envelope';
         if (name.includes('project')) return 'bi-briefcase';
+        if (name.includes('comment')) return 'bi-chat-text';
         if (name.includes('blog')) return 'bi-journal-text';
         if (name.includes('gallery')) return 'bi-images';
+        if (name.includes('review') || name.includes('feedback') || name.includes('rating')) return 'bi-star';
+        if (name.includes('cookie') || name.includes('consent')) return 'bi-shield-check';
         if (name.includes('nav')) return 'bi-cursor';
         return 'bi-lightning';
+    }
+
+    sessionEventsSummary(journey: VisitorJourney): { name: string; icon: string; count: number }[] {
+        const counts = new Map<string, number>();
+        for (const ev of journey.events) {
+            counts.set(ev.eventName, (counts.get(ev.eventName) ?? 0) + 1);
+        }
+        return Array.from(counts.entries())
+            .map(([name, count]) => ({ name, icon: this.eventIcon(name), count }))
+            .sort((a, b) => b.count - a.count);
     }
 
     shortPath(path: string | null): string {
@@ -267,18 +291,19 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
         return path.length > 15 ? '…' + path.slice(-14) : path;
     }
 
-    pageTimePct(pageViews: VisitorPageView[], pv: VisitorPageView): number {
-        const max = Math.max(...pageViews.map(p => Number(p.timeOnPageMs ?? 0)), 1);
-        return Math.round((Number(pv.timeOnPageMs ?? 0) / max) * 100);
-    }
-
     formatDuration(ms: number): string {
         if (!ms || ms < 1000) return '< 1s';
         const s = Math.floor(ms / 1000);
         if (s < 60) return `${s}s`;
         const m = Math.floor(s / 60);
-        const rem = s % 60;
-        return rem > 0 ? `${m}m ${rem}s` : `${m}m`;
+        if (m < 60) return `${m}m`;
+        const h = Math.floor(m / 60);
+        if (h < 24) return `${h}h`;
+        const d = Math.floor(h / 24);
+        if (d < 30) return `${d}d`;
+        const mo = Math.floor(d / 30);
+        if (mo < 12) return `${mo}mo`;
+        return `${Math.floor(mo / 12)}y`;
     }
 
     visitorDeviceIcon(type: string | null): string {
@@ -486,64 +511,4 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
         });
     }
 
-    private renderJourneyChart(canvas: HTMLCanvasElement, pageViews: VisitorPageView[]) {
-        const ctx = canvas.getContext('2d');
-        if (!ctx || pageViews.length === 0) return;
-        // Polyfill roundRect for older browsers
-        if (!ctx.roundRect) {
-            (ctx as any).roundRect = function(x: number, y: number, w: number, h: number) { this.rect(x, y, w, h); };
-        }
-
-        const pages = pageViews.filter(p => p.timeOnPageMs && p.timeOnPageMs > 0);
-        if (pages.length === 0) return;
-
-        const W = canvas.parentElement?.clientWidth ?? 300;
-        const BAR_H = 18;
-        const GAP = 6;
-        const PAD_L = 110;
-        const PAD_R = 50;
-        const PAD_T = 6;
-        const H = pages.length * (BAR_H + GAP) + PAD_T * 2;
-
-        canvas.width = W;
-        canvas.height = H;
-        ctx.clearRect(0, 0, W, H);
-
-        const maxMs = Math.max(...pages.map(p => Number(p.timeOnPageMs ?? 0)), 1);
-        const barW = W - PAD_L - PAD_R;
-
-        pages.forEach((p, i) => {
-            const y = PAD_T + i * (BAR_H + GAP);
-            const ms = Number(p.timeOnPageMs ?? 0);
-            const w = Math.max((ms / maxMs) * barW, 2);
-
-            // Bar background
-            ctx.fillStyle = 'rgba(228,224,216,0.05)';
-            ctx.beginPath();
-            ctx.roundRect(PAD_L, y, barW, BAR_H, 3);
-            ctx.fill();
-
-            // Bar fill
-            const grad = ctx.createLinearGradient(PAD_L, 0, PAD_L + w, 0);
-            grad.addColorStop(0, 'rgba(99,102,241,0.7)');
-            grad.addColorStop(1, 'rgba(129,140,248,0.9)');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.roundRect(PAD_L, y, w, BAR_H, 3);
-            ctx.fill();
-
-            // Path label (left)
-            ctx.fillStyle = 'rgba(228,224,216,0.7)';
-            ctx.font = '11px Inconsolata, monospace';
-            ctx.textBaseline = 'middle';
-            ctx.textAlign = 'right';
-            const label = (p.path ?? '/').length > 14 ? '…' + (p.path ?? '/').slice(-13) : (p.path ?? '/');
-            ctx.fillText(label, PAD_L - 6, y + BAR_H / 2);
-
-            // Duration label (right)
-            ctx.fillStyle = 'rgba(228,224,216,0.5)';
-            ctx.textAlign = 'left';
-            ctx.fillText(this.formatDuration(ms), PAD_L + w + 5, y + BAR_H / 2);
-        });
-    }
 }

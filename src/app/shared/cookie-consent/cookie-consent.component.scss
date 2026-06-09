@@ -38,7 +38,7 @@
     @media (max-width: 540px) {
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.875rem;
+        gap: 1rem;
     }
 }
 
@@ -78,7 +78,7 @@
 
 .cookie-consent__actions {
     display: flex;
-    gap: 0.625rem;
+    gap: 0.5rem;
     flex-shrink: 0;
 
     @media (max-width: 540px) {

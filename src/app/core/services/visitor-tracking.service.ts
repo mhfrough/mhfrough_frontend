@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
+const CONTACT_USER_KEY = 'mhf_contact_user';
+
 const SESSION_KEY = 'vst_sid';
 
 @Injectable({ providedIn: 'root' })
@@ -38,6 +40,10 @@ export class VisitorTrackingService {
         body['language'] = (navigator.language ?? '').slice(0, 10) || undefined;
         const ref = document.referrer?.slice(0, 500);
         if (ref) body['referrer'] = ref;
+        try {
+            const cu = localStorage.getItem(CONTACT_USER_KEY);
+            if (cu) body['contactUser'] = JSON.parse(cu);
+        } catch { /* ignore */ }
 
         this.http.post<{ sessionId: string }>(`${this.api}/ping`, body).subscribe({
             next: (res) => {

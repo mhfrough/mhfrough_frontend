@@ -66,7 +66,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.7rem 0.9rem;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
     background: var(--bg-alt);
@@ -82,7 +82,7 @@
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
 
     i { font-size: 0.85rem; }
 }
@@ -139,7 +139,7 @@
     text-overflow: ellipsis;
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.25rem;
 }
 
 .afc-close-btn {
@@ -198,8 +198,8 @@
 .afc-session-item {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.6rem 0.9rem;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
     cursor: pointer;
     border-bottom: 1px solid var(--border);
     transition: background var(--dur) var(--ease);
@@ -258,7 +258,7 @@
     text-overflow: ellipsis;
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.25rem;
 }
 
 .afc-unread {
@@ -278,7 +278,7 @@
     padding: 0.75rem;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
 }
 
 .afc-msg {
@@ -311,7 +311,7 @@
 }
 
 .afc-bubble {
-    padding: 0.4rem 0.7rem;
+    padding: 0.5rem 0.75rem;
     font-family: var(--font-sans);
     font-size: 0.8rem;
     line-height: 1.5;
@@ -322,8 +322,8 @@
     font-family: var(--font-mono);
     font-size: 0.58rem;
     color: var(--text-muted);
-    margin-top: 0.12rem;
-    padding: 0 0.15rem;
+    margin-top: 0.25rem;
+    padding: 0 0.25rem;
 }
 
 // ─── Typing indicator ─────────────────────────────────────────────────────────
@@ -353,7 +353,7 @@
 .afc-input-row {
     display: flex;
     align-items: flex-end;
-    gap: 0.4rem;
+    gap: 0.5rem;
     padding: 0.5rem 0.75rem;
     border-top: 1px solid var(--border);
     flex-shrink: 0;
@@ -363,7 +363,7 @@
     flex: 1;
     border: none;
     border-bottom: 1px solid var(--border);
-    padding: 0.4rem 0.35rem;
+    padding: 0.5rem;
     font-family: var(--font-sans);
     font-size: 0.8rem;
     background: transparent;
@@ -406,12 +406,12 @@
 }
 
 .afc-closed-notice {
-    padding: 0.6rem 0.9rem;
+    padding: 0.75rem 1rem;
     text-align: center;
     font-family: var(--font-sans);
     font-size: 0.72rem;
     color: var(--text-muted);
     border-top: 1px solid var(--border);
 
-    i { margin-right: 0.3rem; }
+    i { margin-right: 0.25rem; }
 }

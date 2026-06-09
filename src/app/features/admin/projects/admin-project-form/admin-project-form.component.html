@@ -57,8 +57,7 @@
             }
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label label-optional">Case Study / Content <span class="form-hint">(optional, HTML
-                    supported)</span></label>
+            <label class="admin-form-label label-optional">Case Study / Content</label>
             <div class="rte-wrap">
                 <app-rte-toolbar [el]="contentArea" mode="full"></app-rte-toolbar>
                 <textarea #contentArea ngModel [ngModel]="editing()?.content" name="content" rows="14"

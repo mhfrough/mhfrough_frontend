@@ -290,6 +290,13 @@
                             <div class="vt-journey-inner">
                                 <!-- Session meta summary -->
                                 <div class="vt-journey-meta">
+                                    @if (s.contactUser) {
+                                    <span><i class="bi bi-person-circle"></i>
+                                        @if (s.contactUser['name']) { <strong>{{ s.contactUser['name'] }}</strong> }
+                                        @if (s.contactUser['email']) { <span style="font-family:monospace;font-size:.8rem;opacity:.75"> · {{ s.contactUser['email'] }}</span> }
+                                        @if (s.contactUser['company']) { <span style="opacity:.55"> · {{ s.contactUser['company'] }}</span> }
+                                    </span>
+                                    }
                                     @if (s.referrer) {
                                     <span><i class="bi bi-box-arrow-in-right"></i> Came from: <span style="font-family:monospace;font-size:.8rem;max-width:22rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle" [title]="s.referrer">{{ s.referrer }}</span></span>
                                     }
@@ -319,8 +326,14 @@
                                                 </div>
                                                 <div class="vt-timeline-body">
                                                     <span class="vt-timeline-label" [title]="item.label">{{ item.label }}</span>
+                                                    @if (item.type === 'page' && item.sub) {
+                                                    <span class="vt-timeline-duration">{{ item.sub }}</span>
+                                                    }
+                                                    @if (item.type === 'event' && item.elapsed) {
+                                                    <span class="vt-timeline-duration vt-timeline-duration--event">{{ item.elapsed }}</span>
+                                                    }
                                                     <span class="vt-timeline-time">{{ item.time | date:'h:mm:ss a' }}</span>
-                                                    @if (item.sub) {
+                                                    @if (item.type === 'event' && item.sub) {
                                                     <span class="vt-timeline-sub" [title]="item.sub">{{ item.sub }}</span>
                                                     }
                                                     @if (item.meta) {
@@ -333,23 +346,22 @@
                                         }
                                     </div>
 
-                                    <!-- Time-on-page bars column -->
+                                    <!-- Session events summary column -->
                                     <div class="vt-journey-chart-col">
                                         <p class="admin-analytics-panel-title" style="margin-bottom:.75rem">
-                                            <i class="bi bi-bar-chart-steps"></i> Time per Page
+                                            <i class="bi bi-lightning-charge"></i> Session Actions
                                         </p>
-                                        @if (journeyMap()[s.id].pageViews.length === 0) {
-                                        <p class="admin-dashboard-empty">No page view data.</p>
+                                        @if (sessionEventsSummary(journeyMap()[s.id]).length === 0) {
+                                        <p class="admin-dashboard-empty">No actions recorded.</p>
                                         } @else {
-                                        <div class="vt-device-dist">
-                                            @for (pv of journeyMap()[s.id].pageViews; track pv.id) {
-                                            <div class="vt-device-bar-row">
-                                                <i class="bi bi-file-earmark-text" style="color:var(--text-muted);width:1rem;text-align:center;font-size:.75rem;opacity:.5"></i>
-                                                <span class="vt-device-label" style="width:6rem" [title]="pv.path || '/'">{{ shortPath(pv.path) }}</span>
-                                                <div class="vt-device-track">
-                                                    <div class="vt-device-fill" [style.width.%]="pageTimePct(journeyMap()[s.id].pageViews, pv)"></div>
+                                        <div class="admin-activity-feed">
+                                            @for (ev of sessionEventsSummary(journeyMap()[s.id]); track ev.name) {
+                                            <div class="admin-activity-item">
+                                                <i class="bi {{ ev.icon }} admin-activity-icon"></i>
+                                                <div class="admin-activity-body">
+                                                    <span class="admin-activity-text">{{ formatEventName(ev.name) }}</span>
                                                 </div>
-                                                <span class="vt-device-pct" style="width:3.5rem;text-align:left">{{ pv.timeOnPageMs && +pv.timeOnPageMs > 0 ? formatDuration(+pv.timeOnPageMs) : '—' }}</span>
+                                                <span class="admin-activity-badge">{{ ev.count }}</span>
                                             </div>
                                             }
                                         </div>

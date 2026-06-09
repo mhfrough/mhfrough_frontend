@@ -26,6 +26,7 @@ export interface VisitorSession {
     bounced: boolean;
     startedAt: string;
     lastSeenAt: string | null;
+    contactUser: Record<string, string> | null;
 }
 
 export interface VisitorPageView {

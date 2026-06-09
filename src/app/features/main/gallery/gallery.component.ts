@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { VisitorTrackingService } from '../../../core/services/visitor-tracking.service';
 
 @Component({
     selector: 'app-gallery',
@@ -21,6 +22,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     private galleryService = inject(GalleryService);
     private realtime = inject(RealtimeService);
     private platformId = inject(PLATFORM_ID);
+    private tracking = inject(VisitorTrackingService);
     private titleService = inject(Title);
     private seo = inject(SeoService);
     private subs = new Subscription();
@@ -153,6 +155,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
         if (isPlatformBrowser(this.platformId)) {
             document.body.style.overflow = 'hidden';
         }
+        const item = this.items()[index];
+        if (item) this.tracking.trackEvent('gallery_view', { title: item.title ?? '', id: item.id });
     }
 
     closeLightbox() {

@@ -187,6 +187,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
         this.service.submitComment(this.blog().id, { authorName, authorEmail, content }).subscribe({
             next: (res: any) => {
                 this.userInfo.save({ name: authorName, email: authorEmail });
+                this.tracking.trackEvent('blog_comment', { slug: this.blog().slug ?? '', title: this.blog().title ?? '' });
                 this.commentSending.set(false);
                 this.commentData.content = '';
                 form.resetForm({ authorName, authorEmail, content: '' });

@@ -8,6 +8,7 @@ import { UserInfoService } from '../../../core/services/user-info.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { FrontToastService } from '../../../core/services/front-toast.service';
 import { NetworkStatusService } from '../../../core/services/network-status.service';
+import { VisitorTrackingService } from '../../../core/services/visitor-tracking.service';
 import { Title } from '@angular/platform-browser';
 
 @Component({
@@ -20,6 +21,7 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     private service = inject(FeedbackService);
     private userInfo = inject(UserInfoService);
     private readonly realtime = inject(RealtimeService);
+    private readonly tracking = inject(VisitorTrackingService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private toast = inject(FrontToastService);
@@ -161,6 +163,7 @@ export class FeedbackComponent implements OnInit, OnDestroy {
                     ...(v.company?.trim() && { company: v.company.trim() }),
                     ...(v.role?.trim() && { role: v.role.trim() }),
                 });
+                this.tracking.trackEvent('review_submit', { rating: String(this.selectedRating) });
                 this.sending.set(false);
                 form.resetForm();
                 this.selectedRating = 5;
