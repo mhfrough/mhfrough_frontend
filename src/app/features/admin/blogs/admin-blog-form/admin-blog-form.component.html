@@ -1,0 +1,109 @@
+<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">{{ editId() ? 'Edit Post' : 'New Post' }}</h1>
+    </div>
+    <a routerLink="/admin/blogs" class="btn-ghost"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+@if (loading()) {
+<div class="loading-state"><div class="spinner"></div></div>
+} @else {
+<div class="admin-form-panel">
+    <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+        <div class="admin-form-grid">
+            <div class="admin-form-field">
+                <label class="admin-form-label label-required">Title</label>
+                <input ngModel [ngModel]="editing()?.title" name="title" required class="admin-form-input"
+                    [class.is-invalid]="(f.submitted || f.controls['title']?.touched) && f.controls['title']?.invalid"
+                    placeholder="Post title">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label label-required">Slug</label>
+                <div style="display:flex;gap:0.5rem">
+                    <input ngModel [ngModel]="editing()?.slug" name="slug" required class="admin-form-input"
+                        [class.is-invalid]="(f.submitted || f.controls['slug']?.touched) && f.controls['slug']?.invalid"
+                        placeholder="my-post-slug" style="flex:1">
+                    <button type="button" class="btn-ghost" style="white-space:nowrap;padding:0 0.75rem"
+                        (click)="generateSlug(f)">Auto</button>
+                </div>
+            </div>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-required">Excerpt</label>
+            <textarea ngModel [ngModel]="editing()?.excerpt" name="excerpt" required rows="2"
+                class="admin-form-textarea"
+                [class.is-invalid]="(f.submitted || f.controls['excerpt']?.touched) && f.controls['excerpt']?.invalid"></textarea>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-required">Content</label>
+            <div class="rte-wrap">
+                <app-rte-toolbar [el]="contentArea" mode="full"></app-rte-toolbar>
+                <textarea #contentArea ngModel [ngModel]="editing()?.content" name="content" required rows="12"
+                    class="admin-form-textarea rte-textarea"
+                    [class.is-invalid]="(f.submitted || f.controls['content']?.touched) && f.controls['content']?.invalid"
+                    style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
+            </div>
+        </div>
+        <div class="admin-form-grid">
+            <div class="admin-form-field">
+                <label class="admin-form-label label-optional">Tags <span class="form-hint">(SEO keywords)</span></label>
+                <app-tag-input [tags]="formTags()" [suggestions]="allTags()"
+                    (tagsChange)="formTags.set($event)"></app-tag-input>
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label label-optional">Read Time (mins)</label>
+                <div style="display:flex;gap:0.5rem">
+                    <input ngModel [ngModel]="editing()?.readTimeMinutes ?? 5" name="readTimeMinutes" type="number"
+                        min="1" class="admin-form-input" style="flex:1">
+                    <button type="button" class="btn-ghost" style="white-space:nowrap;padding:0 0.75rem"
+                        (click)="calcReadTime(f)">Auto</button>
+                </div>
+            </div>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Cover Image</label>
+            <div class="img-upload-zone" [class.drag-over]="dragOver()" (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+                @if (uploading()) {
+                <div class="img-upload-placeholder"><span class="contact-spinner"></span>&nbsp; Uploading…</div>
+                } @else if (coverPreview()) {
+                <div class="img-upload-preview">
+                    <img [src]="coverPreview()!" alt="Cover preview" loading="lazy" />
+                    <button type="button" class="img-upload-clear" (click)="coverPreview.set(null)">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                </div>
+                } @else {
+                <div class="img-upload-placeholder">
+                    <i class="bi bi-cloud-upload" style="font-size:1.5rem"></i>
+                    <span>Drag &amp; drop an image, or <label class="img-upload-browse">browse<input type="file"
+                                accept="image/*" (change)="onFileInput($event)" hidden></label></span>
+                    <span style="font-size:0.75rem;color:var(--text-muted)">JPEG, PNG, WebP, GIF · max 5 MB</span>
+                </div>
+                }
+            </div>
+            <input ngModel [ngModel]="coverPreview() ?? ''" name="coverImage" class="admin-form-input"
+                placeholder="Or paste a URL directly" style="margin-top:0.5rem"
+                (ngModelChange)="coverPreview.set($event || null)">
+            @if (uploadError()) {
+            <p style="font-size:0.78rem;color:#ef4444;margin-top:0.35rem;margin-bottom:0">
+                <i class="bi bi-exclamation-circle"></i> {{ uploadError() }}
+            </p>
+            }
+        </div>
+        <div class="admin-form-checks">
+            <div class="admin-form-check checkbox-field">
+                <input ngModel [ngModel]="editing()?.isPublished ?? false" name="isPublished" type="checkbox" id="bpub">
+                <label for="bpub">Publish now</label>
+            </div>
+        </div>
+        <div class="admin-form-actions">
+            <button type="submit" class="btn-primary" [disabled]="saving()">
+                @if (saving()) { <span class="contact-spinner"></span>&nbsp; }
+                {{ editId() ? 'Update' : 'Create' }}
+            </button>
+            <button type="button" class="btn-ghost" (click)="cancel()">Cancel</button>
+        </div>
+    </form>
+</div>
+}

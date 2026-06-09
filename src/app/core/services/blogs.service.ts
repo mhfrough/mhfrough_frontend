@@ -22,6 +22,7 @@ export class BlogsService {
         return this.http.get<{ data: any[]; total: number; page: number; limit: number; totalPages: number }>(this.base, { params });
     }
     getAllAdmin() { return this.http.get<any[]>(`${this.base}/all`); }
+    getOne(id: string) { return this.http.get<any>(`${this.base}/admin/${id}`); }
     getTags() { return this.http.get<string[]>(`${this.base}/tags`); }
     getBySlug(slug: string) { return this.http.get<any>(`${this.base}/${slug}`); }
     create(data: any) { return this.http.post<any>(this.base, data); }

@@ -330,8 +330,9 @@ export class ChatService {
     }
 
     updateCurrentPage(visitorSessionId: string, path: string, timestamp: string) {
-        this.currentPageMap.update(m => ({ ...m, [visitorSessionId]: path }));
-        this._pushActivity(visitorSessionId, { type: 'page', label: path, path, timestamp });
+        const normalizedPath = path || '/';
+        this.currentPageMap.update(m => ({ ...m, [visitorSessionId]: normalizedPath }));
+        this._pushActivity(visitorSessionId, { type: 'page', label: normalizedPath, path: normalizedPath, timestamp });
     }
 
     logVisitorEvent(visitorSessionId: string, eventName: string, path: string | null, timestamp: string) {

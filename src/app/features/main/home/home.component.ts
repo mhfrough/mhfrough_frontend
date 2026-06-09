@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID, ElementRef } from '@angular/core';
 import { isPlatformBrowser, CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -18,9 +18,10 @@ import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
     imports: [CommonModule, RouterLink, NgOptimizedImage, ImgFallbackDirective, ExternalUrlPipe],
     templateUrl: './home.component.html',
 })
-export class HomeComponent implements OnInit, OnDestroy {
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private projectsService = inject(ProjectsService);
     private platformId = inject(PLATFORM_ID);
+    private elRef = inject(ElementRef);
     private readonly realtime = inject(RealtimeService);
     readonly footerSettings = inject(FooterSettingsService);
     private feedbackService = inject(FeedbackService);
@@ -37,6 +38,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     readonly openFaqItems = signal<number[]>([]);
 
     readonly stars = [1, 2, 3, 4, 5];
+
+    readonly statsConfig = [
+        { target: 5, suffix: '+', label: 'Years Experience' },
+        { target: 30, suffix: '+', label: 'Projects Delivered' },
+        { target: 10, suffix: '+', label: 'Happy Clients' },
+        { target: 100, suffix: '%', label: 'On-time Delivery' },
+    ];
+    readonly statsDisplayed = signal(['5+', '30+', '10+', '100%']);
+    private statsAnimated = false;
+    private observers: IntersectionObserver[] = [];
 
     readonly clients = [
         { name: 'Arittek Solutions (Pvt.) Ltd.', logo: '/clients/arittek.png', url: 'https://arittek.com/' },
@@ -186,9 +197,16 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.subs.add(this.realtime.on<any>('feedback:deleted').subscribe(() => this.loadFeaturedReviews()));
     }
 
+    ngAfterViewInit() {
+        if (!isPlatformBrowser(this.platformId)) return;
+        this.setupScrollReveal();
+        this.setupStatsObserver();
+    }
+
     ngOnDestroy() {
         this.subs.unsubscribe();
         this.closeLightbox();
+        this.observers.forEach(o => o.disconnect());
     }
 
     private loadFeaturedReviews() {
@@ -221,6 +239,62 @@ export class HomeComponent implements OnInit, OnDestroy {
     @HostListener('document:keydown.escape')
     onEscape() {
         if (this.lightboxSrc()) this.closeLightbox();
+    }
+
+    private setupScrollReveal() {
+        const host: HTMLElement = this.elRef.nativeElement;
+        const targets = host.querySelectorAll<HTMLElement>('.section, .stats-strip, .hero');
+        targets.forEach(el => el.classList.add('reveal'));
+
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('reveal--visible');
+                    obs.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.08 });
+
+        targets.forEach(el => obs.observe(el));
+        this.observers.push(obs);
+    }
+
+    private setupStatsObserver() {
+        const host: HTMLElement = this.elRef.nativeElement;
+        const strip = host.querySelector('.stats-strip');
+        if (!strip) return;
+
+        const obs = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && !this.statsAnimated) {
+                this.statsAnimated = true;
+                this.statsConfig.forEach((stat, i) => this.animateStat(i, stat.target, stat.suffix, i * 120));
+                obs.disconnect();
+            }
+        }, { threshold: 0.4 });
+
+        obs.observe(strip);
+        this.observers.push(obs);
+    }
+
+    private animateStat(index: number, target: number, suffix: string, delay: number) {
+        setTimeout(() => {
+            const total = 300;
+            const start = performance.now();
+
+            const tick = () => {
+                const elapsed = performance.now() - start;
+                if (elapsed >= total) {
+                    this.statsDisplayed.update(arr => { const c = [...arr]; c[index] = target + suffix; return c; });
+                    return;
+                }
+                const eased = 1 - Math.pow(1 - elapsed / total, 3);
+                const val = Math.round(eased * target);
+                this.statsDisplayed.update(arr => { const c = [...arr]; c[index] = val + suffix; return c; });
+                requestAnimationFrame(tick);
+            };
+
+            requestAnimationFrame(tick);
+        }, delay);
     }
 
     private pick(arr: string[], seed: number): string {

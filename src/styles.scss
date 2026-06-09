@@ -741,6 +741,18 @@ body::before {
     }
 }
 
+// ─── Scroll reveal (JS adds .reveal, then .reveal--visible on intersection) ──
+.reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+
+    &.reveal--visible {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 // --- Sections -----------------------------------------------------------------
 .section {
     padding: 3rem 0;
@@ -4557,6 +4569,35 @@ button.admin-nav-link:last-child:hover {
 
     &::after {
         content: '"';
+    }
+}
+
+// --- Button save states -------------------------------------------------------
+
+@keyframes btn-shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-5px); }
+    40%      { transform: translateX(5px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+}
+
+.btn-primary {
+    &.btn--success {
+        background: #16a34a !important;
+        color: #fff !important;
+        opacity: 1 !important;
+        pointer-events: none;
+        transition: background 0.2s ease;
+    }
+
+    &.btn--error {
+        animation: btn-shake 0.4s ease;
+        background: #dc2626 !important;
+        color: #fff !important;
+        opacity: 1 !important;
+        pointer-events: none;
+        transition: background 0.2s ease;
     }
 }
 

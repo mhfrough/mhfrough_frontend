@@ -47,6 +47,11 @@
                 </a>
             </li>
             <li>
+                <a class="admin-nav-link" routerLink="/admin/appointments" routerLinkActive="is-active">
+                    <i class="bi bi-bell"></i>Reminders
+                </a>
+            </li>
+            <li>
                 <a class="admin-nav-link" routerLink="/admin/inquiries" routerLinkActive="is-active">
                     <i class="bi bi-envelope"></i>Inquiries
                     @if (notif.unreadInquiries() > 0) {

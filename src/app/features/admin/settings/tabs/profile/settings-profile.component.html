@@ -7,13 +7,6 @@
         </div>
     </div>
 
-    @if (profileSaved() === 'identity') {
-    <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> Profile saved successfully.</div>
-    }
-    @if (profileError()?.section === 'identity') {
-    <div class="admin-alert admin-alert--error">{{ profileError()!.msg }}</div>
-    }
-
     <div class="profile-avatar-row">
         <div class="profile-avatar-wrap" style="width:64px;height:64px">
             @if (avatarPreview()) {
@@ -58,8 +51,20 @@
     </div>
 
     <div class="admin-form-actions" style="margin-top:1.25rem">
-        <button class="btn-primary" (click)="saveProfile('identity')" [disabled]="profileSaving() === 'identity'">
-            @if (profileSaving() === 'identity') { <span class="contact-spinner"></span> Saving… } @else { <i class="bi bi-check-lg"></i> Save Profile }
+        <button class="btn-primary"
+            [class.btn--success]="profileBtnState()['identity'] === 'success'"
+            [class.btn--error]="profileBtnState()['identity'] === 'error'"
+            (click)="saveProfile('identity')"
+            [disabled]="profileSaving() === 'identity' || profileBtnState()['identity'] === 'success' || profileBtnState()['identity'] === 'error'">
+            @if (profileSaving() === 'identity') {
+                <span class="contact-spinner"></span> Saving…
+            } @else if (profileBtnState()['identity'] === 'success') {
+                <i class="bi bi-check-circle-fill"></i> Saved!
+            } @else if (profileBtnState()['identity'] === 'error') {
+                <i class="bi bi-x-lg"></i> Failed
+            } @else {
+                <i class="bi bi-check-lg"></i> Save Profile
+            }
         </button>
     </div>
 </div>

@@ -21,6 +21,7 @@ export class SettingsProfileComponent implements OnInit, OnDestroy {
     readonly profileSaving = signal<'identity' | 'about' | 'links' | null>(null);
     readonly profileSaved = signal<'identity' | 'about' | 'links' | null>(null);
     readonly profileError = signal<{ section: 'identity' | 'about' | 'links'; msg: string } | null>(null);
+    readonly profileBtnState = signal<Record<string, 'idle' | 'success' | 'error'>>({});
     readonly avatarUploading = signal(false);
     readonly avatarPreview = signal<string | null>(null);
 
@@ -173,6 +174,7 @@ export class SettingsProfileComponent implements OnInit, OnDestroy {
         this.profileSaving.set(section);
         this.profileSaved.set(null);
         this.profileError.set(null);
+        this.profileBtnState.update(s => ({ ...s, [section]: 'idle' }));
         this.settingsService.updateProfile({
             displayName: this.profileDisplayName || undefined,
             bio: this.profileBio || undefined,
@@ -196,12 +198,18 @@ export class SettingsProfileComponent implements OnInit, OnDestroy {
             next: () => {
                 this.profileSaving.set(null);
                 this.profileSaved.set(section);
+                this.profileBtnState.update(s => ({ ...s, [section]: 'success' }));
                 this.footerService.load();
-                setTimeout(() => this.profileSaved.set(null), 3000);
+                setTimeout(() => {
+                    this.profileSaved.set(null);
+                    this.profileBtnState.update(s => ({ ...s, [section]: 'idle' }));
+                }, 2000);
             },
             error: (e) => {
                 this.profileSaving.set(null);
                 this.profileError.set({ section, msg: e?.error?.message ?? 'Failed to save profile.' });
+                this.profileBtnState.update(s => ({ ...s, [section]: 'error' }));
+                setTimeout(() => this.profileBtnState.update(s => ({ ...s, [section]: 'idle' })), 2500);
             },
         });
     }

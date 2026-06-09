@@ -22,8 +22,24 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/admin/projects/admin-projects.component').then(m => m.AdminProjectsComponent),
             },
             {
+                path: 'projects/new',
+                loadComponent: () => import('./features/admin/projects/admin-project-form/admin-project-form.component').then(m => m.AdminProjectFormComponent),
+            },
+            {
+                path: 'projects/:id/edit',
+                loadComponent: () => import('./features/admin/projects/admin-project-form/admin-project-form.component').then(m => m.AdminProjectFormComponent),
+            },
+            {
                 path: 'blogs',
                 loadComponent: () => import('./features/admin/blogs/admin-blogs.component').then(m => m.AdminBlogsComponent),
+            },
+            {
+                path: 'blogs/new',
+                loadComponent: () => import('./features/admin/blogs/admin-blog-form/admin-blog-form.component').then(m => m.AdminBlogFormComponent),
+            },
+            {
+                path: 'blogs/:id/edit',
+                loadComponent: () => import('./features/admin/blogs/admin-blog-form/admin-blog-form.component').then(m => m.AdminBlogFormComponent),
             },
             {
                 path: 'inquiries',
@@ -75,8 +91,20 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/admin/settings/admin-settings.component').then(m => m.AdminSettingsComponent),
             },
             {
+                path: 'appointments',
+                loadComponent: () => import('./features/admin/appointments/admin-appointments.component').then(m => m.AdminAppointmentsComponent),
+            },
+            {
                 path: 'gallery',
                 loadComponent: () => import('./features/admin/gallery/admin-gallery.component').then(m => m.AdminGalleryComponent),
+            },
+            {
+                path: 'gallery/new',
+                loadComponent: () => import('./features/admin/gallery/admin-gallery-form/admin-gallery-form.component').then(m => m.AdminGalleryFormComponent),
+            },
+            {
+                path: 'gallery/:id/edit',
+                loadComponent: () => import('./features/admin/gallery/admin-gallery-form/admin-gallery-form.component').then(m => m.AdminGalleryFormComponent),
             },
             {
                 path: 'email',

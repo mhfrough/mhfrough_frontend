@@ -37,11 +37,6 @@
                 <div class="ac-session-info">
                     <span class="ac-session-name">{{ session.visitorName || 'Visitor' }}</span>
                     <span class="ac-session-time">{{ session.lastActivityAt | date:'MMM d, HH:mm' }}</span>
-                    @if (session.visitorSessionId && currentPageMap()[session.visitorSessionId]) {
-                    <span class="ac-session-page" title="{{ currentPageMap()[session.visitorSessionId] }}">
-                        <i class="bi bi-circle-fill ac-vs-live-dot"></i>{{ currentPageMap()[session.visitorSessionId] }}
-                    </span>
-                    }
                 </div>
                 <div class="ac-session-meta">
                     @if (session.unreadCount > 0) {
@@ -153,12 +148,6 @@
                 <div>
                     <p class="ac-chat-visitor-name">{{ getActiveSession()?.visitorName ?? 'Visitor' }}</p>
                     <p class="ac-chat-visitor-since">Since {{ getActiveSession()?.createdAt | date:'MMM d, HH:mm' }}</p>
-                    @let headerPage = getActiveVisitorCurrentPage();
-                    @if (headerPage) {
-                    <p class="ac-chat-visitor-page">
-                        <i class="bi bi-circle-fill ac-vs-live-dot"></i>{{ headerPage }}
-                    </p>
-                    }
                 </div>
             </div>
             <div class="ac-header-actions">

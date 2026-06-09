@@ -46,6 +46,7 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         push: 'Push Notifications',
         'notification-logs': 'Notification Logs',
         invoices: 'Invoices',
+        appointments: 'Appointments',
         gallery: 'Gallery',
     };
 
