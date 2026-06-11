@@ -23,8 +23,20 @@ export class InquiriesService {
     }
 
     getAll() { return this.http.get<any[]>(this.base); }
-    markRead(id: string) { return this.http.patch(`${this.base}/${id}/read`, {}); }
-    remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
+
+    markRead(id: string): Observable<any> {
+        if (!this.network.isOnline()) {
+            return from(this.syncQueue.enqueue({ url: `${this.base}/${id}/read`, method: 'PATCH', body: {}, timestamp: Date.now() }).then(() => ({ queued: true })));
+        }
+        return this.http.patch(`${this.base}/${id}/read`, {});
+    }
+
+    remove(id: string): Observable<any> {
+        if (!this.network.isOnline()) {
+            return from(this.syncQueue.enqueue({ url: `${this.base}/${id}`, method: 'DELETE', body: null, timestamp: Date.now() }).then(() => ({ queued: true })));
+        }
+        return this.http.delete(`${this.base}/${id}`);
+    }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -52,7 +64,24 @@ export class FeedbackService {
         return this.http.post<any>(this.base, data);
     }
 
-    approve(id: string) { return this.http.patch(`${this.base}/${id}/approve`, {}); }
-    unapprove(id: string, adminNote?: string) { return this.http.patch(`${this.base}/${id}/unapprove`, { adminNote }); }
-    remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
+    approve(id: string): Observable<any> {
+        if (!this.network.isOnline()) {
+            return from(this.syncQueue.enqueue({ url: `${this.base}/${id}/approve`, method: 'PATCH', body: {}, timestamp: Date.now() }).then(() => ({ queued: true })));
+        }
+        return this.http.patch(`${this.base}/${id}/approve`, {});
+    }
+
+    unapprove(id: string, adminNote?: string): Observable<any> {
+        if (!this.network.isOnline()) {
+            return from(this.syncQueue.enqueue({ url: `${this.base}/${id}/unapprove`, method: 'PATCH', body: { adminNote }, timestamp: Date.now() }).then(() => ({ queued: true })));
+        }
+        return this.http.patch(`${this.base}/${id}/unapprove`, { adminNote });
+    }
+
+    remove(id: string): Observable<any> {
+        if (!this.network.isOnline()) {
+            return from(this.syncQueue.enqueue({ url: `${this.base}/${id}`, method: 'DELETE', body: null, timestamp: Date.now() }).then(() => ({ queued: true })));
+        }
+        return this.http.delete(`${this.base}/${id}`);
+    }
 }

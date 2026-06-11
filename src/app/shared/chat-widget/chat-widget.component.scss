@@ -1,4 +1,4 @@
-﻿:host {
+:host {
     position: fixed;
     bottom: 1.75rem;
     right: 1.75rem;
@@ -7,6 +7,7 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 0.75rem;
+    font-family: var(--font);
 }
 
 // ─── Trigger ──────────────────────────────────────────────────────────────────
@@ -31,8 +32,8 @@
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: #e4e0d8;
-    color: #1a1917;
+    background: var(--text);
+    color: var(--bg);
     border: none;
     cursor: pointer;
     display: flex;
@@ -58,15 +59,15 @@
     min-width: 19px;
     height: 19px;
     border-radius: 9999px;
-    background: #1a1917;
-    color: #e4e0d8;
+    background: var(--bg);
+    color: var(--text);
     font-size: 0.62rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 4px;
-    border: 2px solid #e4e0d8;
+    border: 2px solid var(--text);
     letter-spacing: 0;
     line-height: 1;
     pointer-events: none;
@@ -78,8 +79,8 @@
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
-    background: #1a1917;
-    border: 1px solid rgba(228, 224, 216, 0.1);
+    background: var(--bg);
+    border: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     max-height: 540px;
@@ -104,8 +105,8 @@
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 .cw-header {
-    background: #242220;
-    border-bottom: 1px solid rgba(228, 224, 216, 0.08);
+    background: var(--bg-alt);
+    border-bottom: 1px solid rgba(var(--text-rgb), 0.08);
     padding: 0.9rem 1rem;
     display: flex;
     align-items: center;
@@ -117,14 +118,14 @@
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: rgba(228, 224, 216, 0.08);
-    border: 1px solid rgba(228, 224, 216, 0.2);
+    background: rgba(var(--text-rgb), 0.08);
+    border: 1px solid rgba(var(--text-rgb), 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.78rem;
     font-weight: 700;
-    color: #e4e0d8;
+    color: var(--text);
     letter-spacing: 0.03em;
     flex-shrink: 0;
 }
@@ -141,13 +142,13 @@
 .cw-name {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #e4e0d8;
+    color: var(--text);
     margin: 0;
 }
 
 .cw-status {
     font-size: 0.72rem;
-    color: rgba(228, 224, 216, 0.5);
+    color: rgba(var(--text-rgb), 0.5);
     margin: 0;
     display: flex;
     align-items: center;
@@ -158,7 +159,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #4ade80;
+    background: var(--badge-success);
     display: inline-block;
     animation: cw-pulse 2s infinite;
 }
@@ -178,7 +179,7 @@
 .cw-close {
     background: transparent;
     border: none;
-    color: rgba(228, 224, 216, 0.45);
+    color: rgba(var(--text-rgb), 0.45);
     cursor: pointer;
     padding: 0.3rem;
     line-height: 1;
@@ -186,11 +187,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 160ms, color 160ms;
+    transition: background var(--dur), color var(--dur);
 
     &:hover {
-        background: rgba(228, 224, 216, 0.08);
-        color: #e4e0d8;
+        background: rgba(var(--text-rgb), 0.08);
+        color: var(--text);
     }
 }
 
@@ -201,8 +202,8 @@
     flex-direction: column;
     gap: 1rem;
     flex: 1;
-    background: #1a1917;
-    background-image: radial-gradient(rgba(228, 224, 216, 0.05) 1px, transparent 1px);
+    background: var(--bg);
+    background-image: radial-gradient(rgba(var(--text-rgb), 0.05) 1px, transparent 1px);
     background-size: 20px 20px;
 }
 
@@ -212,8 +213,8 @@
 }
 
 .cw-intro-bubble {
-    background: #242220;
-    border: 1px solid rgba(228, 224, 216, 0.08);
+    background: var(--bg-alt);
+    border: 1px solid rgba(var(--text-rgb), 0.08);
     border-radius: 12px;
     padding: 0.75rem 1rem;
     width: 100%;
@@ -225,20 +226,20 @@
 .cw-intro-hi {
     font-size: 0.88rem;
     font-weight: 600;
-    color: #e4e0d8;
+    color: var(--text);
     margin: 0;
     line-height: 1.4;
 }
 
 .cw-intro-bio {
     font-size: 0.8rem;
-    color: rgba(228, 224, 216, 0.7);
+    color: rgba(var(--text-rgb), 0.7);
     line-height: 1.5;
 }
 
 .cw-intro-sub {
     font-size: 0.76rem;
-    color: rgba(228, 224, 216, 0.45);
+    color: rgba(var(--text-rgb), 0.45);
     line-height: 1.5;
 }
 
@@ -246,8 +247,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    background: #242220;
-    border: 1px solid rgba(228, 224, 216, 0.08);
+    background: var(--bg-alt);
+    border: 1px solid rgba(var(--text-rgb), 0.08);
     border-radius: 12px;
     padding: 1rem;
 }
@@ -255,25 +256,26 @@
 .cw-intro-label {
     font-size: 0.78rem;
     font-weight: 500;
-    color: rgba(228, 224, 216, 0.45);
+    color: rgba(var(--text-rgb), 0.45);
 }
 
 .cw-intro-input {
-    border: 1px solid rgba(228, 224, 216, 0.12);
+    border: 1px solid rgba(var(--text-rgb), 0.12);
     border-radius: 8px;
     padding: 0.5rem 0.75rem;
     font-size: 0.85rem;
-    background: #1a1917;
-    color: #e4e0d8;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
     outline: none;
-    transition: border-color 160ms;
+    transition: border-color var(--dur);
 
     &:focus {
-        border-color: rgba(228, 224, 216, 0.35);
+        border-color: rgba(var(--text-rgb), 0.35);
     }
 
     &::placeholder {
-        color: rgba(228, 224, 216, 0.25);
+        color: rgba(var(--text-rgb), 0.25);
     }
 }
 
@@ -283,15 +285,16 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: #e4e0d8;
-    color: #1a1917;
+    background: var(--text);
+    color: var(--bg);
     border: none;
     border-radius: 8px;
     font-size: 0.85rem;
     font-weight: 600;
+    font-family: var(--font);
     letter-spacing: 0.01em;
     cursor: pointer;
-    transition: opacity 160ms;
+    transition: opacity var(--dur);
 
     &:disabled {
         opacity: 0.3;
@@ -311,8 +314,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    background-color: #1a1917;
-    background-image: radial-gradient(rgba(228, 224, 216, 0.05) 1px, transparent 1px);
+    background-color: var(--bg);
+    background-image: radial-gradient(rgba(var(--text-rgb), 0.05) 1px, transparent 1px);
     background-size: 20px 20px;
 
     &::-webkit-scrollbar {
@@ -324,7 +327,7 @@
     }
 
     &::-webkit-scrollbar-thumb {
-        background: rgba(228, 224, 216, 0.15);
+        background: rgba(var(--text-rgb), 0.15);
         border-radius: 2px;
     }
 }
@@ -342,10 +345,10 @@
         .cw-audio-msg,
         .cw-file-bubble--video,
         .cw-file-bubble--image {
-            background: #242220;
-            color: #e4e0d8;
+            background: var(--bg-alt);
+            color: var(--text);
             border-radius: 0 12px 12px 12px;
-            border: 1px solid rgba(228, 224, 216, 0.07);
+            border: 1px solid rgba(var(--text-rgb), 0.07);
         }
 
         .cw-bubble-time {
@@ -360,8 +363,8 @@
         .cw-audio-msg,
         .cw-file-bubble--video,
         .cw-file-bubble--image {
-            background: #e4e0d8;
-            color: #1a1917;
+            background: var(--text);
+            color: var(--bg);
             border-radius: 12px 12px 0 12px;
         }
 
@@ -383,21 +386,21 @@
     &--hold .cw-bubble-text {
         background: rgba(251, 191, 36, 0.08) !important;
         border: 1px solid rgba(251, 191, 36, 0.22) !important;
-        color: rgba(228, 224, 216, 0.85) !important;
+        color: rgba(var(--text-rgb), 0.85) !important;
     }
 
     &--unread {
 
         .cw-bubble-text,
         .cw-audio-msg {
-            border-color: rgba(228, 224, 216, 0.3) !important;
+            border-color: rgba(var(--text-rgb), 0.3) !important;
         }
 
         .cw-bubble-time::after {
             content: ' · NEW';
             font-size: 0.6rem;
             font-weight: 700;
-            color: #e4e0d8;
+            color: var(--text);
             opacity: 0.6;
             letter-spacing: 0.06em;
         }
@@ -407,15 +410,15 @@
         opacity: 0.6;
 
         .cw-bubble-text {
-            border: 1px dashed rgba(228, 224, 216, 0.4) !important;
-            background: rgba(228, 224, 216, 0.55) !important;
+            border: 1px dashed rgba(var(--text-rgb), 0.4) !important;
+            background: rgba(var(--text-rgb), 0.55) !important;
         }
     }
 }
 
 // ─── Sending dots animation ───────────────────────────────────────────────────
 .cw-bubble-time--sending {
-    color: rgba(228, 224, 216, 0.5);
+    color: rgba(var(--text-rgb), 0.5);
     gap: 0.3rem;
 }
 
@@ -448,9 +451,9 @@
     align-items: center;
     gap: 0.45rem;
     font-size: 0.72rem;
-    color: rgba(228, 224, 216, 0.5);
-    background: rgba(228, 224, 216, 0.05);
-    border: 1px solid rgba(228, 224, 216, 0.1);
+    color: rgba(var(--text-rgb), 0.5);
+    background: rgba(var(--text-rgb), 0.05);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 0.45rem 0.75rem;
     margin-top: 0.25rem;
@@ -460,7 +463,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #f59e0b;
+    background: var(--badge-warn);
     flex-shrink: 0;
     animation: cw-dot-pulse 1.5s ease-in-out infinite;
 }
@@ -478,7 +481,7 @@
 
     &--sub {
         font-size: 0.77rem;
-        color: rgba(228, 224, 216, 0.55);
+        color: rgba(var(--text-rgb), 0.55);
         padding-top: 0;
         line-height: 1.5;
     }
@@ -487,20 +490,20 @@
 .cw-greeting-hi {
     font-size: 0.86rem;
     font-weight: 600;
-    color: #e4e0d8;
+    color: var(--text);
     margin: 0;
     line-height: 1.45;
 }
 
 .cw-greeting-sub {
     font-size: 0.77rem;
-    color: rgba(228, 224, 216, 0.55);
+    color: rgba(var(--text-rgb), 0.55);
     line-height: 1.5;
 }
 
 .cw-bubble-time {
     font-size: 0.68rem;
-    color: rgba(228, 224, 216, 0.35);
+    color: rgba(var(--text-rgb), 0.35);
     margin-top: 0.18rem;
     padding: 0 0.25rem;
     display: flex;
@@ -528,7 +531,7 @@
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background: rgba(228, 224, 216, 0.5);
+        background: rgba(var(--text-rgb), 0.5);
         animation: cw-bounce 1.2s infinite;
         display: inline-block;
 
@@ -559,9 +562,9 @@
 .cw-closed-notice {
     text-align: center;
     font-size: 0.78rem;
-    color: rgba(228, 224, 216, 0.4);
+    color: rgba(var(--text-rgb), 0.4);
     padding: 0.5rem;
-    border-top: 1px solid rgba(228, 224, 216, 0.08);
+    border-top: 1px solid rgba(var(--text-rgb), 0.08);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -570,17 +573,18 @@
 
 .cw-new-chat-btn {
     font-size: 0.75rem;
+    font-family: var(--font);
     padding: 0.3rem 0.85rem;
     border-radius: 99px;
-    border: 1px solid rgba(99, 102, 241, 0.5);
+    border: 1px solid rgba(var(--indigo-rgb), 0.5);
     background: transparent;
-    color: #6366f1;
+    color: var(--indigo);
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: background var(--dur), color var(--dur);
 
     &:hover {
-        background: #6366f1;
-        color: #fff;
+        background: var(--indigo);
+        color: var(--bg);
     }
 }
 
@@ -590,33 +594,33 @@
     align-items: flex-end;
     gap: 0.5rem;
     padding: 0.75rem;
-    background: #1f1d1b;
-    border-top: 1px solid rgba(228, 224, 216, 0.08);
+    background: var(--bg-footer);
+    border-top: 1px solid rgba(var(--text-rgb), 0.08);
     flex-shrink: 0;
 }
 
 .cw-input {
     flex: 1;
-    border: 1px solid rgba(228, 224, 216, 0.1);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 0.5rem 0.75rem;
     font-size: 0.84rem;
-    font-family: var(--font, 'Inconsolata', monospace);
-    color: #e4e0d8;
-    background: #242220;
+    font-family: var(--font);
+    color: var(--text);
+    background: var(--bg-alt);
     resize: none;
     outline: none;
     max-height: 100px;
     overflow-y: auto;
     line-height: 1.45;
-    transition: border-color 160ms;
+    transition: border-color var(--dur);
 
     &:focus {
-        border-color: rgba(228, 224, 216, 0.3);
+        border-color: rgba(var(--text-rgb), 0.3);
     }
 
     &::placeholder {
-        color: rgba(228, 224, 216, 0.25);
+        color: rgba(var(--text-rgb), 0.25);
     }
 
     &::-webkit-scrollbar {
@@ -624,7 +628,7 @@
     }
 
     &::-webkit-scrollbar-thumb {
-        background: rgba(228, 224, 216, 0.1);
+        background: rgba(var(--text-rgb), 0.1);
         border-radius: 2px;
     }
 }
@@ -633,15 +637,15 @@
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: #e4e0d8;
-    color: #1a1917;
+    background: var(--text);
+    color: var(--bg);
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: opacity 160ms, transform 120ms;
+    transition: opacity var(--dur), transform 120ms;
 
     &:disabled {
         opacity: 0.2;
@@ -663,19 +667,19 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(228, 224, 216, 0.08);
-    color: rgba(228, 224, 216, 0.65);
-    border: 1px solid rgba(228, 224, 216, 0.12);
+    background: rgba(var(--text-rgb), 0.08);
+    color: rgba(var(--text-rgb), 0.65);
+    border: 1px solid rgba(var(--text-rgb), 0.12);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: background 160ms, color 160ms, transform 120ms;
+    transition: background var(--dur), color var(--dur), transform 120ms;
 
     &:hover {
-        background: rgba(228, 224, 216, 0.14);
-        color: #e4e0d8;
+        background: rgba(var(--text-rgb), 0.14);
+        color: var(--text);
         transform: scale(1.06);
     }
 
@@ -698,8 +702,8 @@
     height: 32px;
     border-radius: 50%;
     background: transparent;
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: #ef4444;
+    border: 1px solid rgba(var(--badge-danger-rgb), 0.4);
+    color: var(--badge-danger);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -708,7 +712,7 @@
     transition: background 150ms, color 150ms;
 
     &:hover {
-        background: rgba(239, 68, 68, 0.12);
+        background: rgba(var(--badge-danger-rgb), 0.12);
     }
 }
 
@@ -725,7 +729,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #ef4444;
+    background: var(--badge-danger);
     flex-shrink: 0;
     animation: cw-rec-blink 1s ease-in-out infinite;
 }
@@ -755,7 +759,7 @@
     width: 3px;
     height: 100%;
     border-radius: 1.5px;
-    background: rgba(228, 224, 216, 0.55);
+    background: rgba(var(--text-rgb), 0.55);
     transform-origin: center;
     transition: transform 80ms ease;
     transform: scaleY(0.08);
@@ -764,7 +768,7 @@
 .cw-rec-timer {
     font-size: 0.72rem;
     font-variant-numeric: tabular-nums;
-    color: rgba(228, 224, 216, 0.55);
+    color: rgba(var(--text-rgb), 0.55);
     flex-shrink: 0;
     letter-spacing: 0.03em;
 }
@@ -773,8 +777,8 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: #4ade80;
-    color: #1a1917;
+    background: var(--badge-success);
+    color: var(--bg);
     border: none;
     cursor: pointer;
     display: flex;
@@ -806,7 +810,7 @@
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: rgba(228, 224, 216, 0.5);
+    background: rgba(var(--text-rgb), 0.5);
     animation: cw-bounce 1.2s infinite;
 
     &:nth-child(2) {
@@ -820,7 +824,7 @@
 
 .cw-uploading-label {
     font-size: 0.75rem;
-    color: rgba(228, 224, 216, 0.4);
+    color: rgba(var(--text-rgb), 0.4);
     margin-left: 0.25rem;
 }
 
@@ -845,14 +849,12 @@
     flex-shrink: 0;
     transition: opacity 150ms;
 
-    // Admin bubble = dark background → light circle, dark icon inside
-    background: rgba(228, 224, 216, 0.88);
-    color: #1a1917;
+    background: rgba(var(--text-rgb), 0.88);
+    color: var(--bg);
 
-    // Visitor bubble = light background → dark circle, light icon inside
     .cw-bubble--visitor & {
-        background: #1a1917;
-        color: #e4e0d8;
+        background: var(--bg);
+        color: var(--text);
     }
 
     &:hover {
@@ -900,14 +902,13 @@
     appearance: none;
     height: 2px;
     border-radius: 1px;
-    background: rgba(228, 224, 216, 0.25);
+    background: rgba(var(--text-rgb), 0.25);
     outline: none;
     cursor: pointer;
     padding: .1rem 0;
 
-    // On visitor bubble (light bg) the default track is too light — use a darker track
     .cw-bubble--visitor & {
-        background: rgba(26, 25, 23, 0.25);
+        background: rgba(var(--bg-rgb), 0.25);
     }
 
     &::-webkit-slider-thumb {
@@ -1038,7 +1039,7 @@
     max-height: 180px;
 
     &:focus-visible {
-        outline: 2px solid rgba(228, 224, 216, 0.5);
+        outline: 2px solid rgba(var(--text-rgb), 0.5);
         outline-offset: 2px;
     }
 }
@@ -1055,25 +1056,24 @@
     box-sizing: border-box;
     transition: background 150ms;
 
-    // admin bubble context (dark bg)
-    color: rgba(228, 224, 216, 0.8);
-    border-top: 1px solid rgba(228, 224, 216, 0.12);
+    color: rgba(var(--text-rgb), 0.8);
+    border-top: 1px solid rgba(var(--text-rgb), 0.12);
 
     .cw-bubble--visitor & {
-        color: rgba(26, 25, 23, 0.7);
-        border-top-color: rgba(26, 25, 23, 0.12);
+        color: rgba(var(--bg-rgb), 0.7);
+        border-top-color: rgba(var(--bg-rgb), 0.12);
     }
 
     i { font-size: 0.78rem; flex-shrink: 0; }
     span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     &:hover {
-        background: rgba(228, 224, 216, 0.08);
-        color: #e4e0d8;
+        background: rgba(var(--text-rgb), 0.08);
+        color: var(--text);
 
         .cw-bubble--visitor & {
-            background: rgba(26, 25, 23, 0.06);
-            color: #1a1917;
+            background: rgba(var(--bg-rgb), 0.06);
+            color: var(--bg);
         }
     }
 }
@@ -1106,7 +1106,7 @@
 }
 
 .cw-lb-counter {
-    font-family: monospace;
+    font-family: var(--font);
     font-size: 0.68rem;
     letter-spacing: 0.08em;
     color: rgba(255,255,255,0.4);
@@ -1149,7 +1149,7 @@
 }
 
 .cw-lb-zoom-val {
-    font-family: monospace;
+    font-family: var(--font);
     font-size: 0.65rem;
     letter-spacing: 0.06em;
     color: rgba(255,255,255,0.4);

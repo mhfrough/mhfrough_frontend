@@ -59,7 +59,7 @@ import { SyncQueueService } from '../../core/services/sync-queue.service';
             flex-shrink: 0;
             display: inline-flex;
             align-items: center;
-            background: rgba(228, 224, 216, 0.06);
+            background: rgba(var(--text-rgb), 0.06);
             border: 1px solid var(--border);
             border-radius: 999px;
             padding: 0 0.5rem;

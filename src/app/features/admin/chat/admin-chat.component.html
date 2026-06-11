@@ -10,13 +10,13 @@
             <h2 class="ac-sidebar-title">
                 <i class="bi bi-chat-dots"></i> Live Chat
             </h2>
-            <button class="ac-icon-btn" title="Settings" (click)="openSettings()"
+            <button class="ac-icon-btn" title="Settings"
+                (click)="activeTab === 'settings' ? activeTab = 'chat' : openSettings()"
                 [class.is-active]="activeTab === 'settings'">
                 <i class="bi bi-gear"></i>
             </button>
         </div>
 
-        @if (activeTab === 'chat') {
         <div class="ac-sidebar-search">
             <div class="ac-search-wrap">
                 <i class="bi bi-search"></i>
@@ -52,11 +52,6 @@
             </li>
             }
         </ul>
-        }
-
-        @if (activeTab === 'settings') {
-        <!-- Settings panel embedded in sidebar slot on mobile, not shown here -->
-        }
     </aside>
 
     <!-- ─── Main: chat view or settings ───────────────────────────────────── -->
@@ -67,7 +62,6 @@
         <div class="ac-settings">
             <div class="ac-settings-header">
                 <h3>Chat Settings</h3>
-                <button class="ac-icon-btn" (click)="activeTab = 'chat'"><i class="bi bi-x-lg"></i></button>
             </div>
 
             <section class="ac-settings-section">
@@ -114,16 +108,24 @@
                     <span class="ac-settings-hint">Shown below your name in the widget header</span>
                 </label>
                 <input class="ac-settings-input" [(ngModel)]="statusMessage"
-                    placeholder="e.g. Typically replies within a few minutes" />
+                    placeholder="e.g. Typically replies within minutes" />
             </section>
 
+            @if (settingsSaved()) {
+            <div class="admin-alert admin-alert--success"><i class="bi bi-check-circle-fill"></i> Chat settings saved successfully.</div>
+            }
+            @if (settingsError()) {
+            <div class="admin-alert admin-alert--error"><i class="bi bi-exclamation-circle-fill"></i> {{ settingsError() }}</div>
+            }
+
             <div class="ac-settings-footer">
-                <button class="ac-save-btn" (click)="saveSettings()">
+                <button class="ac-save-btn" (click)="saveSettings()" [disabled]="settingsSaving()">
+                    @if (settingsSaving()) {
+                    <span class="ac-saving-spinner"></span> Saving…
+                    } @else {
                     <i class="bi bi-check2-all"></i> Save Settings
+                    }
                 </button>
-                @if (settingsSaved) {
-                <span class="ac-saved-msg"><i class="bi bi-check2"></i> Saved!</span>
-                }
             </div>
         </div>
         }
@@ -194,10 +196,10 @@
             <div class="ac-vs-feed">
                 @for (item of activity.slice(0, 3); track $index) {
                 <div class="ac-vs-feed-item" [class.ac-vs-feed-item--event]="item.type === 'event'">
-                    <i class="bi"
-                        [class.bi-arrow-right-short]="item.type === 'page'"
+                    <i class="bi" [class.bi-arrow-right-short]="item.type === 'page'"
                         [class.bi-lightning-charge-fill]="item.type === 'event'"></i>
-                    <span class="ac-vs-feed-label">{{ item.type === 'event' ? formatEventLabel(item.label) : item.label }}</span>
+                    <span class="ac-vs-feed-label">{{ item.type === 'event' ? formatEventLabel(item.label) : item.label
+                        }}</span>
                     <span class="ac-vs-feed-time">{{ formatActivityTime(item.timestamp) }}</span>
                 </div>
                 }
@@ -210,11 +212,10 @@
 
         <!-- Session notes -->
         @if (activeSessionId()) {
-        <div class="ac-notes-bar" [class.is-expanded]="notesExpanded()"
-             (mouseenter)="onNotesFocus()" (mouseleave)="onNotesBlur()">
+        <div class="ac-notes-bar" [class.is-expanded]="notesExpanded()" (mouseenter)="onNotesFocus()"
+            (mouseleave)="onNotesBlur()">
             <i class="bi bi-sticky ac-notes-icon"></i>
-            <textarea class="ac-notes-input" [value]="notesText()"
-                (input)="onNotesInput($any($event.target).value)"
+            <textarea class="ac-notes-input" [value]="notesText()" (input)="onNotesInput($any($event.target).value)"
                 placeholder="Notes…" rows="1"></textarea>
             @if (notesSaved()) {
             <span class="ac-notes-saved"><i class="bi bi-check2"></i></span>
@@ -223,9 +224,8 @@
         }
 
         <!-- Messages -->
-        <div class="ac-messages" #msgsEl
-            (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)"
-            [class.ac-drag-over]="isDragOver()">
+        <div class="ac-messages" #msgsEl (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)" [class.ac-drag-over]="isDragOver()">
             <!-- Drag overlay -->
             @if (isDragOver()) {
             <div class="ac-drag-overlay">
@@ -237,7 +237,7 @@
             @for (msg of activeMsgs(); track trackById($index, msg)) {
             <div class="ac-msg" [class.ac-msg--admin]="msg.sender === 'admin'"
                 [class.ac-msg--visitor]="msg.sender === 'visitor'"
-                [class.ac-msg--unread]="msg.sender === 'visitor' && !msg.read">
+                [class.ac-msg--unread]="msg.sender === 'visitor' && !msg.read" [class.ac-msg--pending]="msg.pending">
 
                 @if (msg.messageType === 'audio' && msg.audioUrl) {
                 @let bars = audioBarsFor(msg.id);
@@ -279,8 +279,7 @@
                 } @else if (msg.messageType === 'file' && msg.fileUrl) {
 
                 @if (isImage(msg.fileType)) {
-                <div class="ac-file-msg ac-file-msg--image ac-msg-bubble"
-                    (click)="openLightbox(msg.id)">
+                <div class="ac-file-msg ac-file-msg--image ac-msg-bubble" (click)="openLightbox(msg.id)">
                     <img [src]="msg.fileUrl" [alt]="msg.fileName ?? 'image'" loading="lazy" />
                     @if (msg.content && !msg.content.startsWith('[File:')) {
                     <span class="ac-file-caption" [innerHTML]="msg.content"></span>
@@ -310,12 +309,19 @@
                 <span class="ac-msg-bubble ac-msg-bubble--rich" [innerHTML]="msg.content"></span>
                 }
 
+                @if (msg.pending) {
+                <span class="ac-msg-time ac-msg-time--sending">
+                    <span class="ac-sending-dots"><span></span><span></span><span></span></span>
+                    Sending
+                </span>
+                } @else {
                 <span class="ac-msg-time">
                     {{ msg.createdAt | date:'HH:mm' }}
                     @if (msg.isBot) {
                     <span class="ac-bot-badge"><i class="bi bi-stars"></i> AI</span>
                     }
                 </span>
+                }
             </div>
             }
 
@@ -335,7 +341,8 @@
             @for (pf of pendingFiles(); track $index; let i = $index) {
             <div class="ac-pending-file">
                 @if (pf.previewUrl && pf.file.type.startsWith('video/')) {
-                <video class="ac-pending-thumb ac-pending-thumb--video" [src]="pf.previewUrl" preload="metadata" muted playsinline></video>
+                <video class="ac-pending-thumb ac-pending-thumb--video" [src]="pf.previewUrl" preload="metadata" muted
+                    playsinline></video>
                 } @else if (pf.previewUrl) {
                 <img class="ac-pending-thumb" [src]="pf.previewUrl" [alt]="pf.file.name" />
                 } @else {
@@ -401,9 +408,8 @@
                         }
                     </div>
                 </div>
-                <textarea #editorEl class="ac-editor" placeholder="Type a reply…"
-                    (keydown)="onKeydown($event)" (input)="onEditorInput()"
-                    aria-label="Message input" rows="2"></textarea>
+                <textarea #editorEl class="ac-editor" placeholder="Type a reply…" (keydown)="onKeydown($event)"
+                    (input)="onEditorInput()" aria-label="Message input" rows="2"></textarea>
             </div>
             @if (canSend()) {
             <button class="ac-send-btn" (click)="sendMessage()" [disabled]="isSendingFiles()">
@@ -442,13 +448,19 @@
         @let caption = lightboxCaption(lbMsg);
         <span class="ac-lightbox-caption">{{ caption || lbMsg.fileName || '' }}</span>
         <div class="ac-lightbox-zoom-bar">
-            <button class="ac-lightbox-zoom-btn" type="button" (click)="lbZoomOut()" [disabled]="lbZoom() <= 0.5" aria-label="Zoom out"><i class="bi bi-dash"></i></button>
-            <span class="ac-lightbox-zoom-val" (click)="lbZoomReset()" title="Reset zoom">{{ (lbZoom() * 100).toFixed(0) }}%</span>
-            <button class="ac-lightbox-zoom-btn" type="button" (click)="lbZoomIn()" [disabled]="lbZoom() >= 3" aria-label="Zoom in"><i class="bi bi-plus"></i></button>
+            <button class="ac-lightbox-zoom-btn" type="button" (click)="lbZoomOut()" [disabled]="lbZoom() <= 0.5"
+                aria-label="Zoom out"><i class="bi bi-dash"></i></button>
+            <span class="ac-lightbox-zoom-val" (click)="lbZoomReset()" title="Reset zoom">{{ (lbZoom() * 100).toFixed(0)
+                }}%</span>
+            <button class="ac-lightbox-zoom-btn" type="button" (click)="lbZoomIn()" [disabled]="lbZoom() >= 3"
+                aria-label="Zoom in"><i class="bi bi-plus"></i></button>
         </div>
-        <a class="ac-lightbox-dl" [href]="lbMsg.fileUrl!" download [attr.download]="lbMsg.fileName"
-            target="_blank" rel="noopener" aria-label="Download">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 3v13M6 11l6 6 6-6M4 20h16"/></svg>
+        <a class="ac-lightbox-dl" [href]="lbMsg.fileUrl!" download [attr.download]="lbMsg.fileName" target="_blank"
+            rel="noopener" aria-label="Download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" width="14" height="14">
+                <path d="M12 3v13M6 11l6 6 6-6M4 20h16" />
+            </svg>
         </a>
         <button class="ac-lightbox-close" type="button" (click)="closeLightbox()" aria-label="Close">
             <i class="bi bi-x-lg"></i>
@@ -458,8 +470,8 @@
     <!-- Image stage -->
     <div class="ac-lightbox-stage" (click)="$event.stopPropagation()">
         @if (lightboxImgs().length > 1) {
-        <button class="ac-lightbox-arrow ac-lightbox-arrow--prev" type="button"
-            (click)="lightboxPrev()" aria-label="Previous image">
+        <button class="ac-lightbox-arrow ac-lightbox-arrow--prev" type="button" (click)="lightboxPrev()"
+            aria-label="Previous image">
             <i class="bi bi-chevron-left"></i>
         </button>
         }
@@ -468,8 +480,8 @@
                 [style.transform]="'scale(' + lbZoom() + ')'" [style.cursor]="lbZoom() > 1 ? 'move' : 'default'" />
         </div>
         @if (lightboxImgs().length > 1) {
-        <button class="ac-lightbox-arrow ac-lightbox-arrow--next" type="button"
-            (click)="lightboxNext()" aria-label="Next image">
+        <button class="ac-lightbox-arrow ac-lightbox-arrow--next" type="button" (click)="lightboxNext()"
+            aria-label="Next image">
             <i class="bi bi-chevron-right"></i>
         </button>
         }
@@ -479,8 +491,8 @@
     @if (lightboxImgs().length > 1) {
     <div class="ac-lightbox-thumbs" (click)="$event.stopPropagation()">
         @for (img of lightboxImgs(); track img.id; let i = $index) {
-        <button class="ac-lightbox-thumb" [class.is-active]="i === lightboxIndex()"
-            (click)="lightboxIndex.set(i)" [attr.aria-label]="'Image ' + (i + 1)" type="button">
+        <button class="ac-lightbox-thumb" [class.is-active]="i === lightboxIndex()" (click)="lightboxIndex.set(i)"
+            [attr.aria-label]="'Image ' + (i + 1)" type="button">
             <img [src]="img.fileUrl!" [alt]="img.fileName ?? ''" loading="lazy" />
         </button>
         }

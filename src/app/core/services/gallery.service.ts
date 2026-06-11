@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { IdbService } from './idb.service';
+import { NetworkStatusService } from './network-status.service';
+import { SyncQueueService } from './sync-queue.service';
 
 export interface GalleryItem {
     id: string;
@@ -24,7 +26,13 @@ export interface GalleryItem {
 export class GalleryService {
     private readonly http = inject(HttpClient);
     private readonly idb = inject(IdbService);
+    private readonly network = inject(NetworkStatusService);
+    private readonly syncQueue = inject(SyncQueueService);
     private readonly base = `${environment.apiUrl}/gallery`;
+
+    private enqueue(method: 'POST' | 'PUT' | 'PATCH' | 'DELETE', url: string, body: unknown = null): Observable<any> {
+        return from(this.syncQueue.enqueue({ url, method, body, timestamp: Date.now() }).then(() => ({ queued: true })));
+    }
 
     uploadMedia(file: File) {
         const fd = new FormData();
@@ -66,7 +74,19 @@ export class GalleryService {
     getCategories() { return this.http.get<string[]>(`${this.base}/categories`); }
     getTags() { return this.http.get<string[]>(`${this.base}/tags`); }
     getOne(id: string) { return this.http.get<GalleryItem>(`${this.base}/${id}`); }
-    create(data: Partial<GalleryItem>) { return this.http.post<GalleryItem>(this.base, data); }
-    update(id: string, data: Partial<GalleryItem>) { return this.http.put<GalleryItem>(`${this.base}/${id}`, data); }
-    remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
+
+    create(data: Partial<GalleryItem>): Observable<any> {
+        if (!this.network.isOnline()) return this.enqueue('POST', this.base, data);
+        return this.http.post<GalleryItem>(this.base, data);
+    }
+
+    update(id: string, data: Partial<GalleryItem>): Observable<any> {
+        if (!this.network.isOnline()) return this.enqueue('PUT', `${this.base}/${id}`, data);
+        return this.http.put<GalleryItem>(`${this.base}/${id}`, data);
+    }
+
+    remove(id: string): Observable<any> {
+        if (!this.network.isOnline()) return this.enqueue('DELETE', `${this.base}/${id}`);
+        return this.http.delete(`${this.base}/${id}`);
+    }
 }

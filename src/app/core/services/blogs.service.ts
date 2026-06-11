@@ -15,6 +15,10 @@ export class BlogsService {
     private readonly base = `${environment.apiUrl}/blogs`;
     private readonly commentsBase = `${environment.apiUrl}/blog-comments`;
 
+    private enqueue(method: 'POST' | 'PUT' | 'PATCH' | 'DELETE', url: string, body: unknown = null): Observable<any> {
+        return from(this.syncQueue.enqueue({ url, method, body, timestamp: Date.now() }).then(() => ({ queued: true })));
+    }
+
     uploadImage(file: File) {
         const fd = new FormData();
         fd.append('file', file);
@@ -69,10 +73,25 @@ export class BlogsService {
         });
     }
 
-    create(data: any) { return this.http.post<any>(this.base, data); }
-    update(id: string, data: any) { return this.http.put<any>(`${this.base}/${id}`, data); }
-    unpublish(id: string, adminNote?: string) { return this.http.patch<any>(`${this.base}/${id}/unpublish`, { adminNote }); }
-    remove(id: string) { return this.http.delete(`${this.base}/${id}`); }
+    create(data: any): Observable<any> {
+        if (!this.network.isOnline()) return this.enqueue('POST', this.base, data);
+        return this.http.post<any>(this.base, data);
+    }
+
+    update(id: string, data: any): Observable<any> {
+        if (!this.network.isOnline()) return this.enqueue('PUT', `${this.base}/${id}`, data);
+        return this.http.put<any>(`${this.base}/${id}`, data);
+    }
+
+    unpublish(id: string, adminNote?: string): Observable<any> {
+        if (!this.network.isOnline()) return this.enqueue('PATCH', `${this.base}/${id}/unpublish`, { adminNote });
+        return this.http.patch<any>(`${this.base}/${id}/unpublish`, { adminNote });
+    }
+
+    remove(id: string): Observable<any> {
+        if (!this.network.isOnline()) return this.enqueue('DELETE', `${this.base}/${id}`);
+        return this.http.delete(`${this.base}/${id}`);
+    }
 
     // Comments
     getComments(blogId: string) { return this.http.get<any[]>(`${this.commentsBase}/post/${blogId}`); }
@@ -95,7 +114,19 @@ export class BlogsService {
     // Admin comments
     getPendingComments() { return this.http.get<any[]>(`${this.commentsBase}/pending`); }
     getAllComments() { return this.http.get<any[]>(`${this.commentsBase}`); }
-    approveComment(id: string) { return this.http.patch(`${this.commentsBase}/${id}/approve`, {}); }
-    unapproveComment(id: string, adminNote?: string) { return this.http.patch(`${this.commentsBase}/${id}/unapprove`, { adminNote }); }
-    deleteComment(id: string) { return this.http.delete(`${this.commentsBase}/${id}`); }
+
+    approveComment(id: string): Observable<any> {
+        if (!this.network.isOnline()) return this.enqueue('PATCH', `${this.commentsBase}/${id}/approve`, {});
+        return this.http.patch(`${this.commentsBase}/${id}/approve`, {});
+    }
+
+    unapproveComment(id: string, adminNote?: string): Observable<any> {
+        if (!this.network.isOnline()) return this.enqueue('PATCH', `${this.commentsBase}/${id}/unapprove`, { adminNote });
+        return this.http.patch(`${this.commentsBase}/${id}/unapprove`, { adminNote });
+    }
+
+    deleteComment(id: string): Observable<any> {
+        if (!this.network.isOnline()) return this.enqueue('DELETE', `${this.commentsBase}/${id}`);
+        return this.http.delete(`${this.commentsBase}/${id}`);
+    }
 }

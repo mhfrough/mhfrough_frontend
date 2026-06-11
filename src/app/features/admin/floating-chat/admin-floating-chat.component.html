@@ -83,9 +83,17 @@
     <div class="afc-messages" #msgsEl>
         @for (msg of activeMsgs(); track trackById($index, msg)) {
         <div class="afc-msg" [class.afc-msg--admin]="msg.sender === 'admin'"
-            [class.afc-msg--visitor]="msg.sender === 'visitor'">
+            [class.afc-msg--visitor]="msg.sender === 'visitor'"
+            [class.afc-msg--pending]="msg.pending">
             <span class="afc-bubble">{{ msg.messageType === 'audio' ? '🎤 Audio' : msg.content }}</span>
+            @if (msg.pending) {
+            <span class="afc-msg-time afc-msg-time--sending">
+                <span class="afc-sending-dots"><span></span><span></span><span></span></span>
+                Sending
+            </span>
+            } @else {
             <span class="afc-msg-time">{{ formatTime(msg.createdAt) }}</span>
+            }
         </div>
         }
         @if (isVisitorTyping()) {

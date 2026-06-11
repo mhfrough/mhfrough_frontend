@@ -354,8 +354,23 @@ export class ChatService {
     }
 
     sendAdminMessage(sessionId: string, content: string) {
+        const localId = `local_${Date.now()}`;
+        const localMsg: ChatMessage = {
+            id: localId,
+            sessionId,
+            content,
+            sender: 'admin',
+            read: true,
+            createdAt: new Date().toISOString(),
+            messageType: 'text',
+            pending: true,
+        };
+        this.activeMsgs.update(m => [...m, localMsg]);
+
         this.socket?.emit('admin:message', { sessionId, content }, (msg: ChatMessage) => {
-            if (msg) this.activeMsgs.update(m => [...m, msg]);
+            if (msg) {
+                this.activeMsgs.update(msgs => [...msgs.filter(m => m.id !== localId), msg]);
+            }
         });
     }
 

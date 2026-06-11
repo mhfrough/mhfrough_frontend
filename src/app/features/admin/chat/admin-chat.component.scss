@@ -498,6 +498,42 @@
             letter-spacing: 0.07em;
         }
     }
+
+    &--pending {
+        opacity: 0.55;
+
+        .ac-msg-bubble {
+            border-style: dashed !important;
+            opacity: 0.8;
+        }
+    }
+}
+
+.ac-msg-time--sending {
+    gap: 0.3rem;
+}
+
+.ac-sending-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+
+    span {
+        display: block;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: currentColor;
+        animation: ac-dot-pulse 1.2s ease-in-out infinite;
+
+        &:nth-child(2) { animation-delay: 0.2s; }
+        &:nth-child(3) { animation-delay: 0.4s; }
+    }
+}
+
+@keyframes ac-dot-pulse {
+    0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+    40%           { opacity: 1;    transform: scale(1.1); }
 }
 
 .ac-msg-bubble {
@@ -779,20 +815,28 @@
     cursor: pointer;
     transition: opacity var(--dur) var(--ease);
 
-    &:hover {
+    &:hover:not(:disabled) {
         opacity: 0.82;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 }
 
-.ac-saved-msg {
-    font-family: var(--font-sans);
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #4ade80;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
+.ac-saving-spinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(var(--bg-rgb), 0.3);
+    border-top-color: var(--bg);
+    border-radius: 50%;
+    animation: ac-spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes ac-spin {
+    to { transform: rotate(360deg); }
 }
 
 // ─── Shared icon button ───────────────────────────────────────────────────────

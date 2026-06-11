@@ -41,17 +41,19 @@ const SESSION_KEY = 'ticker_dismissed';
     styles: [`
 :host {
     display: block;
+    font-family: var(--font);
 }
 
 .ticker-banner {
     display: flex;
     align-items: center;
-    background: #242220;
-    color: #928e87;
+    background: var(--bg-alt);
+    color: var(--text-muted);
     font-size: 0.78rem;
+    font-family: var(--font);
     height: 32px;
     overflow: hidden;
-    border-bottom: 1px solid rgba(228, 224, 216, 0.08);
+    border-bottom: 1px solid var(--border);
     letter-spacing: 0.02em;
 }
 
@@ -61,9 +63,9 @@ const SESSION_KEY = 'ticker_dismissed';
     align-items: center;
     padding: 0 0.75rem;
     height: 100%;
-    color: #928e87;
+    color: var(--text-muted);
     font-size: 0.72rem;
-    border-right: 1px solid rgba(228, 224, 216, 0.08);
+    border-right: 1px solid var(--border);
 }
 
 .ticker-track-wrap {
@@ -95,13 +97,13 @@ const SESSION_KEY = 'ticker_dismissed';
 
 .ticker-item {
     padding: 0 1.25rem;
-    color: #928e87;
+    color: var(--text-muted);
 }
 
 .ticker-sep {
     opacity: 0.3;
     font-size: 0.55rem;
-    color: #928e87;
+    color: var(--text-muted);
 }
 
 .ticker-close {
@@ -113,17 +115,18 @@ const SESSION_KEY = 'ticker_dismissed';
     height: 32px;
     background: none;
     border: none;
-    border-left: 1px solid rgba(228, 224, 216, 0.08);
-    color: #928e87;
+    border-left: 1px solid var(--border);
+    color: var(--text-muted);
     cursor: pointer;
     font-size: 0.95rem;
-    transition: color 160ms ease, background 160ms ease;
+    font-family: var(--font);
+    transition: color var(--dur) ease, background var(--dur) ease;
     padding: 0;
 }
 
 .ticker-close:hover {
-    color: #e4e0d8;
-    background: rgba(228, 224, 216, 0.06);
+    color: var(--text);
+    background: rgba(var(--text-rgb), 0.06);
 }
 
 @keyframes ticker-scroll {

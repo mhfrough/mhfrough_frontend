@@ -5,6 +5,7 @@ import {
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { ChatService, ChatSession, ChatMessage, VisitorActivity } from '../../../core/services/chat.service';
 import { ActivityLogService } from '../../../core/services/activity-log.service';
@@ -134,7 +135,9 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     greetingMessages: string[] = [];
     holdMessages: string[] = [];
     statusMessage = '';
-    settingsSaved = false;
+    readonly settingsSaved = signal(false);
+    readonly settingsError = signal<string | null>(null);
+    readonly settingsSaving = signal(false);
 
     private typingTimeout?: ReturnType<typeof setTimeout>;
     private _subs = new Subscription();
@@ -498,22 +501,28 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     trackIdx(i: number) { return i; }
 
     saveSettings() {
-        const saves = [
+        if (this.settingsSaving()) return;
+        this.settingsSaving.set(true);
+        this.settingsSaved.set(false);
+        this.settingsError.set(null);
+
+        forkJoin([
             this.chatService.saveSettings('greeting_messages', this.greetingMessages.filter(m => m.trim())),
             this.chatService.saveSettings('hold_messages', this.holdMessages.filter(m => m.trim())),
             this.chatService.saveSettings('status_message', this.statusMessage),
-        ];
-        let done = 0;
-        for (const obs of saves) {
-            obs.subscribe(() => {
-                done++;
-                if (done === saves.length) {
-                    this.chatService.loadSettings();
-                    this.settingsSaved = true;
-                    setTimeout(() => this.settingsSaved = false, 3000);
-                }
-            });
-        }
+        ]).subscribe({
+            next: () => {
+                this.chatService.loadSettings();
+                this.settingsSaving.set(false);
+                this.settingsSaved.set(true);
+                setTimeout(() => this.settingsSaved.set(false), 3000);
+            },
+            error: (e) => {
+                this.settingsSaving.set(false);
+                this.settingsError.set(e?.error?.message ?? 'Failed to save settings. Please try again.');
+                setTimeout(() => this.settingsError.set(null), 4000);
+            },
+        });
     }
 
     trackById(_: number, m: { id: string }) { return m.id; }
