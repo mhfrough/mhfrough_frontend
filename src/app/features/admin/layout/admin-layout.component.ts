@@ -40,6 +40,7 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
         projects: 'Projects',
         blogs: 'Blog Posts',
         inquiries: 'Inquiries',
+        leads: 'Leads',
         feedback: 'Feedback',
         comments: 'Comments',
         chat: 'Live Chat',

@@ -502,6 +502,57 @@
     </div>
 </div>
 
+<!-- ── Email (Resend) ─────────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-envelope-paper"></i> Email (Resend)</h2>
+            <p class="settings-card-sub">Configure outbound email via Resend.com — used for replying to inquiries and sending messages from Admin → Email.</p>
+        </div>
+    </div>
+
+    <!-- Enable toggle -->
+    <div class="settings-toggle-row">
+        <div>
+            <span class="settings-toggle-title">Enable Outbound Email</span>
+            <span class="settings-toggle-sub">When enabled, the Email module can send messages via Resend.</span>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="emailEnabled">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <!-- API Key -->
+    <div class="admin-form-field" style="margin-top:1.25rem">
+        <label class="admin-form-label">Resend API Key</label>
+        <p class="form-hint">Get your API key from <strong>resend.com</strong> → API Keys. The key is stored securely and never exposed in full.</p>
+        <input type="password" class="admin-form-input" [(ngModel)]="resendApiKey"
+            placeholder="re_..." autocomplete="off">
+    </div>
+
+    <!-- From address + name -->
+    <div class="admin-form-grid" style="margin-top:1rem">
+        <div class="admin-form-field">
+            <label class="admin-form-label">From Address</label>
+            <input type="email" class="admin-form-input" [(ngModel)]="emailFromAddress" placeholder="hello@mhfrough.dev">
+            <span class="form-hint">Must be a verified domain in your Resend account.</span>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">From Name</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="emailFromName" placeholder="Mohammad Hamza">
+        </div>
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1.25rem">
+        <button class="btn-primary" (click)="saveEmailSettings()" [disabled]="emailSaving()">
+            @if (emailSaving()) { <span class="contact-spinner"></span> Saving… } @else { <i class="bi bi-envelope-paper"></i> Save Email Settings }
+        </button>
+        @if (emailSaved()) { <span class="settings-saved-msg"><i class="bi bi-check-circle-fill"></i> Saved!</span> }
+        @if (emailError()) { <span class="settings-error-msg">{{ emailError() }}</span> }
+    </div>
+</div>
+
 <!-- Clear all logs confirm modal -->
 @if (clearAllLogsConfirm()) {
 <div class="admin-modal-overlay" (click)="cancelClearAllLogs()">

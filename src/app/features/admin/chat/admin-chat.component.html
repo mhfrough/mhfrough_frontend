@@ -165,6 +165,17 @@
                     <i class="bi" [class.bi-robot]="botOn" [class.bi-slash-circle]="!botOn"></i>
                     <span>Bot {{ botOn ? 'ON' : 'OFF' }}</span>
                 </button>
+                @if (getActiveSession()?.leadId) {
+                <button class="ac-bot-toggle is-on" (click)="goToLead()" title="View linked lead">
+                    <i class="bi bi-funnel"></i>
+                    <span>View Lead</span>
+                </button>
+                } @else {
+                <button class="ac-bot-toggle" (click)="openCreateLeadModal()" title="Create a lead from this chat">
+                    <i class="bi bi-funnel"></i>
+                    <span>Create Lead</span>
+                </button>
+                }
                 @if (getActiveSession()?.status === 'active') {
                 <button class="ac-close-btn" (click)="closeSession()" title="End chat">
                     <i class="bi bi-x-circle"></i> End Chat
@@ -527,6 +538,46 @@
         <div class="admin-modal-actions">
             <button class="btn-ghost" (click)="cancelDelete()">Cancel</button>
             <button class="btn-danger" (click)="executeDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Create Lead Modal -->
+@if (showLeadModal()) {
+<div class="admin-modal-overlay" (click)="closeLeadModal()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Create Lead</p>
+        <p class="admin-modal-body">Capture this visitor as a lead so it shows up in your pipeline.</p>
+
+        <div class="admin-form-field">
+            <label class="admin-form-label label-required">Name</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="leadForm.name" placeholder="Jane Doe">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-required">Email</label>
+            <input type="email" class="admin-form-input" [(ngModel)]="leadForm.email" placeholder="client@example.com">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Phone</label>
+            <input type="tel" class="admin-form-input" [(ngModel)]="leadForm.phone" placeholder="+1 (555) 000-0000">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Project Summary</label>
+            <textarea class="admin-form-textarea" rows="3" [(ngModel)]="leadForm.projectSummary"
+                placeholder="What does the client need?"></textarea>
+        </div>
+
+        @if (leadFormError()) {
+        <span class="form-error">{{ leadFormError() }}</span>
+        }
+
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="closeLeadModal()">Cancel</button>
+            <button class="btn-primary" (click)="saveLead()" [disabled]="leadFormSaving()">
+                @if (leadFormSaving()) { <span class="contact-spinner"></span>&nbsp; }
+                Create Lead
+            </button>
         </div>
     </div>
 </div>

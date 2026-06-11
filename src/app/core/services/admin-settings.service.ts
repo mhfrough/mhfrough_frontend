@@ -37,6 +37,11 @@ export interface AdminSettings {
     renderServiceIdBackend: string | null;
     renderServiceIdFrontend: string | null;
     renderPostgresId: string | null;
+    // Email (Resend)
+    resendApiKey: string | null;
+    emailFromAddress: string | null;
+    emailFromName: string;
+    emailEnabled: boolean;
     updatedAt: string;
 }
 
@@ -154,6 +159,10 @@ const DEFAULTS: AdminSettings = {
     renderServiceIdBackend: null,
     renderServiceIdFrontend: null,
     renderPostgresId: null,
+    resendApiKey: null,
+    emailFromAddress: null,
+    emailFromName: 'Mohammad Hamza',
+    emailEnabled: false,
     updatedAt: '',
 };
 

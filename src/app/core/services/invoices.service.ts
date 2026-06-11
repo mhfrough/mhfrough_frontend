@@ -32,6 +32,7 @@ export interface Invoice {
     taxRate: number;
     taxAmount: number;
     total: number;
+    leadId?: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -47,6 +48,7 @@ export interface CreateInvoicePayload {
     notes?: string;
     status?: 'draft' | 'sent' | 'paid';
     taxRate?: number;
+    leadId?: string;
 }
 
 @Injectable({ providedIn: 'root' })

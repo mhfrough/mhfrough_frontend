@@ -32,7 +32,7 @@ export type WidgetData = WeatherData | GoldData | UsdPkrData;
 // Millisecond TTLs used for client-side localStorage cache of widget data.
 const WEATHER_TTL = 15 * 60 * 1000;      // 15 minutes
 const GOLD_TTL = 8 * 60 * 60 * 1000;     // 8 hours
-const USD_TTL = 30 * 60 * 1000;          // 30 minutes
+const USD_TTL = 60 * 60 * 1000;          // 1 hour
 
 const LS_KEY_WEATHER = 'widget_weather_v1';
 const LS_KEY_GOLD = 'widget_gold_v1';

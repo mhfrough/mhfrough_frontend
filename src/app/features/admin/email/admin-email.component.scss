@@ -431,6 +431,13 @@
     border-top: 1px solid var(--border);
 }
 
+.em-reply-box {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    max-width: 640px;
+}
+
 // ─── Compose ──────────────────────────────────────────────────────────────────
 .em-compose-form {
     max-width: 640px;

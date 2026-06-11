@@ -7,6 +7,9 @@ const CONTACT_USER_KEY = 'mhf_contact_user';
 
 const SESSION_KEY = 'vst_sid';
 
+/** Durable per-browser ID, persisted across sessions to recognize returning visitors */
+const CLIENT_ID_KEY = 'mhf_visitor_uid';
+
 @Injectable({ providedIn: 'root' })
 export class VisitorTrackingService {
     private readonly http = inject(HttpClient);
@@ -44,8 +47,9 @@ export class VisitorTrackingService {
             const cu = localStorage.getItem(CONTACT_USER_KEY);
             if (cu) body['contactUser'] = JSON.parse(cu);
         } catch { /* ignore */ }
+        body['clientId'] = this.getOrCreateClientId();
 
-        this.http.post<{ sessionId: string }>(`${this.api}/ping`, body).subscribe({
+        this.http.post<{ sessionId: string; returningVisitor: boolean }>(`${this.api}/ping`, body).subscribe({
             next: (res) => {
                 this.sessionId = res.sessionId;
                 sessionStorage.setItem(SESSION_KEY, res.sessionId);
@@ -71,6 +75,16 @@ export class VisitorTrackingService {
         this.emitLeave(path ?? this.currentPath ?? '');
         this.currentPath = null;
         this.pageStartMs = null;
+    }
+
+    /** Reads (or generates and persists) a durable per-browser ID stored in localStorage */
+    private getOrCreateClientId(): string {
+        let id = localStorage.getItem(CLIENT_ID_KEY);
+        if (!id) {
+            id = crypto.randomUUID();
+            localStorage.setItem(CLIENT_ID_KEY, id);
+        }
+        return id;
     }
 
     private emitLeave(path: string) {

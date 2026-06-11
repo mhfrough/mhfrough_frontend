@@ -41,6 +41,12 @@
             <label class="cw-intro-label">Your name to get started</label>
             <input class="cw-intro-input" [(ngModel)]="visitorName" placeholder="e.g. John"
                 (keydown.enter)="startChat()" maxlength="60" autofocus />
+            <label class="cw-intro-label">Email (optional)</label>
+            <input class="cw-intro-input" type="email" [(ngModel)]="visitorEmail" placeholder="e.g. john@email.com"
+                (keydown.enter)="startChat()" maxlength="120" />
+            <label class="cw-intro-label">Phone (optional)</label>
+            <input class="cw-intro-input" type="tel" [(ngModel)]="visitorPhone" placeholder="e.g. +1 555 123 4567"
+                (keydown.enter)="startChat()" maxlength="30" />
             <button class="cw-start-btn" (click)="startChat()" [disabled]="!visitorName.trim()">
                 Start Chat
                 <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">

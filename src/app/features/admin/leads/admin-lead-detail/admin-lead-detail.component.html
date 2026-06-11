@@ -1,0 +1,211 @@
+<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">{{ editId() ? 'Edit Lead' : 'New Lead' }}</h1>
+        <p class="admin-page-sub">{{ editId() ? 'Update lead details and track pipeline progress' : 'Add a lead manually' }}</p>
+    </div>
+    <a routerLink="/admin/leads" class="btn-ghost"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+@if (loading()) {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+} @else {
+
+<form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <div class="admin-form-panel">
+
+        <p class="admin-form-title">Lead Info</p>
+        @if (lead(); as l) {
+        <div style="margin-bottom:1.25rem">
+            <span class="admin-badge">{{ sourceLabel(l.source) }}</span>
+            <span style="color:var(--text-muted);font-size:0.78rem;margin-left:0.5rem">Created {{ formatDate(l.createdAt) }}</span>
+        </div>
+        }
+        <div class="admin-form-grid">
+            <div class="admin-form-field">
+                <label class="admin-form-label label-required">Name</label>
+                <input type="text" class="admin-form-input" formControlName="name"
+                    [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+                    placeholder="Jane Doe / Acme Corp">
+                @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                <span class="form-error">Name is required.</span>
+                }
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label label-required">Email</label>
+                <input type="email" class="admin-form-input" formControlName="email"
+                    [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+                    placeholder="client@example.com">
+                @if (form.get('email')?.touched) {
+                    @if (form.get('email')?.errors?.['required']) {
+                    <span class="form-error">Email is required.</span>
+                    } @else if (form.get('email')?.errors?.['email']) {
+                    <span class="form-error">Enter a valid email address.</span>
+                    }
+                }
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label label-optional">Phone</label>
+                <input type="tel" class="admin-form-input" formControlName="phone" placeholder="+1 (555) 000-0000">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label label-optional">Status</label>
+                <select class="admin-form-select" formControlName="status">
+                    @for (status of statuses; track status) {
+                    <option [value]="status">{{ statusLabel(status) }}</option>
+                    }
+                </select>
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label label-optional">Budget</label>
+                <input type="text" class="admin-form-input" formControlName="budget" placeholder="e.g. $1k - $3k">
+            </div>
+        </div>
+
+        <p class="admin-form-title" style="margin-top:2rem">Project Summary</p>
+        <div class="admin-form-field">
+            <textarea class="admin-form-textarea" formControlName="projectSummary" rows="4"
+                placeholder="What does the client need?"></textarea>
+        </div>
+
+        <p class="admin-form-title" style="margin-top:2rem">
+            Internal Notes
+            <span class="form-hint">private — not shared with the client</span>
+        </p>
+        <div class="admin-form-field">
+            <textarea class="admin-form-textarea" formControlName="notes" rows="4"
+                placeholder="Internal notes…"></textarea>
+        </div>
+
+        <div class="admin-form-actions">
+            <button type="submit" class="btn-primary" [disabled]="saving()">
+                @if (saving()) { <span class="contact-spinner"></span>&nbsp; }
+                {{ editId() ? 'Save Changes' : 'Create Lead' }}
+            </button>
+            <a routerLink="/admin/leads" class="btn-ghost">Cancel</a>
+        </div>
+
+    </div>
+</form>
+
+@if (lead(); as l) {
+<div class="admin-form-panel">
+    <p class="admin-form-title">Linked Records</p>
+
+    @if (l.inquiries && l.inquiries.length > 0) {
+    <div style="margin-bottom:2rem">
+        <label class="admin-form-label">Originating Inquiry</label>
+        @for (inq of l.inquiries; track inq.id) {
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    @if (inq.subject) {
+                    <p class="admin-card-subject">{{ inq.subject }}</p>
+                    }
+                    <p class="admin-card-message">{{ inq.message }}</p>
+                </div>
+                <span class="admin-card-date">{{ formatDate(inq.createdAt) }}</span>
+            </div>
+        </div>
+        }
+        <a routerLink="/admin/email" [queryParams]="{ folder: 'inquiries' }" class="btn-text"><i class="bi bi-box-arrow-up-right"></i> View in Email</a>
+    </div>
+    }
+
+    @if (l.chatSessions && l.chatSessions.length > 0) {
+    <div style="margin-bottom:2rem">
+        <label class="admin-form-label">Chat Sessions</label>
+        <div>
+            @for (cs of l.chatSessions; track cs.id) {
+            <a [routerLink]="['/admin/chat']" [queryParams]="{ s: cs.id }" class="btn-text" style="margin-right:1.25rem">
+                <i class="bi bi-chat-dots"></i> {{ cs.visitorName || 'Visitor' }} &middot; {{ formatDate(cs.createdAt) }}
+            </a>
+            }
+        </div>
+    </div>
+    }
+
+    <div style="margin-bottom:2rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+            <label class="admin-form-label" style="margin:0">Appointments</label>
+            <a [routerLink]="['/admin/appointments']" [queryParams]="{ leadId: l.id }" class="btn-text">
+                <i class="bi bi-plus-circle"></i> Schedule Appointment
+            </a>
+        </div>
+        @if (l.appointments && l.appointments.length > 0) {
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (a of l.appointments; track a.id) {
+                    <tr>
+                        <td>{{ a.title }}</td>
+                        <td style="font-family:var(--font-mono);font-size:0.78rem">{{ formatDate(a.date) }}</td>
+                        <td style="font-family:var(--font-mono);font-size:0.78rem">{{ a.startTime }}</td>
+                        <td>
+                            <span class="admin-badge" [class.admin-badge--on]="a.status === 'confirmed' || a.status === 'completed'"
+                                [class.admin-badge--danger]="a.status === 'cancelled'">
+                                {{ appointmentStatusLabel(a.status) }}
+                            </span>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        } @else {
+        <p class="empty-state">No appointments yet.</p>
+        }
+    </div>
+
+    <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+            <label class="admin-form-label" style="margin:0">Invoices</label>
+            <a [routerLink]="['/admin/invoices/new']" [queryParams]="{ leadId: l.id }" class="btn-text">
+                <i class="bi bi-plus-circle"></i> New Invoice
+            </a>
+        </div>
+        @if (l.invoices && l.invoices.length > 0) {
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (inv of l.invoices; track inv.id) {
+                    <tr>
+                        <td style="font-family:var(--font-mono);font-size:0.82rem;font-weight:600">
+                            <a [routerLink]="['/admin/invoices', inv.id]">{{ inv.invoiceNumber }}</a>
+                        </td>
+                        <td style="font-weight:600">{{ formatCurrency(inv.total) }}</td>
+                        <td>
+                            <span class="admin-badge" [class.admin-badge--on]="inv.status === 'paid'"
+                                [class.admin-badge--warn]="inv.status === 'sent' || inv.status === 'draft'">
+                                {{ invoiceStatusLabel(inv.status) }}
+                            </span>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        } @else {
+        <p class="empty-state">No invoices yet.</p>
+        }
+    </div>
+</div>
+}
+
+}

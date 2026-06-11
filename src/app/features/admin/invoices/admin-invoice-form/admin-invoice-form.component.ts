@@ -13,6 +13,7 @@ import {
     InvoicesService,
     CreateInvoicePayload,
 } from '../../../../core/services/invoices.service';
+import { LeadsService } from '../../../../core/services/leads.service';
 import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { EditorHelperService } from '../../../../core/services/editor-helper.service';
 
@@ -26,6 +27,7 @@ export class AdminInvoiceFormComponent implements OnInit {
     private readonly editor = inject(EditorHelperService);
     private readonly fb = inject(FormBuilder);
     private readonly svc = inject(InvoicesService);
+    private readonly leads = inject(LeadsService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly platformId = inject(PLATFORM_ID);
@@ -34,6 +36,7 @@ export class AdminInvoiceFormComponent implements OnInit {
     readonly savingDraft = signal(false);
     readonly loading = signal(false);
     readonly editId = signal<string | null>(null);
+    readonly leadId = signal<string | null>(null);
 
     readonly form = this.fb.group({
         clientName: ['', Validators.required],
@@ -75,6 +78,7 @@ export class AdminInvoiceFormComponent implements OnInit {
             this.loading.set(true);
             this.svc.getOne(id).subscribe({
                 next: (inv) => {
+                    this.leadId.set(inv.leadId ?? null);
                     // Clear and rebuild items
                     while (this.items.length) this.items.removeAt(0);
                     const sortedItems = [...(inv.items ?? [])].sort(
@@ -106,6 +110,18 @@ export class AdminInvoiceFormComponent implements OnInit {
                 },
                 error: () => this.loading.set(false),
             });
+        } else {
+            const leadId = this.route.snapshot.queryParamMap.get('leadId');
+            if (leadId) {
+                this.leadId.set(leadId);
+                this.leads.getOne(leadId).subscribe(lead => {
+                    this.form.patchValue({
+                        clientName: lead.name,
+                        clientEmail: lead.email,
+                        clientPhone: lead.phone ?? '',
+                    });
+                });
+            }
         }
     }
 
@@ -154,6 +170,7 @@ export class AdminInvoiceFormComponent implements OnInit {
             status: v.status as 'draft' | 'sent' | 'paid',
             taxRate: Number(v.taxRate),
             notes: v.notes ?? undefined,
+            leadId: this.leadId() ?? undefined,
             items: (v.items ?? []).map((item: any, i: number) => ({
                 itemName: item.itemName,
                 subItem: item.subItem || undefined,

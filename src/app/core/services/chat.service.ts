@@ -37,6 +37,7 @@ export interface ChatSession {
     visitorSessionId?: string | null;
     notes?: string | null;
     botEnabled?: boolean;
+    leadId?: string | null;
 }
 
 export interface ChatSettings {
@@ -99,7 +100,7 @@ export class ChatService {
 
     // ─── Visitor WebSocket ────────────────────────────────────────────────────
 
-    async connectAsVisitor(visitorName: string) {
+    async connectAsVisitor(visitorName: string, contact?: { email?: string; phone?: string }) {
         if (!isPlatformBrowser(this.platformId)) return;
 
         // Disconnect any existing socket before creating a new connection
@@ -129,7 +130,13 @@ export class ChatService {
             const visitorSessionId = sessionStorage.getItem('vst_sid') ?? undefined;
             this.socket!.emit(
                 'visitor:join',
-                { visitorName, sessionId: sessionId ?? undefined, visitorSessionId },
+                {
+                    visitorName,
+                    sessionId: sessionId ?? undefined,
+                    visitorSessionId,
+                    contactEmail: contact?.email,
+                    contactPhone: contact?.phone,
+                },
                 async (res: { sessionId: string; messages: ChatMessage[] }) => {
                     sessionStorage.setItem(SESSION_KEY, res.sessionId);
                     sessionStorage.setItem(VISITOR_NAME_KEY, visitorName);

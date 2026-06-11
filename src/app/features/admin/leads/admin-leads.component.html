@@ -1,0 +1,104 @@
+<div class="admin-page-header">
+    <h1 class="admin-page-title">Leads</h1>
+    <a routerLink="/admin/leads/new" class="btn-primary">New Lead</a>
+</div>
+
+<div class="admin-filter-tabs" style="margin-bottom:1.25rem;flex-wrap:wrap">
+    <button class="admin-filter-tab" [class.is-active]="filterStatus() === 'all'" (click)="setFilter('all')">
+        All
+    </button>
+    @for (status of statuses; track status) {
+    <button class="admin-filter-tab" [class.is-active]="filterStatus() === status" (click)="setFilter(status)">
+        {{ statusLabel(status) }}
+    </button>
+    }
+</div>
+
+@if (loading()) {
+<div class="loading-state">
+    <div class="spinner"></div>
+</div>
+} @else if (leads().length === 0) {
+<p class="empty-state">No leads yet. Leads are created automatically from contact form submissions, or you can add
+    one manually.</p>
+} @else {
+
+<div class="admin-list-toolbar">
+    <div class="admin-list-search">
+        <i class="bi bi-search"></i>
+        <input [value]="searchQuery()" (input)="onSearch($event)" placeholder="Search by name, email or phone…"
+            autocomplete="off">
+    </div>
+    <select class="admin-page-size-select" [value]="pageSize()" (change)="onPageSizeChange($event)">
+        <option value="10">10 / page</option>
+        <option value="25">25 / page</option>
+        <option value="50">50 / page</option>
+        <option value="100">100 / page</option>
+    </select>
+    <span class="admin-list-toolbar-count">{{ filteredLeads().length }} lead{{ filteredLeads().length !== 1 ? 's' : ''
+        }}</span>
+</div>
+
+@if (filteredLeads().length === 0) {
+<p class="empty-state">No leads match your search.</p>
+} @else {
+<div class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Contact</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (lead of pagedLeads(); track lead.id) {
+            <tr>
+                <td style="font-weight:600">{{ lead.name }}</td>
+                <td>
+                    <span>{{ lead.email }}</span>
+                    @if (lead.phone) {
+                    <br>
+                    <span style="color:var(--text-muted);font-size:0.78rem">{{ lead.phone }}</span>
+                    }
+                </td>
+                <td>
+                    <span class="admin-badge">{{ sourceLabel(lead.source) }}</span>
+                </td>
+                <td>
+                    <select class="admin-page-size-select" [value]="lead.status"
+                        (change)="onStatusChange(lead, $event)">
+                        @for (status of statuses; track status) {
+                        <option [value]="status">{{ statusLabel(status) }}</option>
+                        }
+                    </select>
+                </td>
+                <td style="color:var(--text-muted);font-size:0.78rem;font-family:var(--font-mono)">
+                    {{ formatDate(lead.createdAt) }}
+                </td>
+                <td style="text-align:right;white-space:nowrap">
+                    <a [routerLink]="['/admin/leads', lead.id]" class="btn-text" style="margin-right:1.25rem">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                    <button class="btn-text-danger" (click)="confirmDelete(lead.id)">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageNumbers]="pageNumbers"
+    (pageChange)="currentPage.set($event)" />
+}
+}
+
+@if (deleteTargetId()) {
+<app-confirm-modal title="Delete Lead" body="This action cannot be undone. The lead and its history will be permanently deleted."
+    (confirmed)="executeDelete()" (cancelled)="cancelDelete()" />
+}

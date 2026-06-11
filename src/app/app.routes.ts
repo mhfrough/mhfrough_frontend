@@ -42,8 +42,16 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/admin/blogs/admin-blog-form/admin-blog-form.component').then(m => m.AdminBlogFormComponent),
             },
             {
-                path: 'inquiries',
-                loadComponent: () => import('./features/admin/inquiries/admin-inquiries.component').then(m => m.AdminInquiriesComponent),
+                path: 'leads',
+                loadComponent: () => import('./features/admin/leads/admin-leads.component').then(m => m.AdminLeadsComponent),
+            },
+            {
+                path: 'leads/new',
+                loadComponent: () => import('./features/admin/leads/admin-lead-detail/admin-lead-detail.component').then(m => m.AdminLeadDetailComponent),
+            },
+            {
+                path: 'leads/:id',
+                loadComponent: () => import('./features/admin/leads/admin-lead-detail/admin-lead-detail.component').then(m => m.AdminLeadDetailComponent),
             },
             {
                 path: 'feedback',

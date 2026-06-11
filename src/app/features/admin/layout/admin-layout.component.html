@@ -52,11 +52,18 @@
                 </a>
             </li>
             <li>
-                <a class="admin-nav-link" routerLink="/admin/inquiries" routerLinkActive="is-active">
+                <a class="admin-nav-link" routerLink="/admin/email" [queryParams]="{ folder: 'inquiries' }"
+                    routerLinkActive="is-active"
+                    [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored' }">
                     <i class="bi bi-envelope"></i>Inquiries
                     @if (notif.unreadInquiries() > 0) {
                     <span class="admin-nav-badge admin-nav-badge--danger">{{ notif.unreadInquiries() }}</span>
                     }
+                </a>
+            </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/leads" routerLinkActive="is-active">
+                    <i class="bi bi-funnel"></i>Leads
                 </a>
             </li>
             <li>
@@ -68,7 +75,8 @@
                 </a>
             </li>
             <li>
-                <a class="admin-nav-link" routerLink="/admin/email" routerLinkActive="is-active">
+                <a class="admin-nav-link" routerLink="/admin/email" routerLinkActive="is-active"
+                    [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored' }">
                     <i class="bi bi-envelope-paper"></i>Email
                 </a>
             </li>

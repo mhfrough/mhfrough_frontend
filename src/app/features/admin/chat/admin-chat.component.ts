@@ -8,6 +8,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { ChatService, ChatSession, ChatMessage, VisitorActivity } from '../../../core/services/chat.service';
+import { LeadsService, CreateLeadPayload } from '../../../core/services/leads.service';
 import { ActivityLogService } from '../../../core/services/activity-log.service';
 import { SoundService } from '../../../core/services/sound.service';
 import { VisitorAnalyticsService, VisitorSession } from '../../../core/services/visitor-analytics.service';
@@ -32,6 +33,7 @@ export interface PendingFile {
 })
 export class AdminChatComponent implements OnInit, OnDestroy {
     private readonly chatService = inject(ChatService);
+    private readonly leads = inject(LeadsService);
     private readonly visitorAnalytics = inject(VisitorAnalyticsService);
     private readonly platformId = inject(PLATFORM_ID);
     private readonly errLog = inject(ActivityLogService);
@@ -67,6 +69,12 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     readonly notesText = signal('');
     readonly notesSaved = signal(false);
     private _notesSaveTimeout?: ReturnType<typeof setTimeout>;
+
+    // ─── Create Lead ──────────────────────────────────────────────────────────
+    readonly showLeadModal = signal(false);
+    readonly leadFormSaving = signal(false);
+    readonly leadFormError = signal('');
+    leadForm = { name: '', email: '', phone: '', projectSummary: '' };
 
     // ─── Audio recording ──────────────────────────────────────────────────────
     readonly isRecording = signal(false);
@@ -481,6 +489,54 @@ export class AdminChatComponent implements OnInit, OnDestroy {
         if (!session) return;
         const next = !(session.botEnabled ?? true);
         this.chatService.toggleSessionBot(session.id, next);
+    }
+
+    // ─── Create Lead ──────────────────────────────────────────────────────────
+    openCreateLeadModal() {
+        const session = this.getActiveSession();
+        this.leadForm = { name: session?.visitorName ?? '', email: '', phone: '', projectSummary: '' };
+        this.leadFormError.set('');
+        this.showLeadModal.set(true);
+    }
+
+    closeLeadModal() {
+        this.showLeadModal.set(false);
+    }
+
+    saveLead() {
+        const session = this.getActiveSession();
+        if (!session) return;
+        if (!this.leadForm.name.trim() || !this.leadForm.email.trim()) {
+            this.leadFormError.set('Name and email are required.');
+            return;
+        }
+        this.leadFormSaving.set(true);
+        const payload: CreateLeadPayload = {
+            name: this.leadForm.name.trim(),
+            email: this.leadForm.email.trim(),
+            phone: this.leadForm.phone.trim() || undefined,
+            projectSummary: this.leadForm.projectSummary.trim() || undefined,
+            source: 'chat',
+            chatSessionId: session.id,
+        };
+        this.leads.create(payload).subscribe({
+            next: (lead) => {
+                this.leadFormSaving.set(false);
+                this.chatService.sessions.update(list =>
+                    list.map(s => s.id === session.id ? { ...s, leadId: lead.id } : s)
+                );
+                this.showLeadModal.set(false);
+            },
+            error: () => {
+                this.leadFormSaving.set(false);
+                this.leadFormError.set('Failed to create lead. Please try again.');
+            },
+        });
+    }
+
+    goToLead() {
+        const leadId = this.getActiveSession()?.leadId;
+        if (leadId) this.router.navigate(['/admin/leads', leadId]);
     }
 
     // ─── Settings tab ─────────────────────────────────────────────────────────

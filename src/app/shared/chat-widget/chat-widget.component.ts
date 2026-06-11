@@ -41,6 +41,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     readonly settings = this.chatService.settings;
 
     visitorName = '';
+    visitorEmail = '';
+    visitorPhone = '';
     message = '';
     greetingMessage = '';
     holdMessage = '';
@@ -140,6 +142,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
                 // Pre-fill from mhf_contact_user localStorage if available
                 const saved = this.userInfo.get();
                 if (saved?.name) this.visitorName = saved.name;
+                if (saved?.email) this.visitorEmail = saved.email;
+                if (saved?.phone) this.visitorPhone = saved.phone;
                 this._visibleTimer = setTimeout(() => this.visible.set(true), 7000);
             }
         }
@@ -162,6 +166,12 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             this.chatService.markAllVisitorMsgsRead();
             this._shouldScroll.set(true);
             this.pickGreeting();
+
+            // Known visitor (we already have their name from a previous chat) —
+            // skip the intro form and start the conversation immediately.
+            if (!this.started() && this.visitorName.trim()) {
+                this.startChat();
+            }
         }
     }
 
@@ -204,11 +214,17 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     startChat() {
         const name = this.visitorName.trim();
         if (!name) return;
+        const email = this.visitorEmail.trim();
+        const phone = this.visitorPhone.trim();
         this.started.set(true);
         this._shouldScroll.set(true);
-        this.chatService.connectAsVisitor(name);
-        // Persist name to shared localStorage contact key
-        this.userInfo.save({ name });
+        this.chatService.connectAsVisitor(name, { email: email || undefined, phone: phone || undefined });
+        // Persist contact details to shared localStorage contact key
+        this.userInfo.save({
+            name,
+            ...(email ? { email } : {}),
+            ...(phone ? { phone } : {}),
+        });
     }
 
     startNewChat() {

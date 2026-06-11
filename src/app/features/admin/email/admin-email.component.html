@@ -26,6 +26,14 @@
                 </button>
             </li>
             <li>
+                <button class="em-folder-link" [class.is-active]="activeFolder() === 'inquiries'" (click)="goTo('inquiries')">
+                    <i class="bi bi-envelope-open"></i> Inquiries
+                    @if (notif.unreadInquiries() > 0) {
+                    <span class="em-folder-badge">{{ notif.unreadInquiries() }}</span>
+                    }
+                </button>
+            </li>
+            <li>
                 <button class="em-folder-link" [class.is-active]="activeFolder() === 'sent'" (click)="goTo('sent')">
                     <i class="bi bi-send"></i> Sent
                     @if (folderCounts().sent > 0) {
@@ -52,42 +60,108 @@
     <!-- ─── Main content ─────────────────────────────────────────────────── -->
     <main class="em-main">
 
-        <!-- ============ INBOX / SENT / DRAFTS ============ -->
-        @if (activeFolder() === 'inbox' || activeFolder() === 'sent' || activeFolder() === 'drafts') {
+        <!-- ============ INBOX / SENT / DRAFTS / INQUIRIES ============ -->
+        @if (activeFolder() === 'inbox' || activeFolder() === 'sent' || activeFolder() === 'drafts' || activeFolder() === 'inquiries') {
 
-            @if (selectedMessage(); as msg) {
+            @if ((activeFolder() === 'inquiries' && inquiriesLoading()) || (activeFolder() === 'sent' && sentLoading()) || (activeFolder() === 'drafts' && draftsLoading())) {
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                </div>
+            } @else if (selectedMessage(); as msg) {
                 <!-- Reading pane -->
                 <div class="em-reading-pane">
                     <div class="em-reading-toolbar">
                         <button class="btn-text" (click)="closeMessage()">
                             <i class="bi bi-arrow-left"></i> Back
                         </button>
+                        @if (activeFolder() !== 'sent') {
                         <button class="btn-text-danger" (click)="confirmDeleteMessage(msg, $event)">
                             <i class="bi bi-trash"></i> Delete
                         </button>
+                        }
                     </div>
                     <div class="em-reading-header">
                         <h2 class="em-reading-subject">{{ msg.subject }}</h2>
                         <div class="em-reading-meta">
                             <div class="em-reading-avatar">{{ initials(msg.from) }}</div>
                             <div>
-                                <p class="em-reading-from">{{ msg.from }} <span class="em-reading-email">&lt;{{ msg.fromEmail }}&gt;</span></p>
+                                <p class="em-reading-from">
+                                    {{ msg.from }}
+                                    @if (msg.fromEmail) {
+                                    <span class="em-reading-email">&lt;{{ msg.fromEmail }}&gt;</span>
+                                    }
+                                    @if (msg.phone) {
+                                    <span class="em-reading-email">&middot; {{ msg.phone }}</span>
+                                    }
+                                </p>
                                 <p class="em-reading-to">to {{ msg.to || 'me' }}</p>
                             </div>
                             <span class="em-reading-date">{{ msg.date | date:'MMM d, y, h:mm a' }}</span>
                         </div>
                     </div>
-                    <div class="em-reading-body">{{ msg.body }}</div>
 
+                    @if (activeFolder() === 'sent' || activeFolder() === 'drafts') {
+                    <div class="em-reading-body" [innerHTML]="msg.body"></div>
+                    } @else {
+                    <div class="em-reading-body">{{ msg.body }}</div>
+                    }
+
+                    @if (activeFolder() === 'inquiries') {
+                    <div class="em-reply-box">
+                        @if (msg.leadId) {
+                        <a [routerLink]="['/admin/leads', msg.leadId]" class="btn-text">
+                            <i class="bi bi-funnel"></i> View Lead
+                        </a>
+                        }
+
+                        @if (replySent()) {
+                        <div class="admin-alert admin-alert--success">
+                            <i class="bi bi-check-circle-fill" style="flex-shrink:0"></i>
+                            <span><strong>Reply sent!</strong></span>
+                        </div>
+                        }
+                        @if (replyError()) {
+                        <div class="admin-alert admin-alert--error">
+                            <i class="bi bi-exclamation-triangle-fill" style="flex-shrink:0"></i>
+                            <span>{{ replyError() }}</span>
+                        </div>
+                        }
+
+                        <div class="admin-form-field">
+                            <label class="admin-form-label">Reply Subject</label>
+                            <input type="text" class="admin-form-input" [(ngModel)]="replySubject" name="replySubject" autocomplete="off">
+                        </div>
+                        <div class="admin-form-field">
+                            <label class="admin-form-label">Reply</label>
+                            <div class="rte-wrap">
+                                <app-rte-toolbar [el]="replyBodyArea" mode="full"></app-rte-toolbar>
+                                <textarea #replyBodyArea [(ngModel)]="replyBody" name="replyBody" class="admin-form-textarea rte-textarea" rows="6"
+                                    placeholder="Write your reply…" style="font-family:var(--font-mono);font-size:0.82rem"></textarea>
+                            </div>
+                        </div>
+                        <div class="admin-form-actions">
+                            <button type="button" class="btn-primary" [disabled]="replySending() || !replyBody.trim()" (click)="sendReply(msg)">
+                                @if (replySending()) {
+                                <span class="contact-spinner"></span> Sending…
+                                } @else {
+                                <i class="bi bi-reply-fill"></i> Send Reply
+                                }
+                            </button>
+                        </div>
+                    </div>
+                    } @else {
                     <div class="em-reading-actions">
                         <button class="btn-primary" (click)="goTo('compose')"><i class="bi bi-reply-fill"></i> Reply</button>
                         <button class="btn-ghost" (click)="goTo('compose')"><i class="bi bi-arrow-right"></i> Forward</button>
                     </div>
+                    }
                 </div>
             } @else {
                 <!-- Message list -->
                 <div class="admin-page-header">
-                    <h1 class="admin-page-title">{{ activeFolder() === 'inbox' ? 'Inbox' : activeFolder() === 'sent' ? 'Sent' : 'Drafts' }}</h1>
+                    <h1 class="admin-page-title">
+                        {{ activeFolder() === 'inbox' ? 'Inbox' : activeFolder() === 'sent' ? 'Sent' : activeFolder() === 'inquiries' ? 'Inquiries' : 'Drafts' }}
+                    </h1>
                 </div>
 
                 <div class="admin-list-toolbar">
@@ -104,22 +178,25 @@
                     <p class="empty-state">
                         @if (searchQuery()) { No messages match your search. }
                         @else if (activeFolder() === 'inbox') { Your inbox is empty. }
+                        @else if (activeFolder() === 'inquiries') { No inquiries yet. }
                         @else if (activeFolder() === 'sent') { You haven't sent any messages yet. }
                         @else { No drafts saved. }
                     </p>
                 } @else {
                     <ul class="em-msg-list">
                         @for (msg of filteredMessages(); track msg.id) {
-                        <li class="em-msg-row" [class.is-unread]="!msg.read && activeFolder() === 'inbox'" (click)="openMessage(msg)">
+                        <li class="em-msg-row" [class.is-unread]="!msg.read && (activeFolder() === 'inbox' || activeFolder() === 'inquiries')" (click)="openMessage(msg)">
+                            @if (activeFolder() === 'inbox') {
                             <button class="em-star-btn" [class.is-starred]="msg.starred" (click)="toggleStar(msg, $event)"
                                 [attr.aria-label]="msg.starred ? 'Unstar' : 'Star'">
                                 <i class="bi" [class.bi-star-fill]="msg.starred" [class.bi-star]="!msg.starred"></i>
                             </button>
-                            <div class="em-msg-avatar">{{ initials(activeFolder() === 'inbox' ? msg.from : (msg.to || msg.from)) }}</div>
+                            }
+                            <div class="em-msg-avatar">{{ initials((activeFolder() === 'inbox' || activeFolder() === 'inquiries') ? msg.from : (msg.to || msg.from)) }}</div>
                             <div class="em-msg-info">
                                 <div class="em-msg-top">
                                     <span class="em-msg-name">
-                                        {{ activeFolder() === 'inbox' ? msg.from : (msg.to ? 'To: ' + msg.to : 'To: (no recipient)') }}
+                                        {{ (activeFolder() === 'inbox' || activeFolder() === 'inquiries') ? msg.from : (msg.to ? 'To: ' + msg.to : 'To: (no recipient)') }}
                                     </span>
                                     <span class="em-msg-date">{{ msg.date | date:'MMM d' }}</span>
                                 </div>
@@ -142,13 +219,19 @@
             @if (sentNotice()) {
             <div class="admin-alert admin-alert--success">
                 <i class="bi bi-check-circle-fill" style="flex-shrink:0"></i>
-                <span><strong>Message sent!</strong> (demo only — nothing was actually delivered)</span>
+                <span><strong>Message sent!</strong></span>
             </div>
             }
             @if (draftSavedNotice()) {
             <div class="admin-alert admin-alert--warning">
                 <i class="bi bi-file-earmark-check-fill" style="flex-shrink:0"></i>
                 <span><strong>Draft saved.</strong></span>
+            </div>
+            }
+            @if (sendError()) {
+            <div class="admin-alert admin-alert--error">
+                <i class="bi bi-exclamation-triangle-fill" style="flex-shrink:0"></i>
+                <span>{{ sendError() }}</span>
             </div>
             }
 

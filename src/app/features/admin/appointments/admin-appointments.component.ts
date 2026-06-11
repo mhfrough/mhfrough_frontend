@@ -1,8 +1,10 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AppointmentsService, Appointment, AppointmentStatus, CreateAppointmentPayload } from '../../../core/services/appointments.service';
+import { LeadsService } from '../../../core/services/leads.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
@@ -23,6 +25,8 @@ interface CalendarDay {
 })
 export class AdminAppointmentsComponent implements OnInit, OnDestroy {
     private readonly svc = inject(AppointmentsService);
+    private readonly leads = inject(LeadsService);
+    private readonly route = inject(ActivatedRoute);
     private readonly realtime = inject(RealtimeService);
     private readonly subs: Subscription[] = [];
 
@@ -161,6 +165,20 @@ export class AdminAppointmentsComponent implements OnInit, OnDestroy {
         this.loadCalendarMonth();
         this.loadAllList();
         this.realtime.connect().then(() => this.realtime.joinAdmin());
+
+        const leadId = this.route.snapshot.queryParamMap.get('leadId');
+        if (leadId) {
+            this.leads.getOne(leadId).subscribe(lead => {
+                this.openCreateForm();
+                this.form = {
+                    ...this.form,
+                    clientName: lead.name,
+                    clientEmail: lead.email,
+                    clientPhone: lead.phone ?? '',
+                    leadId: lead.id,
+                };
+            });
+        }
         this.subs.push(
             this.realtime.on<Appointment>('reminder:created').subscribe(r => {
                 this.addToCalendarIfMonth(r);

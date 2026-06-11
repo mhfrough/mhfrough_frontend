@@ -27,6 +27,9 @@ export interface VisitorSession {
     startedAt: string;
     lastSeenAt: string | null;
     contactUser: Record<string, string> | null;
+    clientId: string | null;
+    /** Number of sessions sharing this visitor's clientId — > 1 means a returning visitor */
+    visitCount: number;
 }
 
 export interface VisitorPageView {

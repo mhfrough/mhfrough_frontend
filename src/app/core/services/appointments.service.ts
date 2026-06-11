@@ -17,6 +17,7 @@ export interface Appointment {
     notes?: string;
     status: AppointmentStatus;
     reminderSentAt?: string | null;
+    leadId?: string | null;
     createdAt: string;
     updatedAt: string;
 }

@@ -137,6 +137,42 @@ export class SettingsSecurityComponent implements OnInit, OnDestroy {
         return val && !val.startsWith('••') ? val : undefined;
     }
 
+    // ── Email (Resend) ────────────────────────────────────────────────────────
+    readonly emailSaving = signal(false);
+    readonly emailSaved = signal(false);
+    readonly emailError = signal('');
+
+    emailEnabled = false;
+    resendApiKey = '';
+    emailFromAddress = '';
+    emailFromName = 'Mohammad Hamza';
+
+    saveEmailSettings(): void {
+        this.emailSaving.set(true);
+        this.emailSaved.set(false);
+        this.emailError.set('');
+
+        const payload: Partial<AdminSettings> = {
+            emailEnabled: this.emailEnabled,
+            emailFromAddress: this.emailFromAddress || undefined,
+            emailFromName: this.emailFromName || undefined,
+        };
+        const resolvedKey = this.resolveKey(this.resendApiKey);
+        if (resolvedKey !== undefined) payload['resendApiKey'] = resolvedKey;
+
+        this.settingsService.update(payload).subscribe({
+            next: () => {
+                this.emailSaving.set(false);
+                this.emailSaved.set(true);
+                setTimeout(() => this.emailSaved.set(false), 3000);
+            },
+            error: (e: any) => {
+                this.emailSaving.set(false);
+                this.emailError.set(e?.error?.message ?? 'Failed to save email settings.');
+            },
+        });
+    }
+
     // ── Change Password ───────────────────────────────────────────────────────
     readonly pwLoading = signal(false);
     readonly pwSuccess = signal('');
@@ -222,6 +258,11 @@ export class SettingsSecurityComponent implements OnInit, OnDestroy {
         this.aiInstruction = s.aiInstruction ?? '';
         this.aiAutoReplyDelay = s.aiAutoReplyDelay ?? 1500;
         this.aiMaxResponseLength = s.aiMaxResponseLength ?? 300;
+        // Email (Resend)
+        this.emailEnabled = s.emailEnabled ?? false;
+        this.resendApiKey = s.resendApiKey ? '••••••••' : '';
+        this.emailFromAddress = s.emailFromAddress ?? '';
+        this.emailFromName = s.emailFromName ?? 'Mohammad Hamza';
     }
 
     saveSecuritySettings() {

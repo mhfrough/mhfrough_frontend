@@ -37,6 +37,10 @@ export class InquiriesService {
         }
         return this.http.delete(`${this.base}/${id}`);
     }
+
+    reply(id: string, dto: { subject: string; html: string }): Observable<any> {
+        return this.http.post(`${this.base}/${id}/reply`, dto);
+    }
 }
 
 @Injectable({ providedIn: 'root' })

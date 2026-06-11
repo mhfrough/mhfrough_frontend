@@ -1,16 +1,34 @@
-import { Component, OnInit, inject, signal, computed, HostBinding } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, HostBinding } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { RteToolbarComponent } from '../../../shared/components/rte-toolbar/rte-toolbar.component';
+import { InquiriesService } from '../../../core/services/inquiry-feedback.service';
+import { AdminNotificationService } from '../../../core/services/admin-notification.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
+import { EmailService, EmailMessage } from '../../../core/services/email.service';
 
-type Folder = 'inbox' | 'sent' | 'drafts' | 'compose' | 'settings';
+type Folder = 'inbox' | 'sent' | 'drafts' | 'inquiries' | 'compose' | 'settings';
 type RecipientField = 'to' | 'cc';
 
 interface SavedContact {
     name: string;
     email: string;
+}
+
+interface Inquiry {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+    subject?: string | null;
+    message: string;
+    status: string;
+    leadId?: string | null;
+    createdAt: string;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,10 +44,11 @@ interface MailMessage {
     date: Date;
     read: boolean;
     starred: boolean;
-    folder: 'inbox' | 'sent' | 'drafts';
+    folder: 'inbox' | 'sent' | 'drafts' | 'inquiries';
+    leadId?: string | null;
+    phone?: string | null;
+    _sourceId?: string;
 }
-
-let nextId = 1000;
 
 const DUMMY_MESSAGES: MailMessage[] = [
     {
@@ -67,58 +86,32 @@ const DUMMY_MESSAGES: MailMessage[] = [
         body: 'Your latest deployment to production succeeded.\n\nBranch: main\nCommit: chore: update dependencies\nStatus: Ready\n\nView details in your dashboard.',
         date: new Date(Date.now() - 1000 * 60 * 60 * 80), read: true, starred: false, folder: 'inbox',
     },
-    {
-        id: 'm6', from: 'Mohammad Hamza', fromEmail: 'mhfrough@yahoo.com', to: 'ayesha.khan@example.com',
-        subject: 'Re: Project inquiry — portfolio redesign',
-        preview: 'Thanks for reaching out! I would be glad to help with the redesign. Here is my availability for a call…',
-        body: 'Hi Ayesha,\n\nThanks for reaching out! I would be glad to help with the redesign. Here is my availability for a call this week — let me know what works best for you.\n\nBest,\nMohammad',
-        date: new Date(Date.now() - 1000 * 60 * 60 * 5), read: true, starred: false, folder: 'sent',
-    },
-    {
-        id: 'm7', from: 'Mohammad Hamza', fromEmail: 'mhfrough@yahoo.com', to: 'bilal.ahmed@example.com',
-        subject: 'Invoice #INV-2026-014',
-        preview: 'Hi Bilal, please find attached the invoice for the latest milestone. Let me know if you have any questions…',
-        body: 'Hi Bilal,\n\nPlease find the invoice for the latest milestone. Let me know if you have any questions.\n\nThanks,\nMohammad',
-        date: new Date(Date.now() - 1000 * 60 * 60 * 30), read: true, starred: false, folder: 'sent',
-    },
-    {
-        id: 'm8', from: 'Mohammad Hamza', fromEmail: 'mhfrough@yahoo.com', to: 'sara.malik@example.com',
-        subject: 'Re: Feedback on the live chat widget',
-        preview: 'Glad you liked it! The AI steps in only when…',
-        body: 'Glad you liked it! The AI steps in only after a short delay if I am away, and always hands off to me once I am online.\n\nHappy to share more details if useful.',
-        date: new Date(Date.now() - 1000 * 60 * 60 * 48), read: true, starred: false, folder: 'sent',
-    },
-    {
-        id: 'm9', from: 'Mohammad Hamza', fromEmail: 'mhfrough@yahoo.com', to: '',
-        subject: 'Follow-up — new portfolio project',
-        preview: 'Hey, just checking in on the project brief I sent over last week — wanted to see if you had any…',
-        body: 'Hey,\n\nJust checking in on the project brief I sent over last week — wanted to see if you had any questions before we lock in the timeline.\n\n[draft — not yet sent]',
-        date: new Date(Date.now() - 1000 * 60 * 60 * 9), read: true, starred: false, folder: 'drafts',
-    },
-    {
-        id: 'm10', from: 'Mohammad Hamza', fromEmail: 'mhfrough@yahoo.com', to: 'team@example.com',
-        subject: '(no subject)',
-        preview: 'Quick note to self — remember to attach the updated case study deck before sending…',
-        body: 'Quick note to self — remember to attach the updated case study deck before sending.\n\n[draft]',
-        date: new Date(Date.now() - 1000 * 60 * 60 * 60), read: true, starred: false, folder: 'drafts',
-    },
 ];
 
 @Component({
     selector: 'app-admin-email',
     standalone: true,
-    imports: [CommonModule, DatePipe, FormsModule, ConfirmModalComponent, RteToolbarComponent],
+    imports: [CommonModule, DatePipe, FormsModule, RouterLink, ConfirmModalComponent, RteToolbarComponent],
     templateUrl: './admin-email.component.html',
     styleUrl: './admin-email.component.scss',
 })
-export class AdminEmailComponent implements OnInit {
+export class AdminEmailComponent implements OnInit, OnDestroy {
     @HostBinding('attr.data-bs-theme') readonly darkTheme = 'dark';
     private readonly titleService = inject(Title);
+    private readonly route = inject(ActivatedRoute);
+    private readonly router = inject(Router);
+    private readonly inquiriesSvc = inject(InquiriesService);
+    private readonly emailSvc = inject(EmailService);
+    private readonly realtime = inject(RealtimeService);
+    readonly notif = inject(AdminNotificationService);
+
+    private subs = new Subscription();
 
     private static readonly FOLDER_TITLES: Record<Folder, string> = {
         inbox: 'Inbox',
         sent: 'Sent',
         drafts: 'Drafts',
+        inquiries: 'Inquiries',
         compose: 'Compose',
         settings: 'Mail Settings',
     };
@@ -130,11 +123,27 @@ export class AdminEmailComponent implements OnInit {
 
     readonly messages = signal<MailMessage[]>(DUMMY_MESSAGES.map(m => ({ ...m })));
 
+    // ── Inquiries / Sent / Drafts (real data) ───────────────────────────
+    readonly inquiries = signal<Inquiry[]>([]);
+    readonly inquiriesLoading = signal(true);
+    readonly sentMessages = signal<MailMessage[]>([]);
+    readonly sentLoading = signal(true);
+    readonly draftMessages = signal<MailMessage[]>([]);
+    readonly draftsLoading = signal(true);
+
+    // ── Inquiry reply composer ───────────────────────────────────────────
+    readonly replySending = signal(false);
+    readonly replySent = signal(false);
+    readonly replyError = signal('');
+    replySubject = '';
+    replyBody = '';
+
     // ── Compose form state ──────────────────────────────────────────────
     readonly showCc = signal(false);
     readonly sending = signal(false);
     readonly sentNotice = signal(false);
     readonly draftSavedNotice = signal(false);
+    readonly sendError = signal('');
 
     // ── Recipient chips (comma-separated addresses → tags) ──────────────
     readonly toEmails = signal<string[]>([]);
@@ -181,16 +190,26 @@ export class AdminEmailComponent implements OnInit {
         return {
             inbox: list.filter(m => m.folder === 'inbox').length,
             unread: list.filter(m => m.folder === 'inbox' && !m.read).length,
-            sent: list.filter(m => m.folder === 'sent').length,
-            drafts: list.filter(m => m.folder === 'drafts').length,
+            sent: this.sentMessages().length,
+            drafts: this.draftMessages().length,
         };
+    });
+
+    private readonly currentFolderMessages = computed<MailMessage[]>(() => {
+        switch (this.activeFolder()) {
+            case 'inquiries': return this.inquiries().map(inq => this.inquiryToMailMessage(inq));
+            case 'sent': return this.sentMessages();
+            case 'drafts': return this.draftMessages();
+            case 'inbox': return this.messages().filter(m => m.folder === 'inbox');
+            default: return [];
+        }
     });
 
     readonly filteredMessages = computed(() => {
         const folder = this.activeFolder();
         if (folder === 'compose' || folder === 'settings') return [];
         const q = this.searchQuery().toLowerCase().trim();
-        let list = this.messages().filter(m => m.folder === folder);
+        let list = this.currentFolderMessages();
         if (q) {
             list = list.filter(m =>
                 m.from.toLowerCase().includes(q) ||
@@ -205,11 +224,99 @@ export class AdminEmailComponent implements OnInit {
     readonly selectedMessage = computed(() => {
         const id = this.selectedId();
         if (!id) return null;
-        return this.messages().find(m => m.id === id) ?? null;
+        return this.currentFolderMessages().find(m => m.id === id) ?? null;
     });
 
     ngOnInit(): void {
         this.titleService.setTitle('Email | Admin');
+        this.loadInquiries();
+        this.loadSent();
+        this.loadDrafts();
+
+        this.subs.add(this.realtime.on<Inquiry>('inquiry:new').subscribe(inquiry => {
+            this.inquiries.update(list => [inquiry, ...list]);
+            this.notif.fetchCounts();
+        }));
+
+        this.subs.add(this.realtime.on<{ id: string; status: string }>('inquiry:read').subscribe(({ id, status }) => {
+            this.inquiries.update(list => list.map(i => i.id === id ? { ...i, status } : i));
+            this.notif.fetchCounts();
+        }));
+
+        this.subs.add(this.route.queryParamMap.subscribe(params => {
+            if (params.get('folder') === 'inquiries' && this.activeFolder() !== 'inquiries') {
+                this.goTo('inquiries');
+            }
+        }));
+    }
+
+    ngOnDestroy(): void {
+        this.subs.unsubscribe();
+    }
+
+    private loadInquiries(): void {
+        this.inquiriesLoading.set(true);
+        this.inquiriesSvc.getAll().subscribe({
+            next: (data: Inquiry[]) => { this.inquiries.set(data); this.inquiriesLoading.set(false); },
+            error: () => this.inquiriesLoading.set(false),
+        });
+    }
+
+    private loadSent(): void {
+        this.sentLoading.set(true);
+        this.emailSvc.getMessages('sent').subscribe({
+            next: (data) => { this.sentMessages.set(data.map(m => this.emailMessageToMailMessage(m))); this.sentLoading.set(false); },
+            error: () => this.sentLoading.set(false),
+        });
+    }
+
+    private loadDrafts(): void {
+        this.draftsLoading.set(true);
+        this.emailSvc.getMessages('drafts').subscribe({
+            next: (data) => { this.draftMessages.set(data.map(m => this.emailMessageToMailMessage(m))); this.draftsLoading.set(false); },
+            error: () => this.draftsLoading.set(false),
+        });
+    }
+
+    private inquiryToMailMessage(inq: Inquiry): MailMessage {
+        return {
+            id: inq.id,
+            from: inq.name,
+            fromEmail: inq.email,
+            to: '',
+            subject: inq.subject || '(no subject)',
+            preview: inq.message.slice(0, 120),
+            body: inq.message,
+            date: new Date(inq.createdAt),
+            read: inq.status !== 'new',
+            starred: false,
+            folder: 'inquiries',
+            leadId: inq.leadId ?? null,
+            phone: inq.phone ?? null,
+            _sourceId: inq.id,
+        };
+    }
+
+    private emailMessageToMailMessage(m: EmailMessage): MailMessage {
+        const text = this.stripHtml(m.body);
+        return {
+            id: m.id,
+            from: 'Mohammad Hamza',
+            fromEmail: '',
+            to: m.to,
+            subject: m.subject || '(no subject)',
+            preview: text.slice(0, 120),
+            body: m.body,
+            date: new Date(m.createdAt),
+            read: true,
+            starred: false,
+            folder: m.folder === 'draft' ? 'drafts' : 'sent',
+            _sourceId: m.id,
+        };
+    }
+
+    private stripHtml(html: string): string {
+        return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     }
 
     private setTitleFromFolder(): void {
@@ -225,8 +332,16 @@ export class AdminEmailComponent implements OnInit {
         this.searchQuery.set('');
         this.sentNotice.set(false);
         this.draftSavedNotice.set(false);
+        this.replySent.set(false);
+        this.replyError.set('');
         this.menuOpen.set(false);
         this.setTitleFromFolder();
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { folder: folder === 'inquiries' ? 'inquiries' : null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
     }
 
     onSearch(event: Event) {
@@ -235,6 +350,20 @@ export class AdminEmailComponent implements OnInit {
 
     openMessage(msg: MailMessage) {
         this.selectedId.set(msg.id);
+        this.replySent.set(false);
+        this.replyError.set('');
+
+        if (msg.folder === 'inquiries') {
+            this.replySubject = msg.subject && msg.subject !== '(no subject)' ? `Re: ${msg.subject}` : 'Re: Your Inquiry';
+            this.replyBody = '';
+            if (!msg.read && msg._sourceId) {
+                const id = msg._sourceId;
+                this.inquiriesSvc.markRead(id).subscribe(() => this.notif.fetchCounts());
+                this.inquiries.update(list => list.map(i => i.id === id ? { ...i, status: 'read' } : i));
+            }
+            return;
+        }
+
         if (!msg.read) {
             this.messages.update(list => list.map(m => m.id === msg.id ? { ...m, read: true } : m));
         }
@@ -242,6 +371,28 @@ export class AdminEmailComponent implements OnInit {
 
     closeMessage() {
         this.selectedId.set(null);
+    }
+
+    sendReply(msg: MailMessage) {
+        if (!msg._sourceId || !this.replyBody.trim() || this.replySending()) return;
+        this.replySending.set(true);
+        this.replyError.set('');
+        this.replySent.set(false);
+        const subject = this.replySubject.trim() || `Re: ${msg.subject}`;
+        const id = msg._sourceId;
+
+        this.inquiriesSvc.reply(id, { subject, html: this.replyBody }).subscribe({
+            next: () => {
+                this.replySending.set(false);
+                this.replySent.set(true);
+                this.inquiries.update(list => list.map(i => i.id === id ? { ...i, status: 'replied' } : i));
+                this.notif.fetchCounts();
+            },
+            error: (e: any) => {
+                this.replySending.set(false);
+                this.replyError.set(e?.error?.message ?? 'Failed to send reply.');
+            },
+        });
     }
 
     toggleStar(msg: MailMessage, event: Event) {
@@ -262,7 +413,18 @@ export class AdminEmailComponent implements OnInit {
         const msg = this.deleteTarget();
         if (!msg) return;
         this.deleteTarget.set(null);
-        this.messages.update(list => list.filter(m => m.id !== msg.id));
+
+        if (msg.folder === 'drafts' && msg._sourceId) {
+            this.emailSvc.deleteDraft(msg._sourceId).subscribe();
+            this.draftMessages.update(list => list.filter(m => m.id !== msg.id));
+        } else if (msg.folder === 'inquiries' && msg._sourceId) {
+            const id = msg._sourceId;
+            this.inquiriesSvc.remove(id).subscribe(() => this.notif.fetchCounts());
+            this.inquiries.update(list => list.filter(i => i.id !== id));
+        } else {
+            this.messages.update(list => list.filter(m => m.id !== msg.id));
+        }
+
         if (this.selectedId() === msg.id) this.selectedId.set(null);
     }
 
@@ -385,7 +547,7 @@ export class AdminEmailComponent implements OnInit {
         this.attachmentDragOver.set(false);
     }
 
-    // ── Compose (dummy — no backend) ────────────────────────────────────
+    // ── Compose ──────────────────────────────────────────────────────────
     submitCompose(form: NgForm) {
         this.commitEmailInput('to');
         this.commitEmailInput('cc');
@@ -394,57 +556,50 @@ export class AdminEmailComponent implements OnInit {
 
         this.sending.set(true);
         this.sentNotice.set(false);
+        this.sendError.set('');
         const value = form.value as { subject: string; body: string };
-        const to = this.toEmails().join(', ');
 
-        setTimeout(() => {
-            const sentMsg: MailMessage = {
-                id: `m${nextId++}`,
-                from: 'Mohammad Hamza',
-                fromEmail: 'mhfrough@yahoo.com',
-                to,
-                subject: value.subject || '(no subject)',
-                preview: value.body.slice(0, 120),
-                body: value.body,
-                date: new Date(),
-                read: true,
-                starred: false,
-                folder: 'sent',
-            };
-            this.messages.update(list => [sentMsg, ...list]);
-            this.sending.set(false);
-            this.sentNotice.set(true);
-            form.resetForm();
-            this.resetComposeState();
-            setTimeout(() => this.sentNotice.set(false), 4000);
-        }, 700);
+        this.emailSvc.send({
+            to: this.toEmails(),
+            cc: this.ccEmails().length ? this.ccEmails() : undefined,
+            subject: value.subject,
+            html: value.body,
+        }).subscribe({
+            next: (sent) => {
+                this.sentMessages.update(list => [this.emailMessageToMailMessage(sent), ...list]);
+                this.sending.set(false);
+                this.sentNotice.set(true);
+                form.resetForm();
+                this.resetComposeState();
+                setTimeout(() => this.sentNotice.set(false), 4000);
+            },
+            error: (e: any) => {
+                this.sending.set(false);
+                this.sendError.set(e?.error?.message ?? 'Failed to send email.');
+            },
+        });
     }
 
     saveDraft(form: NgForm) {
         this.commitEmailInput('to');
         this.commitEmailInput('cc');
         const value = form.value as { subject?: string; body?: string };
-        const to = this.toEmails().join(', ');
-        if (!to && !value?.subject && !value?.body) return;
+        if (this.toEmails().length === 0 && !value?.subject && !value?.body) return;
 
-        const draftMsg: MailMessage = {
-            id: `m${nextId++}`,
-            from: 'Mohammad Hamza',
-            fromEmail: 'mhfrough@yahoo.com',
-            to,
-            subject: value.subject || '(no subject)',
-            preview: (value.body ?? '').slice(0, 120),
-            body: value.body ?? '',
-            date: new Date(),
-            read: true,
-            starred: false,
-            folder: 'drafts',
-        };
-        this.messages.update(list => [draftMsg, ...list]);
-        this.draftSavedNotice.set(true);
-        form.resetForm();
-        this.resetComposeState();
-        setTimeout(() => this.draftSavedNotice.set(false), 4000);
+        this.emailSvc.saveDraft({
+            to: this.toEmails().length ? this.toEmails() : undefined,
+            cc: this.ccEmails().length ? this.ccEmails() : undefined,
+            subject: value.subject,
+            html: value.body,
+        }).subscribe({
+            next: (draft) => {
+                this.draftMessages.update(list => [this.emailMessageToMailMessage(draft), ...list]);
+                this.draftSavedNotice.set(true);
+                form.resetForm();
+                this.resetComposeState();
+                setTimeout(() => this.draftSavedNotice.set(false), 4000);
+            },
+        });
     }
 
     confirmDiscard(form: NgForm) {

@@ -270,6 +270,11 @@
                             }
                         </div>
                         }
+                        @if (s.visitCount > 1) {
+                        <span class="admin-badge admin-badge--on" title="Seen {{ s.visitCount }} times on this browser" style="margin-top:.25rem">
+                            <i class="bi bi-arrow-repeat"></i> Returning ({{ s.visitCount }})
+                        </span>
+                        }
                     </td>
                     <td style="text-align:right;padding-left:0" (click)="$event.stopPropagation()">
                         <button class="btn-text-danger" (click)="confirmDeleteSession(s.id)" title="Delete session">
@@ -295,6 +300,11 @@
                                         @if (s.contactUser['name']) { <strong>{{ s.contactUser['name'] }}</strong> }
                                         @if (s.contactUser['email']) { <span style="font-family:monospace;font-size:.8rem;opacity:.75"> · {{ s.contactUser['email'] }}</span> }
                                         @if (s.contactUser['company']) { <span style="opacity:.55"> · {{ s.contactUser['company'] }}</span> }
+                                    </span>
+                                    }
+                                    @if (s.visitCount > 1) {
+                                    <span class="admin-badge admin-badge--on" title="Seen {{ s.visitCount }} times on this browser">
+                                        <i class="bi bi-arrow-repeat"></i> Returning visitor · {{ s.visitCount }} visits
                                     </span>
                                     }
                                     @if (s.referrer) {
