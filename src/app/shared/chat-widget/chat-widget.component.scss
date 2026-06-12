@@ -1342,3 +1342,33 @@
         border-color: rgba(255,255,255,0.3);
     }
 }
+
+// ─── Full-screen chat on mobile ────────────────────────────────────────────────
+@media (max-width: 640px) {
+    :host {
+        // raise above the floating tab bar / "more" bottom sheet
+        z-index: 1100;
+    }
+
+    // trigger lives in the floating tab bar's "Chat" tab instead
+    .cw-trigger {
+        display: none;
+    }
+
+    .cw-panel {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100dvh;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    .cw-header {
+        padding-top: calc(0.9rem + env(safe-area-inset-top));
+    }
+
+    .cw-footer {
+        padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    }
+}

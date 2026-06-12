@@ -37,8 +37,6 @@ import { UsdPkrWidgetComponent } from './usd-pkr-widget/usd-pkr-widget.component
 .widgets-carousel {
   display: flex;
   align-items: center;
-
-  @media (max-width: 640px) { display: none; }
 }
 
 .carousel-track {

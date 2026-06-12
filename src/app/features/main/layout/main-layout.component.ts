@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal, computed, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { Component, HostListener, inject, signal, computed, viewChild, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { ViewportScroller, isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
@@ -82,6 +82,26 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
     scrollTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
     toggleNav() { this.navOpen.update(v => !v); }
+
+    // --- Main navigation (used by the "More" bottom sheet + footer nav) -------
+    readonly mainNavItems: { label: string; link: string; fragment?: string; icon: string }[] = [
+        { label: 'About', link: '/', fragment: 'about', icon: 'bi-person' },
+        { label: 'Projects', link: '/projects', icon: 'bi-briefcase' },
+        { label: 'Gallery', link: '/gallery', icon: 'bi-images' },
+        { label: 'Services', link: '/', fragment: 'services', icon: 'bi-stars' },
+        { label: 'Writing', link: '/blog', icon: 'bi-pencil-square' },
+        { label: 'Reviews', link: '/feedback', icon: 'bi-star' },
+        { label: 'Work with me', link: '/contact', icon: 'bi-envelope-paper' },
+    ];
+
+    // --- Chat widget integration (mobile floating tab bar) --------------------
+    readonly chatWidgetRef = viewChild(ChatWidgetComponent);
+    readonly chatUnread = computed(() => this.chatWidgetRef()?.unreadCount() ?? 0);
+    readonly chatOpen = computed(() => this.chatWidgetRef()?.open() ?? false);
+
+    toggleChat() {
+        this.chatWidgetRef()?.toggle();
+    }
 
     isSocialVisible(key: string, place: 'footer' | 'contact' = 'footer'): boolean {
         const vis = this.footerSettings.data().socialVisibility;

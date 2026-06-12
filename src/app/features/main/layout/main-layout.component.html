@@ -19,25 +19,25 @@
         <div class="nav-actions">
             <!-- live data widgets — visible only when admin is logged in -->
             <app-widgets-carousel></app-widgets-carousel>
-            <button class="menu-btn" (click)="toggleNav()" aria-label="Menu">
-                <i class="bi" [class.bi-list]="!navOpen()" [class.bi-x-lg]="navOpen()"></i>
-            </button>
         </div>
     </nav>
-
-    <!-- Mobile menu -->
-    @if (navOpen()) {
-    <div class="mobile-menu">
-        <a routerLink="/" fragment="about" (click)="navOpen.set(false)">About</a>
-        <a routerLink="/projects" (click)="navOpen.set(false)">Projects</a>
-        <a routerLink="/gallery" (click)="navOpen.set(false)">Gallery</a>
-        <a routerLink="/" fragment="services" (click)="navOpen.set(false)">Services</a>
-        <a routerLink="/blog" (click)="navOpen.set(false)">Writing</a>
-        <a routerLink="/feedback" (click)="navOpen.set(false)">Reviews</a>
-        <a routerLink="/contact" (click)="navOpen.set(false)">Work with me</a>
-    </div>
-    }
 </header>
+
+<!-- ─── Mobile "More" bottom sheet ─────────────────────────────────────────── -->
+@if (navOpen()) {
+<div class="mobile-menu-backdrop" (click)="navOpen.set(false)"></div>
+<div class="mobile-menu">
+    <span class="mobile-menu-handle"></span>
+    @for (item of mainNavItems; track item.label) {
+    <a [routerLink]="item.link" [fragment]="item.fragment" routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.link === '/' }"
+        (click)="navOpen.set(false)">
+        <i class="bi" [class]="item.icon"></i>
+        <span>{{ item.label }}</span>
+    </a>
+    }
+</div>
+}
 
 <!-- ─── Page Content ────────────────────────────────────────────────────────── -->
 <main class="site-main">
@@ -46,6 +46,11 @@
 <!-- ─── Footer ──────────────────────────────────────────────────────────────── -->
 <footer class="site-footer">
     <div class="container">
+        <nav class="footer-nav">
+            @for (item of mainNavItems; track item.label) {
+            <a [routerLink]="item.link" [fragment]="item.fragment">{{ item.label }}</a>
+            }
+        </nav>
         <div class="footer-bottom">
             <span>
                 © {{ year }} {{ footerSettings.data().copyrightOwner }}
@@ -94,3 +99,32 @@
 
 <!-- ─── Front-end Toast Notifications ───────────────────────────────────────── -->
 <app-front-toast />
+
+<!-- ─── Mobile App-Style Floating Tab Bar ──────────────────────────────────────── -->
+<nav class="mobile-tabbar" [class.is-hidden]="chatOpen()">
+    <a class="tabbar-item" routerLink="/projects" routerLinkActive="active">
+        <i class="bi bi-briefcase"></i>
+        <span>Projects</span>
+    </a>
+    <a class="tabbar-item" routerLink="/gallery" routerLinkActive="active">
+        <i class="bi bi-images"></i>
+        <span>Gallery</span>
+    </a>
+    <a class="tabbar-item tabbar-item--home" routerLink="/" routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        <span class="tabbar-home">ء</span>
+    </a>
+    <button class="tabbar-item" type="button" [class.active]="chatOpen()" (click)="toggleChat()">
+        <span class="tabbar-icon-wrap">
+            <i class="bi bi-chat-dots"></i>
+            @if (chatUnread() > 0) {
+            <span class="tabbar-badge">{{ chatUnread() > 9 ? '9+' : chatUnread() }}</span>
+            }
+        </span>
+        <span>Chat</span>
+    </button>
+    <button class="tabbar-item" type="button" [class.active]="navOpen()" (click)="toggleNav()">
+        <i class="bi bi-grid-3x3-gap"></i>
+        <span>More</span>
+    </button>
+</nav>
