@@ -142,6 +142,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     // Settings form
     greetingMessages: string[] = [];
     holdMessages: string[] = [];
+    finalMessages: string[] = [];
     statusMessage = '';
     readonly settingsSaved = signal(false);
     readonly settingsError = signal<string | null>(null);
@@ -546,6 +547,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
         const s = this.settings();
         this.greetingMessages = s ? [...s.greeting_messages] : [];
         this.holdMessages = s ? [...s.hold_messages] : [];
+        this.finalMessages = s ? [...s.final_messages] : [];
         this.statusMessage = s?.status_message ?? '';
     }
 
@@ -553,6 +555,8 @@ export class AdminChatComponent implements OnInit, OnDestroy {
     removeGreeting(i: number) { this.greetingMessages.splice(i, 1); }
     addHold() { this.holdMessages.push(''); }
     removeHold(i: number) { this.holdMessages.splice(i, 1); }
+    addFinal() { this.finalMessages.push(''); }
+    removeFinal(i: number) { this.finalMessages.splice(i, 1); }
 
     trackIdx(i: number) { return i; }
 
@@ -565,6 +569,7 @@ export class AdminChatComponent implements OnInit, OnDestroy {
         forkJoin([
             this.chatService.saveSettings('greeting_messages', this.greetingMessages.filter(m => m.trim())),
             this.chatService.saveSettings('hold_messages', this.holdMessages.filter(m => m.trim())),
+            this.chatService.saveSettings('final_messages', this.finalMessages.filter(m => m.trim())),
             this.chatService.saveSettings('status_message', this.statusMessage),
         ]).subscribe({
             next: () => {

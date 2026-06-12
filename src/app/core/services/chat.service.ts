@@ -13,7 +13,7 @@ export interface ChatMessage {
     sender: 'visitor' | 'admin';
     read: boolean;
     createdAt: string;
-    messageType?: 'text' | 'audio' | 'file';
+    messageType?: 'text' | 'audio' | 'file' | 'reminder';
     audioUrl?: string | null;
     fileUrl?: string | null;
     fileName?: string | null;
@@ -43,6 +43,7 @@ export interface ChatSession {
 export interface ChatSettings {
     greeting_messages: string[];
     hold_messages: string[];
+    final_messages: string[];
     status_message: string;
 }
 

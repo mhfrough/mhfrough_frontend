@@ -1078,6 +1078,58 @@
     }
 }
 
+// ─── Reminder card ─────────────────────────────────────────────────────────────
+.cw-reminder-card {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 0.85rem;
+    min-width: 200px;
+    max-width: 240px;
+    background: rgba(var(--indigo-rgb), 0.08);
+    border: 1px solid rgba(var(--indigo-rgb), 0.25);
+    border-radius: 0 12px 12px 12px;
+}
+
+.cw-reminder-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(var(--indigo-rgb), 0.15);
+    color: var(--indigo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.cw-reminder-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.cw-reminder-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cw-reminder-datetime {
+    font-size: 0.72rem;
+    color: rgba(var(--text-rgb), 0.6);
+}
+
+.cw-reminder-duration {
+    font-size: 0.66rem;
+    color: rgba(var(--text-rgb), 0.4);
+}
+
 // ─── Lightbox ────────────────────────────────────────────────────────────────
 .cw-lightbox {
     position: fixed;

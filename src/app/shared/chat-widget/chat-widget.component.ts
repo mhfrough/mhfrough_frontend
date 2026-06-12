@@ -10,7 +10,7 @@ import { ActivityLogService } from '../../core/services/activity-log.service';
 import { SoundService } from '../../core/services/sound.service';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { UserInfoService } from '../../core/services/user-info.service';
-import { formatDuration, lightboxCaption } from './chat-message.utils';
+import { formatDuration, lightboxCaption, parseReminder, formatReminderDateTime, formatReminderDuration, ReminderInfo } from './chat-message.utils';
 
 @Component({
     selector: 'app-chat-widget',
@@ -365,6 +365,20 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
     formatDuration(seconds: number): string {
         return formatDuration(seconds);
+    }
+
+    // ─── Reminder cards ───────────────────────────────────────────────────────
+
+    parseReminder(content: string): ReminderInfo | null {
+        return parseReminder(content);
+    }
+
+    formatReminderDateTime(date: string, startTime: string): string {
+        return formatReminderDateTime(date, startTime);
+    }
+
+    formatReminderDuration(minutes: number): string {
+        return formatReminderDuration(minutes);
     }
 
     // ─── Audio playback ───────────────────────────────────────────────────────

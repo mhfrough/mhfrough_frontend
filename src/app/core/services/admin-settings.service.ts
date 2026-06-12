@@ -29,6 +29,7 @@ export interface AdminSettings {
     aiInstruction: string | null;
     aiAutoReplyDelay: number;
     aiMaxResponseLength: number;
+    aiMaxQuestions: number;
     // Deployment Health
     githubToken: string | null;
     githubRepoBackend: string | null;
@@ -152,6 +153,7 @@ const DEFAULTS: AdminSettings = {
     aiInstruction: null,
     aiAutoReplyDelay: 1500,
     aiMaxResponseLength: 300,
+    aiMaxQuestions: 6,
     githubToken: null,
     githubRepoBackend: null,
     githubRepoFrontend: null,

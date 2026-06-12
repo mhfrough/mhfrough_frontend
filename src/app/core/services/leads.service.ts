@@ -25,6 +25,7 @@ export interface Lead {
     name: string;
     email: string;
     phone?: string | null;
+    website?: string | null;
     source: LeadSource;
     status: LeadStatus;
     projectSummary?: string | null;
@@ -42,6 +43,7 @@ export interface CreateLeadPayload {
     name: string;
     email: string;
     phone?: string;
+    website?: string;
     source?: LeadSource;
     status?: LeadStatus;
     projectSummary?: string;

@@ -41,12 +41,6 @@
             <label class="cw-intro-label">Your name to get started</label>
             <input class="cw-intro-input" [(ngModel)]="visitorName" placeholder="e.g. John"
                 (keydown.enter)="startChat()" maxlength="60" autofocus />
-            <label class="cw-intro-label">Email (optional)</label>
-            <input class="cw-intro-input" type="email" [(ngModel)]="visitorEmail" placeholder="e.g. john@email.com"
-                (keydown.enter)="startChat()" maxlength="120" />
-            <label class="cw-intro-label">Phone (optional)</label>
-            <input class="cw-intro-input" type="tel" [(ngModel)]="visitorPhone" placeholder="e.g. +1 555 123 4567"
-                (keydown.enter)="startChat()" maxlength="30" />
             <button class="cw-start-btn" (click)="startChat()" [disabled]="!visitorName.trim()">
                 Start Chat
                 <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
@@ -142,6 +136,15 @@
             </a>
             }
 
+            } @else if (msg.messageType === 'reminder' && parseReminder(msg.content); as reminder) {
+            <div class="cw-reminder-card">
+                <div class="cw-reminder-icon"><i class="bi bi-calendar-event"></i></div>
+                <div class="cw-reminder-info">
+                    <span class="cw-reminder-title">{{ reminder.title }}</span>
+                    <span class="cw-reminder-datetime">{{ formatReminderDateTime(reminder.date, reminder.startTime) }}</span>
+                    <span class="cw-reminder-duration">{{ formatReminderDuration(reminder.durationMinutes) }}</span>
+                </div>
+            </div>
             } @else {
             <span class="cw-bubble-text" [innerHTML]="msg.content"></span>
             }

@@ -104,6 +104,25 @@
 
             <section class="ac-settings-section">
                 <label class="ac-settings-label">
+                    <i class="bi bi-flag"></i> Closing Messages
+                    <span class="ac-settings-hint">Shown after the AI finishes qualifying a lead and goes quiet</span>
+                </label>
+                @for (msg of finalMessages; track trackIdx($index); let i = $index) {
+                <div class="ac-settings-row">
+                    <input class="ac-settings-input" [(ngModel)]="finalMessages[i]"
+                        placeholder="e.g. Thanks — we'll be in touch shortly! 🚀" />
+                    <button class="ac-icon-btn ac-icon-btn--danger" (click)="removeFinal(i)">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                }
+                <button class="ac-add-btn" (click)="addFinal()">
+                    <i class="bi bi-plus"></i> Add Closing Message
+                </button>
+            </section>
+
+            <section class="ac-settings-section">
+                <label class="ac-settings-label">
                     <i class="bi bi-activity"></i> Status Message
                     <span class="ac-settings-hint">Shown below your name in the widget header</span>
                 </label>

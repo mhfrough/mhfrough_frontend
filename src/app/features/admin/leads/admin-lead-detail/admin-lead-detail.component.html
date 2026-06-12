@@ -50,6 +50,10 @@
                 <input type="tel" class="admin-form-input" formControlName="phone" placeholder="+1 (555) 000-0000">
             </div>
             <div class="admin-form-field">
+                <label class="admin-form-label label-optional">Website</label>
+                <input type="text" class="admin-form-input" formControlName="website" placeholder="e.g. example.com">
+            </div>
+            <div class="admin-form-field">
                 <label class="admin-form-label label-optional">Status</label>
                 <select class="admin-form-select" formControlName="status">
                     @for (status of statuses; track status) {
