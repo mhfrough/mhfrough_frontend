@@ -191,7 +191,8 @@
                     @for (inv of l.invoices; track inv.id) {
                     <tr>
                         <td style="font-family:var(--font-mono);font-size:0.82rem;font-weight:600">
-                            <a [routerLink]="['/admin/invoices', inv.id]">{{ inv.invoiceNumber }}</a>
+                            <a [routerLink]="['/admin/invoices', inv.id]"
+                                style="color:var(--text);text-decoration:underline;text-underline-offset:2px">{{ inv.invoiceNumber }}</a>
                         </td>
                         <td style="font-weight:600">{{ formatCurrency(inv.total) }}</td>
                         <td>
