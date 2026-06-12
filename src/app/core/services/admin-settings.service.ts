@@ -153,7 +153,7 @@ const DEFAULTS: AdminSettings = {
     aiInstruction: null,
     aiAutoReplyDelay: 1500,
     aiMaxResponseLength: 300,
-    aiMaxQuestions: 6,
+    aiMaxQuestions: 12,
     githubToken: null,
     githubRepoBackend: null,
     githubRepoFrontend: null,

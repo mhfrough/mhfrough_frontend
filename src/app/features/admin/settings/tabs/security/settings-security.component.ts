@@ -97,7 +97,7 @@ export class SettingsSecurityComponent implements OnInit, OnDestroy {
     aiInstruction = '';
     aiAutoReplyDelay = 1500;
     aiMaxResponseLength = 300;
-    aiMaxQuestions = 6;
+    aiMaxQuestions = 12;
 
     readonly AI_TONES = [
         { value: 'professional', label: 'Professional' },
@@ -260,7 +260,7 @@ export class SettingsSecurityComponent implements OnInit, OnDestroy {
         this.aiInstruction = s.aiInstruction ?? '';
         this.aiAutoReplyDelay = s.aiAutoReplyDelay ?? 1500;
         this.aiMaxResponseLength = s.aiMaxResponseLength ?? 300;
-        this.aiMaxQuestions = s.aiMaxQuestions ?? 6;
+        this.aiMaxQuestions = s.aiMaxQuestions ?? 12;
         // Email (Resend)
         this.emailEnabled = s.emailEnabled ?? false;
         this.resendApiKey = s.resendApiKey ? '••••••••' : '';
