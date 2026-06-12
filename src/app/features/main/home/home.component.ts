@@ -1,8 +1,7 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, inject, signal, HostListener, PLATFORM_ID, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, inject, signal, PLATFORM_ID, ElementRef } from '@angular/core';
 import { isPlatformBrowser, CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Title } from '@angular/platform-browser';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
@@ -26,7 +25,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly footerSettings = inject(FooterSettingsService);
     private feedbackService = inject(FeedbackService);
     private preconnect = inject(PreconnectService);
-    private titleService = inject(Title);
     private seo = inject(SeoService);
     readonly projects = signal<any[]>([]);
     readonly loadingProjects = signal(true);
@@ -34,18 +32,17 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly loadingFeaturedReviews = signal(true);
     readonly greeting = signal('');
     readonly holidayGreeting = signal('');
-    readonly lightboxSrc = signal<string | null>(null);
     readonly openFaqItems = signal<number[]>([]);
 
     readonly stars = [1, 2, 3, 4, 5];
 
     readonly statsConfig = [
-        { target: 5, suffix: '+', label: 'Years Experience' },
+        { target: 6, suffix: '+', label: 'Years Experience' },
         { target: 30, suffix: '+', label: 'Projects Delivered' },
         { target: 10, suffix: '+', label: 'Happy Clients' },
         { target: 100, suffix: '%', label: 'On-time Delivery' },
     ];
-    readonly statsDisplayed = signal(['5+', '30+', '10+', '100%']);
+    readonly statsDisplayed = signal(['6+', '30+', '10+', '100%']);
     private statsAnimated = false;
     private observers: IntersectionObserver[] = [];
 
@@ -156,6 +153,15 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
             url: '/',
             type: 'profile',
         });
+        this.seo.setJsonLd({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: this.faqs.map(faq => ({
+                '@type': 'Question',
+                name: faq.q,
+                acceptedAnswer: { '@type': 'Answer', text: faq.a },
+            })),
+        });
         this.footerSettings.load();
         this.projectsService.getFeatured().subscribe({
             next: (data: any[]) => { this.projects.set(data); this.loadingProjects.set(false); this.preconnect.add(data[0]?.thumbnail); },
@@ -205,8 +211,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnDestroy() {
         this.subs.unsubscribe();
-        this.closeLightbox();
         this.observers.forEach(o => o.disconnect());
+        this.seo.removeJsonLd();
     }
 
     private loadFeaturedReviews() {
@@ -220,25 +226,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     toggleFaq(i: number) {
         const cur = this.openFaqItems();
         this.openFaqItems.set(cur.includes(i) ? cur.filter(x => x !== i) : [...cur, i]);
-    }
-
-    openLightbox(src: string) {
-        this.lightboxSrc.set(src);
-        if (isPlatformBrowser(this.platformId)) {
-            document.body.style.overflow = 'hidden';
-        }
-    }
-
-    closeLightbox() {
-        this.lightboxSrc.set(null);
-        if (isPlatformBrowser(this.platformId)) {
-            document.body.style.overflow = '';
-        }
-    }
-
-    @HostListener('document:keydown.escape')
-    onEscape() {
-        if (this.lightboxSrc()) this.closeLightbox();
     }
 
     private setupScrollReveal() {

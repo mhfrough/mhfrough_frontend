@@ -21,7 +21,7 @@ const STATUS_LABELS: Record<LeadStatus, string> = {
 };
 
 const SOURCE_LABELS: Record<string, string> = {
-    contact: 'Contact Form',
+    email: 'Email',
     chat: 'Live Chat',
     appointment: 'Appointment',
     manual: 'Manual',

@@ -1,6 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { ActivityLogService, ActivityLogEntry } from '../../../core/services/activity-log.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
+
+const MAX_LOGS = 300;
 
 @Component({
     selector: 'app-admin-notification-logs',
@@ -8,8 +12,10 @@ import { ActivityLogService, ActivityLogEntry } from '../../../core/services/act
     imports: [CommonModule],
     templateUrl: './admin-notification-logs.component.html',
 })
-export class AdminNotificationLogsComponent implements OnInit {
+export class AdminNotificationLogsComponent implements OnInit, OnDestroy {
     private readonly service = inject(ActivityLogService);
+    private readonly realtime = inject(RealtimeService);
+    private readonly subs = new Subscription();
     readonly logs = signal<ActivityLogEntry[]>([]);
     readonly loading = signal(true);
     readonly deleteTargetId = signal<string | null>(null);
@@ -22,6 +28,7 @@ export class AdminNotificationLogsComponent implements OnInit {
         feedback: 'bi-star',
         comment: 'bi-chat-left-text',
         invoice: 'bi-receipt',
+        lead: 'bi-person-badge',
         push: 'bi-bell',
         client: 'bi-bug',
         system: 'bi-gear',
@@ -41,6 +48,7 @@ export class AdminNotificationLogsComponent implements OnInit {
         'project:delete': 'Project Deleted',
         'inquiry:received': 'New Inquiry',
         'inquiry:read': 'Inquiry Read',
+        'inquiry:replied': 'Inquiry Replied',
         'inquiry:delete': 'Inquiry Deleted',
         'feedback:received': 'New Review',
         'feedback:approve': 'Review Approved',
@@ -53,6 +61,9 @@ export class AdminNotificationLogsComponent implements OnInit {
         'invoice:create': 'Invoice Created',
         'invoice:update': 'Invoice Updated',
         'invoice:delete': 'Invoice Deleted',
+        'lead:create': 'Lead Created',
+        'lead:update': 'Lead Updated',
+        'lead:delete': 'Lead Deleted',
         'push:sent': 'Push Sent',
         'push:skipped': 'Push Skipped',
         'push:error': 'Push Error',
@@ -66,6 +77,15 @@ export class AdminNotificationLogsComponent implements OnInit {
 
     ngOnInit() {
         this.loadLogs();
+
+        // Live stream: prepend new entries as the backend logs them
+        this.subs.add(this.realtime.on<ActivityLogEntry>('activity:log_created').subscribe(entry => {
+            this.logs.update(list => [entry, ...list].slice(0, MAX_LOGS));
+        }));
+    }
+
+    ngOnDestroy() {
+        this.subs.unsubscribe();
     }
 
     private loadLogs() {

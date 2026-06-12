@@ -12,7 +12,7 @@ import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 import { FrontToastService } from '../../../core/services/front-toast.service';
 import { VisitorTrackingService } from '../../../core/services/visitor-tracking.service';
 import { NetworkStatusService } from '../../../core/services/network-status.service';
-import { Title } from '@angular/platform-browser';
+import { SeoService } from '../../../core/services/seo.service';
 
 @Component({
     selector: 'app-contact',
@@ -29,7 +29,7 @@ export class ContactComponent implements OnInit, OnDestroy {
     readonly footerSettings = inject(FooterSettingsService);
     private toast = inject(FrontToastService);
     private tracking = inject(VisitorTrackingService);
-    private titleService = inject(Title);
+    private seo = inject(SeoService);
     readonly network = inject(NetworkStatusService);
 
     isSocialVisible(key: string): boolean {
@@ -51,7 +51,11 @@ export class ContactComponent implements OnInit, OnDestroy {
     formData = { name: '', email: '', phone: '', subject: '', message: '' };
 
     ngOnInit() {
-        this.titleService.setTitle('Contact | Mohammad Hamza');
+        this.seo.update({
+            title: 'Contact | Mohammad Hamza',
+            description: 'Get in touch with Mohammad Hamza for web design, full-stack development, and product design projects. Available for freelance and consulting work.',
+            url: '/contact',
+        });
         this.footerSettings.load();
         if (isPlatformBrowser(this.platformId)) {
             const saved = this.userInfo.get();

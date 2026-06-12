@@ -278,7 +278,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     }
 
     private loadTodayReminders() {
-        const today = new Date().toISOString().slice(0, 10);
+        // Local date, not toISOString() — UTC would show yesterday's reminders until 5 AM PKT
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         this.appointmentsService.getAll().subscribe({
             next: (data) => {
                 const todays = data
@@ -313,6 +315,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                 if (data.length) {
                     const avg = data.reduce((s, f) => s + f.rating, 0) / data.length;
                     this.avgRating.set(Math.round(avg * 10) / 10);
+                } else {
+                    this.avgRating.set(0);
                 }
             },
         });

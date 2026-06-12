@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit, afterNextRender } from '@angular/cor
 import { RouterLink, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { ActivityLogService } from '../../../core/services/activity-log.service';
+import { SeoService } from '../../../core/services/seo.service';
 
 @Component({
     selector: 'app-not-found',
@@ -13,6 +14,7 @@ export class NotFoundComponent implements OnInit {
     private location = inject(Location);
     private router = inject(Router);
     private readonly activityLog = inject(ActivityLogService);
+    private readonly seo = inject(SeoService);
     readonly currentUrl = signal('');
 
     constructor() {
@@ -27,6 +29,11 @@ export class NotFoundComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.seo.update({
+            title: 'Page Not Found | Mohammad Hamza',
+            description: 'The page you are looking for does not exist or has been moved.',
+            noIndex: true,
+        });
         // Set URL for SSR render (no logging — afterNextRender handles client-side logging)
         const state = this.location.getState() as { from?: string } | null;
         this.currentUrl.set(state?.from ?? this.router.url);

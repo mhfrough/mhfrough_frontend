@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
+import { SeoService } from '../../../core/services/seo.service';
 
 @Component({
     selector: 'app-terms',
@@ -10,11 +10,15 @@ import { FooterSettingsService } from '../../../core/services/footer-settings.se
     templateUrl: './terms.component.html',
 })
 export class TermsComponent implements OnInit {
-    private titleService = inject(Title);
+    private seo = inject(SeoService);
     readonly footerSettings = inject(FooterSettingsService);
 
     ngOnInit() {
-        this.titleService.setTitle('Terms of Service | Mohammad Hamza');
+        this.seo.update({
+            title: 'Terms of Service | Mohammad Hamza',
+            description: 'Terms of service for mhfrough.dev — the conditions that apply when using this website and its services.',
+            url: '/terms',
+        });
         this.footerSettings.load();
     }
 

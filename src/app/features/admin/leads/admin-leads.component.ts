@@ -1,7 +1,9 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { LeadsService, Lead, LeadStatus } from '../../../core/services/leads.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
 import { AdminListBase } from '../../../shared/admin-list.base';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
@@ -37,8 +39,10 @@ const SOURCE_LABELS: Record<string, string> = {
     imports: [CommonModule, RouterLink, PaginationComponent, ConfirmModalComponent],
     templateUrl: './admin-leads.component.html',
 })
-export class AdminLeadsComponent extends AdminListBase implements OnInit {
+export class AdminLeadsComponent extends AdminListBase implements OnInit, OnDestroy {
     private readonly svc = inject(LeadsService);
+    private readonly realtime = inject(RealtimeService);
+    private readonly subs = new Subscription();
 
     readonly leads = signal<Lead[]>([]);
     readonly loading = signal(true);
@@ -71,6 +75,21 @@ export class AdminLeadsComponent extends AdminListBase implements OnInit {
 
     ngOnInit() {
         this.load();
+
+        // Live pipeline: leads arrive from chat, email, and appointments while viewing
+        this.subs.add(this.realtime.on<Lead>('lead:created').subscribe(lead => {
+            this.leads.update(list => list.some(l => l.id === lead.id) ? list : [lead, ...list]);
+        }));
+        this.subs.add(this.realtime.on<Lead>('lead:updated').subscribe(lead => {
+            this.leads.update(list => list.map(l => l.id === lead.id ? { ...l, ...lead } : l));
+        }));
+        this.subs.add(this.realtime.on<{ id: string }>('lead:deleted').subscribe(({ id }) => {
+            this.leads.update(list => list.filter(l => l.id !== id));
+        }));
+    }
+
+    ngOnDestroy() {
+        this.subs.unsubscribe();
     }
 
     load() {

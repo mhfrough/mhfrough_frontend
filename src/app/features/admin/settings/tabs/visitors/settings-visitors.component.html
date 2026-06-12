@@ -213,7 +213,7 @@
             <tbody>
                 @for (s of visitorSessions(); track s.id) {
                 <!-- Main session row -->
-                <tr class="vt-session-row" [class.vt-session-row--expanded]="expandedSessionId() === s.id" (click)="toggleJourney(s.id)">
+                <tr class="vt-session-row" [class.vt-session-row--expanded]="expandedSessionId() === s.id" [class.vt-session-row--active]="isActive(s)" (click)="toggleJourney(s.id)">
                     <td style="text-align:center;padding-right:0">
                         <i class="bi {{ expandedSessionId() === s.id ? 'bi-chevron-down' : 'bi-chevron-right' }}" style="font-size:.7rem;opacity:.5;transition:transform 200ms"></i>
                     </td>
@@ -271,8 +271,8 @@
                         </div>
                         }
                         @if (s.visitCount > 1) {
-                        <span class="admin-badge admin-badge--on" title="Seen {{ s.visitCount }} times on this browser" style="margin-top:.25rem">
-                            <i class="bi bi-arrow-repeat"></i> Returning ({{ s.visitCount }})
+                        <span class="vt-returning-badge" title="Seen {{ s.visitCount }} times on this browser">
+                            <i class="bi bi-arrow-repeat"></i> {{ s.visitCount }}x visit
                         </span>
                         }
                     </td>

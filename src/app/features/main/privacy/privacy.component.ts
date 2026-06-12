@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Title } from '@angular/platform-browser';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
+import { SeoService } from '../../../core/services/seo.service';
 
 @Component({
     selector: 'app-privacy',
@@ -10,11 +10,15 @@ import { FooterSettingsService } from '../../../core/services/footer-settings.se
     templateUrl: './privacy.component.html',
 })
 export class PrivacyComponent implements OnInit {
-    private titleService = inject(Title);
+    private seo = inject(SeoService);
     readonly footerSettings = inject(FooterSettingsService);
 
     ngOnInit() {
-        this.titleService.setTitle('Privacy Policy | Mohammad Hamza');
+        this.seo.update({
+            title: 'Privacy Policy | Mohammad Hamza',
+            description: 'Privacy policy for mhfrough.dev — how visitor data is collected, used, and protected.',
+            url: '/privacy',
+        });
         this.footerSettings.load();
     }
 

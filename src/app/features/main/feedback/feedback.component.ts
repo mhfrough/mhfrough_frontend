@@ -9,7 +9,7 @@ import { RealtimeService } from '../../../core/services/realtime.service';
 import { FrontToastService } from '../../../core/services/front-toast.service';
 import { NetworkStatusService } from '../../../core/services/network-status.service';
 import { VisitorTrackingService } from '../../../core/services/visitor-tracking.service';
-import { Title } from '@angular/platform-browser';
+import { SeoService } from '../../../core/services/seo.service';
 
 @Component({
     selector: 'app-feedback',
@@ -25,7 +25,7 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private toast = inject(FrontToastService);
-    private titleService = inject(Title);
+    private seo = inject(SeoService);
     private platformId = inject(PLATFORM_ID);
     readonly network = inject(NetworkStatusService);
     readonly sending = signal(false);
@@ -109,7 +109,11 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.titleService.setTitle('Reviews | Mohammad Hamza');
+        this.seo.update({
+            title: 'Reviews | Mohammad Hamza',
+            description: 'Client reviews and testimonials for Mohammad Hamza — read what clients say about working together, or share your own experience.',
+            url: '/feedback',
+        });
         const p = this.route.snapshot.queryParams;
         if (p['q']) this.searchQuery.set(p['q']);
         if (p['page']) this.currentPage.set(+p['page']);

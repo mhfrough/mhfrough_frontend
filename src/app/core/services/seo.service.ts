@@ -10,10 +10,12 @@ export interface SeoData {
     image?: string;
     type?: 'website' | 'article' | 'profile';
     keywords?: string;
+    /** Set true on pages that should not appear in search results (e.g. 404). */
+    noIndex?: boolean;
 }
 
-const SITE_URL = 'https://mhfrough.dev';
-const DEFAULT_IMAGE = `${SITE_URL}/assets/og-image.png`;
+const SITE_URL = 'https://www.mhfrough.dev';
+const DEFAULT_IMAGE = `${SITE_URL}/icons/icon-512x512.png`;
 
 /** Sets per-route title, meta description, Open Graph/Twitter tags, canonical link and JSON-LD. */
 @Injectable({ providedIn: 'root' })
@@ -31,6 +33,12 @@ export class SeoService {
 
         this.setTag('name', 'description', data.description);
         if (data.keywords) this.setTag('name', 'keywords', data.keywords);
+
+        if (data.noIndex) {
+            this.setTag('name', 'robots', 'noindex, nofollow');
+        } else {
+            this.setTag('name', 'robots', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
+        }
 
         this.setTag('property', 'og:title', data.title);
         this.setTag('property', 'og:description', data.description);
