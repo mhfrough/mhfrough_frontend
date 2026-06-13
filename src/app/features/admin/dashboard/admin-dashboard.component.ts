@@ -44,15 +44,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     readonly todayReminders = signal<Appointment[]>([]);
     readonly leadStats = signal<LeadStats | null>(null);
 
-    /** Pipeline stages in flow order, with display label + accent colour. */
-    // Warm, muted pipeline accents that sit on the sepia theme (was bootstrap hex).
-    readonly leadStages: { status: LeadStatus; label: string; accent: string }[] = [
-        { status: 'new', label: 'New', accent: '#928e87' },
-        { status: 'contacted', label: 'Contacted', accent: '#9c8f7a' },
-        { status: 'qualified', label: 'Qualified', accent: '#c2a25e' },
-        { status: 'quoted', label: 'Quoted', accent: '#d98c4a' },
-        { status: 'won', label: 'Won', accent: '#6bbf8a' },
-        { status: 'lost', label: 'Lost', accent: '#c46a6a' },
+    /** Pipeline stages in flow order. Bars render monochrome to match the
+     *  other dashboard metrics (no per-stage colour). */
+    readonly leadStages: { status: LeadStatus; label: string }[] = [
+        { status: 'new', label: 'New' },
+        { status: 'contacted', label: 'Contacted' },
+        { status: 'qualified', label: 'Qualified' },
+        { status: 'quoted', label: 'Quoted' },
+        { status: 'won', label: 'Won' },
+        { status: 'lost', label: 'Lost' },
     ];
 
     private subs = new Subscription();

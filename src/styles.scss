@@ -21,7 +21,7 @@
     --mobile-tabbar-h: 68px;
 
     // Radius — pointy-edge house style. One knob: bump --radius to soften globally.
-    --radius: 0;          // all rectangular surfaces (cards, panels, inputs, buttons)
+    --radius: 0; // all rectangular surfaces (cards, panels, inputs, buttons)
     --radius-pill: 999px; // status pills / toggles / scrollbar thumb only
     --radius-circle: 50%; // avatars / icon dots only
 
@@ -132,7 +132,9 @@ html {
 
 // Ensure all elements — including button/input/select/textarea which browsers
 // reset to system font — inherit the site font instead of falling through.
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     font-family: inherit;
 }
 
@@ -260,7 +262,7 @@ body::before {
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 900px) {
             display: none;
         }
     }
@@ -417,7 +419,7 @@ body::before {
 .mobile-tabbar {
     display: none;
 
-    @media (max-width: 640px) {
+    @media (max-width: 900px) {
         display: flex;
         position: fixed;
         bottom: 0;
@@ -522,7 +524,7 @@ body::before {
 .mobile-menu-backdrop {
     display: none;
 
-    @media (max-width: 640px) {
+    @media (max-width: 900px) {
         display: block;
         position: fixed;
         inset: 0;
@@ -545,7 +547,7 @@ body::before {
 .mobile-menu {
     display: none;
 
-    @media (max-width: 640px) {
+    @media (max-width: 900px) {
         display: flex;
         flex-direction: column;
         position: fixed;
@@ -640,8 +642,9 @@ body::before {
 .site-footer {
     padding: 2rem 0;
     margin-top: 0;
+    border-top: 1px solid var(--border);
 
-    @media (max-width: 640px) {
+    @media (max-width: 900px) {
         padding-bottom: calc(2rem + var(--mobile-tabbar-h) + env(safe-area-inset-bottom));
     }
 
@@ -795,12 +798,26 @@ body::before {
 
         .nav-logo {
             font-size: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
             display: inline-block;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: var(--text);
+            text-decoration: none;
+            transition: opacity var(--dur) var(--ease);
+
+            &:hover {
+                opacity: 0.6;
+            }
+
+            .nav-logo-dot {
+                color: var(--indigo);
+            }
         }
 
         .footer-locale {
-            margin-top: 1rem;
+            margin: 0 0 1rem;
             font-family: var(--font-sans);
             font-size: 0.8rem;
             color: var(--text-muted);
@@ -1029,6 +1046,19 @@ body::before {
     text-transform: uppercase;
     color: var(--text-muted);
     margin: 0 0 1.5rem;
+}
+
+// Page hero title — the large display heading used at the top of a page.
+// Shared across all public page headers so About/Services/FAQ match
+// Blog/Projects/Gallery/Contact/Legal. (.section-title is a small section
+// label, NOT a page title — don't use it for the page <h1>.)
+.page-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 5dvw, 3rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--text);
+    margin: 0 0 1rem;
 }
 
 .section-cta {
@@ -4016,7 +4046,9 @@ button.admin-nav-link:last-child:hover {
     color: var(--text-muted);
     margin-bottom: 0.75rem;
 
-    i { color: var(--badge-warn); }
+    i {
+        color: var(--badge-warn);
+    }
 }
 
 .admin-today-reminders-count {
@@ -4040,7 +4072,9 @@ button.admin-nav-link:last-child:hover {
     padding: 0.5rem 0;
     border-bottom: 1px solid var(--border);
 
-    &:last-child { border-bottom: none; }
+    &:last-child {
+        border-bottom: none;
+    }
 }
 
 .admin-today-reminder-time {
@@ -4332,6 +4366,8 @@ button.admin-nav-link:last-child:hover {
     appearance: none;
     -webkit-appearance: none;
     cursor: pointer;
+    color: var(--text);
+    accent-color: var(--text);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23918e87' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.5rem center;
@@ -4931,11 +4967,27 @@ button.admin-nav-link:last-child:hover {
 // --- Button save states -------------------------------------------------------
 
 @keyframes btn-shake {
-    0%,100% { transform: translateX(0); }
-    20%      { transform: translateX(-5px); }
-    40%      { transform: translateX(5px); }
-    60%      { transform: translateX(-4px); }
-    80%      { transform: translateX(4px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-5px);
+    }
+
+    40% {
+        transform: translateX(5px);
+    }
+
+    60% {
+        transform: translateX(-4px);
+    }
+
+    80% {
+        transform: translateX(4px);
+    }
 }
 
 .btn-primary {
@@ -6755,7 +6807,7 @@ button.admin-nav-link:last-child:hover {
 }
 
 .settings-card {
-    background: var(--surface);
+    // background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 0;
     padding: 1.75rem;
@@ -7699,7 +7751,10 @@ tr.session-current-row {
     font-size: 0.75rem;
     color: var(--text-muted);
 
-    i { font-size: 0.8rem; flex-shrink: 0; }
+    i {
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
 }
 
 .admin-modal-textarea {

@@ -126,15 +126,11 @@
             @for (stage of leadStages; track stage.status) {
             <div class="admin-analytics-metric">
                 <div class="admin-analytics-metric-head">
-                    <span>
-                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:.4rem"
-                            [style.background]="stage.accent"></span>{{ stage.label }}
-                    </span>
+                    <span>{{ stage.label }}</span>
                     <span class="admin-analytics-pct">{{ leadStageCount(stage.status) }}</span>
                 </div>
                 <div class="admin-analytics-track">
-                    <div class="admin-analytics-fill" [style.width.%]="leadStageBarPct(stage.status)"
-                        [style.background]="stage.accent"></div>
+                    <div class="admin-analytics-fill" [style.width.%]="leadStageBarPct(stage.status)"></div>
                 </div>
             </div>
             }

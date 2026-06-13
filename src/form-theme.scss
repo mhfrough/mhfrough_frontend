@@ -108,6 +108,8 @@ input[type="checkbox"] {
     height: 16px;
     margin: 0;
     vertical-align: middle;
+    accent-color: var(--text);
+    cursor: pointer;
 }
 
 /* When label follows checkbox */

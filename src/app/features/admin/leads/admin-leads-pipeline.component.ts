@@ -11,18 +11,17 @@ import { RealtimeService } from '../../../core/services/realtime.service';
 interface PipelineColumn {
     status: LeadStatus;
     label: string;
-    accent: string;
     leads: Lead[];
 }
 
-// Warm, muted pipeline accents that sit on the sepia theme (was bootstrap hex).
-const COLUMN_DEFS: { status: LeadStatus; label: string; accent: string }[] = [
-    { status: 'new', label: 'New', accent: '#928e87' },
-    { status: 'contacted', label: 'Contacted', accent: '#9c8f7a' },
-    { status: 'qualified', label: 'Qualified', accent: '#c2a25e' },
-    { status: 'quoted', label: 'Quoted', accent: '#d98c4a' },
-    { status: 'won', label: 'Won', accent: '#6bbf8a' },
-    { status: 'lost', label: 'Lost', accent: '#c46a6a' },
+// Columns render monochrome to follow the black-and-white theme (no per-stage colour).
+const COLUMN_DEFS: { status: LeadStatus; label: string }[] = [
+    { status: 'new', label: 'New' },
+    { status: 'contacted', label: 'Contacted' },
+    { status: 'qualified', label: 'Qualified' },
+    { status: 'quoted', label: 'Quoted' },
+    { status: 'won', label: 'Won' },
+    { status: 'lost', label: 'Lost' },
 ];
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -48,7 +47,7 @@ const SOURCE_LABELS: Record<string, string> = {
             <div class="pipeline" cdkDropListGroup>
                 @for (col of columns(); track col.status) {
                     <div class="pipeline-col">
-                        <div class="pipeline-col-head" [style.borderTopColor]="col.accent">
+                        <div class="pipeline-col-head">
                             <span class="pipeline-col-title">{{ col.label }}</span>
                             <span class="pipeline-col-count">{{ col.leads.length }}</span>
                         </div>
@@ -82,21 +81,33 @@ const SOURCE_LABELS: Record<string, string> = {
         }
     `,
     styles: [`
+        :host {
+            display: flex;
+            flex-direction: column;
+            height: calc(100dvh - 6rem);
+        }
+        @media (max-width: 768px) {
+            :host { height: calc(100dvh - 56px - 4.75rem); }
+        }
+        @media (max-width: 480px) {
+            :host { height: calc(100dvh - 56px - 4.5rem); }
+        }
+        .admin-page-header { flex-shrink: 0; }
         .pipeline {
             display: flex;
             gap: 1rem;
             overflow-x: auto;
-            padding-bottom: 1rem;
-            align-items: flex-start;
+            flex: 1;
+            min-height: 0;
         }
         .pipeline-col {
             flex: 0 0 260px;
             background: var(--bg-alt);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius);
             display: flex;
             flex-direction: column;
-            max-height: calc(100vh - 220px);
+            height: 100%;
         }
         .pipeline-col-head {
             display: flex;
@@ -109,14 +120,14 @@ const SOURCE_LABELS: Record<string, string> = {
         .pipeline-col-title { font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; }
         .pipeline-col-count {
             font-size: 0.72rem; font-weight: 600; color: var(--text-muted);
-            background: rgba(var(--text-rgb), 0.06); border-radius: 999px; padding: 0.05rem 0.5rem;
+            background: rgba(var(--text-rgb), 0.06); border-radius: var(--radius); padding: 0.05rem 0.5rem;
         }
         .pipeline-col-body {
             padding: 0.75rem; overflow-y: auto; flex: 1; min-height: 80px;
             display: flex; flex-direction: column; gap: 0.6rem;
         }
         .pipeline-card {
-            background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+            background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
             padding: 0.7rem 0.8rem; cursor: grab;
             box-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
@@ -129,10 +140,10 @@ const SOURCE_LABELS: Record<string, string> = {
         .pipeline-card-date { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.4rem; font-family: var(--font-mono); }
         .pipeline-empty {
             text-align: center; color: var(--text-muted); font-size: 0.74rem;
-            border: 1px dashed var(--border); border-radius: 6px; padding: 1rem 0.5rem;
+            border: 1px dashed var(--border); border-radius: var(--radius); padding: 1rem 0.5rem;
         }
         .pipeline-card-preview {
-            background: var(--bg-alt); border: 1px solid var(--border); border-radius: 6px;
+            background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius);
             padding: 0.5rem 0.8rem; font-weight: 600; font-size: 0.85rem;
             box-shadow: 0 6px 20px rgba(0,0,0,0.35);
         }
