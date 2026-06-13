@@ -13,11 +13,11 @@
     }
 
     &.invalid .field-input {
-        border-color: #e53935 !important;
+        border-color: var(--danger) !important;
     }
 
     .validation {
-        color: #e53935;
+        color: var(--danger);
         font-size: 0.78rem;
         font-family: var(--font);
         margin-top: 0.25rem;
@@ -31,11 +31,11 @@
         color: var(--text-muted);
 
         .near-limit {
-            color: orange;
+            color: var(--warn);
         }
 
         .over-limit {
-            color: #e53935;
+            color: var(--danger);
         }
     }
 }

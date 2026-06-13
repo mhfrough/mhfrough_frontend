@@ -134,7 +134,7 @@
 .ac-session-page {
     font-family: var(--font-mono);
     font-size: 0.62rem;
-    color: var(--accent, #4ade80);
+    color: var(--accent, var(--success));
     display: flex;
     align-items: center;
     gap: 0.3rem;
@@ -185,7 +185,7 @@
     }
 
     &:hover {
-        color: #dc2626;
+        color: var(--danger);
     }
 }
 
@@ -253,7 +253,7 @@
 .ac-chat-visitor-page {
     font-family: var(--font-mono);
     font-size: 0.65rem;
-    color: var(--accent, #4ade80);
+    color: var(--accent, var(--success));
     margin: 0;
     display: flex;
     align-items: center;
@@ -269,7 +269,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    border: 1px solid rgba(var(--accent-rgb, 99, 102, 241), 0.4);
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
     background: transparent;
     color: var(--muted);
     font-family: var(--font-sans);
@@ -308,7 +308,7 @@
     padding: 0.5rem 1rem;
     border: 1px solid rgba(220, 38, 38, 0.5);
     background: transparent;
-    color: #dc2626;
+    color: var(--danger);
     font-family: var(--font-sans);
     font-size: 0.72rem;
     font-weight: 500;
@@ -318,7 +318,7 @@
     transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
 
     &:hover {
-        background: #dc2626;
+        background: var(--danger);
         color: var(--bg);
     }
 }
@@ -374,7 +374,7 @@
 
 .ac-vs-live-dot {
     font-size: 0.42rem;
-    color: #4ade80;
+    color: var(--success);
     flex-shrink: 0;
     animation: ac-rec-blink 1.5s ease-in-out infinite;
 }
@@ -859,7 +859,7 @@
     }
 
     &--danger:hover {
-        color: #dc2626;
+        color: var(--danger);
     }
 }
 
@@ -898,7 +898,7 @@
     height: 30px;
     background: transparent;
     border: 1px solid rgba(220, 38, 38, 0.4);
-    color: #dc2626;
+    color: var(--danger);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -923,7 +923,7 @@
 .ac-rec-dot {
     width: 7px;
     height: 7px;
-    background: #dc2626;
+    background: var(--danger);
     flex-shrink: 0;
     animation: ac-rec-blink 1s ease-in-out infinite;
 }
@@ -1289,7 +1289,7 @@
 
 .ac-notes-saved {
     font-size: 0.7rem;
-    color: #4ade80;
+    color: var(--success);
     flex-shrink: 0;
     margin-top: 0.28rem;
     opacity: 0.8;
@@ -1421,7 +1421,7 @@
     transition: color var(--dur) var(--ease);
 
     &:hover {
-        color: #dc2626;
+        color: var(--danger);
     }
 }
 
@@ -1547,7 +1547,7 @@
 
         &:hover {
             opacity: 1;
-            background: rgba(0, 0, 0, 0.04);
+            background: var(--surface-hover);
         }
     }
 

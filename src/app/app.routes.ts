@@ -50,6 +50,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/admin/leads/admin-lead-detail/admin-lead-detail.component').then(m => m.AdminLeadDetailComponent),
             },
             {
+                path: 'leads/pipeline',
+                loadComponent: () => import('./features/admin/leads/admin-leads-pipeline.component').then(m => m.AdminLeadsPipelineComponent),
+            },
+            {
                 path: 'leads/:id',
                 loadComponent: () => import('./features/admin/leads/admin-lead-detail/admin-lead-detail.component').then(m => m.AdminLeadDetailComponent),
             },
@@ -145,6 +149,22 @@ export const routes: Routes = [
             {
                 path: 'contact',
                 loadComponent: () => import('./features/main/contact/contact.component').then(m => m.ContactComponent),
+            },
+            {
+                path: 'services',
+                loadComponent: () => import('./features/main/services/services.component').then(m => m.ServicesComponent),
+            },
+            {
+                path: 'about',
+                loadComponent: () => import('./features/main/about/about.component').then(m => m.AboutComponent),
+            },
+            {
+                path: 'faq',
+                loadComponent: () => import('./features/main/faq/faq.component').then(m => m.FaqComponent),
+            },
+            {
+                path: 'credits',
+                loadComponent: () => import('./features/main/credits/credits.component').then(m => m.CreditsComponent),
             },
             {
                 path: 'feedback',

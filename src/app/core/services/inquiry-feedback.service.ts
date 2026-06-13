@@ -56,7 +56,15 @@ export class FeedbackService {
         if (q) params['q'] = q;
         return this.http.get<{ data: any[]; total: number; page: number; limit: number; totalPages: number }>(this.base, { params });
     }
+    getFeatured() { return this.http.get<any[]>(`${this.base}/featured`); }
     getAll() { return this.http.get<any[]>(`${this.base}/all`); }
+
+    setFeatured(id: string, featured: boolean): Observable<any> {
+        if (!this.network.isOnline()) {
+            return from(this.syncQueue.enqueue({ url: `${this.base}/${id}/feature`, method: 'PATCH', body: { featured }, timestamp: Date.now() }).then(() => ({ queued: true })));
+        }
+        return this.http.patch(`${this.base}/${id}/feature`, { featured });
+    }
 
     submit(data: any): Observable<any> {
         if (!this.network.isOnline()) {

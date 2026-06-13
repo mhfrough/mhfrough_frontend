@@ -1,0 +1,90 @@
+<!-- ── Export / Backup ──────────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-download"></i> Export &amp; Backup</h2>
+            <p class="settings-card-sub">
+                Download a full JSON snapshot of all content (projects, blogs, inquiries, feedback,
+                leads, invoices, gallery, chat, visitor analytics, and logs). Keep it somewhere safe
+                before clearing anything below.
+            </p>
+        </div>
+        <button class="btn-primary" (click)="exportData()" [disabled]="exporting()">
+            @if (exporting()) { <span class="contact-spinner"></span> Exporting… }
+            @else { <i class="bi bi-filetype-json"></i> Download backup }
+        </button>
+    </div>
+    @if (exportError()) {
+    <div class="admin-alert admin-alert--error">{{ exportError() }}</div>
+    }
+</div>
+
+<!-- ── Danger Zone ──────────────────────────────────────────────────────────── -->
+<div class="settings-card danger-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title danger-title"><i class="bi bi-exclamation-octagon-fill"></i> Danger Zone</h2>
+            <p class="settings-card-sub">
+                Permanently delete data. This <strong>cannot be undone</strong>. Your admin account,
+                settings, and site configuration are never touched. Export a backup first.
+            </p>
+        </div>
+    </div>
+
+    @if (wipeResult(); as res) {
+    <div class="admin-alert admin-alert--success">
+        <i class="bi bi-check-circle-fill"></i> {{ res.message }}
+        <span class="danger-cleared">({{ objectEntriesText(res.cleared) }})</span>
+    </div>
+    }
+    @if (wipeError()) {
+    <div class="admin-alert admin-alert--error"><i class="bi bi-exclamation-triangle-fill"></i> {{ wipeError() }}</div>
+    }
+
+    @if (loading()) {
+    <div class="loading-state"><div class="spinner"></div></div>
+    } @else {
+
+    <h3 class="settings-section-label">Select data to clear</h3>
+    <div class="danger-datasets">
+        @for (d of datasets(); track d.key) {
+        <label class="danger-dataset" [class.is-checked]="isSelected(d.key)">
+            <input type="checkbox" [checked]="isSelected(d.key)" (change)="toggle(d.key)">
+            <span class="danger-dataset-main">
+                <span class="danger-dataset-label">{{ d.label }}</span>
+                @if (d.note) { <span class="danger-dataset-note">{{ d.note }}</span> }
+            </span>
+            <span class="danger-dataset-count">{{ d.count }}</span>
+        </label>
+        }
+    </div>
+
+    <div class="danger-confirm">
+        <div class="admin-form-field">
+            <label class="admin-form-label">Confirm your password</label>
+            <input type="password" class="admin-form-input" [(ngModel)]="password" autocomplete="current-password"
+                placeholder="Admin password" (input)="cancelArm()">
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Type <code>{{ CONFIRM_PHRASE }}</code> to confirm</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="confirmText" autocomplete="off"
+                [placeholder]="CONFIRM_PHRASE" (input)="cancelArm()">
+        </div>
+    </div>
+
+    <div class="admin-form-actions danger-actions">
+        @if (!armed()) {
+        <button class="btn-danger" (click)="arm()" [disabled]="!canWipe()">
+            <i class="bi bi-trash3"></i> Delete {{ selectedCount() }} dataset{{ selectedCount() === 1 ? '' : 's' }}…
+        </button>
+        } @else {
+        <span class="danger-final-q">This is permanent. Are you sure?</span>
+        <button class="btn-ghost" (click)="cancelArm()" [disabled]="wiping()">Cancel</button>
+        <button class="btn-danger" (click)="executeWipe()" [disabled]="wiping()">
+            @if (wiping()) { <span class="contact-spinner"></span> Deleting… }
+            @else { <i class="bi bi-trash3-fill"></i> Yes, delete permanently }
+        </button>
+        }
+    </div>
+    }
+</div>

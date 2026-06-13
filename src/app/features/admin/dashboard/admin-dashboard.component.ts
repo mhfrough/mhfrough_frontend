@@ -10,6 +10,7 @@ import { BlogsService } from '../../../core/services/blogs.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { VisitorAnalyticsService, VisitorStats } from '../../../core/services/visitor-analytics.service';
 import { AppointmentsService, Appointment } from '../../../core/services/appointments.service';
+import { LeadsService, LeadStats, LeadStatus } from '../../../core/services/leads.service';
 
 @Component({
     selector: 'app-admin-dashboard',
@@ -26,6 +27,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     private readonly realtime = inject(RealtimeService);
     private readonly visitorService = inject(VisitorAnalyticsService);
     private readonly appointmentsService = inject(AppointmentsService);
+    private readonly leadsService = inject(LeadsService);
     private readonly platformId = inject(PLATFORM_ID);
 
     @ViewChild('visitorChart') chartCanvas!: ElementRef<HTMLCanvasElement>;
@@ -40,6 +42,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     readonly avgRating = signal(0);
     readonly visitorStats = signal<VisitorStats | null>(null);
     readonly todayReminders = signal<Appointment[]>([]);
+    readonly leadStats = signal<LeadStats | null>(null);
+
+    /** Pipeline stages in flow order, with display label + accent colour. */
+    // Warm, muted pipeline accents that sit on the sepia theme (was bootstrap hex).
+    readonly leadStages: { status: LeadStatus; label: string; accent: string }[] = [
+        { status: 'new', label: 'New', accent: '#928e87' },
+        { status: 'contacted', label: 'Contacted', accent: '#9c8f7a' },
+        { status: 'qualified', label: 'Qualified', accent: '#c2a25e' },
+        { status: 'quoted', label: 'Quoted', accent: '#d98c4a' },
+        { status: 'won', label: 'Won', accent: '#6bbf8a' },
+        { status: 'lost', label: 'Lost', accent: '#c46a6a' },
+    ];
 
     private subs = new Subscription();
     private _chartRaw: { day: string; count: string }[] = [];
@@ -69,6 +83,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.loadBlogs();
         this.loadVisitorStats();
         this.loadTodayReminders();
+        this.loadLeadStats();
 
         // Reload on relevant events
         this.subs.add(this.realtime.on<any>('inquiry:new').subscribe(() => {
@@ -122,6 +137,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.subs.add(this.realtime.on<any>('reminder:created').subscribe(() => this.loadTodayReminders()));
         this.subs.add(this.realtime.on<any>('reminder:updated').subscribe(() => this.loadTodayReminders()));
         this.subs.add(this.realtime.on<any>('reminder:deleted').subscribe(() => this.loadTodayReminders()));
+
+        // lead pipeline changes → refresh pipeline summary
+        this.subs.add(this.realtime.on<any>('lead:created').subscribe(() => this.loadLeadStats()));
+        this.subs.add(this.realtime.on<any>('lead:updated').subscribe(() => this.loadLeadStats()));
+        this.subs.add(this.realtime.on<any>('lead:deleted').subscribe(() => this.loadLeadStats()));
     }
 
     ngOnDestroy() { this.subs.unsubscribe(); }
@@ -166,8 +186,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         }
 
         const grad = ctx.createLinearGradient(0, padT, 0, H);
-        grad.addColorStop(0, 'rgba(99,102,241,0.25)');
-        grad.addColorStop(1, 'rgba(99,102,241,0)');
+        grad.addColorStop(0, 'rgba(228,224,216,0.18)');
+        grad.addColorStop(1, 'rgba(228,224,216,0)');
         ctx.beginPath();
         ctx.moveTo(getX(0), getY(counts[0]));
         for (let i = 1; i < counts.length; i++) {
@@ -186,7 +206,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             const cpx = (getX(i - 1) + getX(i)) / 2;
             ctx.bezierCurveTo(cpx, getY(counts[i - 1]), cpx, getY(counts[i]), getX(i), getY(counts[i]));
         }
-        ctx.strokeStyle = '#818cf8';
+        ctx.strokeStyle = '#e4e0d8';
         ctx.lineWidth = 2;
         ctx.lineJoin = 'round';
         ctx.stroke();
@@ -195,7 +215,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             counts.forEach((v, i) => {
                 ctx.beginPath();
                 ctx.arc(getX(i), getY(v), 2.5, 0, Math.PI * 2);
-                ctx.fillStyle = '#818cf8';
+                ctx.fillStyle = '#e4e0d8';
                 ctx.fill();
             });
         }
@@ -206,7 +226,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
             ctx.save();
             ctx.setLineDash([3, 3]);
-            ctx.strokeStyle = 'rgba(129,140,248,0.45)';
+            ctx.strokeStyle = 'rgba(228,224,216,0.4)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(hx, padT);
@@ -216,15 +236,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
             ctx.beginPath();
             ctx.arc(hx, hy, 5, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(129,140,248,0.3)';
+            ctx.fillStyle = 'rgba(228,224,216,0.25)';
             ctx.fill();
             ctx.beginPath();
             ctx.arc(hx, hy, 3, 0, Math.PI * 2);
-            ctx.fillStyle = '#818cf8';
+            ctx.fillStyle = '#e4e0d8';
             ctx.fill();
             ctx.beginPath();
             ctx.arc(hx, hy, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = '#e0e7ff';
+            ctx.fillStyle = '#1a1917';
             ctx.fill();
 
             const date = new Date(raw[hoverIdx].day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -237,8 +257,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             if (tx + tw > W - 2) tx = W - tw - 2;
             const ty = padT - 2;
 
-            ctx.fillStyle = 'rgba(15,12,41,0.92)';
-            ctx.strokeStyle = 'rgba(129,140,248,0.4)';
+            ctx.fillStyle = 'rgba(31,29,27,0.95)';
+            ctx.strokeStyle = 'rgba(228,224,216,0.25)';
             ctx.lineWidth = 1;
             if ((ctx as any).roundRect) {
                 ctx.beginPath();
@@ -249,7 +269,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                 ctx.fillRect(tx, ty, tw, th);
                 ctx.strokeRect(tx, ty, tw, th);
             }
-            ctx.fillStyle = '#c7d2fe';
+            ctx.fillStyle = '#e4e0d8';
             ctx.fillText(text, tx + 7, ty + 12);
         }
     }
@@ -295,6 +315,24 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.http.get(`${environment.apiUrl}/admin/dashboard`).subscribe({
             next: (data) => this.stats.set(data),
         });
+    }
+
+    private loadLeadStats() {
+        this.leadsService.getStats().subscribe({
+            next: (data) => this.leadStats.set(data),
+        });
+    }
+
+    leadStageCount(status: LeadStatus): number {
+        return this.leadStats()?.byStatus[status] ?? 0;
+    }
+
+    /** Bar width relative to the largest stage, so the pipeline reads at a glance. */
+    leadStageBarPct(status: LeadStatus): number {
+        const s = this.leadStats();
+        if (!s) return 0;
+        const max = Math.max(...Object.values(s.byStatus), 1);
+        return Math.round((s.byStatus[status] / max) * 100);
     }
 
     private loadVisitorStats() {

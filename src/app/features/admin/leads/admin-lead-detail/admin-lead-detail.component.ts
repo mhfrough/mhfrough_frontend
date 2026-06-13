@@ -56,6 +56,8 @@ export class AdminLeadDetailComponent implements OnInit {
     readonly lead = signal<Lead | null>(null);
     readonly loading = signal(false);
     readonly saving = signal(false);
+    readonly saveError = signal('');
+    readonly saveSuccess = signal(false);
 
     readonly statuses: LeadStatus[] = ['new', 'contacted', 'qualified', 'quoted', 'won', 'lost'];
 
@@ -105,6 +107,8 @@ export class AdminLeadDetailComponent implements OnInit {
             return;
         }
         this.saving.set(true);
+        this.saveError.set('');
+        this.saveSuccess.set(false);
         const v = this.form.getRawValue();
         const id = this.editId();
 
@@ -123,8 +127,13 @@ export class AdminLeadDetailComponent implements OnInit {
                 next: (lead) => {
                     this.lead.set(lead);
                     this.saving.set(false);
+                    this.saveSuccess.set(true);
+                    setTimeout(() => this.saveSuccess.set(false), 3000);
                 },
-                error: () => this.saving.set(false),
+                error: () => {
+                    this.saving.set(false);
+                    this.saveError.set('Could not save changes. Please check your connection and try again.');
+                },
             });
         } else {
             const payload: CreateLeadPayload = {
@@ -143,7 +152,10 @@ export class AdminLeadDetailComponent implements OnInit {
                     this.saving.set(false);
                     this.router.navigate(['/admin/leads', lead.id]);
                 },
-                error: () => this.saving.set(false),
+                error: () => {
+                    this.saving.set(false);
+                    this.saveError.set('Could not create the lead. Please check your connection and try again.');
+                },
             });
         }
     }

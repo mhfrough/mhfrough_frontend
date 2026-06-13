@@ -10,6 +10,7 @@ import { PreconnectService } from '../../../core/services/preconnect.service';
 import { SeoService } from '../../../core/services/seo.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
+import { SERVICES, FAQS } from '../../../core/data/site-content';
 
 @Component({
     selector: 'app-home',
@@ -54,95 +55,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
     readonly marqueeClients = [...this.clients, ...this.clients];
 
-    readonly techStack = [
-        'Angular', 'TypeScript', 'RxJS', 'NgRx',
-        'NestJS', 'Node.js', 'PostgreSQL', 'TypeORM',
-        'Socket.io', 'Firebase', 'REST API', 'GraphQL',
-        'Ionic', 'Capacitor', 'React', 'HTML / CSS',
-        'SCSS / SASS', 'Bootstrap', 'Figma', 'Adobe XD',
-        'Git', 'Docker', 'Linux', 'PWA / SSR',
-    ];
-
-    readonly pricingTiers = [
-        {
-            tier: 'Starter',
-            amount: '$200',
-            suffix: '/ project',
-            desc: 'Landing pages, UI/UX designs, and simple static websites.',
-            features: [
-                'Responsive design (mobile-first)',
-                'Figma / Adobe XD prototype',
-                'Up to 5 pages',
-                '2 revision rounds',
-                'Delivered in 1–2 weeks',
-            ],
-            cta: 'Get started',
-            subject: 'Starter Package Inquiry',
-            note: 'Starting estimate — final price depends on scope',
-            featured: false,
-        },
-        {
-            tier: 'Professional',
-            amount: '$800',
-            suffix: '/ project',
-            desc: 'Full-stack web apps, portals, dashboards, and e-commerce platforms.',
-            features: [
-                'Custom frontend + backend',
-                'Database design & REST API',
-                'Auth, roles & permissions',
-                'Deployment & CI/CD support',
-                'Delivered in 3–6 weeks',
-            ],
-            cta: "Let's build it",
-            subject: 'Professional Package Inquiry',
-            note: 'Starting estimate — final price depends on scope',
-            featured: true,
-        },
-        {
-            tier: 'Enterprise',
-            amount: 'Custom',
-            suffix: '',
-            desc: 'Architecture consulting, team leadership, and long-term engagements.',
-            features: [
-                'Technical discovery & planning',
-                'System architecture design',
-                'Code review & team mentoring',
-                'Ongoing maintenance & support',
-                'Timeline negotiated upfront',
-            ],
-            cta: 'Get in touch',
-            subject: 'Enterprise Package Inquiry',
-            note: 'Scope and pricing defined after discovery call',
-            featured: false,
-        },
-    ];
-
-    readonly faqs = [
-        {
-            q: 'Do you work with international clients?',
-            a: 'Absolutely. I work with clients globally across the US, UK, Europe, and beyond. Communication is handled over email, Slack, or video calls at mutually convenient times.',
-        },
-        {
-            q: 'How long does a typical project take?',
-            a: "It depends on scope. A landing page can be ready in 1–2 weeks; a full-stack web application typically takes 3–8 weeks. I'll give you a clear timeline estimate before we start.",
-        },
-        {
-            q: 'Do you sign NDAs?',
-            a: "Yes, I'm happy to sign a Non-Disclosure Agreement before discussing project details. Your IP and business data are safe.",
-        },
-        {
-            q: 'What is your revision policy?',
-            a: 'Every project includes 2 rounds of revisions as standard. Additional revisions are billed at an hourly rate agreed on upfront.',
-        },
-        {
-            q: 'What payment methods do you accept?',
-            a: "I accept bank transfer, PayPal, Wise, and other common international payment methods. We'll agree on milestones and a payment schedule before starting.",
-        },
-        {
-            q: 'Can you join an existing team or project?',
-            a: "Yes. I'm comfortable stepping into ongoing projects, reviewing existing codebases, and collaborating with other developers, designers, and stakeholders.",
-        },
-    ];
+    // Home shows only teasers; the full lists live on /services and /faq.
+    readonly featuredServices = SERVICES.filter(s => s.featured);
+    readonly topFaqs = FAQS.slice(0, 3);
 
     private subs = new Subscription();
 
@@ -153,15 +68,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
             url: '/',
             type: 'profile',
         });
-        this.seo.setJsonLd({
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: this.faqs.map(faq => ({
-                '@type': 'Question',
-                name: faq.q,
-                acceptedAnswer: { '@type': 'Answer', text: faq.a },
-            })),
-        });
+        // FAQ structured data lives on the dedicated /faq page now.
         this.footerSettings.load();
         this.projectsService.getFeatured().subscribe({
             next: (data: any[]) => { this.projects.set(data); this.loadingProjects.set(false); this.preconnect.add(data[0]?.thumbnail); },
@@ -201,6 +108,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.subs.add(this.realtime.on<any>('feedback:approved').subscribe(() => this.loadFeaturedReviews()));
         this.subs.add(this.realtime.on<any>('feedback:unapproved').subscribe(() => this.loadFeaturedReviews()));
         this.subs.add(this.realtime.on<any>('feedback:deleted').subscribe(() => this.loadFeaturedReviews()));
+        this.subs.add(this.realtime.on<any>('feedback:featured').subscribe(() => this.loadFeaturedReviews()));
     }
 
     ngAfterViewInit() {
@@ -217,8 +125,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private loadFeaturedReviews() {
         this.loadingFeaturedReviews.set(true);
-        this.feedbackService.getApprovedPaginated(1, 3).subscribe({
-            next: (res) => { this.featuredReviews.set(res.data); this.loadingFeaturedReviews.set(false); },
+        this.feedbackService.getFeatured().subscribe({
+            next: (data) => { this.featuredReviews.set(data); this.loadingFeaturedReviews.set(false); },
             error: () => this.loadingFeaturedReviews.set(false),
         });
     }

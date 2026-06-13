@@ -180,7 +180,7 @@
     font-weight: 700;
     letter-spacing: 0;
     line-height: 1;
-    border-radius: 2px;
+    border-radius: var(--radius);
     color: var(--badge-danger);
     border: 1px solid rgba(var(--badge-danger-rgb), 0.5);
     background: rgba(var(--badge-danger-rgb), 0.06);
@@ -237,7 +237,7 @@
             display: inline-block;
             width: 6px;
             height: 6px;
-            border-radius: 999px;
+            border-radius: var(--radius-pill);
             background: var(--indigo);
             margin-top: 0.45rem;
             flex-shrink: 0;
@@ -257,11 +257,11 @@
     margin-top: 0.1rem;
 
     &.is-starred {
-        color: #d97706;
+        color: var(--warn);
     }
 
     &:hover {
-        color: #d97706;
+        color: var(--warn);
     }
 }
 
@@ -486,7 +486,7 @@
 }
 
 .tag-input-wrap.is-invalid .tag-input-inner {
-    border-bottom-color: #dc2626;
+    border-bottom-color: var(--danger);
 }
 
 .tag-chip-save {

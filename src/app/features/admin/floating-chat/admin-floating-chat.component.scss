@@ -34,7 +34,7 @@
     right: -6px;
     min-width: 18px;
     height: 18px;
-    background: #dc2626;
+    background: var(--danger);
     color: #fff;
     font-family: var(--font-mono);
     font-size: 0.6rem;
@@ -88,7 +88,7 @@
 }
 
 .afc-header-badge {
-    background: #dc2626;
+    background: var(--danger);
     color: #fff;
     font-family: var(--font-mono);
     font-size: 0.58rem;
@@ -159,7 +159,7 @@
 // ─── Live dot ─────────────────────────────────────────────────────────────────
 .afc-live-dot {
     font-size: 0.35rem;
-    color: #4ade80;
+    color: var(--success);
     animation: afc-blink 1.5s ease-in-out infinite;
     flex-shrink: 0;
 }

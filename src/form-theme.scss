@@ -25,8 +25,7 @@ input:focus,
 textarea:focus,
 select:focus,
 .form-control:focus {
-    border-color: var(--indigo);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.06);
+    border-color: var(--text);
     outline: none;
 }
 
@@ -36,12 +35,12 @@ textarea.ng-invalid.ng-touched,
 select.ng-invalid.ng-touched,
 .form-control.is-invalid,
 .ng-invalid.ng-touched {
-    border-color: #e53935 !important;
+    border-color: var(--danger) !important;
 }
 
 .was-validated .form-control:invalid,
 .form-control:invalid {
-    border-color: #e53935;
+    border-color: var(--danger);
 }
 
 /* Red underline variant (utility) */
@@ -54,13 +53,13 @@ select.ng-invalid.ng-touched,
 }
 
 .input-underline.invalid {
-    border-bottom-color: #e53935;
+    border-bottom-color: var(--danger);
 }
 
 /* Label helpers: add a small helper class to markup labels with required/optional */
 .label-required::after {
     content: ' *';
-    color: #e53935;
+    color: var(--danger);
     margin-left: 0.25rem;
 }
 
@@ -96,11 +95,11 @@ select {
 
 /* Near limit / over limit helpers for textarea */
 .near-limit {
-    color: orange;
+    color: var(--warn);
 }
 
 .over-limit {
-    color: #e53935;
+    color: var(--danger);
 }
 
 /* Checkbox + label alignment (covers common markup patterns used across admin) */
@@ -125,7 +124,7 @@ label>input[type="checkbox"] {
 
 /* Normalize existing markers used in admin templates */
 .required {
-    color: #e53935;
+    color: var(--danger);
     margin-left: 0.25rem;
 }
 
@@ -139,7 +138,7 @@ label>input[type="checkbox"] {
 
 /* Inline error message shown below invalid fields */
 .form-error {
-    color: #e53935;
+    color: var(--danger);
     font-size: 0.78rem;
     margin-top: 0.25rem;
     display: block;

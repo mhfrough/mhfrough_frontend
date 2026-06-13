@@ -71,6 +71,11 @@ export class AdminFeedbackComponent extends AdminListBase implements OnInit, OnD
             this.feedback.update(list => list.filter(f => f.id !== id));
             this.notif.fetchCounts();
         }));
+
+        // feedback:featured → update item in-place
+        this.subs.add(this.realtime.on<any>('feedback:featured').subscribe(item => {
+            this.feedback.update(list => list.map(f => f.id === item.id ? { ...f, isFeatured: item.isFeatured } : f));
+        }));
     }
 
     ngOnDestroy() { this.subs.unsubscribe(); }
@@ -83,6 +88,13 @@ export class AdminFeedbackComponent extends AdminListBase implements OnInit, OnD
         this.service.approve(id).subscribe(() => {
             this.notif.fetchCounts();
         });
+    }
+
+    toggleFeature(fb: any) {
+        const next = !fb.isFeatured;
+        // Optimistic — realtime 'feedback:featured' will confirm/correct.
+        this.feedback.update(list => list.map(f => f.id === fb.id ? { ...f, isFeatured: next } : f));
+        this.service.setFeatured(fb.id, next).subscribe();
     }
 
     override executeDelete(): void {

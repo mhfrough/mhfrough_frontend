@@ -1,0 +1,107 @@
+<!-- ─── Page header ──────────────────────────────────────────────────────── -->
+<section class="section">
+    <div class="section-container">
+        <p class="legal-eyebrow">Services &amp; Pricing</p>
+        <h1 class="section-title">Full-stack engineering, end to end.</h1>
+        <p class="section-lead">
+            I design, build, and ship production web applications — from the database and API to a
+            fast, accessible interface. Below is how I can help, how we'll work together, and what
+            engagements typically look like. Every project is scoped individually, so treat the
+            pricing as a starting point, not a ceiling.
+        </p>
+        <div class="section-actions">
+            <a routerLink="/contact" [queryParams]="{subject: 'Project Inquiry'}" class="btn-primary">Start a project</a>
+            <a routerLink="/projects" class="btn-ghost">See past work</a>
+        </div>
+    </div>
+</section>
+
+<!-- ─── What I do ────────────────────────────────────────────────────────── -->
+<section class="section" id="services">
+    <div class="section-container">
+        <h2 class="section-title">What I do</h2>
+        <div class="services-grid">
+            @for (service of services; track service.name) {
+            <a class="service-card" routerLink="/contact"
+                [queryParams]="{subject: service.subject, message: service.message}">
+                <i class="bi {{ service.icon }} service-icon"></i>
+                <h3 class="service-name">{{ service.name }}</h3>
+                <p class="service-desc">{{ service.desc }}</p>
+                <div class="service-footer">
+                    <div class="service-tags">
+                        @for (tag of service.tags; track tag) {
+                        <span class="service-tag">{{ tag }}</span>
+                        }
+                    </div>
+                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ─── How I Work ───────────────────────────────────────────────────────── -->
+<section class="section process-section" id="process">
+    <div class="section-container">
+        <h2 class="section-title">How I Work</h2>
+        <div class="process-steps">
+            @for (step of processSteps; track step.name; let i = $index) {
+            <div class="process-step">
+                <span class="process-num">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                <i class="bi {{ step.icon }} process-icon"></i>
+                <h3 class="process-name">{{ step.name }}</h3>
+                <p class="process-desc">{{ step.desc }}</p>
+            </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ─── Pricing ──────────────────────────────────────────────────────────── -->
+<section class="section" id="pricing">
+    <div class="section-container">
+        <h2 class="section-title">Pricing</h2>
+        <p class="section-sub">Indicative starting points — final quotes are tailored to your scope.</p>
+        <div class="pricing-grid">
+            @for (tier of pricingTiers; track tier.tier) {
+            <div class="pricing-card" [class.pricing-card--featured]="tier.featured">
+                @if (tier.featured) {
+                <div class="pricing-badge">Most Popular</div>
+                }
+                <p class="pricing-tier">{{ tier.tier }}</p>
+                <div class="pricing-price">
+                    <span class="pricing-amount">{{ tier.amount }}</span>
+                    @if (tier.suffix) {
+                    <span class="pricing-suffix">{{ tier.suffix }}</span>
+                    }
+                </div>
+                <p class="pricing-desc">{{ tier.desc }}</p>
+                <ul class="pricing-features">
+                    @for (f of tier.features; track f) {
+                    <li><i class="bi bi-check-lg"></i>{{ f }}</li>
+                    }
+                </ul>
+                <a routerLink="/contact" [queryParams]="{subject: tier.subject}" class="btn-primary">
+                    {{ tier.cta }} <i class="bi bi-arrow-right"></i>
+                </a>
+                <p class="pricing-note">* {{ tier.note }}</p>
+            </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ─── Contact CTA ──────────────────────────────────────────────────────── -->
+<section class="section" id="contact">
+    <div class="section-container contact-cta">
+        <div class="hero-availability">
+            <span class="avail-dot"></span>
+            <span class="avail-text">Available for new projects</span>
+        </div>
+        <h2>Have something in mind?</h2>
+        <p>Tell me about your project and I'll come back with a clear plan and a quote. Still have
+            questions? Check the <a routerLink="/faq" class="inline-link">FAQ</a>.</p>
+        <a routerLink="/contact" [queryParams]="{subject: 'Project Inquiry'}" class="btn-primary">Get in touch</a>
+    </div>
+</section>

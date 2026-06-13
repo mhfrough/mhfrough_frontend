@@ -8,8 +8,6 @@
 @import "@fontsource/inconsolata/500.css";
 @import "@fontsource/inconsolata/600.css";
 @import "@fontsource/inconsolata/700.css";
-@import "@fontsource/dm-sans/400.css";
-@import "@fontsource/dm-sans/500.css";
 
 // --- Tokens ------------------------------------------------------------------
 :root {
@@ -19,10 +17,15 @@
     --font: "Inconsolata", "Courier New", monospace;
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
     --dur: 220ms;
+    --dur-fast: 120ms;
     --mobile-tabbar-h: 68px;
 
-    // Main site palette ? paper
-    // Dark palette (admin-aligned)
+    // Radius — pointy-edge house style. One knob: bump --radius to soften globally.
+    --radius: 0;          // all rectangular surfaces (cards, panels, inputs, buttons)
+    --radius-pill: 999px; // status pills / toggles / scrollbar thumb only
+    --radius-circle: 50%; // avatars / icon dots only
+
+    // Dark palette (warm charcoal)
     --bg: #1a1917;
     --bg-rgb: 26, 25, 23;
     --bg-alt: #242220;
@@ -33,19 +36,38 @@
     --text-muted: #928e87;
     --border: rgba(228, 224, 216, 0.10);
     --accent: #e4e0d8;
-    --paper: #1a1917;
+
+    // Surfaces (raised fills + hover overlays — tinted light for the dark theme)
+    --surface: #242220;
+    --surface-alt: #1f1d1b;
+    --surface-hover: rgba(228, 224, 216, 0.05);
+    --bg-soft: #242220;
+    --bg-subtle: rgba(228, 224, 216, 0.04);
+    --muted: var(--text-muted);
 
     // Shared / admin
     --indigo: #6366f1;
     --indigo-rgb: 99, 102, 241;
 
-    // Badge semantic color tokens
-    --badge-success: #4ade80;
-    --badge-success-rgb: 74, 222, 128;
-    --badge-warn: #d97706;
-    --badge-warn-rgb: 217, 119, 6;
-    --badge-danger: #dc2626;
-    --badge-danger-rgb: 220, 38, 38;
+    // Semantic colors (map meaning -> palette so the same intent reads one way)
+    --primary: var(--indigo);
+    --primary-rgb: var(--indigo-rgb);
+    --accent-rgb: 99, 102, 241; // focus / interactive accent (indigo)
+    --success: #4ade80;
+    --success-rgb: 74, 222, 128;
+    --danger: #dc2626;
+    --danger-rgb: 220, 38, 38;
+    --warn: #d97706;
+    --warn-rgb: 217, 119, 6;
+
+    // Badge semantic color tokens (alias the semantic set above)
+    --badge-success: var(--success);
+    --badge-success-rgb: var(--success-rgb);
+    --badge-on: var(--success);
+    --badge-warn: var(--warn);
+    --badge-warn-rgb: var(--warn-rgb);
+    --badge-danger: var(--danger);
+    --badge-danger-rgb: var(--danger-rgb);
 }
 
 // --- Scrollbar ---------------------------------------------------------------
@@ -65,7 +87,7 @@
 
 ::-webkit-scrollbar-thumb {
     background: var(--text-muted);
-    border-radius: 9999px;
+    border-radius: var(--radius-pill);
 
     &:hover {
         background: var(--text);
@@ -290,7 +312,7 @@ body::before {
         min-width: 180px;
         background: var(--bg);
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: var(--radius);
         padding: 1rem;
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
         opacity: 0;
@@ -341,7 +363,7 @@ body::before {
             position: relative;
             width: 28px;
             height: 16px;
-            border-radius: 9999px;
+            border-radius: var(--radius-pill);
             background: var(--border);
             border: 1px solid var(--border);
             cursor: pointer;
@@ -457,7 +479,7 @@ body::before {
     right: -8px;
     min-width: 15px;
     height: 15px;
-    border-radius: 9999px;
+    border-radius: var(--radius-pill);
     background: var(--indigo);
     color: #fff;
     font-size: 0.55rem;
@@ -544,7 +566,7 @@ body::before {
     .mobile-menu-handle {
         width: 36px;
         height: 4px;
-        border-radius: 9999px;
+        border-radius: var(--radius-pill);
         background: var(--border);
         margin: 0.75rem auto;
         flex-shrink: 0;
@@ -739,6 +761,68 @@ body::before {
             color: var(--text-muted);
             text-decoration: none;
             transition: color var(--dur) var(--ease);
+
+            &:hover,
+            &.active {
+                color: var(--text);
+            }
+        }
+    }
+
+    /* Multi-column top section: brand/bio + grouped link columns. */
+    .footer-top {
+        display: grid;
+        grid-template-columns: 1.7fr 1fr 1fr 1fr;
+        gap: 3rem;
+        padding-bottom: 2.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border);
+
+        @media (max-width: 860px) {
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem 2rem;
+        }
+
+        @media (max-width: 480px) {
+            gap: 2rem 1.25rem;
+        }
+    }
+
+    .footer-brand-col {
+        @media (max-width: 860px) {
+            grid-column: 1 / -1;
+        }
+
+        .nav-logo {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .footer-locale {
+            margin-top: 1rem;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+
+            i {
+                margin-right: 0.35rem;
+            }
+        }
+    }
+
+    .footer-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+
+        a {
+            font-family: var(--font-sans);
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color var(--dur) var(--ease);
+            width: fit-content;
 
             &:hover,
             &.active {
@@ -1492,7 +1576,7 @@ body::before {
     color: var(--text-muted);
     border: 1px solid var(--border);
     padding: 0.15rem 0.5rem;
-    border-radius: 2px;
+    border-radius: var(--radius);
 }
 
 .service-cta {
@@ -1951,17 +2035,17 @@ body::before {
         font-size: 0.88em;
         background: rgba(255, 255, 255, 0.06);
         border: 1px solid var(--border);
-        border-radius: 4px;
+        border-radius: var(--radius);
         padding: 0.1em 0.35em;
     }
 
     img {
         max-width: 100%;
-        border-radius: 6px;
+        border-radius: var(--radius);
         margin: 0.5rem 0;
     }
 
-    // Strip inline color overrides from RTE � ensure text stays on-theme
+    // Strip inline color overrides from RTE — ensure text stays on-theme
     span[style*="color"] {
         color: var(--text-muted) !important;
     }
@@ -3335,7 +3419,7 @@ body::before {
 }
 
 button.admin-nav-link:last-child:hover {
-    color: #dc2626;
+    color: var(--danger);
     background: rgba(220, 38, 38, 0.07);
 }
 
@@ -3363,7 +3447,7 @@ button.admin-nav-link:last-child:hover {
     font-weight: 700;
     letter-spacing: 0;
     border: 1px solid currentColor;
-    border-radius: 2px;
+    border-radius: var(--radius);
     line-height: 1;
 
     &--danger {
@@ -3608,7 +3692,7 @@ button.admin-nav-link:last-child:hover {
 
 .admin-rating-fill {
     height: 100%;
-    background: #d97706;
+    background: var(--warn);
     transition: width 0.5s var(--ease);
 }
 
@@ -3999,8 +4083,8 @@ button.admin-nav-link:last-child:hover {
     flex-shrink: 0;
 
     &--confirmed {
-        border-color: var(--badge-on, #22c55e);
-        color: var(--badge-on, #22c55e);
+        border-color: var(--badge-on);
+        color: var(--badge-on);
     }
 
     &--pending {
@@ -4115,7 +4199,7 @@ button.admin-nav-link:last-child:hover {
     }
 
     tbody tr:hover td {
-        background: rgba(0, 0, 0, 0.018);
+        background: var(--surface-hover);
     }
 }
 
@@ -4234,7 +4318,7 @@ button.admin-nav-link:last-child:hover {
     }
 
     &.is-invalid {
-        border-bottom-color: #dc2626;
+        border-bottom-color: var(--danger);
     }
 }
 
@@ -4379,7 +4463,7 @@ button.admin-nav-link:last-child:hover {
     transition: color var(--dur) var(--ease);
 
     &:hover {
-        color: #dc2626;
+        color: var(--danger);
     }
 }
 
@@ -4459,7 +4543,7 @@ button.admin-nav-link:last-child:hover {
         align-items: center;
         gap: 0.35rem;
         font-size: 0.85rem;
-        color: var(--success, #4ade80);
+        color: var(--success);
     }
 
     .settings-error-msg {
@@ -4664,14 +4748,14 @@ button.admin-nav-link:last-child:hover {
 
 .img-upload-zone {
     border: 2px dashed var(--border);
-    // border-radius: 8px;
+    // border-radius: var(--radius);
     transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
     overflow: hidden;
 
     &:hover,
     &.drag-over {
         border-color: var(--text);
-        background: var(--surface-hover, rgba(128, 128, 128, .06));
+        background: var(--surface-hover);
     }
 }
 
@@ -4700,7 +4784,7 @@ button.admin-nav-link:last-child:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--surface-alt, rgba(128, 128, 128, .04));
+    background: var(--surface-alt);
 
     img {
         width: 100%;
@@ -4795,7 +4879,7 @@ button.admin-nav-link:last-child:hover {
         color: var(--border);
 
         &.star--filled {
-            color: #d97706;
+            color: var(--warn);
         }
     }
 }
@@ -4865,7 +4949,7 @@ button.admin-nav-link:last-child:hover {
 
     &.btn--error {
         animation: btn-shake 0.4s ease;
-        background: #dc2626 !important;
+        background: var(--danger) !important;
         color: #fff !important;
         opacity: 1 !important;
         pointer-events: none;
@@ -4892,7 +4976,7 @@ button.admin-nav-link:last-child:hover {
     }
 
     &--success {
-        color: #4ade80;
+        color: var(--success);
         background: rgba(22, 101, 52, 0.15);
         border-color: rgba(74, 222, 128, 0.25);
     }
@@ -5075,7 +5159,7 @@ button.admin-nav-link:last-child:hover {
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #dc2626;
+    color: var(--danger);
     background: none;
     border: none;
     cursor: pointer;
@@ -5203,7 +5287,7 @@ button.admin-nav-link:last-child:hover {
         letter-spacing: 0.2em;
         text-transform: uppercase;
         color: var(--text-muted);
-        margin: 0 0 1rem;
+        margin: 0 0 0.75rem;
     }
 
     .contact-heading {
@@ -5239,7 +5323,7 @@ button.admin-nav-link:last-child:hover {
     }
 
     &--success {
-        color: #4ade80;
+        color: var(--success);
         background: rgba(22, 101, 52, 0.15);
         border-color: rgba(74, 222, 128, 0.25);
     }
@@ -5312,7 +5396,7 @@ button.admin-nav-link:last-child:hover {
     }
 
     &.is-error {
-        border-bottom-color: #dc2626;
+        border-bottom-color: var(--danger);
     }
 }
 
@@ -5352,7 +5436,7 @@ button.admin-nav-link:last-child:hover {
 .contact-error {
     font-family: var(--font-sans);
     font-size: 0.72rem;
-    color: #dc2626;
+    color: var(--danger);
     letter-spacing: 0.02em;
 }
 
@@ -5551,7 +5635,7 @@ button.admin-nav-link:last-child:hover {
         color: var(--border);
 
         &.star--filled {
-            color: #d97706;
+            color: var(--warn);
         }
     }
 }
@@ -5660,7 +5744,7 @@ button.admin-nav-link:last-child:hover {
     transition: color var(--dur) var(--ease), transform var(--dur) var(--ease);
 
     &.is-active {
-        color: #d97706;
+        color: var(--warn);
     }
 
     &:hover {
@@ -5738,7 +5822,7 @@ button.admin-nav-link:last-child:hover {
     &--dark {
         background: #1a1917;
         padding: 1.5rem;
-        border-radius: 12px;
+        border-radius: var(--radius);
     }
 }
 
@@ -5748,7 +5832,7 @@ button.admin-nav-link:last-child:hover {
     flex-direction: column;
     gap: 0.2rem;
     padding: 1.25rem 1rem 1rem;
-    border-radius: 10px;
+    border-radius: var(--radius);
     border: none;
     cursor: pointer;
     min-height: 120px;
@@ -5802,7 +5886,7 @@ button.admin-nav-link:last-child:hover {
     gap: 1.25rem;
     padding: 2rem;
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: var(--radius);
     margin-top: 1.5rem;
 }
 
@@ -6110,7 +6194,7 @@ button.admin-nav-link:last-child:hover {
         color: var(--text);
         background: var(--bg-alt);
         padding: 0.1em 0.35em;
-        border-radius: 3px;
+        border-radius: var(--radius);
     }
 
     pre {
@@ -6410,14 +6494,14 @@ button.admin-nav-link:last-child:hover {
 .brand-spacing-bar-wrap {
     height: 12px;
     background: var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius);
     overflow: hidden;
 }
 
 .brand-spacing-bar {
     height: 100%;
     background: var(--text);
-    border-radius: 6px;
+    border-radius: var(--radius);
     min-width: 4px;
 }
 
@@ -6489,7 +6573,7 @@ button.admin-nav-link:last-child:hover {
     padding: 1.5rem;
     background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: var(--radius);
 }
 
 .brand-shadow-name {
@@ -6519,7 +6603,7 @@ button.admin-nav-link:last-child:hover {
     gap: 0.5rem;
     padding: 1.25rem;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius);
 }
 
 .brand-motion-label {
@@ -6542,14 +6626,14 @@ button.admin-nav-link:last-child:hover {
     gap: 0.75rem;
     padding: 1.25rem;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius);
 }
 
 .brand-motion-box {
     width: 40px;
     height: 40px;
     background: var(--text);
-    border-radius: 6px;
+    border-radius: var(--radius);
     transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
 
     &:hover {
@@ -6559,7 +6643,7 @@ button.admin-nav-link:last-child:hover {
 }
 
 // -----------------------------------------------------------------------------
-// ADMIN LOGIN � Remember Me
+// ADMIN LOGIN — Remember Me
 // -----------------------------------------------------------------------------
 
 .admin-remember-row {
@@ -6648,6 +6732,25 @@ button.admin-nav-link:last-child:hover {
     &.is-active:visited {
         color: var(--text);
         border-bottom-color: var(--text);
+    }
+}
+
+/* Danger Zone tab — subtle red accent so destructive area reads as such. */
+.settings-tab--danger {
+    color: rgba(var(--badge-danger-rgb), 0.85);
+
+    &:visited {
+        color: rgba(var(--badge-danger-rgb), 0.85);
+    }
+
+    &:hover {
+        color: var(--badge-danger);
+    }
+
+    &.is-active,
+    &.is-active:visited {
+        color: var(--badge-danger);
+        border-bottom-color: var(--badge-danger);
     }
 }
 
@@ -6871,7 +6974,7 @@ button.admin-nav-link:last-child:hover {
     inset: 0;
     background: rgba(255, 255, 255, 0.12);
     border: 1px solid var(--border);
-    border-radius: 24px;
+    border-radius: var(--radius);
     transition: background 0.2s, border-color 0.2s;
     cursor: pointer;
 
@@ -6962,7 +7065,7 @@ button.admin-nav-link:last-child:hover {
     color: var(--text-muted);
     background: rgba(255, 255, 255, 0.06);
     padding: 0.2rem 0.45rem;
-    border-radius: 4px;
+    border-radius: var(--radius);
     display: block;
 }
 
@@ -6979,7 +7082,7 @@ button.admin-nav-link:last-child:hover {
     gap: 0.35rem;
     font-size: 0.7rem;
     font-weight: 500;
-    color: #4ade80;
+    color: var(--success);
     margin-top: 0.25rem;
 }
 
@@ -6987,7 +7090,7 @@ button.admin-nav-link:last-child:hover {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #4ade80;
+    background: var(--success);
     flex-shrink: 0;
     animation: session-pulse 1.6s ease-in-out infinite;
 }
@@ -7012,7 +7115,7 @@ button.admin-nav-link:last-child:hover {
     gap: 0.35rem;
     font-size: 0.72rem;
     font-weight: 500;
-    color: #4ade80;
+    color: var(--success);
 }
 
 tr.session-current-row td {
@@ -7116,7 +7219,7 @@ tr.session-current-row {
     padding: 0.75rem 1rem;
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius);
     margin-bottom: 1.25rem;
     font-family: var(--font-sans);
     font-size: 0.85rem;
@@ -7350,7 +7453,7 @@ tr.session-current-row {
     align-items: flex-start;
     gap: 1rem;
     padding: 2rem 2.5rem;
-    border-radius: 12px;
+    border-radius: var(--radius);
     min-width: 180px;
 
     &--light {
@@ -7364,7 +7467,7 @@ tr.session-current-row {
     }
 
     &--indigo {
-        background: #6366f1;
+        background: var(--indigo);
     }
 }
 
@@ -7449,18 +7552,18 @@ tr.session-current-row {
     }
 
     &--inquiry {
-        border-left: 3px solid #dc2626;
+        border-left: 3px solid var(--danger);
 
         i {
-            color: #dc2626;
+            color: var(--danger);
         }
     }
 
     &--feedback {
-        border-left: 3px solid #d97706;
+        border-left: 3px solid var(--warn);
 
         i {
-            color: #d97706;
+            color: var(--warn);
         }
     }
 }
@@ -7537,7 +7640,7 @@ tr.session-current-row {
     line-height: 1.6;
 }
 
-// Minimal reason textarea � no form-field wrapper, just a bare underline input
+// Minimal reason textarea — no form-field wrapper, just a bare underline input
 .admin-modal-reason {
     margin-bottom: 1.5rem;
 
@@ -7583,9 +7686,9 @@ tr.session-current-row {
     gap: 0.5rem;
     margin: 1rem 0;
     padding: 0.75rem;
-    background: var(--bg-subtle, rgba(255,255,255,0.04));
+    background: var(--bg-subtle);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius);
 }
 
 .admin-modal-device-row {
@@ -7764,9 +7867,9 @@ tr.session-current-row {
     letter-spacing: 0.12em;
     text-transform: uppercase;
     padding: 0.75rem 1.25rem;
-    background: #dc2626;
+    background: var(--danger);
     color: #fff;
-    border: 1px solid #dc2626;
+    border: 1px solid var(--danger);
     cursor: pointer;
     transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
 
@@ -7825,7 +7928,7 @@ tr.session-current-row {
     font-family: var(--font-sans);
     font-size: 0.68rem;
     font-weight: 500;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--text-muted);
     margin: 0 0 0.75rem;
@@ -7933,7 +8036,7 @@ tr.session-current-row {
         color: var(--text);
         background: var(--bg-alt);
         padding: 0.1em 0.35em;
-        border-radius: 3px;
+        border-radius: var(--radius);
     }
 }
 
@@ -8107,7 +8210,7 @@ tr.session-current-row {
     color: var(--text-muted);
 
     &--video {
-        color: #6366f1;
+        color: var(--indigo);
         border-color: rgba(99, 102, 241, 0.4);
     }
 
@@ -8539,7 +8642,7 @@ tr.session-current-row {
 
 .vt-device-fill {
     height: 100%;
-    background: var(--indigo, #6366f1);
+    background: var(--indigo, var(--indigo));
     opacity: 0.7;
     transition: width 400ms var(--ease);
 }
@@ -8594,7 +8697,7 @@ tr.session-current-row {
     margin-top: 0.25rem;
     font-size: 0.72rem;
     font-weight: 500;
-    color: #4ade80;
+    color: var(--success);
     max-width: 160px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -8605,7 +8708,7 @@ tr.session-current-row {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #4ade80;
+    background: var(--success);
     flex-shrink: 0;
     animation: vt-pulse 1.6s ease-in-out infinite;
 }
@@ -8795,10 +8898,10 @@ tr.session-current-row {
 .vt-timeline-duration {
     font-family: var(--font-mono);
     font-size: 0.62rem;
-    color: var(--primary, #818cf8);
+    color: var(--primary);
     background: rgba(99, 102, 241, 0.12);
     border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 3px;
+    border-radius: var(--radius);
     padding: 1px 5px;
     white-space: nowrap;
 }
@@ -9105,7 +9208,7 @@ tr.session-current-row {
         opacity: 0.3;
 
         &.star--filled {
-            color: #d97706;
+            color: var(--warn);
             opacity: 1;
         }
     }
@@ -9364,4 +9467,44 @@ tr.session-current-row {
     line-height: 1.85;
     color: var(--text-muted);
     margin: 0;
+}
+
+/* ─── Shared helpers for the simple public pages (services / about / faq) ──── */
+/* Reuses the existing section system + tokens so these pages match the home
+   page exactly. Intro lead + action row only — everything else (.service-card,
+   .pricing-card, .process-step, .faq-list, .about-grid) is already global. */
+.section-lead {
+    max-width: 62ch;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    line-height: 1.85;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.section-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 1.75rem;
+}
+
+/* Sub-heading shown under a .section-title on the simple pages. */
+.section-sub {
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin: -0.5rem 0 2rem;
+}
+
+/* Inline text link inside body copy (on-theme underline). */
+.inline-link {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: opacity var(--dur) var(--ease);
+
+    &:hover {
+        opacity: 0.7;
+    }
 }

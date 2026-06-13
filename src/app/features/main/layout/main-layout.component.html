@@ -7,10 +7,10 @@
         <a class="nav-logo" routerLink="/" (click)="scrollTop()">MHFrough<span class="nav-logo-dot">.</span></a>
         <!-- Desktop nav -->
         <ul class="nav-links">
-            <li><a routerLink="/" fragment="about">About</a></li>
+            <li><a routerLink="/about" routerLinkActive="active">About</a></li>
             <li><a routerLink="/projects" routerLinkActive="active">Projects</a></li>
             <li><a routerLink="/gallery" routerLinkActive="active">Gallery</a></li>
-            <li><a routerLink="/" fragment="services">Services</a></li>
+            <li><a routerLink="/services" routerLinkActive="active">Services</a></li>
             <li><a routerLink="/blog" routerLinkActive="active">Writing</a></li>
             <li><a routerLink="/feedback" routerLinkActive="active">Reviews</a></li>
             <li><a routerLink="/contact" routerLinkActive="active">Work with me</a></li>
@@ -46,11 +46,42 @@
 <!-- ─── Footer ──────────────────────────────────────────────────────────────── -->
 <footer class="site-footer">
     <div class="container">
-        <nav class="footer-nav">
-            @for (item of mainNavItems; track item.label) {
-            <a [routerLink]="item.link" [fragment]="item.fragment">{{ item.label }}</a>
-            }
-        </nav>
+        <div class="footer-top">
+            <div class="footer-brand-col">
+                <a class="nav-logo" routerLink="/" (click)="scrollTop()">MHFrough<span class="nav-logo-dot">.</span></a>
+                <p class="footer-bio">
+                    Application developer &amp; product designer crafting fast, modern, accessible web
+                    experiences — from first sketch to production deployment.
+                </p>
+                @if (footerSettings.data().location && isSocialVisible('location')) {
+                <p class="footer-locale"><i class="bi bi-geo-alt"></i> {{ footerSettings.data().location }}</p>
+                }
+            </div>
+
+            <nav class="footer-links" aria-label="Explore">
+                <p class="footer-col-title">Explore</p>
+                <a routerLink="/projects">Projects</a>
+                <a routerLink="/gallery">Gallery</a>
+                <a routerLink="/services">Services</a>
+                <a routerLink="/blog">Writing</a>
+                <a routerLink="/feedback">Reviews</a>
+            </nav>
+
+            <nav class="footer-links" aria-label="Company">
+                <p class="footer-col-title">Company</p>
+                <a routerLink="/about">About</a>
+                <a routerLink="/faq">FAQ</a>
+                <a routerLink="/contact">Work with me</a>
+                <a routerLink="/credits">Credits</a>
+            </nav>
+
+            <nav class="footer-links" aria-label="Legal">
+                <p class="footer-col-title">Legal</p>
+                <a routerLink="/privacy">Privacy Policy</a>
+                <a routerLink="/terms">Terms &amp; Conditions</a>
+            </nav>
+        </div>
+
         <div class="footer-bottom">
             <span>
                 © {{ year }} {{ footerSettings.data().copyrightOwner }}

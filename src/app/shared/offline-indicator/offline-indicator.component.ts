@@ -19,6 +19,16 @@ import { SyncQueueService } from '../../core/services/sync-queue.service';
                 }
             </div>
         }
+        @if (sync.failedCount() > 0) {
+            <div class="offline-toast failed">
+                <i class="bi bi-exclamation-triangle offline-icon"></i>
+                <span class="offline-text">
+                    {{ sync.failedCount() }} change{{ sync.failedCount() === 1 ? '' : 's' }} couldn't be saved.
+                </span>
+                <button type="button" class="offline-action" (click)="retry()">Retry</button>
+                <button type="button" class="offline-action subtle" (click)="dismiss()">Dismiss</button>
+            </div>
+        }
     `,
     styles: [`
         :host { display: contents; }
@@ -69,6 +79,30 @@ import { SyncQueueService } from '../../core/services/sync-queue.service';
             letter-spacing: 0.04em;
         }
 
+        .offline-toast.failed {
+            border-color: rgba(220, 53, 69, 0.5);
+            color: var(--text);
+        }
+
+        .offline-toast.failed .offline-icon { color: #dc3545; }
+
+        .offline-action {
+            flex-shrink: 0;
+            cursor: pointer;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.15rem 0.65rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            color: var(--text);
+            transition: background 0.15s ease;
+        }
+
+        .offline-action:hover { background: rgba(var(--text-rgb), 0.08); }
+        .offline-action.subtle { color: var(--text-muted); border-color: transparent; }
+
         @keyframes offline-slide-up {
             from { opacity: 0; transform: translateX(-50%) translateY(0.75rem); }
             to   { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -78,4 +112,7 @@ import { SyncQueueService } from '../../core/services/sync-queue.service';
 export class OfflineIndicatorComponent {
     protected readonly network = inject(NetworkStatusService);
     protected readonly sync = inject(SyncQueueService);
+
+    retry() { void this.sync.retryAllFailed(); }
+    dismiss() { void this.sync.discardAllFailed(); }
 }

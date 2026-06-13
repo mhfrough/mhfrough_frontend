@@ -56,6 +56,11 @@
                 </button>
                 }
                 @if (fb.isApproved) {
+                <button class="btn-text" (click)="toggleFeature(fb)"
+                    [title]="fb.isFeatured ? 'Remove from featured testimonials' : 'Feature as a testimonial'">
+                    <i class="bi" [class.bi-star-fill]="fb.isFeatured" [class.bi-star]="!fb.isFeatured"></i>
+                    {{ fb.isFeatured ? 'Featured' : 'Feature' }}
+                </button>
                 <button class="btn-text" (click)="openStatusModal(fb.id)">
                     <i class="bi bi-eye-slash"></i> Unapprove
                 </button>

@@ -92,6 +92,78 @@
     </div>
 </div>
 
+<!-- ── Lead Pipeline ─────────────────────────────────────────────────────── -->
+@if (leadStats(); as ls) {
+<div class="admin-analytics-split" style="margin-top:0">
+
+    <!-- Pipeline stages -->
+    <div class="admin-analytics-panel">
+        <div class="admin-analytics-panel-header">
+            <p class="admin-analytics-panel-title">Lead Pipeline</p>
+            <a routerLink="/admin/leads/pipeline" class="admin-dashboard-section-link">Open board</a>
+        </div>
+
+        <div class="admin-visitor-stat-row">
+            <div class="admin-visitor-stat">
+                <span class="admin-visitor-stat-val">{{ ls.total }}</span>
+                <span class="admin-visitor-stat-lbl">Total</span>
+            </div>
+            <div class="admin-visitor-stat">
+                <span class="admin-visitor-stat-val">{{ ls.open }}</span>
+                <span class="admin-visitor-stat-lbl">Open</span>
+            </div>
+            <div class="admin-visitor-stat">
+                <span class="admin-visitor-stat-val">{{ ls.byStatus.won }}</span>
+                <span class="admin-visitor-stat-lbl">Won</span>
+            </div>
+            <div class="admin-visitor-stat">
+                <span class="admin-visitor-stat-val">{{ ls.winRate }}%</span>
+                <span class="admin-visitor-stat-lbl">Win Rate</span>
+            </div>
+        </div>
+
+        <div style="margin-top:1rem">
+            @for (stage of leadStages; track stage.status) {
+            <div class="admin-analytics-metric">
+                <div class="admin-analytics-metric-head">
+                    <span>
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:.4rem"
+                            [style.background]="stage.accent"></span>{{ stage.label }}
+                    </span>
+                    <span class="admin-analytics-pct">{{ leadStageCount(stage.status) }}</span>
+                </div>
+                <div class="admin-analytics-track">
+                    <div class="admin-analytics-fill" [style.width.%]="leadStageBarPct(stage.status)"
+                        [style.background]="stage.accent"></div>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Lead sources -->
+    <div class="admin-analytics-panel">
+        <p class="admin-analytics-panel-title">Lead Sources</p>
+        @if (ls.bySource.length === 0) {
+        <p class="admin-dashboard-empty">No leads yet.</p>
+        } @else {
+        <div class="admin-activity-feed">
+            @for (s of ls.bySource; track s.source) {
+            <div class="admin-activity-item">
+                <i class="bi bi-diagram-3 admin-activity-icon"></i>
+                <div class="admin-activity-body">
+                    <span class="admin-activity-text">{{ s.source | titlecase }}</span>
+                </div>
+                <span class="admin-activity-badge">{{ s.count }}</span>
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+</div>
+}
+
 <!-- ── Analytics ─────────────────────────────────────────────────────────── -->
 <div class="admin-analytics-split">
 

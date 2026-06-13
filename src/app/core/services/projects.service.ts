@@ -1,22 +1,11 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, from } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { IdbService } from './idb.service';
-import { NetworkStatusService } from './network-status.service';
-import { SyncQueueService } from './sync-queue.service';
+import { OfflineResourceService, Paginated } from './offline-resource.service';
 
 @Injectable({ providedIn: 'root' })
-export class ProjectsService {
-    private readonly http = inject(HttpClient);
-    private readonly idb = inject(IdbService);
-    private readonly network = inject(NetworkStatusService);
-    private readonly syncQueue = inject(SyncQueueService);
+export class ProjectsService extends OfflineResourceService {
     private readonly base = `${environment.apiUrl}/projects`;
-
-    private enqueue(method: 'POST' | 'PUT' | 'PATCH' | 'DELETE', url: string, body: unknown = null): Observable<any> {
-        return from(this.syncQueue.enqueue({ url, method, body, timestamp: Date.now() }).then(() => ({ queued: true })));
-    }
 
     uploadImage(file: File) {
         const fd = new FormData();
@@ -26,28 +15,15 @@ export class ProjectsService {
 
     getAll() { return this.http.get<any[]>(this.base); }
 
-    getPublic(page: number, limit: number, q?: string, tag?: string): Observable<{ data: any[]; total: number; page: number; limit: number; totalPages: number }> {
+    getPublic(page: number, limit: number, q?: string, tag?: string): Observable<Paginated<any>> {
         const params: Record<string, any> = { page, limit };
         if (q) params['q'] = q;
         if (tag && tag !== 'all') params['tag'] = tag;
-        return new Observable(subscriber => {
-            if (page === 1 && !q && !tag) {
-                this.idb.getAll<any>('projects').then(cached => {
-                    if (cached.length) {
-                        subscriber.next({ data: cached.slice(0, limit), total: cached.length, page: 1, limit, totalPages: Math.ceil(cached.length / limit) });
-                    }
-                });
-            }
-            this.http.get<{ data: any[]; total: number; page: number; limit: number; totalPages: number }>(this.base, { params }).subscribe({
-                next: fresh => {
-                    if (page === 1 && !q && !tag) {
-                        this.idb.putMany('projects', fresh.data).catch(() => {});
-                    }
-                    subscriber.next(fresh);
-                    subscriber.complete();
-                },
-                error: err => subscriber.error(err),
-            });
+        return this.staleList<any>({
+            store: 'projects',
+            cacheable: page === 1 && !q && !tag,
+            limit,
+            fetch: () => this.http.get<Paginated<any>>(this.base, { params }),
         });
     }
 
@@ -73,28 +49,9 @@ export class ProjectsService {
     getOne(id: string) { return this.http.get<any>(`${this.base}/${id}`); }
     getBySlug(slug: string) { return this.http.get<any>(`${this.base}/slug/${slug}`); }
 
-    create(data: any): Observable<any> {
-        if (!this.network.isOnline()) return this.enqueue('POST', this.base, data);
-        return this.http.post<any>(this.base, data);
-    }
-
-    update(id: string, data: any): Observable<any> {
-        if (!this.network.isOnline()) return this.enqueue('PUT', `${this.base}/${id}`, data);
-        return this.http.put<any>(`${this.base}/${id}`, data);
-    }
-
-    patchFeatured(id: string, featured: boolean): Observable<any> {
-        if (!this.network.isOnline()) return this.enqueue('PATCH', `${this.base}/${id}/featured`, { featured });
-        return this.http.patch<any>(`${this.base}/${id}/featured`, { featured });
-    }
-
-    unpublish(id: string, adminNote?: string): Observable<any> {
-        if (!this.network.isOnline()) return this.enqueue('PATCH', `${this.base}/${id}/unpublish`, { adminNote });
-        return this.http.patch<any>(`${this.base}/${id}/unpublish`, { adminNote });
-    }
-
-    remove(id: string): Observable<any> {
-        if (!this.network.isOnline()) return this.enqueue('DELETE', `${this.base}/${id}`);
-        return this.http.delete(`${this.base}/${id}`);
-    }
+    create(data: any) { return this.mutate('POST', this.base, data); }
+    update(id: string, data: any) { return this.mutate('PUT', `${this.base}/${id}`, data); }
+    patchFeatured(id: string, featured: boolean) { return this.mutate('PATCH', `${this.base}/${id}/featured`, { featured }); }
+    unpublish(id: string, adminNote?: string) { return this.mutate('PATCH', `${this.base}/${id}/unpublish`, { adminNote }); }
+    remove(id: string) { return this.mutate('DELETE', `${this.base}/${id}`); }
 }

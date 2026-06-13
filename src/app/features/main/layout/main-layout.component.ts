@@ -85,12 +85,13 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
     // --- Main navigation (used by the "More" bottom sheet + footer nav) -------
     readonly mainNavItems: { label: string; link: string; fragment?: string; icon: string }[] = [
-        { label: 'About', link: '/', fragment: 'about', icon: 'bi-person' },
+        { label: 'About', link: '/about', icon: 'bi-person' },
         { label: 'Projects', link: '/projects', icon: 'bi-briefcase' },
         { label: 'Gallery', link: '/gallery', icon: 'bi-images' },
-        { label: 'Services', link: '/', fragment: 'services', icon: 'bi-stars' },
+        { label: 'Services', link: '/services', icon: 'bi-stars' },
         { label: 'Writing', link: '/blog', icon: 'bi-pencil-square' },
         { label: 'Reviews', link: '/feedback', icon: 'bi-star' },
+        { label: 'FAQ', link: '/faq', icon: 'bi-question-circle' },
         { label: 'Work with me', link: '/contact', icon: 'bi-envelope-paper' },
     ];
 

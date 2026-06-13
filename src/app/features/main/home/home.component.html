@@ -119,13 +119,10 @@
             <h2 class="section-title">About</h2>
         </div>
         <div class="about-right">
-            @if (footerSettings.data().aboutHtml) {
-            <div class="about-rte-content" [innerHTML]="footerSettings.data().aboutHtml"></div>
-            } @else {
+            <!-- Short teaser only — the full bio, honors & stack live on /about. -->
             <p>Hello — I'm <strong>Mohammad Hamza</strong>, an application developer and product designer based in
-                Karāchi, Pakistan. I hold the position of <strong>Lead Front-end Developer</strong> at
-                <strong>Arittek Solutions (Pvt.) Ltd.</strong> and hold a BS in Computer Science from
-                <strong>KIET</strong> (formerly PAF-KIET).
+                Karāchi, Pakistan, and <strong>Lead Front-end Developer</strong> at
+                <strong>Arittek Solutions (Pvt.) Ltd.</strong> I design and build full-stack web experiences end to end.
             </p>
             <div class="about-links">
                 <a [href]="'https://github.com/mhfrough' | externalUrl:'about_github'" target="_blank"
@@ -133,43 +130,8 @@
                 <a [href]="'https://www.linkedin.com/in/mhfrough/' | externalUrl:'about_linkedin'" target="_blank"
                     rel="noopener">LinkedIn <i class="bi bi-arrow-up-right"></i></a>
             </div>
-            }
-        </div>
-    </div>
-</section>
-
-<!-- ─── Honors & Awards ─────────────────────────────────────────────────── -->
-<section class="section" id="honors">
-    <div class="section-container about-grid">
-        <div class="about-left">
-            <h2 class="section-title">Honors &amp; Awards</h2>
-        </div>
-        <div class="about-right">
-            <div class="honors-list">
-                <div class="honor-item">
-                    <h3 class="honor-title">UI / UX <span class="honor-role">(Competition Head)</span></h3>
-                    <p class="honor-issuer">Issued by <strong>Combat' 18</strong> · Feb 2018</p>
-                </div>
-                <div class="honor-item">
-                    <h3 class="honor-title">Web Designing</h3>
-                    <p class="honor-issuer">Issued by <strong>Flair' 17</strong> · Jan 2017</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ─── Tech Stack ───────────────────────────────────────────────────────── -->
-<section class="section" id="stack">
-    <div class="section-container about-grid">
-        <div class="about-left">
-            <h2 class="section-title">Tech Stack</h2>
-        </div>
-        <div class="about-right">
-            <div class="stack-chips">
-                @for (tech of techStack; track tech) {
-                <span class="stack-chip">{{ tech }}</span>
-                }
+            <div style="margin-top:1.5rem">
+                <a routerLink="/about" class="view-all">More about me <i class="bi bi-arrow-right"></i></a>
             </div>
         </div>
     </div>
@@ -178,183 +140,27 @@
 <!-- ─── Services ────────────────────────────────────────────────────────── -->
 <section class="section" id="services">
     <div class="section-container">
-        <h2 class="section-title">My Services</h2>
+        <div class="home-projects-header">
+            <h2 class="section-title" style="margin:0">My Services</h2>
+            <a routerLink="/services" class="view-all">All Services <i class="bi bi-arrow-right"></i></a>
+        </div>
         <div class="services-grid">
-
+            @for (service of featuredServices; track service.name) {
             <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Website Design', message: 'Hi, I\'m interested in your Website Design service. I\'d love to discuss my project and get a custom design proposal.'}">
-                <i class="bi bi-layout-text-window-reverse service-icon"></i>
-                <h3 class="service-name">Website Design</h3>
-                <p class="service-desc">Pixel-perfect UI layouts and visual web designs tailored to your brand identity.
-                </p>
+                [queryParams]="{subject: service.subject, message: service.message}">
+                <i class="bi {{ service.icon }} service-icon"></i>
+                <h3 class="service-name">{{ service.name }}</h3>
+                <p class="service-desc">{{ service.desc }}</p>
                 <div class="service-footer">
-                    <div class="service-tags"><span class="service-tag">UI/UX</span><span
-                            class="service-tag">Mockups</span></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Application Development', message: 'Hi, I\'m interested in your Application Development service. I\'d like to discuss building a full-stack application for my project.'}">
-                <i class="bi bi-app service-icon"></i>
-                <h3 class="service-name">Application Development</h3>
-                <p class="service-desc">Full-stack web applications built with modern frameworks — Angular, NestJS,
-                    React and more.</p>
-                <div class="service-footer">
-                    <div class="service-tags"><span class="service-tag">Full-stack</span></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'PWA & SSR', message: 'Hi, I\'m interested in your PWA & SSR service. I\'d like to discuss making my app a Progressive Web App with server-side rendering.'}">
-                <i class="bi bi-lightning-charge service-icon"></i>
-                <h3 class="service-name">PWA &amp; SSR</h3>
-                <p class="service-desc">Progressive Web Apps and server-side rendered experiences for lightning-fast
-                    load times and offline capability.</p>
-                <div class="service-footer">
-                    <div class="service-tags"><span class="service-tag">PWA</span><span class="service-tag">SSR</span>
+                    <div class="service-tags">
+                        @for (tag of service.tags; track tag) {
+                        <span class="service-tag">{{ tag }}</span>
+                        }
                     </div>
                     <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
                 </div>
             </a>
-
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Hybrid App Development', message: 'Hi, I\'m interested in your Hybrid App Development service. I\'d like to build a cross-platform mobile app and would love to discuss the details.'}">
-                <i class="bi bi-phone service-icon"></i>
-                <h3 class="service-name">Hybrid App Development</h3>
-                <p class="service-desc">Cross-platform mobile apps built once, running natively on iOS and Android with
-                    a seamless user experience.</p>
-                <div class="service-footer">
-                    <div class="service-tags"><span class="service-tag">Hybrid</span></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Website Development', message: 'Hi, I\'m interested in your Website Development service. I need a professional website and would love to discuss my requirements.'}">
-                <i class="bi bi-globe service-icon"></i>
-                <h3 class="service-name">Website Development</h3>
-                <p class="service-desc">Fast, responsive, and SEO-optimised websites — from landing pages to full
-                    portals, with clean frontend code throughout.</p>
-                <div class="service-footer">
-                    <div class="service-tags"><span class="service-tag">SEO</span><span
-                            class="service-tag">Full-stack</span></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Logo & Icon Design', message: 'Hi, I\'m interested in your Logo & Icon Design service. I need a unique logo and icons for my brand.'}">
-                <i class="bi bi-pen service-icon"></i>
-                <h3 class="service-name">Logo &amp; Icon Design</h3>
-                <p class="service-desc">Memorable logos, brand marks, and icon sets that communicate the essence of your
-                    identity.</p>
-                <div class="service-footer">
-                    <div class="service-tags"><span class="service-tag">Branding</span><span
-                            class="service-tag">Icons</span></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'UI/UX & Prototyping', message: 'Hi, I\'m interested in your UI/UX & Prototyping service. I need high-fidelity wireframes and interactive prototypes.'}">
-                <i class="bi bi-bezier2 service-icon"></i>
-                <h3 class="service-name">UI/UX &amp; Prototyping</h3>
-                <p class="service-desc">High-fidelity wireframes, mockups, and interactive prototypes crafted in Adobe
-                    XD and Figma.</p>
-                <div class="service-footer">
-                    <div class="service-tags"><span class="service-tag">UI/UX</span><span
-                            class="service-tag">Mockups</span></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'AI Integration', message: 'Hi, I\'m interested in your AI Integration service. I\'d like to discuss how AI can be applied to my project.'}">
-                <i class="bi bi-robot service-icon"></i>
-                <h3 class="service-name">AI Integration</h3>
-                <p class="service-desc">Integrating AI-powered features — from smart assistants to automated workflows —
-                    into your products.</p>
-                <div class="service-footer">
-                    <div class="service-tags"><span class="service-tag">AI</span></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Team Leadership', message: 'Hi, I\'m interested in your Team Leadership service. I\'d like to discuss how you can help lead or mentor my development team.'}">
-                <i class="bi bi-people service-icon"></i>
-                <h3 class="service-name">Team Leadership</h3>
-                <p class="service-desc">Technical leadership, mentoring, and team management to help your development
-                    squad deliver with confidence.</p>
-                <div class="service-footer">
-                    <div class="service-tags"></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Programming Troubleshooting', message: 'Hi, I\'m facing some technical issues and need help with debugging. I\'d like to discuss the problem and find a solution together.'}">
-                <i class="bi bi-bug service-icon"></i>
-                <h3 class="service-name">Programming Troubleshooting</h3>
-                <p class="service-desc">Diagnosing and fixing bugs, performance issues, and broken builds across any
-                    stack.</p>
-                <div class="service-footer">
-                    <div class="service-tags"></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
-            <a class="service-card" routerLink="/contact"
-                [queryParams]="{subject: 'Blogging', message: 'Hi, I\'m interested in your Blogging service. I\'d like to discuss content creation and technical writing for my platform.'}">
-                <i class="bi bi-pencil-square service-icon"></i>
-                <h3 class="service-name">Blogging</h3>
-                <p class="service-desc">Technical articles, tutorials, and thought-leadership content crafted to educate
-                    and engage your audience.</p>
-                <div class="service-footer">
-                    <div class="service-tags"></div>
-                    <span class="service-cta">Inquire <i class="bi bi-arrow-right"></i></span>
-                </div>
-            </a>
-
-        </div>
-    </div>
-</section>
-
-<!-- ─── How I Work ───────────────────────────────────────────────────────── -->
-<section class="section process-section" id="process">
-    <div class="section-container">
-        <h2 class="section-title">How I Work</h2>
-        <div class="process-steps">
-            <div class="process-step">
-                <span class="process-num">01</span>
-                <i class="bi bi-chat-text process-icon"></i>
-                <h3 class="process-name">Discover</h3>
-                <p class="process-desc">We define your goals, audience, and constraints together — I listen before I
-                    build.</p>
-            </div>
-            <div class="process-step">
-                <span class="process-num">02</span>
-                <i class="bi bi-bezier2 process-icon"></i>
-                <h3 class="process-name">Design</h3>
-                <p class="process-desc">Wireframes and prototypes shaped around real user needs — validated before a
-                    line of code is written.</p>
-            </div>
-            <div class="process-step">
-                <span class="process-num">03</span>
-                <i class="bi bi-code-slash process-icon"></i>
-                <h3 class="process-name">Build</h3>
-                <p class="process-desc">Clean, tested code delivered in iterative sprints with full visibility into
-                    progress.</p>
-            </div>
-            <div class="process-step">
-                <span class="process-num">04</span>
-                <i class="bi bi-rocket-takeoff process-icon"></i>
-                <h3 class="process-name">Deliver</h3>
-                <p class="process-desc">Deployed, documented, and supported after go-live — the relationship doesn't
-                    end at launch.</p>
-            </div>
+            }
         </div>
     </div>
 </section>
@@ -435,39 +241,6 @@
     </div>
 </section>
 
-<!-- ─── Pricing ──────────────────────────────────────────────────────────── -->
-<section class="section" id="pricing">
-    <div class="section-container">
-        <h2 class="section-title">Pricing</h2>
-        <div class="pricing-grid">
-            @for (tier of pricingTiers; track tier.tier) {
-            <div class="pricing-card" [class.pricing-card--featured]="tier.featured">
-                @if (tier.featured) {
-                <div class="pricing-badge">Most Popular</div>
-                }
-                <p class="pricing-tier">{{ tier.tier }}</p>
-                <div class="pricing-price">
-                    <span class="pricing-amount">{{ tier.amount }}</span>
-                    @if (tier.suffix) {
-                    <span class="pricing-suffix">{{ tier.suffix }}</span>
-                    }
-                </div>
-                <p class="pricing-desc">{{ tier.desc }}</p>
-                <ul class="pricing-features">
-                    @for (f of tier.features; track f) {
-                    <li><i class="bi bi-check-lg"></i>{{ f }}</li>
-                    }
-                </ul>
-                <a routerLink="/contact" [queryParams]="{subject: tier.subject}" class="btn-primary">
-                    {{ tier.cta }} <i class="bi bi-arrow-right"></i>
-                </a>
-                <p class="pricing-note">* {{ tier.note }}</p>
-            </div>
-            }
-        </div>
-    </div>
-</section>
-
 <!-- ─── FAQ ──────────────────────────────────────────────────────────────── -->
 <section class="section" id="faq">
     <div class="section-container about-grid">
@@ -476,7 +249,7 @@
         </div>
         <div class="about-right">
             <div class="faq-list">
-                @for (faq of faqs; track faq.q; let i = $index) {
+                @for (faq of topFaqs; track faq.q; let i = $index) {
                 <div class="faq-item" [class.is-open]="openFaqItems().includes(i)">
                     <button class="faq-question" (click)="toggleFaq(i)" [attr.aria-expanded]="openFaqItems().includes(i)">
                         <span class="faq-q-text">{{ faq.q }}</span>
@@ -487,6 +260,9 @@
                     </div>
                 </div>
                 }
+            </div>
+            <div style="margin-top:1.5rem">
+                <a routerLink="/faq" class="view-all">All questions <i class="bi bi-arrow-right"></i></a>
             </div>
         </div>
     </div>

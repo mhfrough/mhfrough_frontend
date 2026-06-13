@@ -1,10 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, from } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { IdbService } from './idb.service';
-import { NetworkStatusService } from './network-status.service';
-import { SyncQueueService } from './sync-queue.service';
+import { OfflineResourceService, Paginated } from './offline-resource.service';
 
 export interface GalleryItem {
     id: string;
@@ -23,16 +20,8 @@ export interface GalleryItem {
 }
 
 @Injectable({ providedIn: 'root' })
-export class GalleryService {
-    private readonly http = inject(HttpClient);
-    private readonly idb = inject(IdbService);
-    private readonly network = inject(NetworkStatusService);
-    private readonly syncQueue = inject(SyncQueueService);
+export class GalleryService extends OfflineResourceService {
     private readonly base = `${environment.apiUrl}/gallery`;
-
-    private enqueue(method: 'POST' | 'PUT' | 'PATCH' | 'DELETE', url: string, body: unknown = null): Observable<any> {
-        return from(this.syncQueue.enqueue({ url, method, body, timestamp: Date.now() }).then(() => ({ queued: true })));
-    }
 
     uploadMedia(file: File) {
         const fd = new FormData();
@@ -45,29 +34,16 @@ export class GalleryService {
     getAll() { return this.http.get<GalleryItem[]>(this.base); }
     getAllAdmin() { return this.http.get<GalleryItem[]>(`${this.base}/all`); }
 
-    getPublicPaginated(page: number, limit: number, q?: string, category?: string, tag?: string): Observable<{ data: GalleryItem[]; total: number; page: number; limit: number; totalPages: number }> {
+    getPublicPaginated(page: number, limit: number, q?: string, category?: string, tag?: string): Observable<Paginated<GalleryItem>> {
         const params: Record<string, string> = { page: String(page), limit: String(limit) };
         if (q) params['q'] = q;
         if (category && category !== 'all') params['category'] = category;
         if (tag && tag !== 'all') params['tag'] = tag;
-        return new Observable(subscriber => {
-            if (page === 1 && !q && !category && !tag) {
-                this.idb.getAll<GalleryItem>('gallery').then(cached => {
-                    if (cached.length) {
-                        subscriber.next({ data: cached.slice(0, limit), total: cached.length, page: 1, limit, totalPages: Math.ceil(cached.length / limit) });
-                    }
-                });
-            }
-            this.http.get<{ data: GalleryItem[]; total: number; page: number; limit: number; totalPages: number }>(this.base, { params }).subscribe({
-                next: fresh => {
-                    if (page === 1 && !q && !category && !tag) {
-                        this.idb.putMany('gallery', fresh.data).catch(() => {});
-                    }
-                    subscriber.next(fresh);
-                    subscriber.complete();
-                },
-                error: err => subscriber.error(err),
-            });
+        return this.staleList<GalleryItem>({
+            store: 'gallery',
+            cacheable: page === 1 && !q && !category && !tag,
+            limit,
+            fetch: () => this.http.get<Paginated<GalleryItem>>(this.base, { params }),
         });
     }
 
@@ -75,18 +51,7 @@ export class GalleryService {
     getTags() { return this.http.get<string[]>(`${this.base}/tags`); }
     getOne(id: string) { return this.http.get<GalleryItem>(`${this.base}/${id}`); }
 
-    create(data: Partial<GalleryItem>): Observable<any> {
-        if (!this.network.isOnline()) return this.enqueue('POST', this.base, data);
-        return this.http.post<GalleryItem>(this.base, data);
-    }
-
-    update(id: string, data: Partial<GalleryItem>): Observable<any> {
-        if (!this.network.isOnline()) return this.enqueue('PUT', `${this.base}/${id}`, data);
-        return this.http.put<GalleryItem>(`${this.base}/${id}`, data);
-    }
-
-    remove(id: string): Observable<any> {
-        if (!this.network.isOnline()) return this.enqueue('DELETE', `${this.base}/${id}`);
-        return this.http.delete(`${this.base}/${id}`);
-    }
+    create(data: Partial<GalleryItem>) { return this.mutate('POST', this.base, data); }
+    update(id: string, data: Partial<GalleryItem>) { return this.mutate('PUT', `${this.base}/${id}`, data); }
+    remove(id: string) { return this.mutate('DELETE', `${this.base}/${id}`); }
 }

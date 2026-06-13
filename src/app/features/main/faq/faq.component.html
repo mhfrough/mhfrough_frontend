@@ -1,0 +1,45 @@
+<!-- ─── Page header ──────────────────────────────────────────────────────── -->
+<section class="section">
+    <div class="section-container">
+        <p class="legal-eyebrow">Help</p>
+        <h1 class="section-title">Frequently asked questions</h1>
+        <p class="section-lead">
+            The things people usually want to know before we start. Can't find your answer?
+            <a routerLink="/contact" class="inline-link">Get in touch</a> — happy to help.
+        </p>
+    </div>
+</section>
+
+<!-- ─── Questions ────────────────────────────────────────────────────────── -->
+<section class="section" id="faq">
+    <div class="section-container about-grid">
+        <div class="about-left">
+            <h2 class="section-title">Questions</h2>
+        </div>
+        <div class="about-right">
+            <div class="faq-list">
+                @for (faq of faqs; track faq.q; let i = $index) {
+                <div class="faq-item" [class.is-open]="openFaqItems().includes(i)">
+                    <button class="faq-question" (click)="toggleFaq(i)" [attr.aria-expanded]="openFaqItems().includes(i)">
+                        <span class="faq-q-text">{{ faq.q }}</span>
+                        <i class="bi bi-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p class="faq-answer-inner">{{ faq.a }}</p>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Contact CTA ──────────────────────────────────────────────────────── -->
+<section class="section" id="contact">
+    <div class="section-container contact-cta">
+        <h2>Still have a question?</h2>
+        <p>Send it over and I'll get back to you. You can also browse
+            <a routerLink="/services" class="inline-link">services &amp; pricing</a> first.</p>
+        <a routerLink="/contact" [queryParams]="{subject: 'Question'}" class="btn-primary">Ask a question</a>
+    </div>
+</section>

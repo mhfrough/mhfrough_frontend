@@ -1,0 +1,95 @@
+<!-- ─── Page header ──────────────────────────────────────────────────────── -->
+<section class="section">
+    <div class="section-container">
+        <p class="legal-eyebrow">About</p>
+        <h1 class="section-title">Mohammad Hamza</h1>
+        <p class="section-lead">
+            Application developer and product designer based in Karāchi, Pakistan — I create brands,
+            design experiences, and build the web applications behind them. Programmer, developer,
+            problem solver.
+        </p>
+        <div class="section-actions">
+            <a routerLink="/projects" class="btn-primary">View Projects</a>
+            <a routerLink="/contact" class="btn-ghost">Work with me</a>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Bio ──────────────────────────────────────────────────────────────── -->
+<section class="section" id="bio">
+    <div class="section-container about-grid">
+        <div class="about-left">
+            <h2 class="section-title">Background</h2>
+        </div>
+        <div class="about-right">
+            @if (footerSettings.data().aboutHtml) {
+            <div class="about-rte-content" [innerHTML]="footerSettings.data().aboutHtml"></div>
+            } @else {
+            <p>Hello — I'm <strong>Mohammad Hamza</strong>, an application developer and product designer based in
+                Karāchi, Pakistan. I hold the position of <strong>Lead Front-end Developer</strong> at
+                <strong>Arittek Solutions (Pvt.) Ltd.</strong> and hold a BS in Computer Science from
+                <strong>KIET</strong> (formerly PAF-KIET).</p>
+            <p>I work across the full stack — designing interfaces in Figma and Adobe XD, then building them with
+                Angular on the front end and NestJS, PostgreSQL, and real-time tooling on the back end. I care about
+                clean, accessible, fast experiences and code that's a pleasure to maintain.</p>
+            }
+            <div class="about-links">
+                <a [href]="'https://github.com/mhfrough' | externalUrl:'about_github'" target="_blank"
+                    rel="noopener">GitHub <i class="bi bi-arrow-up-right"></i></a>
+                <a [href]="'https://www.linkedin.com/in/mhfrough/' | externalUrl:'about_linkedin'" target="_blank"
+                    rel="noopener">LinkedIn <i class="bi bi-arrow-up-right"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Honors & Awards ─────────────────────────────────────────────────── -->
+<section class="section" id="honors">
+    <div class="section-container about-grid">
+        <div class="about-left">
+            <h2 class="section-title">Honors &amp; Awards</h2>
+        </div>
+        <div class="about-right">
+            <div class="honors-list">
+                <div class="honor-item">
+                    <h3 class="honor-title">UI / UX <span class="honor-role">(Competition Head)</span></h3>
+                    <p class="honor-issuer">Issued by <strong>Combat' 18</strong> · Feb 2018</p>
+                </div>
+                <div class="honor-item">
+                    <h3 class="honor-title">Web Designing</h3>
+                    <p class="honor-issuer">Issued by <strong>Flair' 17</strong> · Jan 2017</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Tech Stack ───────────────────────────────────────────────────────── -->
+<section class="section" id="stack">
+    <div class="section-container about-grid">
+        <div class="about-left">
+            <h2 class="section-title">Tech Stack</h2>
+        </div>
+        <div class="about-right">
+            <div class="stack-chips">
+                @for (tech of techStack; track tech) {
+                <span class="stack-chip">{{ tech }}</span>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Contact CTA ──────────────────────────────────────────────────────── -->
+<section class="section" id="contact">
+    <div class="section-container contact-cta">
+        <div class="hero-availability">
+            <span class="avail-dot"></span>
+            <span class="avail-text">Available for new projects</span>
+        </div>
+        <h2>Let's build something.</h2>
+        <p>Always open to hearing about what you are building. Browse the
+            <a routerLink="/services" class="inline-link">services</a> or get in touch directly.</p>
+        <a routerLink="/contact" [queryParams]="{subject: 'Project Inquiry'}" class="btn-primary">Get in touch</a>
+    </div>
+</section>

@@ -9,8 +9,10 @@ import { SettingsTickerComponent } from './tabs/ticker/settings-ticker.component
 import { SettingsVisitorsComponent } from './tabs/visitors/settings-visitors.component';
 import { SettingsWidgetsComponent } from './tabs/widgets/settings-widgets.component';
 import { SettingsHealthComponent } from './tabs/health/settings-health.component';
+import { SettingsAnalyticsComponent } from './tabs/analytics/settings-analytics.component';
+import { SettingsDataComponent } from './tabs/data/settings-data.component';
 
-type SettingsTab = 'profile' | 'security' | 'notifications' | 'ticker' | 'visitors' | 'widgets' | 'health';
+type SettingsTab = 'profile' | 'security' | 'notifications' | 'ticker' | 'visitors' | 'analytics' | 'widgets' | 'health' | 'data';
 
 const TAB_TITLES: Record<SettingsTab, string> = {
     profile: 'Profile Settings',
@@ -18,11 +20,13 @@ const TAB_TITLES: Record<SettingsTab, string> = {
     notifications: 'Notification Settings',
     ticker: 'Ticker Settings',
     visitors: 'Visitor Analytics',
+    analytics: 'Analytics & Reports',
     widgets: 'Widget API Keys',
     health: 'Deployment Health',
+    data: 'Data & Danger Zone',
 };
 
-const VALID_TABS: SettingsTab[] = ['profile', 'security', 'notifications', 'ticker', 'visitors', 'widgets', 'health'];
+const VALID_TABS: SettingsTab[] = ['profile', 'security', 'notifications', 'ticker', 'visitors', 'analytics', 'widgets', 'health', 'data'];
 
 @Component({
     selector: 'app-admin-settings',
@@ -36,6 +40,8 @@ const VALID_TABS: SettingsTab[] = ['profile', 'security', 'notifications', 'tick
         SettingsVisitorsComponent,
         SettingsWidgetsComponent,
         SettingsHealthComponent,
+        SettingsAnalyticsComponent,
+        SettingsDataComponent,
     ],
     templateUrl: './admin-settings.component.html',
 })

@@ -363,8 +363,8 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
         }
 
         const grad = ctx.createLinearGradient(0, padT, 0, H);
-        grad.addColorStop(0, 'rgba(99,102,241,0.25)');
-        grad.addColorStop(1, 'rgba(99,102,241,0)');
+        grad.addColorStop(0, 'rgba(228,224,216,0.18)');
+        grad.addColorStop(1, 'rgba(228,224,216,0)');
         ctx.beginPath();
         ctx.moveTo(getX(0), getY(counts[0]));
         for (let i = 1; i < counts.length; i++) {
@@ -383,7 +383,7 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
             const cpx = (getX(i - 1) + getX(i)) / 2;
             ctx.bezierCurveTo(cpx, getY(counts[i - 1]), cpx, getY(counts[i]), getX(i), getY(counts[i]));
         }
-        ctx.strokeStyle = '#818cf8';
+        ctx.strokeStyle = '#e4e0d8';
         ctx.lineWidth = 2;
         ctx.lineJoin = 'round';
         ctx.stroke();
@@ -392,7 +392,7 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
             counts.forEach((v, i) => {
                 ctx.beginPath();
                 ctx.arc(getX(i), getY(v), 2.5, 0, Math.PI * 2);
-                ctx.fillStyle = '#818cf8';
+                ctx.fillStyle = '#e4e0d8';
                 ctx.fill();
             });
         }
@@ -403,7 +403,7 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
 
             ctx.save();
             ctx.setLineDash([3, 3]);
-            ctx.strokeStyle = 'rgba(129,140,248,0.45)';
+            ctx.strokeStyle = 'rgba(228,224,216,0.4)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(hx, padT);
@@ -413,15 +413,15 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
 
             ctx.beginPath();
             ctx.arc(hx, hy, 5, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(129,140,248,0.3)';
+            ctx.fillStyle = 'rgba(228,224,216,0.25)';
             ctx.fill();
             ctx.beginPath();
             ctx.arc(hx, hy, 3, 0, Math.PI * 2);
-            ctx.fillStyle = '#818cf8';
+            ctx.fillStyle = '#e4e0d8';
             ctx.fill();
             ctx.beginPath();
             ctx.arc(hx, hy, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = '#e0e7ff';
+            ctx.fillStyle = '#1a1917';
             ctx.fill();
 
             const date = new Date(raw[hoverIdx].day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -434,8 +434,8 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
             if (tx + tw > W - 2) tx = W - tw - 2;
             const ty = padT - 2;
 
-            ctx.fillStyle = 'rgba(15,12,41,0.92)';
-            ctx.strokeStyle = 'rgba(129,140,248,0.4)';
+            ctx.fillStyle = 'rgba(31,29,27,0.95)';
+            ctx.strokeStyle = 'rgba(228,224,216,0.25)';
             ctx.lineWidth = 1;
             if ((ctx as any).roundRect) {
                 ctx.beginPath();
@@ -446,7 +446,7 @@ export class SettingsVisitorsComponent implements OnInit, OnDestroy {
                 ctx.fillRect(tx, ty, tw, th);
                 ctx.strokeRect(tx, ty, tw, th);
             }
-            ctx.fillStyle = '#c7d2fe';
+            ctx.fillStyle = '#e4e0d8';
             ctx.fillText(text, tx + 7, ty + 12);
         }
     }

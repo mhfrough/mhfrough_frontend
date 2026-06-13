@@ -22,11 +22,17 @@
     <a class="settings-tab" [class.is-active]="activeTab() === 'visitors'" routerLink="/admin/settings/visitors">
         <i class="bi bi-graph-up-arrow"></i> Visitors
     </a>
+    <a class="settings-tab" [class.is-active]="activeTab() === 'analytics'" routerLink="/admin/settings/analytics">
+        <i class="bi bi-bar-chart-line"></i> Analytics
+    </a>
     <a class="settings-tab" [class.is-active]="activeTab() === 'widgets'" routerLink="/admin/settings/widgets">
         <i class="bi bi-puzzle"></i> Widgets
     </a>
     <a class="settings-tab" [class.is-active]="activeTab() === 'health'" routerLink="/admin/settings/health">
         <i class="bi bi-heart-pulse"></i> Deployment Health
+    </a>
+    <a class="settings-tab settings-tab--danger" [class.is-active]="activeTab() === 'data'" routerLink="/admin/settings/data">
+        <i class="bi bi-database-exclamation"></i> Data
     </a>
 </div>
 
@@ -50,10 +56,18 @@
 <app-settings-visitors />
 }
 
+@if (activeTab() === 'analytics') {
+<app-settings-analytics />
+}
+
 @if (activeTab() === 'widgets') {
 <app-settings-widgets />
 }
 
 @if (activeTab() === 'health') {
 <app-settings-health />
+}
+
+@if (activeTab() === 'data') {
+<app-settings-data />
 }

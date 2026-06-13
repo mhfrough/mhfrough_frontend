@@ -82,6 +82,13 @@
                 placeholder="Internal notes…"></textarea>
         </div>
 
+        @if (saveError()) {
+        <div class="admin-alert admin-alert--error" style="margin-top:1.25rem"><i class="bi bi-exclamation-triangle-fill"></i> {{ saveError() }}</div>
+        }
+        @if (saveSuccess()) {
+        <div class="admin-alert admin-alert--success" style="margin-top:1.25rem"><i class="bi bi-check-circle-fill"></i> Lead saved.</div>
+        }
+
         <div class="admin-form-actions">
             <button type="submit" class="btn-primary" [disabled]="saving()">
                 @if (saving()) { <span class="contact-spinner"></span>&nbsp; }

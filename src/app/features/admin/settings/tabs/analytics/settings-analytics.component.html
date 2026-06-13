@@ -1,0 +1,107 @@
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-bar-chart-line"></i> Analytics &amp; Reports</h2>
+            <p class="settings-card-sub">
+                Activity across inquiries, leads, feedback, comments, and revenue over time, plus
+                pipeline and rating breakdowns. Export the raw series as CSV.
+            </p>
+        </div>
+        <div class="analytics-actions">
+            <div class="analytics-range" role="group" aria-label="Date range">
+                @for (r of ranges; track r) {
+                <button class="analytics-range-btn" [class.is-active]="days() === r" (click)="setDays(r)">{{ r }}d</button>
+                }
+            </div>
+            <button class="btn-ghost btn-sm" (click)="exportCsv()" [disabled]="!data()">
+                <i class="bi bi-download"></i> CSV
+            </button>
+        </div>
+    </div>
+
+    @if (error()) {
+    <div class="admin-alert admin-alert--error">{{ error() }}</div>
+    }
+
+    @if (loading()) {
+    <div class="loading-state"><div class="spinner"></div></div>
+    } @else if (data(); as d) {
+
+    <!-- Summary tiles -->
+    <div class="analytics-tiles">
+        <div class="analytics-tile">
+            <span class="analytics-tile-val">{{ d.totals.inquiries }}</span>
+            <span class="analytics-tile-label">Inquiries</span>
+        </div>
+        <div class="analytics-tile">
+            <span class="analytics-tile-val">{{ d.totals.leads }}</span>
+            <span class="analytics-tile-label">Leads</span>
+        </div>
+        <div class="analytics-tile">
+            <span class="analytics-tile-val">{{ d.totals.feedback }}</span>
+            <span class="analytics-tile-label">Feedback</span>
+        </div>
+        <div class="analytics-tile">
+            <span class="analytics-tile-val">{{ d.totals.comments }}</span>
+            <span class="analytics-tile-label">Comments</span>
+        </div>
+        <div class="analytics-tile">
+            <span class="analytics-tile-val">${{ d.totals.paidRevenue | number:'1.0-0' }}</span>
+            <span class="analytics-tile-label">Revenue (paid)</span>
+        </div>
+    </div>
+
+    <!-- Trend charts -->
+    <div class="analytics-charts">
+        @for (c of cards(); track c.key) {
+        <div class="analytics-chart-card">
+            <div class="analytics-chart-head">
+                <span class="analytics-chart-title"><i class="bi" [class]="c.icon"></i> {{ c.label }}</span>
+                <span class="analytics-chart-sum">
+                    @if (c.money) { ${{ sum(c.values) | number:'1.0-0' }} } @else { {{ sum(c.values) }} }
+                    <em>· {{ days() }}d</em>
+                </span>
+            </div>
+            <svg class="analytics-svg" [attr.viewBox]="'0 0 ' + VW + ' ' + VH" preserveAspectRatio="none" aria-hidden="true">
+                <path class="analytics-area" [attr.d]="areaPath(c.values)"></path>
+                <path class="analytics-line" [attr.d]="linePath(c.values)"></path>
+            </svg>
+            <div class="analytics-chart-axis">
+                <span>{{ c.days[0] | date:'MMM d' }}</span>
+                <span>{{ c.days[c.days.length - 1] | date:'MMM d' }}</span>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Distributions -->
+    <div class="analytics-dist-grid">
+        <div class="analytics-dist">
+            <h3 class="settings-section-label"><i class="bi bi-funnel"></i> Lead pipeline</h3>
+            @for (s of leadStages; track s.key) {
+            <div class="analytics-bar-row">
+                <span class="analytics-bar-label">{{ s.label }}</span>
+                <div class="analytics-bar-track">
+                    <div class="analytics-bar-fill" [style.width.%]="leadStagePct(s.key)" [style.background]="s.accent"></div>
+                </div>
+                <span class="analytics-bar-val">{{ leadStageCount(s.key) }}</span>
+            </div>
+            }
+        </div>
+
+        <div class="analytics-dist">
+            <h3 class="settings-section-label"><i class="bi bi-star"></i> Feedback ratings</h3>
+            @for (r of ratings; track r) {
+            <div class="analytics-bar-row">
+                <span class="analytics-bar-label">{{ r }} ★</span>
+                <div class="analytics-bar-track">
+                    <div class="analytics-bar-fill" [style.width.%]="ratingPct(r)"></div>
+                </div>
+                <span class="analytics-bar-val">{{ ratingCount(r) }}</span>
+            </div>
+            }
+        </div>
+    </div>
+
+    }
+</div>

@@ -54,6 +54,14 @@ export interface CreateLeadPayload {
 
 export type UpdateLeadPayload = Partial<Omit<CreateLeadPayload, 'chatSessionId'>>;
 
+export interface LeadStats {
+    total: number;
+    open: number;
+    winRate: number;
+    byStatus: Record<LeadStatus, number>;
+    bySource: { source: string; count: number }[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class LeadsService {
     private readonly http = inject(HttpClient);
@@ -61,6 +69,10 @@ export class LeadsService {
 
     getAll(): Observable<Lead[]> {
         return this.http.get<Lead[]>(this.base);
+    }
+
+    getStats(): Observable<LeadStats> {
+        return this.http.get<LeadStats>(`${this.base}/stats`);
     }
 
     getOne(id: string): Observable<Lead> {
