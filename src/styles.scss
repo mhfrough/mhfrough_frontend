@@ -815,17 +815,6 @@ body::before {
                 color: var(--indigo);
             }
         }
-
-        .footer-locale {
-            margin: 0 0 1rem;
-            font-family: var(--font-sans);
-            font-size: 0.8rem;
-            color: var(--text-muted);
-
-            i {
-                margin-right: 0.35rem;
-            }
-        }
     }
 
     .footer-links {

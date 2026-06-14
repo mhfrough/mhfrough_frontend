@@ -3,6 +3,7 @@ import { isPlatformBrowser, CommonModule, NgOptimizedImage } from '@angular/comm
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../../core/services/projects.service';
+import { BlogsService } from '../../../core/services/blogs.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
 import { FeedbackService } from '../../../core/services/inquiry-feedback.service';
@@ -20,6 +21,7 @@ import { SERVICES, FAQS } from '../../../core/data/site-content';
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private projectsService = inject(ProjectsService);
+    private blogsService = inject(BlogsService);
     private platformId = inject(PLATFORM_ID);
     private elRef = inject(ElementRef);
     private readonly realtime = inject(RealtimeService);
@@ -29,6 +31,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private seo = inject(SeoService);
     readonly projects = signal<any[]>([]);
     readonly loadingProjects = signal(true);
+    readonly recentBlogs = signal<any[]>([]);
+    readonly loadingBlogs = signal(true);
     readonly featuredReviews = signal<any[]>([]);
     readonly loadingFeaturedReviews = signal(true);
     readonly greeting = signal('');
@@ -46,14 +50,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly statsDisplayed = signal(['6+', '30+', '10+', '100%']);
     private statsAnimated = false;
     private observers: IntersectionObserver[] = [];
-
-    readonly clients = [
-        { name: 'Arittek Solutions (Pvt.) Ltd.', logo: '/clients/arittek.png', url: 'https://arittek.com/' },
-        { name: 'Befiler', logo: '/clients/befiler.png', url: 'https://www.befiler.com/' },
-        { name: 'Bloomstone Private Resort', logo: '/clients/bloomstone.png', url: 'https://bloomstone-frontend.onrender.com/' },
-        { name: 'Finclore', logo: '/clients/finclore.png', url: 'https://www.finclore.com/' },
-    ];
-    readonly marqueeClients = [...this.clients, ...this.clients];
 
     // Home shows only teasers; the full lists live on /services and /faq.
     readonly featuredServices = SERVICES.filter(s => s.featured);
@@ -73,6 +69,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.projectsService.getFeatured().subscribe({
             next: (data: any[]) => { this.projects.set(data); this.loadingProjects.set(false); this.preconnect.add(data[0]?.thumbnail); },
             error: () => this.loadingProjects.set(false),
+        });
+        // Most recent post — the full archive lives on /blog.
+        this.blogsService.getPublic(1, 1).subscribe({
+            next: (res) => { this.recentBlogs.set(res.data); this.loadingBlogs.set(false); },
+            error: () => this.loadingBlogs.set(false),
         });
         this.loadFeaturedReviews();
         this.buildGreeting();

@@ -165,36 +165,6 @@
     </div>
 </section>
 
-<!-- ─── Clients ─────────────────────────────────────────────────────────── -->
-<section class="section clients-section" id="clients">
-    <div class="section-container">
-        <h2 class="section-title">Clients I've Worked With</h2>
-    </div>
-    <div class="clients-marquee-wrap">
-        <div class="clients-marquee">
-            <!-- Track duplicated for seamless infinite loop -->
-            <div class="clients-track">
-                @for (client of marqueeClients; track $index) {
-                <a class="client-item" [href]="client.url | externalUrl:'clients_marquee'" target="_blank"
-                    rel="noopener noreferrer" [attr.aria-label]="'Open ' + client.name + ' website'">
-                    <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'" loading="lazy">
-                    <span class="client-name">{{ client.name }}</span>
-                </a>
-                }
-            </div>
-            <div class="clients-track" aria-hidden="true">
-                @for (client of marqueeClients; track $index) {
-                <a class="client-item" [href]="client.url | externalUrl:'clients_marquee'" target="_blank"
-                    rel="noopener noreferrer" tabindex="-1" [attr.aria-label]="'Open ' + client.name + ' website'">
-                    <img class="client-logo" [src]="client.logo" [alt]="client.name + ' logo'" loading="lazy">
-                    <span class="client-name">{{ client.name }}</span>
-                </a>
-                }
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- ─── Featured Reviews ─────────────────────────────────────────────────── -->
 <section class="section" id="reviews">
     <div class="section-container">
@@ -240,6 +210,51 @@
         }
     </div>
 </section>
+
+<!-- ─── From the Blog ────────────────────────────────────────────────────── -->
+@if (loadingBlogs() || recentBlogs().length > 0) {
+<section class="section" id="writing">
+    <div class="section-container">
+        <div class="home-projects-header">
+            <h2 class="section-title" style="margin:0">From the Blog</h2>
+            <a routerLink="/blog" class="view-all">All Writing <i class="bi bi-arrow-right"></i></a>
+        </div>
+
+        @if (loadingBlogs()) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+        </div>
+        } @else {
+        <div class="blog-grid">
+            @for (blog of recentBlogs(); track blog.id; let i = $index) {
+            <a [routerLink]="['/blog', blog.slug]" class="blog-card">
+                @if (blog.coverImage) {
+                <div class="blog-thumb">
+                    <img [ngSrc]="blog.coverImage" fill [priority]="i === 0" [alt]="'Cover image for ' + blog.title" />
+                </div>
+                }
+                <div class="blog-body">
+                    @if (blog.tags?.length) {
+                    <div class="blog-tags">
+                        @for (tag of blog.tags.slice(0, 3); track tag) {
+                        <span class="blog-tag">{{ tag }}</span>
+                        }
+                    </div>
+                    }
+                    <h3 class="blog-title">{{ blog.title }}</h3>
+                    <p class="blog-excerpt">{{ blog.excerpt }}</p>
+                    <div class="blog-meta">
+                        <span>{{ blog.readTimeMinutes }} min read</span>
+                        <span>{{ blog.publishedAt | date:'MMM d, y' }}</span>
+                    </div>
+                </div>
+            </a>
+            }
+        </div>
+        }
+    </div>
+</section>
+}
 
 <!-- ─── FAQ ──────────────────────────────────────────────────────────────── -->
 <section class="section" id="faq">

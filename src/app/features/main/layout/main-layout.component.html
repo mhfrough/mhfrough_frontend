@@ -49,9 +49,6 @@
         <div class="footer-top">
             <div class="footer-brand-col">
                 <a class="nav-logo" routerLink="/" (click)="scrollTop()">MHFrough<span class="nav-logo-dot">.</span></a>
-                @if (footerSettings.data().location && isSocialVisible('location')) {
-                <p class="footer-locale"><i class="bi bi-geo-alt"></i> {{ footerSettings.data().location }}</p>
-                }
                 <p class="footer-bio">
                     Application developer &amp; product designer crafting fast, modern, accessible web
                     experiences — from first sketch to production deployment.

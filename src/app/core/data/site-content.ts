@@ -73,6 +73,14 @@ export const SERVICES: ServiceItem[] = [
         featured: true,
     },
     {
+        icon: 'bi-cloud-arrow-up',
+        name: 'Deployment & CI/CD',
+        desc: 'Production deployments and automated pipelines — AWS, cPanel, and headless/self-managed servers — with CI/CD set up end to end.',
+        tags: ['AWS', 'DevOps'],
+        subject: 'Deployment & Pipelines',
+        message: "Hi, I'm interested in your Deployment & CI/CD service. I'd like to discuss deploying my app and setting up an automated pipeline (AWS / cPanel / headless server).",
+    },
+    {
         icon: 'bi-phone',
         name: 'Hybrid App Development',
         desc: 'Cross-platform mobile apps built once, running natively on iOS and Android with a seamless user experience.',
@@ -242,6 +250,34 @@ export const FAQS: FaqItem[] = [
     {
         q: 'Can you join an existing team or project?',
         a: "Yes. I'm comfortable stepping into ongoing projects, reviewing existing codebases, and collaborating with other developers, designers, and stakeholders.",
+    },
+    {
+        q: 'What technologies do you work with?',
+        a: 'My core stack is Angular and NestJS with PostgreSQL, but I also work with React, Node.js, TypeORM, Socket.io, and Firebase. For mobile I use Ionic and Capacitor. I pick the right tool for your project rather than forcing a one-size-fits-all stack.',
+    },
+    {
+        q: 'Do you offer ongoing maintenance and support after launch?',
+        a: "Yes. I offer monthly retainers and ad-hoc support for bug fixes, updates, security patches, and new features. We'll agree on a support arrangement that fits your needs — the relationship doesn't have to end at launch.",
+    },
+    {
+        q: 'Can you handle deployment and hosting?',
+        a: 'Absolutely. I deploy to AWS, cPanel, and headless/self-managed servers, and can set up CI/CD pipelines so your app ships automatically on every change. I can work with your existing infrastructure or recommend a setup that fits your budget.',
+    },
+    {
+        q: 'Who owns the code and design once the project is complete?',
+        a: 'You do. On final payment, full ownership of the source code, designs, and assets transfers to you, along with any documentation needed to run and maintain the project.',
+    },
+    {
+        q: 'Can you redesign or fix an existing website or app?',
+        a: "Yes. I regularly take on redesigns, performance improvements, and rescue projects. Send me access to the current site or repository and I'll assess what's there before recommending a path forward.",
+    },
+    {
+        q: 'Are your sites responsive, accessible, and SEO-friendly?',
+        a: 'Yes — every build is mobile-first, follows accessibility best practices (semantic HTML, keyboard navigation, sensible contrast), and ships with clean markup, meta tags, and structured data so search engines can index it properly.',
+    },
+    {
+        q: 'How do we get started?',
+        a: "Reach out through the contact page with a short description of your project. I'll follow up with a few questions, then put together a clear scope, timeline, and quote before any work begins.",
     },
 ];
 
