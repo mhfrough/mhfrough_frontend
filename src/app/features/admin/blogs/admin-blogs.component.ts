@@ -1,17 +1,19 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { BlogsService } from '../../../core/services/blogs.service';
+import { AdminNotificationService } from '../../../core/services/admin-notification.service';
 
 @Component({
     selector: 'app-admin-blogs',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, RouterLink, RouterLinkActive],
     templateUrl: './admin-blogs.component.html',
 })
 export class AdminBlogsComponent implements OnInit {
     private service = inject(BlogsService);
     private readonly router = inject(Router);
+    readonly notif = inject(AdminNotificationService);
     readonly blogs = signal<any[]>([]);
     readonly loading = signal(true);
     readonly deleteTargetId = signal<string | null>(null);

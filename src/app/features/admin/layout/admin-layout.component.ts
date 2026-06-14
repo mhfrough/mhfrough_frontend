@@ -37,8 +37,9 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private static readonly ROUTE_TITLES: Record<string, string> = {
         dashboard: 'Dashboard',
+        insights: 'Insights',
         projects: 'Projects',
-        blogs: 'Blog Posts',
+        blogs: 'Blog',
         inquiries: 'Inquiries',
         leads: 'Leads',
         feedback: 'Feedback',

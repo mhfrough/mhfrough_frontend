@@ -21,14 +21,30 @@
             </button>
         </div>
         <ul class="admin-nav" #sidebarNav>
+            <li class="admin-nav-section">Overview</li>
             <li>
                 <a class="admin-nav-link" routerLink="/admin/dashboard" routerLinkActive="is-active">
                     <i class="bi bi-speedometer2"></i>Dashboard
                 </a>
             </li>
             <li>
+                <a class="admin-nav-link" routerLink="/admin/insights" routerLinkActive="is-active">
+                    <i class="bi bi-graph-up-arrow"></i>Insights
+                </a>
+            </li>
+
+            <li class="admin-nav-section">Content</li>
+            <li>
                 <a class="admin-nav-link" routerLink="/admin/projects" routerLinkActive="is-active">
                     <i class="bi bi-grid-3x3-gap"></i>Projects
+                </a>
+            </li>
+            <li>
+                <a class="admin-nav-link" routerLink="/admin/blogs" routerLinkActive="is-active">
+                    <i class="bi bi-pencil-square"></i>Blog
+                    @if (notif.pendingComments() > 0) {
+                    <span class="admin-nav-badge admin-nav-badge--warn">{{ notif.pendingComments() }}</span>
+                    }
                 </a>
             </li>
             <li>
@@ -36,9 +52,11 @@
                     <i class="bi bi-images"></i>Gallery
                 </a>
             </li>
+
+            <li class="admin-nav-section">Business</li>
             <li>
-                <a class="admin-nav-link" routerLink="/admin/blogs" routerLinkActive="is-active">
-                    <i class="bi bi-pencil-square"></i>Blogs
+                <a class="admin-nav-link" routerLink="/admin/leads" routerLinkActive="is-active">
+                    <i class="bi bi-funnel"></i>Leads
                 </a>
             </li>
             <li>
@@ -51,6 +69,8 @@
                     <i class="bi bi-bell"></i>Reminders
                 </a>
             </li>
+
+            <li class="admin-nav-section">Communication</li>
             <li>
                 <a class="admin-nav-link" routerLink="/admin/email" [queryParams]="{ folder: 'inquiries' }"
                     routerLinkActive="is-active"
@@ -62,23 +82,10 @@
                 </a>
             </li>
             <li>
-                <a class="admin-nav-link" routerLink="/admin/leads" routerLinkActive="is-active">
-                    <i class="bi bi-funnel"></i>Leads
-                </a>
-            </li>
-            <li>
                 <a class="admin-nav-link" routerLink="/admin/chat" routerLinkActive="is-active">
                     <i class="bi bi-chat-dots"></i>Live Chat
                     @if (chat.unreadChatCount() > 0) {
                     <span class="admin-nav-badge admin-nav-badge--danger">{{ chat.unreadChatCount() }}</span>
-                    }
-                </a>
-            </li>
-            <li>
-                <a class="admin-nav-link" routerLink="/admin/comments" routerLinkActive="is-active">
-                    <i class="bi bi-chat-left-text"></i>Comments
-                    @if (notif.pendingComments() > 0) {
-                    <span class="admin-nav-badge admin-nav-badge--warn">{{ notif.pendingComments() }}</span>
                     }
                 </a>
             </li>
@@ -90,6 +97,8 @@
                     }
                 </a>
             </li>
+
+            <li class="admin-nav-section">System</li>
             <li>
                 <a class="admin-nav-link" routerLink="/admin/settings" routerLinkActive="is-active">
                     <i class="bi bi-gear"></i>Settings

@@ -1,0 +1,38 @@
+<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">Insights</h1>
+        <p class="admin-page-sub">Visitor activity, traffic analytics and deployment health.</p>
+    </div>
+</div>
+
+<!-- ── Tab bar ────────────────────────────────────────────────────────────── -->
+<div class="settings-tabs">
+    <a class="settings-tab" [class.is-active]="activeTab() === 'visitors'" routerLink="/admin/insights/visitors">
+        <i class="bi bi-graph-up-arrow"></i> Visitors
+    </a>
+    <a class="settings-tab" [class.is-active]="activeTab() === 'analytics'" routerLink="/admin/insights/analytics">
+        <i class="bi bi-bar-chart-line"></i> Analytics
+    </a>
+    <a class="settings-tab" [class.is-active]="activeTab() === 'activity'" routerLink="/admin/insights/activity">
+        <i class="bi bi-journal-text"></i> Activity
+    </a>
+    <a class="settings-tab" [class.is-active]="activeTab() === 'health'" routerLink="/admin/insights/health">
+        <i class="bi bi-heart-pulse"></i> Deployment Health
+    </a>
+</div>
+
+@if (activeTab() === 'visitors') {
+<app-settings-visitors />
+}
+
+@if (activeTab() === 'analytics') {
+<app-settings-analytics />
+}
+
+@if (activeTab() === 'activity') {
+<app-insights-activity />
+}
+
+@if (activeTab() === 'health') {
+<app-settings-health />
+}

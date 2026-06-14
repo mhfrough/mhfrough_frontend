@@ -62,16 +62,12 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/admin/feedback/admin-feedback.component').then(m => m.AdminFeedbackComponent),
             },
             {
-                path: 'comments',
+                path: 'blogs/comments',
                 loadComponent: () => import('./features/admin/comments/admin-comments.component').then(m => m.AdminCommentsComponent),
             },
             {
                 path: 'chat',
                 loadComponent: () => import('./features/admin/chat/admin-chat.component').then(m => m.AdminChatComponent),
-            },
-            {
-                path: 'push',
-                loadComponent: () => import('./features/admin/push/admin-push.component').then(m => m.AdminPushComponent),
             },
             {
                 path: 'notification-logs',
@@ -101,6 +97,15 @@ export const routes: Routes = [
             {
                 path: 'settings/:tab',
                 loadComponent: () => import('./features/admin/settings/admin-settings.component').then(m => m.AdminSettingsComponent),
+            },
+            {
+                path: 'insights',
+                redirectTo: 'insights/visitors',
+                pathMatch: 'full',
+            },
+            {
+                path: 'insights/:tab',
+                loadComponent: () => import('./features/admin/insights/admin-insights.component').then(m => m.AdminInsightsComponent),
             },
             {
                 path: 'appointments',

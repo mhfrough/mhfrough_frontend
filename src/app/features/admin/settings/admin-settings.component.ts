@@ -6,27 +6,21 @@ import { SettingsProfileComponent } from './tabs/profile/settings-profile.compon
 import { SettingsSecurityComponent } from './tabs/security/settings-security.component';
 import { SettingsNotificationsComponent } from './tabs/notifications/settings-notifications.component';
 import { SettingsTickerComponent } from './tabs/ticker/settings-ticker.component';
-import { SettingsVisitorsComponent } from './tabs/visitors/settings-visitors.component';
-import { SettingsWidgetsComponent } from './tabs/widgets/settings-widgets.component';
-import { SettingsHealthComponent } from './tabs/health/settings-health.component';
-import { SettingsAnalyticsComponent } from './tabs/analytics/settings-analytics.component';
+import { SettingsIntegrationsComponent } from './tabs/integrations/settings-integrations.component';
 import { SettingsDataComponent } from './tabs/data/settings-data.component';
 
-type SettingsTab = 'profile' | 'security' | 'notifications' | 'ticker' | 'visitors' | 'analytics' | 'widgets' | 'health' | 'data';
+type SettingsTab = 'profile' | 'security' | 'notifications' | 'integrations' | 'ticker' | 'data';
 
 const TAB_TITLES: Record<SettingsTab, string> = {
     profile: 'Profile Settings',
     security: 'Security Settings',
     notifications: 'Notification Settings',
+    integrations: 'Integrations',
     ticker: 'Ticker Settings',
-    visitors: 'Visitor Analytics',
-    analytics: 'Analytics & Reports',
-    widgets: 'Widget API Keys',
-    health: 'Deployment Health',
     data: 'Data & Danger Zone',
 };
 
-const VALID_TABS: SettingsTab[] = ['profile', 'security', 'notifications', 'ticker', 'visitors', 'analytics', 'widgets', 'health', 'data'];
+const VALID_TABS: SettingsTab[] = ['profile', 'security', 'notifications', 'integrations', 'ticker', 'data'];
 
 @Component({
     selector: 'app-admin-settings',
@@ -36,11 +30,8 @@ const VALID_TABS: SettingsTab[] = ['profile', 'security', 'notifications', 'tick
         SettingsProfileComponent,
         SettingsSecurityComponent,
         SettingsNotificationsComponent,
+        SettingsIntegrationsComponent,
         SettingsTickerComponent,
-        SettingsVisitorsComponent,
-        SettingsWidgetsComponent,
-        SettingsHealthComponent,
-        SettingsAnalyticsComponent,
         SettingsDataComponent,
     ],
     templateUrl: './admin-settings.component.html',

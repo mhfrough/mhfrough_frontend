@@ -1,0 +1,134 @@
+<!-- ── Activity Logs ───────────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-journal-text"></i> Activity Logs</h2>
+            <p class="settings-card-sub">Paginated audit trail of admin actions, auth events and errors.</p>
+        </div>
+        <div class="settings-card-actions">
+            <button class="btn-ghost" (click)="loadActivityLogs()" [disabled]="activityLogsLoading()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+            @if (activityLogs().length > 0) {
+            <button class="btn-text-danger" (click)="confirmClearAllLogs()">
+                <i class="bi bi-trash"></i> Clear All
+            </button>
+            }
+        </div>
+    </div>
+
+    @if (activityLogsLoading()) {
+    <div class="loading-state"><div class="spinner"></div></div>
+    } @else if (activityLogs().length === 0) {
+    <p class="settings-empty">No activity logs yet.</p>
+    } @else {
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th style="width:120px">Time</th>
+                    <th style="width:150px">Action</th>
+                    <th style="width:90px">Resource</th>
+                    <th>Description</th>
+                    <th style="width:72px">Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (log of pagedActivityLogs; track log.id) {
+                <tr>
+                    <td style="white-space:nowrap;font-size:.8rem;color:var(--text-muted)">
+                        {{ log.createdAt | date:'MMM d · HH:mm' }}
+                    </td>
+                    <td>
+                        <span class="admin-badge" [ngClass]="getLogBadgeClass(log)" style="font-size:.72rem;white-space:nowrap">
+                            {{ getLogActionLabel(log.action) }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="admin-source-badge">
+                            <i class="bi {{ getLogResourceIcon(log.resource) }}"></i>
+                            {{ log.resource }}
+                        </span>
+                    </td>
+                    <td style="font-size:.85rem;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                        [title]="log.description">{{ log.description }}</td>
+                    <td>
+                        <span class="admin-badge" [class.admin-badge--on]="log.status === 'success'"
+                            [class.admin-badge--danger]="log.status === 'error'">
+                            {{ log.status }}
+                        </span>
+                    </td>
+                    <td style="text-align:right">
+                        <button class="btn-text-danger" (click)="confirmDeleteLog(log.id)">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                @if (log.errorMessage) {
+                <tr class="admin-table-error-row">
+                    <td colspan="6">
+                        <span class="admin-error-msg">
+                            <i class="bi bi-exclamation-circle"></i> {{ log.errorMessage }}
+                        </span>
+                    </td>
+                </tr>
+                }
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (activityTotalPages > 1) {
+    <div class="admin-pagination">
+        <button class="admin-pagination-page" (click)="activityPage.update(p => p - 1)" [disabled]="activityPage() === 1">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="admin-pagination-pages">
+            @if (activityPageNumbers[0] > 1) {
+            <button class="admin-pagination-page" (click)="activityPage.set(1)">1</button>
+            @if (activityPageNumbers[0] > 2) { <span class="admin-pagination-label">…</span> }
+            }
+            @for (p of activityPageNumbers; track p) {
+            <button class="admin-pagination-page" [class.is-active]="p === activityPage()" (click)="activityPage.set(p)">{{ p }}</button>
+            }
+            @if (activityPageNumbers[activityPageNumbers.length - 1] < activityTotalPages) {
+            @if (activityPageNumbers[activityPageNumbers.length - 1] < activityTotalPages - 1) { <span class="admin-pagination-label">…</span> }
+            <button class="admin-pagination-page" (click)="activityPage.set(activityTotalPages)">{{ activityTotalPages }}</button>
+            }
+        </div>
+        <button class="admin-pagination-page" (click)="activityPage.update(p => p + 1)" [disabled]="activityPage() === activityTotalPages">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <span class="admin-pagination-label">{{ activityPage() }} / {{ activityTotalPages }}</span>
+    </div>
+    }
+    }
+</div>
+
+<!-- Delete log confirm modal -->
+@if (deleteLogTargetId()) {
+<div class="admin-modal-overlay" (click)="cancelDeleteLog()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Delete Log Entry</p>
+        <p class="admin-modal-body">This action cannot be undone. Are you sure you want to delete this entry?</p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelDeleteLog()">Cancel</button>
+            <button class="btn-danger" (click)="executeDeleteLog()">Delete</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Clear all logs confirm modal -->
+@if (clearAllLogsConfirm()) {
+<div class="admin-modal-overlay" (click)="cancelClearAllLogs()">
+    <div class="admin-modal" (click)="$event.stopPropagation()">
+        <p class="admin-modal-title">Clear All Logs</p>
+        <p class="admin-modal-body">This will permanently delete all activity log entries. This action cannot be undone.</p>
+        <div class="admin-modal-actions">
+            <button class="btn-ghost" (click)="cancelClearAllLogs()">Cancel</button>
+            <button class="btn-danger" (click)="executeClearAllLogs()">Clear All</button>
+        </div>
+    </div>
+</div>
+}

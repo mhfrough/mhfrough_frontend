@@ -16,20 +16,11 @@
     <a class="settings-tab" [class.is-active]="activeTab() === 'notifications'" routerLink="/admin/settings/notifications">
         <i class="bi bi-bell"></i> Notifications
     </a>
+    <a class="settings-tab" [class.is-active]="activeTab() === 'integrations'" routerLink="/admin/settings/integrations">
+        <i class="bi bi-plugin"></i> Integrations
+    </a>
     <a class="settings-tab" [class.is-active]="activeTab() === 'ticker'" routerLink="/admin/settings/ticker">
         <i class="bi bi-megaphone-fill"></i> Ticker
-    </a>
-    <a class="settings-tab" [class.is-active]="activeTab() === 'visitors'" routerLink="/admin/settings/visitors">
-        <i class="bi bi-graph-up-arrow"></i> Visitors
-    </a>
-    <a class="settings-tab" [class.is-active]="activeTab() === 'analytics'" routerLink="/admin/settings/analytics">
-        <i class="bi bi-bar-chart-line"></i> Analytics
-    </a>
-    <a class="settings-tab" [class.is-active]="activeTab() === 'widgets'" routerLink="/admin/settings/widgets">
-        <i class="bi bi-puzzle"></i> Widgets
-    </a>
-    <a class="settings-tab" [class.is-active]="activeTab() === 'health'" routerLink="/admin/settings/health">
-        <i class="bi bi-heart-pulse"></i> Deployment Health
     </a>
     <a class="settings-tab settings-tab--danger" [class.is-active]="activeTab() === 'data'" routerLink="/admin/settings/data">
         <i class="bi bi-database-exclamation"></i> Data
@@ -48,24 +39,12 @@
 <app-settings-notifications />
 }
 
+@if (activeTab() === 'integrations') {
+<app-settings-integrations />
+}
+
 @if (activeTab() === 'ticker') {
 <app-settings-ticker />
-}
-
-@if (activeTab() === 'visitors') {
-<app-settings-visitors />
-}
-
-@if (activeTab() === 'analytics') {
-<app-settings-analytics />
-}
-
-@if (activeTab() === 'widgets') {
-<app-settings-widgets />
-}
-
-@if (activeTab() === 'health') {
-<app-settings-health />
 }
 
 @if (activeTab() === 'data') {

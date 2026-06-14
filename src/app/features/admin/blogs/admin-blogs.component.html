@@ -1,6 +1,20 @@
 <div class="admin-page-header">
-    <h1 class="admin-page-title">Blog Posts</h1>
+    <h1 class="admin-page-title">Blog</h1>
     <button class="btn-primary" (click)="openNew()">New Post</button>
+</div>
+
+<!-- ── Tab bar ────────────────────────────────────────────────────────────── -->
+<div class="settings-tabs">
+    <a class="settings-tab" routerLink="/admin/blogs" routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        <i class="bi bi-pencil-square"></i> Posts
+    </a>
+    <a class="settings-tab" routerLink="/admin/blogs/comments" routerLinkActive="is-active">
+        <i class="bi bi-chat-left-text"></i> Comments
+        @if (notif.pendingComments() > 0) {
+        <span class="admin-nav-badge admin-nav-badge--warn">{{ notif.pendingComments() }}</span>
+        }
+    </a>
 </div>
 
 

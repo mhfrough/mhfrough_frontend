@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AdminSettingsService, AdminSettings, LoginSession } from '../../../../../core/services/admin-settings.service';
 import { AuthService } from '../../../../../core/services/auth.service';
-import { ActivityLogService, ActivityLogEntry } from '../../../../../core/services/activity-log.service';
 import { RealtimeService } from '../../../../../core/services/realtime.service';
 
 @Component({
@@ -16,34 +15,8 @@ import { RealtimeService } from '../../../../../core/services/realtime.service';
 export class SettingsSecurityComponent implements OnInit, OnDestroy {
     private readonly settingsService = inject(AdminSettingsService);
     private readonly auth = inject(AuthService);
-    private readonly logService = inject(ActivityLogService);
     private readonly realtime = inject(RealtimeService);
     private rtSubs = new Subscription();
-
-    // ── Activity Logs ─────────────────────────────────────────────────────────
-    readonly activityLogs = signal<ActivityLogEntry[]>([]);
-    readonly activityLogsLoading = signal(false);
-    readonly activityPage = signal(1);
-    readonly deleteLogTargetId = signal<string | null>(null);
-    readonly clearAllLogsConfirm = signal(false);
-    readonly activityPageSize = 15;
-
-    get pagedActivityLogs(): ActivityLogEntry[] {
-        const start = (this.activityPage() - 1) * this.activityPageSize;
-        return this.activityLogs().slice(start, start + this.activityPageSize);
-    }
-
-    get activityTotalPages(): number {
-        return Math.max(1, Math.ceil(this.activityLogs().length / this.activityPageSize));
-    }
-
-    get activityPageNumbers(): number[] {
-        const total = this.activityTotalPages;
-        const cur = this.activityPage();
-        const pages: number[] = [];
-        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) pages.push(i);
-        return pages;
-    }
 
     // ── Security Settings form ────────────────────────────────────────────────
     readonly settingsLoading = signal(false);
@@ -86,95 +59,6 @@ export class SettingsSecurityComponent implements OnInit, OnDestroy {
         return pages;
     }
 
-    // ── AI Chat Auto-Reply ────────────────────────────────────────────────────
-    readonly aiSaving = signal(false);
-    readonly aiSaved = signal(false);
-    readonly aiError = signal('');
-
-    aiEnabled = false;
-    aiApiKey = '';
-    aiTone = 'professional';
-    aiInstruction = '';
-    aiAutoReplyDelay = 1500;
-    aiMaxResponseLength = 300;
-    aiMaxQuestions = 12;
-
-    readonly AI_TONES = [
-        { value: 'professional', label: 'Professional' },
-        { value: 'friendly', label: 'Friendly' },
-        { value: 'casual', label: 'Casual' },
-        { value: 'technical', label: 'Technical' },
-    ];
-
-    saveAiSettings(): void {
-        this.aiSaving.set(true);
-        this.aiSaved.set(false);
-        this.aiError.set('');
-
-        const payload: Partial<AdminSettings> = {
-            aiEnabled: this.aiEnabled,
-            aiTone: this.aiTone,
-            aiInstruction: this.aiInstruction || undefined,
-            aiAutoReplyDelay: this.aiAutoReplyDelay,
-            aiMaxResponseLength: this.aiMaxResponseLength,
-            aiMaxQuestions: this.aiMaxQuestions,
-        };
-        const resolvedKey = this.resolveKey(this.aiApiKey);
-        if (resolvedKey !== undefined) payload['geminiApiKey'] = resolvedKey;
-
-        this.settingsService.update(payload).subscribe({
-            next: () => {
-                this.aiSaving.set(false);
-                this.aiSaved.set(true);
-                setTimeout(() => this.aiSaved.set(false), 3000);
-            },
-            error: (e: any) => {
-                this.aiSaving.set(false);
-                this.aiError.set(e?.error?.message ?? 'Failed to save AI settings.');
-            },
-        });
-    }
-
-    private resolveKey(val: string): string | undefined {
-        return val && !val.startsWith('••') ? val : undefined;
-    }
-
-    // ── Email (Resend) ────────────────────────────────────────────────────────
-    readonly emailSaving = signal(false);
-    readonly emailSaved = signal(false);
-    readonly emailError = signal('');
-
-    emailEnabled = false;
-    resendApiKey = '';
-    emailFromAddress = '';
-    emailFromName = 'Mohammad Hamza';
-
-    saveEmailSettings(): void {
-        this.emailSaving.set(true);
-        this.emailSaved.set(false);
-        this.emailError.set('');
-
-        const payload: Partial<AdminSettings> = {
-            emailEnabled: this.emailEnabled,
-            emailFromAddress: this.emailFromAddress || undefined,
-            emailFromName: this.emailFromName || undefined,
-        };
-        const resolvedKey = this.resolveKey(this.resendApiKey);
-        if (resolvedKey !== undefined) payload['resendApiKey'] = resolvedKey;
-
-        this.settingsService.update(payload).subscribe({
-            next: () => {
-                this.emailSaving.set(false);
-                this.emailSaved.set(true);
-                setTimeout(() => this.emailSaved.set(false), 3000);
-            },
-            error: (e: any) => {
-                this.emailSaving.set(false);
-                this.emailError.set(e?.error?.message ?? 'Failed to save email settings.');
-            },
-        });
-    }
-
     // ── Change Password ───────────────────────────────────────────────────────
     readonly pwLoading = signal(false);
     readonly pwSuccess = signal('');
@@ -189,29 +73,6 @@ export class SettingsSecurityComponent implements OnInit, OnDestroy {
     get sessions() { return this.settingsService.sessions(); }
     get currentSessionId() { return this.settingsService.currentSessionId(); }
     get hasRevokedSessions(): boolean { return this.settingsService.sessions().some(s => !s.isActive); }
-
-    readonly logResourceIcons: Record<string, string> = {
-        blog: 'bi-file-text', project: 'bi-folder', inquiry: 'bi-envelope', feedback: 'bi-star',
-        comment: 'bi-chat-left-text', invoice: 'bi-receipt', push: 'bi-bell', client: 'bi-bug',
-        system: 'bi-gear', auth: 'bi-shield-lock', nav: 'bi-map',
-    };
-
-    readonly logActionLabels: Record<string, string> = {
-        'blog:create': 'Blog Created', 'blog:update': 'Blog Updated', 'blog:publish': 'Blog Published',
-        'blog:unpublish': 'Blog Unpublished', 'blog:delete': 'Blog Deleted',
-        'project:create': 'Project Created', 'project:update': 'Project Updated',
-        'project:unpublish': 'Project Unpublished', 'project:delete': 'Project Deleted',
-        'inquiry:received': 'New Inquiry', 'inquiry:read': 'Inquiry Read', 'inquiry:delete': 'Inquiry Deleted',
-        'feedback:received': 'New Review', 'feedback:approve': 'Review Approved',
-        'feedback:disapprove': 'Review Disapproved', 'feedback:delete': 'Review Deleted',
-        'comment:received': 'New Comment', 'comment:approve': 'Comment Approved',
-        'comment:unapprove': 'Comment Unapproved', 'comment:delete': 'Comment Deleted',
-        'invoice:create': 'Invoice Created', 'invoice:update': 'Invoice Updated', 'invoice:delete': 'Invoice Deleted',
-        'push:sent': 'Push Sent', 'push:skipped': 'Push Skipped', 'push:error': 'Push Error',
-        'error:client': 'Client Error', 'error:server': 'Server Error',
-        'auth:login': 'Login', 'auth:login-fail': 'Login Failed',
-        'auth:account-locked': 'Account Locked', 'nav:404': '404 Not Found',
-    };
 
     ngOnInit() {
         this.settingsService.load();
@@ -230,12 +91,6 @@ export class SettingsSecurityComponent implements OnInit, OnDestroy {
             error: () => { this.sessionsLoading.set(false); this.sessionsError.set('Failed to load sessions.'); },
         });
 
-        this.loadActivityLogs();
-
-        this.rtSubs.add(this.realtime.on<ActivityLogEntry>('activity:log_created').subscribe(entry => {
-            this.activityLogs.update(list => [entry, ...list]);
-        }));
-
         this.rtSubs.add(this.realtime.on<LoginSession[]>('session:list_updated').subscribe(sessions => {
             this.settingsService.sessions.set(sessions);
         }));
@@ -253,19 +108,6 @@ export class SettingsSecurityComponent implements OnInit, OnDestroy {
         this.lockDurationMinutes = s.lockDurationMinutes;
         this.rememberMeDays = s.rememberMeDays;
         this.sessionDurationDays = s.sessionDurationDays;
-        // AI
-        this.aiEnabled = s.aiEnabled ?? false;
-        this.aiApiKey = s.geminiApiKey ? '••••••••' : '';
-        this.aiTone = s.aiTone ?? 'professional';
-        this.aiInstruction = s.aiInstruction ?? '';
-        this.aiAutoReplyDelay = s.aiAutoReplyDelay ?? 1500;
-        this.aiMaxResponseLength = s.aiMaxResponseLength ?? 300;
-        this.aiMaxQuestions = s.aiMaxQuestions ?? 12;
-        // Email (Resend)
-        this.emailEnabled = s.emailEnabled ?? false;
-        this.resendApiKey = s.resendApiKey ? '••••••••' : '';
-        this.emailFromAddress = s.emailFromAddress ?? '';
-        this.emailFromName = s.emailFromName ?? 'Mohammad Hamza';
     }
 
     saveSecuritySettings() {
@@ -355,57 +197,6 @@ export class SettingsSecurityComponent implements OnInit, OnDestroy {
             },
         });
     }
-
-    loadActivityLogs() {
-        this.activityLogsLoading.set(true);
-        this.activityPage.set(1);
-        this.logService.getLogs(300).subscribe({
-            next: (data) => { this.activityLogs.set(data); this.activityLogsLoading.set(false); },
-            error: () => this.activityLogsLoading.set(false),
-        });
-    }
-
-    confirmDeleteLog(id: string) { this.deleteLogTargetId.set(id); }
-    cancelDeleteLog() { this.deleteLogTargetId.set(null); }
-
-    executeDeleteLog() {
-        const id = this.deleteLogTargetId();
-        if (!id) return;
-        this.logService.remove(id).subscribe({
-            next: () => {
-                this.activityLogs.update(list => list.filter(l => l.id !== id));
-                this.deleteLogTargetId.set(null);
-            },
-        });
-    }
-
-    confirmClearAllLogs() { this.clearAllLogsConfirm.set(true); }
-    cancelClearAllLogs() { this.clearAllLogsConfirm.set(false); }
-
-    executeClearAllLogs() {
-        this.logService.clearAll().subscribe({
-            next: () => {
-                this.activityLogs.set([]);
-                this.activityPage.set(1);
-                this.clearAllLogsConfirm.set(false);
-            },
-        });
-    }
-
-    getLogBadgeClass(log: ActivityLogEntry): string {
-        if (log.status === 'error') return 'admin-badge--danger';
-        const action = log.action;
-        if (action === 'push:skipped') return 'admin-badge--danger';
-        if (action === 'auth:login') return 'admin-badge--on';
-        if (action.endsWith(':create') || action.endsWith(':received') || action.endsWith(':approve')
-            || action.endsWith(':publish') || action === 'push:sent') return 'admin-badge--on';
-        if (action.endsWith(':delete') || action.endsWith(':disapprove')
-            || action.endsWith(':unpublish') || action.endsWith(':unapprove')) return 'admin-badge--warn';
-        return '';
-    }
-
-    getLogActionLabel(action: string): string { return this.logActionLabels[action] ?? action; }
-    getLogResourceIcon(resource: string): string { return this.logResourceIcons[resource] ?? 'bi-circle'; }
 
     formatLockDuration(minutes: number): string {
         if (minutes < 60) return `${minutes} min`;

@@ -1,0 +1,127 @@
+<!-- ── AI Chat Auto-Reply ─────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-stars"></i> AI Chat Auto-Reply</h2>
+            <p class="settings-card-sub">Configure Google Gemini AI to automatically reply to new live chat messages from visitors.</p>
+        </div>
+    </div>
+
+    <!-- Enable toggle -->
+    <div class="settings-toggle-row">
+        <div>
+            <span class="settings-toggle-title">Enable AI Auto-Reply</span>
+            <span class="settings-toggle-sub">When enabled, Gemini AI will automatically reply to new visitor messages.</span>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="aiEnabled">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <!-- API Key -->
+    <div class="admin-form-field" style="margin-top:1.25rem">
+        <label class="admin-form-label">Google Gemini API Key</label>
+        <p class="form-hint">Get your free API key from <strong>Google AI Studio</strong> at aistudio.google.com. The key is stored securely and never exposed in full.</p>
+        <input type="password" class="admin-form-input" [(ngModel)]="aiApiKey"
+            placeholder="AIza..." autocomplete="off">
+    </div>
+
+    <!-- Tone + Delay + Max Length -->
+    <div class="admin-form-grid" style="margin-top:1rem">
+        <div class="admin-form-field">
+            <label class="admin-form-label">Response Tone</label>
+            <select class="admin-form-input admin-form-select" [(ngModel)]="aiTone">
+                @for (tone of AI_TONES; track tone.value) {
+                <option [value]="tone.value">{{ tone.label }}</option>
+                }
+            </select>
+            <span class="form-hint">Controls the personality of AI responses.</span>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Auto-Reply Delay (ms)</label>
+            <input type="number" class="admin-form-input" [(ngModel)]="aiAutoReplyDelay" min="500" max="10000" step="100">
+            <span class="form-hint">Natural pause before AI responds (e.g. 1500 = 1.5 s).</span>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Max Reply Length (characters)</label>
+            <input type="number" class="admin-form-input" [(ngModel)]="aiMaxResponseLength" min="100" max="2000" step="50">
+            <span class="form-hint">How long AI replies can be (100 – 2000 chars).</span>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">Lead Q&amp;A Limit</label>
+            <input type="number" class="admin-form-input" [(ngModel)]="aiMaxQuestions" min="1" max="15" step="1">
+            <span class="form-hint">Max bot replies before it wraps up and goes quiet (1 – 15).</span>
+        </div>
+    </div>
+
+    <!-- System instruction -->
+    <div class="admin-form-field" style="margin-top:1rem">
+        <label class="admin-form-label label-optional">System Instruction</label>
+        <p class="form-hint">Describe what the AI should know: your role, services, how to handle questions, etc.</p>
+        <textarea class="admin-form-textarea" [(ngModel)]="aiInstruction" rows="4"
+            placeholder="e.g. You are a helpful assistant for mhfrough.dev, a personal portfolio & freelance developer site. Answer questions about services, pricing, project timelines, and availability. Be concise."></textarea>
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1.25rem">
+        <button class="btn-primary" (click)="saveAiSettings()" [disabled]="aiSaving()">
+            @if (aiSaving()) { <span class="contact-spinner"></span> Saving… } @else { <i class="bi bi-stars"></i> Save AI Settings }
+        </button>
+        @if (aiSaved()) { <span class="settings-saved-msg"><i class="bi bi-check-circle-fill"></i> Saved!</span> }
+        @if (aiError()) { <span class="settings-error-msg">{{ aiError() }}</span> }
+    </div>
+</div>
+
+<!-- ── Email (Resend) ─────────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-envelope-paper"></i> Email (Resend)</h2>
+            <p class="settings-card-sub">Configure outbound email via Resend.com — used for replying to inquiries and sending messages from Admin → Email.</p>
+        </div>
+    </div>
+
+    <!-- Enable toggle -->
+    <div class="settings-toggle-row">
+        <div>
+            <span class="settings-toggle-title">Enable Outbound Email</span>
+            <span class="settings-toggle-sub">When enabled, the Email module can send messages via Resend.</span>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="emailEnabled">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <!-- API Key -->
+    <div class="admin-form-field" style="margin-top:1.25rem">
+        <label class="admin-form-label">Resend API Key</label>
+        <p class="form-hint">Get your API key from <strong>resend.com</strong> → API Keys. The key is stored securely and never exposed in full.</p>
+        <input type="password" class="admin-form-input" [(ngModel)]="resendApiKey"
+            placeholder="re_..." autocomplete="off">
+    </div>
+
+    <!-- From address + name -->
+    <div class="admin-form-grid" style="margin-top:1rem">
+        <div class="admin-form-field">
+            <label class="admin-form-label">From Address</label>
+            <input type="email" class="admin-form-input" [(ngModel)]="emailFromAddress" placeholder="hello@mhfrough.dev">
+            <span class="form-hint">Must be a verified domain in your Resend account.</span>
+        </div>
+        <div class="admin-form-field">
+            <label class="admin-form-label">From Name</label>
+            <input type="text" class="admin-form-input" [(ngModel)]="emailFromName" placeholder="Mohammad Hamza">
+        </div>
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1.25rem">
+        <button class="btn-primary" (click)="saveEmailSettings()" [disabled]="emailSaving()">
+            @if (emailSaving()) { <span class="contact-spinner"></span> Saving… } @else { <i class="bi bi-envelope-paper"></i> Save Email Settings }
+        </button>
+        @if (emailSaved()) { <span class="settings-saved-msg"><i class="bi bi-check-circle-fill"></i> Saved!</span> }
+        @if (emailError()) { <span class="settings-error-msg">{{ emailError() }}</span> }
+    </div>
+</div>
+
+<!-- ── Live Widget API Keys ───────────────────────────────────────────────── -->
+<app-settings-widgets />

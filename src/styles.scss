@@ -3396,6 +3396,25 @@ body::before {
     overflow-y: auto;
 }
 
+// Non-collapsible group label that separates nav sections.
+// Follows the app's small-label convention (see .section-title / .footer-col-title):
+// font-sans, uppercase, 0.16em tracking, muted token — sized down so it reads as a
+// group label rather than a nav item, with top spacing carrying the grouping.
+.admin-nav-section {
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0.5rem 1.5rem 0.4rem;
+    margin-top: 1rem;
+
+    &:first-child {
+        margin-top: 0.25rem;
+    }
+}
+
 .admin-nav-link {
     display: flex;
     align-items: center;

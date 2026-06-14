@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { BlogsService } from '../../../core/services/blogs.service';
 import { AdminNotificationService } from '../../../core/services/admin-notification.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
@@ -12,7 +13,7 @@ import { ReasonModalComponent } from '../../../shared/components/reason-modal/re
 @Component({
     selector: 'app-admin-comments',
     standalone: true,
-    imports: [CommonModule, PaginationComponent, ConfirmModalComponent, ReasonModalComponent],
+    imports: [CommonModule, RouterLink, RouterLinkActive, PaginationComponent, ConfirmModalComponent, ReasonModalComponent],
     templateUrl: './admin-comments.component.html',
 })
 export class AdminCommentsComponent extends AdminListBase implements OnInit, OnDestroy {
