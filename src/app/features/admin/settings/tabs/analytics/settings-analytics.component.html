@@ -13,7 +13,7 @@
                 <button class="analytics-range-btn" [class.is-active]="days() === r" (click)="setDays(r)">{{ r }}d</button>
                 }
             </div>
-            <button class="btn-ghost btn-sm" (click)="exportCsv()" [disabled]="!data()">
+            <button class="analytics-csv-btn" (click)="exportCsv()" [disabled]="!data()">
                 <i class="bi bi-download"></i> CSV
             </button>
         </div>

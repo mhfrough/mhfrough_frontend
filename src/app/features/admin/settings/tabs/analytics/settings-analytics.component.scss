@@ -11,18 +11,22 @@
 
 .analytics-range {
     display: inline-flex;
+    height: 2.1rem;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 .analytics-range-btn {
+    display: inline-flex;
+    align-items: center;
     background: transparent;
     border: none;
     color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: 0.74rem;
-    padding: 0.35rem 0.7rem;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    padding: 0 0.75rem;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
 
@@ -40,9 +44,31 @@
     }
 }
 
-.btn-sm {
-    padding: 0.35rem 0.7rem;
-    font-size: 0.74rem;
+// CSV export — matches the admin filter-control language (height, subtle border, sans).
+.analytics-csv-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.1rem;
+    padding: 0 0.85rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color var(--dur, 200ms) var(--ease, ease), color var(--dur, 200ms) var(--ease, ease);
+
+    &:hover:not(:disabled) {
+        border-color: var(--text-muted);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 }
 
 /* Summary tiles */

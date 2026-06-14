@@ -45,9 +45,11 @@
     <div class="admin-form-field" style="margin-top:1rem">
         <label class="admin-form-label label-optional">About HTML</label>
         <p class="form-hint" style="margin-bottom:0.4rem">This content appears in the About section on the home page. Supports rich text formatting.</p>
-        <app-rte-toolbar [el]="aboutEl ?? null" mode="full"></app-rte-toolbar>
-        <textarea #aboutEl class="admin-form-textarea admin-rte-textarea" [(ngModel)]="profileAboutHtml"
-            placeholder="<p>Write your about section content here…</p>" rows="12"></textarea>
+        <div class="rte-wrap">
+            <app-rte-toolbar [el]="aboutEl ?? null" mode="full"></app-rte-toolbar>
+            <textarea #aboutEl class="admin-form-textarea rte-textarea" [(ngModel)]="profileAboutHtml"
+                placeholder="<p>Write your about section content here…</p>" rows="12"></textarea>
+        </div>
     </div>
 
     <div class="admin-form-actions" style="margin-top:1.25rem">
