@@ -5,11 +5,12 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { BlogsService } from '../../../../core/services/blogs.service';
 import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { TagInputComponent } from '../../../../shared/components/tag-input/tag-input.component';
+import { ImgUploadComponent } from '../../../../shared/components/img-upload/img-upload.component';
 
 @Component({
     selector: 'app-admin-blog-form',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, RteToolbarComponent, TagInputComponent],
+    imports: [CommonModule, FormsModule, RouterLink, RteToolbarComponent, TagInputComponent, ImgUploadComponent],
     templateUrl: './admin-blog-form.component.html',
 })
 export class AdminBlogFormComponent implements OnInit {
@@ -23,7 +24,6 @@ export class AdminBlogFormComponent implements OnInit {
     readonly editId = signal<string | null>(null);
     readonly coverPreview = signal<string | null>(null);
     readonly uploading = signal(false);
-    readonly dragOver = signal(false);
     readonly uploadError = signal<string | null>(null);
     readonly allTags = signal<string[]>([]);
     readonly formTags = signal<string[]>([]);
@@ -75,23 +75,8 @@ export class AdminBlogFormComponent implements OnInit {
         form.setValue({ ...form.value, readTimeMinutes: Math.max(1, Math.ceil(words / 200)) });
     }
 
-    onDragOver(e: DragEvent) { e.preventDefault(); this.dragOver.set(true); }
-    onDragLeave() { this.dragOver.set(false); }
-    onDrop(e: DragEvent) {
-        e.preventDefault();
-        this.dragOver.set(false);
-        const file = e.dataTransfer?.files?.[0];
-        if (file) this.uploadFile(file);
-    }
-    onFileInput(e: Event) {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (file) this.uploadFile(file);
-    }
-
-    private uploadFile(file: File) {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
-        if (!allowed.includes(file.type)) { this.uploadError.set('Invalid type — use JPEG, PNG, WebP, GIF or SVG.'); return; }
-        if (file.size > 5 * 1024 * 1024) { this.uploadError.set('File exceeds 5 MB limit.'); return; }
+    /** Receives an already-validated file from <app-img-upload> and uploads it. */
+    onFileSelected(file: File) {
         this.uploadError.set(null);
         this.uploading.set(true);
         this.service.uploadImage(file).subscribe({

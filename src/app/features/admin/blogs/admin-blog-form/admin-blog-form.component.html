@@ -76,34 +76,12 @@
         </div>
         <div class="admin-form-field">
             <label class="admin-form-label label-optional">Cover Image</label>
-            <div class="img-upload-zone" [class.drag-over]="dragOver()" (dragover)="onDragOver($event)"
-                (dragleave)="onDragLeave()" (drop)="onDrop($event)">
-                @if (uploading()) {
-                <div class="img-upload-placeholder"><span class="contact-spinner"></span>&nbsp; Uploading…</div>
-                } @else if (coverPreview()) {
-                <div class="img-upload-preview">
-                    <img [src]="coverPreview()!" alt="Cover preview" loading="lazy" />
-                    <button type="button" class="img-upload-clear" (click)="coverPreview.set(null)">
-                        <i class="bi bi-x-circle-fill"></i>
-                    </button>
-                </div>
-                } @else {
-                <div class="img-upload-placeholder">
-                    <i class="bi bi-cloud-upload" style="font-size:1.5rem"></i>
-                    <span>Drag &amp; drop an image, or <label class="img-upload-browse">browse<input type="file"
-                                accept="image/*" (change)="onFileInput($event)" hidden></label></span>
-                    <span style="font-size:0.75rem;color:var(--text-muted)">JPEG, PNG, WebP, GIF · max 5 MB</span>
-                </div>
-                }
-            </div>
+            <app-img-upload [previewUrl]="coverPreview()" [uploading]="uploading()" [uploadError]="uploadError()"
+                hint="JPEG, PNG, WebP, GIF, SVG · max 5 MB" (fileSelected)="onFileSelected($event)"
+                (cleared)="coverPreview.set(null)" />
             <input ngModel [ngModel]="coverPreview() ?? ''" name="coverImage" class="admin-form-input"
                 placeholder="Or paste a URL directly" style="margin-top:0.5rem"
                 (ngModelChange)="coverPreview.set($event || null)">
-            @if (uploadError()) {
-            <p style="font-size:0.78rem;color:#ef4444;margin-top:0.35rem;margin-bottom:0">
-                <i class="bi bi-exclamation-circle"></i> {{ uploadError() }}
-            </p>
-            }
         </div>
         <div class="admin-form-checks">
             <div class="admin-form-check checkbox-field">

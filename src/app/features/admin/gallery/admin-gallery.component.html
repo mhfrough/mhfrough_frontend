@@ -119,60 +119,21 @@
     </table>
 </div>
 
-@if (totalPages() > 1) {
-<div class="admin-pagination">
-    <button class="admin-pagination-page" (click)="currentPage.update(p => p - 1)" [disabled]="currentPage() === 1">
-        <i class="bi bi-chevron-left"></i>
-    </button>
-    <div class="admin-pagination-pages">
-        @if (pageNumbers[0] > 1) {
-        <button class="admin-pagination-page" (click)="currentPage.set(1)">1</button>
-        @if (pageNumbers[0] > 2) { <span class="admin-pagination-label">…</span> }
-        }
-        @for (n of pageNumbers; track n) {
-        <button class="admin-pagination-page" [class.is-active]="currentPage() === n" (click)="currentPage.set(n)">{{ n
-            }}</button>
-        }
-        @if (pageNumbers[pageNumbers.length - 1] < totalPages()) { @if (pageNumbers[pageNumbers.length - 1] <
-            totalPages() - 1) { <span class="admin-pagination-label">…</span> }
-            <button class="admin-pagination-page" (click)="currentPage.set(totalPages())">{{ totalPages() }}</button>
-            }
-    </div>
-    <button class="admin-pagination-page" (click)="currentPage.update(p => p + 1)"
-        [disabled]="currentPage() === totalPages()">
-        <i class="bi bi-chevron-right"></i>
-    </button>
-    <span class="admin-pagination-label">{{ currentPage() }} / {{ totalPages() }}</span>
-</div>
-}
+<app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageNumbers]="pageNumbers"
+    (pageChange)="currentPage.set($event)" />
 }
 }
 
 <!-- ─── Delete Confirm ──────────────────────────────────────────────────────── -->
 @if (deleteTargetId()) {
-<div class="admin-modal-overlay" (click)="cancelDelete()">
-    <div class="admin-modal" (click)="$event.stopPropagation()">
-        <p class="admin-modal-title">Delete Gallery Item?</p>
-        <p class="admin-modal-body">This action cannot be undone. The file will remain in storage.</p>
-        <div class="admin-modal-actions">
-            <button class="btn-ghost" (click)="cancelDelete()">Cancel</button>
-            <button class="btn-danger" (click)="executeDelete()">Delete</button>
-        </div>
-    </div>
-</div>
+<app-confirm-modal title="Delete Gallery Item?"
+    body="This action cannot be undone. The file will remain in storage." (confirmed)="executeDelete()"
+    (cancelled)="cancelDelete()" />
 }
 
 <!-- ─── Hide Confirm ────────────────────────────────────────────────────────── -->
 @if (statusModal()) {
-<div class="admin-modal-overlay" (click)="cancelStatus()">
-    <div class="admin-modal" (click)="$event.stopPropagation()">
-        <p class="admin-modal-title">Hide Gallery Item</p>
-        <p class="admin-modal-body">This item will be hidden from the public gallery. You can publish it again at any
-            time.</p>
-        <div class="admin-modal-actions">
-            <button class="btn-ghost" (click)="cancelStatus()">Cancel</button>
-            <button class="btn-primary" (click)="executeStatus()">Confirm</button>
-        </div>
-    </div>
-</div>
+<app-confirm-modal title="Hide Gallery Item"
+    body="This item will be hidden from the public gallery. You can publish it again at any time."
+    confirmLabel="Confirm" [danger]="false" (confirmed)="executeStatus()" (cancelled)="cancelStatus()" />
 }

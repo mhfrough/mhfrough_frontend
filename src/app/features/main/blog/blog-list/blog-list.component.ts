@@ -1,9 +1,11 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { BlogsService } from '../../../../core/services/blogs.service';
 import { ImgFallbackDirective } from '../../../../shared/directives/img-fallback.directive';
 import { PreconnectService } from '../../../../core/services/preconnect.service';
+import { RealtimeService } from '../../../../core/services/realtime.service';
 import { Title } from '@angular/platform-browser';
 import { SeoService } from '../../../../core/services/seo.service';
 
@@ -20,6 +22,8 @@ export class BlogListComponent implements OnInit, OnDestroy {
     private preconnect = inject(PreconnectService);
     private titleService = inject(Title);
     private seo = inject(SeoService);
+    private readonly realtime = inject(RealtimeService);
+    private readonly subs = new Subscription();
     readonly blogs = signal<any[]>([]);
     readonly loading = signal(true);
 
@@ -119,7 +123,16 @@ export class BlogListComponent implements OnInit, OnDestroy {
 
         this.service.getTags().subscribe({ next: t => this.allTags.set(t) });
         this.load();
+
+        // Live-refresh when posts are published/updated/removed by the admin.
+        this.subs.add(this.realtime.on<any>('blog:created').subscribe(() => this.load()));
+        this.subs.add(this.realtime.on<any>('blog:updated').subscribe(() => this.load()));
+        this.subs.add(this.realtime.on<{ id: string }>('blog:unpublished').subscribe(() => this.load()));
+        this.subs.add(this.realtime.on<{ id: string }>('blog:deleted').subscribe(() => this.load()));
     }
 
-    ngOnDestroy() { clearTimeout(this.searchTimer); }
+    ngOnDestroy() {
+        clearTimeout(this.searchTimer);
+        this.subs.unsubscribe();
+    }
 }

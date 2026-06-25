@@ -17,42 +17,11 @@
             <label class="admin-form-label label-required">Media File
                 <span class="form-hint">(image, gif, video — max 100 MB)</span>
             </label>
-            <div class="img-upload-zone" [class.drag-over]="dragOver()" (dragover)="onDragOver($event)"
-                (dragleave)="onDragLeave()" (drop)="onDrop($event)">
-                @if (uploading()) {
-                <div class="img-upload-placeholder"><span class="contact-spinner"></span>&nbsp; Uploading…</div>
-                } @else if (mediaPreview()) {
-                <div class="img-upload-preview">
-                    @if (mediaPreview()!.mediaType === 'video') {
-                    <video [src]="mediaPreview()!.url" style="max-height:140px;max-width:100%" controls muted></video>
-                    } @else {
-                    <img [src]="mediaPreview()!.url" alt="Preview" loading="lazy" />
-                    }
-                    <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.4rem;text-align:center">
-                        {{ mediaPreview()!.mediaType | uppercase }} · {{ formatBytes(mediaPreview()!.fileSize) }}
-                    </div>
-                    <button type="button" class="img-upload-clear" (click)="mediaPreview.set(null)">
-                        <i class="bi bi-x-circle-fill"></i>
-                    </button>
-                </div>
-                } @else {
-                <div class="img-upload-placeholder">
-                    <i class="bi bi-cloud-upload" style="font-size:1.5rem"></i>
-                    <span>Drag &amp; drop, or
-                        <label class="img-upload-browse">browse
-                            <input type="file" accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"
-                                (change)="onFileInput($event)" hidden>
-                        </label>
-                    </span>
-                    <span style="font-size:0.75rem;color:var(--text-muted)">Images · GIF · MP4 · WebM · OGG · MOV</span>
-                </div>
-                }
-            </div>
-            @if (uploadError()) {
-            <p style="font-size:0.78rem;color:#ef4444;margin-top:0.35rem;margin-bottom:0">
-                <i class="bi bi-exclamation-circle"></i> {{ uploadError() }}
-            </p>
-            }
+            <app-img-upload accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"
+                [allowedTypes]="ALLOWED_MIME" [maxSizeMb]="100" hint="Images · GIF · MP4 · WebM · OGG · MOV · max 100 MB"
+                [previewUrl]="mediaPreview()?.url ?? null" [previewType]="previewType()" [previewMeta]="mediaMeta()"
+                [uploading]="uploading()" [uploadError]="uploadError()" (fileSelected)="onFileSelected($event)"
+                (cleared)="mediaPreview.set(null)" />
             @if (!mediaPreview() && f.submitted) {
             <p style="font-size:0.78rem;color:#ef4444;margin-top:0.35rem;margin-bottom:0">
                 <i class="bi bi-exclamation-circle"></i> Please upload a media file.

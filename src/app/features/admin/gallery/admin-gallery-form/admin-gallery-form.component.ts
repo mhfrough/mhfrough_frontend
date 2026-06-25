@@ -4,11 +4,12 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { GalleryService, GalleryItem } from '../../../../core/services/gallery.service';
 import { TagInputComponent } from '../../../../shared/components/tag-input/tag-input.component';
+import { ImgUploadComponent } from '../../../../shared/components/img-upload/img-upload.component';
 
 @Component({
     selector: 'app-admin-gallery-form',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, TagInputComponent],
+    imports: [CommonModule, FormsModule, RouterLink, TagInputComponent, ImgUploadComponent],
     templateUrl: './admin-gallery-form.component.html',
 })
 export class AdminGalleryFormComponent implements OnInit {
@@ -19,7 +20,6 @@ export class AdminGalleryFormComponent implements OnInit {
     readonly loading = signal(true);
     readonly saving = signal(false);
     readonly uploading = signal(false);
-    readonly dragOver = signal(false);
     readonly editing = signal<GalleryItem | null>(null);
     readonly editId = signal<string | null>(null);
     readonly uploadError = signal<string | null>(null);
@@ -31,7 +31,6 @@ export class AdminGalleryFormComponent implements OnInit {
         'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml',
         'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime',
     ];
-    readonly MAX_SIZE = 100 * 1024 * 1024;
 
     ngOnInit() {
         this.service.getTags().subscribe({ next: t => this.allTags.set(t) });
@@ -84,25 +83,8 @@ export class AdminGalleryFormComponent implements OnInit {
 
     cancel() { this.router.navigate(['/admin/gallery']); }
 
-    onDragOver(e: DragEvent) { e.preventDefault(); this.dragOver.set(true); }
-    onDragLeave() { this.dragOver.set(false); }
-    onDrop(e: DragEvent) {
-        e.preventDefault();
-        this.dragOver.set(false);
-        const file = e.dataTransfer?.files?.[0];
-        if (file) this.uploadFile(file);
-    }
-    onFileInput(e: Event) {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (file) this.uploadFile(file);
-    }
-
-    private uploadFile(file: File) {
-        if (!this.ALLOWED_MIME.includes(file.type)) {
-            this.uploadError.set('Unsupported type. Allowed: JPEG, PNG, WebP, GIF, SVG, MP4, WebM, OGG, MOV.');
-            return;
-        }
-        if (file.size > this.MAX_SIZE) { this.uploadError.set('File exceeds 100 MB limit.'); return; }
+    /** Receives an already-validated file from <app-img-upload> and uploads it. */
+    onFileSelected(file: File) {
         this.uploadError.set(null);
         this.uploading.set(true);
         this.service.uploadMedia(file).subscribe({
@@ -112,6 +94,18 @@ export class AdminGalleryFormComponent implements OnInit {
             },
             error: () => { this.uploadError.set('Upload failed. Please try again.'); this.uploading.set(false); },
         });
+    }
+
+    /** How <app-img-upload> should render the current preview. */
+    previewType(): 'image' | 'video' {
+        return this.mediaPreview()?.mediaType === 'video' ? 'video' : 'image';
+    }
+
+    /** Caption shown under the upload preview, e.g. "VIDEO · 2.3 MB". */
+    mediaMeta(): string | null {
+        const p = this.mediaPreview();
+        if (!p) return null;
+        return `${p.mediaType.toUpperCase()} · ${this.formatBytes(p.fileSize)}`;
     }
 
     formatBytes(bytes: number): string {

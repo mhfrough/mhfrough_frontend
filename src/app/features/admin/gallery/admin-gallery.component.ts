@@ -5,14 +5,17 @@ import { Subscription } from 'rxjs';
 import { GalleryService, GalleryItem } from '../../../core/services/gallery.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { AdminListBase } from '../../../shared/admin-list.base';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
     selector: 'app-admin-gallery',
     standalone: true,
-    imports: [CommonModule, DatePipe, ImgFallbackDirective],
+    imports: [CommonModule, DatePipe, ImgFallbackDirective, PaginationComponent, ConfirmModalComponent],
     templateUrl: './admin-gallery.component.html',
 })
-export class AdminGalleryComponent implements OnInit, OnDestroy {
+export class AdminGalleryComponent extends AdminListBase implements OnInit, OnDestroy {
     private service = inject(GalleryService);
     private realtime = inject(RealtimeService);
     private readonly router = inject(Router);
@@ -20,13 +23,11 @@ export class AdminGalleryComponent implements OnInit, OnDestroy {
 
     readonly items = signal<GalleryItem[]>([]);
     readonly loading = signal(true);
-    readonly deleteTargetId = signal<string | null>(null);
     readonly statusModal = signal<{ id: string } | null>(null);
 
-    // ── Pagination + Search ──────────────────────────────────────────────────
-    readonly searchQuery = signal('');
-    readonly pageSize = signal(25);
-    readonly currentPage = signal(1);
+    readonly sortedItems = computed(() =>
+        [...this.items()].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    );
 
     readonly filteredItems = computed(() => {
         const q = this.searchQuery().toLowerCase().trim();
@@ -44,37 +45,19 @@ export class AdminGalleryComponent implements OnInit, OnDestroy {
         return this.filteredItems().slice(start, start + this.pageSize());
     });
 
-    readonly totalPages = computed(() =>
+    override readonly totalPages = computed(() =>
         Math.max(1, Math.ceil(this.filteredItems().length / this.pageSize()))
     );
-
-    get pageNumbers(): number[] {
-        const total = this.totalPages();
-        const cur = this.currentPage();
-        const pages: number[] = [];
-        for (let i = Math.max(1, cur - 2); i <= Math.min(total, cur + 2); i++) {
-            pages.push(i);
-        }
-        return pages;
-    }
-
-    onSearch(e: Event) {
-        this.searchQuery.set((e.target as HTMLInputElement).value);
-        this.currentPage.set(1);
-    }
-
-    onPageSizeChange(e: Event) {
-        this.pageSize.set(+(e.target as HTMLSelectElement).value);
-        this.currentPage.set(1);
-    }
 
     ngOnInit() {
         this.load();
 
         this.subs.add(this.realtime.on<GalleryItem>('gallery:created').subscribe(item => {
-            this.items.update(list => [item, ...list]);
+            this.items.update(list => list.some(i => i.id === item.id) ? list : [item, ...list]);
         }));
 
+        // gallery:updated carries the full item (incl. isPublished), so hide/publish
+        // changes made elsewhere are reflected here in-place.
         this.subs.add(this.realtime.on<GalleryItem>('gallery:updated').subscribe(item => {
             this.items.update(list => list.map(i => i.id === item.id ? item : i));
         }));
@@ -82,12 +65,12 @@ export class AdminGalleryComponent implements OnInit, OnDestroy {
         this.subs.add(this.realtime.on<{ id: string }>('gallery:deleted').subscribe(({ id }) => {
             this.items.update(list => list.filter(i => i.id !== id));
         }));
-
     }
 
     ngOnDestroy() { this.subs.unsubscribe(); }
 
     load() {
+        this.loading.set(true);
         this.service.getAllAdmin().subscribe({
             next: (d) => { this.items.set(d); this.loading.set(false); },
             error: () => this.loading.set(false),
@@ -98,10 +81,7 @@ export class AdminGalleryComponent implements OnInit, OnDestroy {
 
     edit(item: GalleryItem) { this.router.navigate(['/admin/gallery', item.id, 'edit']); }
 
-    confirmDelete(id: string) { this.deleteTargetId.set(id); }
-    cancelDelete() { this.deleteTargetId.set(null); }
-
-    executeDelete() {
+    override executeDelete(): void {
         const id = this.deleteTargetId();
         if (!id) return;
         this.deleteTargetId.set(null);
@@ -114,24 +94,18 @@ export class AdminGalleryComponent implements OnInit, OnDestroy {
         const m = this.statusModal();
         if (!m) return;
         this.statusModal.set(null);
-        const item = this.items().find(i => i.id === m.id);
+        this.setPublished(m.id, false);
+    }
+
+    publishItem(item: GalleryItem) { this.setPublished(item.id, true); }
+
+    private setPublished(id: string, isPublished: boolean) {
+        const item = this.items().find(i => i.id === id);
         if (!item) return;
-        const updated = { ...item, isPublished: false };
-        this.items.update(list => list.map(i => i.id === m.id ? updated : i));
-        this.service.update(m.id, { isPublished: false }).subscribe({
-            error: () => this.items.update(list => list.map(i => i.id === m.id ? item : i)),
+        // optimistic update; revert on failure
+        this.items.update(list => list.map(i => i.id === id ? { ...i, isPublished } : i));
+        this.service.update(id, { isPublished }).subscribe({
+            error: () => this.items.update(list => list.map(i => i.id === id ? item : i)),
         });
-    }
-
-    publishItem(item: GalleryItem) {
-        const updated = { ...item, isPublished: true };
-        this.items.update(list => list.map(i => i.id === item.id ? updated : i));
-        this.service.update(item.id, { isPublished: true }).subscribe({
-            error: () => this.items.update(list => list.map(i => i.id === item.id ? item : i)),
-        });
-    }
-
-    sortedItems() {
-        return [...this.items()].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 }

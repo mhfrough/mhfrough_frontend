@@ -2,25 +2,23 @@
 <div class="cookie-consent" role="dialog" aria-live="polite" aria-label="Cookie consent">
     <div class="cookie-consent__inner">
 
-        <svg class="cookie-consent__icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-                <mask id="cc-bite">
-                    <rect width="32" height="32" fill="white" />
-                    <circle cx="26" cy="6" r="8" fill="black" />
-                </mask>
-            </defs>
+        <svg class="cookie-consent__icon" viewBox="0 0 33 31" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <!-- Cookie body -->
-            <circle cx="15" cy="17" r="13" fill="currentColor" opacity="0.12" mask="url(#cc-bite)" />
-            <circle cx="15" cy="17" r="13" fill="none" stroke="currentColor" stroke-width="1.4" mask="url(#cc-bite)" />
-            <!-- Chips -->
-            <circle cx="11" cy="13" r="1.6" fill="currentColor" mask="url(#cc-bite)" />
-            <circle cx="18" cy="12" r="1.4" fill="currentColor" mask="url(#cc-bite)" />
-            <circle cx="10" cy="20" r="1.5" fill="currentColor" mask="url(#cc-bite)" />
-            <circle cx="18" cy="20" r="1.6" fill="currentColor" mask="url(#cc-bite)" />
-            <circle cx="14" cy="24" r="1.3" fill="currentColor" mask="url(#cc-bite)" />
-            <!-- Crumbs near bite -->
-            <circle cx="21" cy="8" r="0.9" fill="currentColor" opacity="0.6" />
-            <circle cx="25" cy="13" r="0.7" fill="currentColor" opacity="0.6" />
+            <path
+                d='M25.158 26.575C11.844 37.38-6.692 20.213 4.998 6.205c.19-.211.4-.443.611-.653 2.675-2.655 5.646-3.898 8.553-4.087a.518.518 0 0 1 .547.484c.043 1.728 1.159 2.886 2.802 3.118.253.042.4.274.337.527-.168.547-.232 1.137-.232 1.748.064 3.097 2.634 5.646 5.73 5.667.632 0 1.243-.085 1.833-.274a.398.398 0 0 1 .526.316c.38 2.064 2.254 1.685 3.14 1.39a.459.459 0 0 1 .589.316c1.727 6.298-4.276 11.818-4.276 11.818Z'
+                fill='var(--_fill)' />
+            <!-- Chips: filled with bg color so they read as dark spots on the lighter cookie body -->
+            <path
+                d='M16.12 13.262c0 1.558-1.264 2.612-2.823 2.612s-2.822-1.054-2.822-2.612a2.823 2.823 0 0 1 2.822-2.823 2.81 2.81 0 0 1 2.823 2.823ZM24.988 20.066c0 1.2-.969 2.17-2.17 2.17-1.2 0-2.022-.717-2.022-1.918 0-1.2.822-2.443 2.023-2.443 1.2 0 2.17.99 2.17 2.19ZM8.77 17.411c0 .927-.675 1.454-1.602 1.454s-1.727-.527-1.727-1.454c0-.927.737-1.664 1.664-1.664.927 0 1.664.738 1.664 1.664ZM13.866 23.056a.755.755 0 0 1-.758.759.755.755 0 0 1-.759-.759c0-.42.337-.758.758-.758.422 0 .759.337.759.758ZM8.726 8.5a.843.843 0 1 0 0-1.684.843.843 0 0 0 0 1.685Z'
+                fill='var(--_chip)' />
+            <!-- Bite-off piece -->
+            <path
+                d='M23.955 2.602c.085 1.012-.8 1.833-1.98 1.833s-2.085-.906-2.022-2.022c.063-1.117.948-1.938 1.98-1.833 1.032.105 1.938.99 2.022 2.022Z'
+                fill='var(--_fill)' />
+            <!-- Crumbs -->
+            <path
+                d='M23.851 8.332c-.042.674-.61 1.243-1.264 1.306-.653.042-1.18-.506-1.158-1.222 0-.716.569-1.306 1.264-1.306.695 0 1.2.548 1.158 1.222ZM32.465 8.859c-.063.8-.716 1.474-1.495 1.517-.758.042-1.37-.59-1.37-1.433.022-.842.675-1.517 1.496-1.517.822 0 1.433.653 1.37 1.433Z'
+                fill='var(--_crumb)' />
         </svg>
 
         <p class="cookie-consent__text">

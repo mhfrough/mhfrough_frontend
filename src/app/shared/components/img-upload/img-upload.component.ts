@@ -43,7 +43,14 @@ import { CommonModule } from '@angular/common';
         </div>
     } @else if (previewUrl()) {
         <div class="img-upload-preview">
-            <img [src]="previewUrl()!" alt="Preview" loading="lazy" />
+            @if (previewType() === 'video') {
+                <video [src]="previewUrl()!" style="max-height:140px;max-width:100%" controls muted></video>
+            } @else {
+                <img [src]="previewUrl()!" alt="Preview" loading="lazy" />
+            }
+            @if (previewMeta()) {
+                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.4rem;text-align:center">{{ previewMeta() }}</div>
+            }
             <button type="button" class="img-upload-clear" (click)="cleared.emit()">
                 <i class="bi bi-x-circle-fill"></i>
             </button>
@@ -82,8 +89,12 @@ export class ImgUploadComponent {
     readonly maxSizeMb = input(5);
     /** Hint text shown below the drag-drop prompt. */
     readonly hint = input('JPEG, PNG, WebP, GIF · max 5 MB');
-    /** URL of the currently uploaded / previewed image (from parent). */
+    /** URL of the currently uploaded / previewed media (from parent). */
     readonly previewUrl = input<string | null>(null);
+    /** How to render the preview — an image thumbnail or a video player. */
+    readonly previewType = input<'image' | 'video'>('image');
+    /** Optional caption shown under the preview (e.g. "VIDEO · 2.3 MB"). */
+    readonly previewMeta = input<string | null>(null);
     /** Whether the parent is currently uploading. */
     readonly uploading = input(false);
     /** Error message from the parent's upload attempt. */

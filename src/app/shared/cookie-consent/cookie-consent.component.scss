@@ -54,6 +54,9 @@
     flex-shrink: 0;
     color: var(--text-muted);
     animation: cookie-spin 7s linear infinite;
+    --_fill: rgba(228, 224, 216, 0.18);
+    --_chip: var(--bg, #1a1917);
+    --_crumb: rgba(228, 224, 216, 0.42);
 }
 
 .cookie-consent__text {

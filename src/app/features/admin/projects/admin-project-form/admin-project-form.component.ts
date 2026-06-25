@@ -5,11 +5,12 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ProjectsService } from '../../../../core/services/projects.service';
 import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { TagInputComponent } from '../../../../shared/components/tag-input/tag-input.component';
+import { ImgUploadComponent } from '../../../../shared/components/img-upload/img-upload.component';
 
 @Component({
     selector: 'app-admin-project-form',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, RteToolbarComponent, TagInputComponent],
+    imports: [CommonModule, FormsModule, RouterLink, RteToolbarComponent, TagInputComponent, ImgUploadComponent],
     templateUrl: './admin-project-form.component.html',
 })
 export class AdminProjectFormComponent implements OnInit {
@@ -23,7 +24,6 @@ export class AdminProjectFormComponent implements OnInit {
     readonly editId = signal<string | null>(null);
     readonly thumbPreview = signal<string | null>(null);
     readonly uploading = signal(false);
-    readonly dragOver = signal(false);
     readonly uploadError = signal<string | null>(null);
     readonly allTags = signal<string[]>([]);
     readonly formTags = signal<string[]>([]);
@@ -55,6 +55,9 @@ export class AdminProjectFormComponent implements OnInit {
             ...form.value,
             tags: this.formTags(),
             techStack: form.value.techStack?.split(',').map((s: string) => s.trim()).filter(Boolean),
+            // Drop blank URLs so the backend's @IsUrl() validation isn't tripped by "".
+            liveUrl: form.value.liveUrl?.trim() || undefined,
+            githubUrl: form.value.githubUrl?.trim() || undefined,
         };
         const obs = this.editId()
             ? this.service.update(this.editId()!, payload)
@@ -73,48 +76,13 @@ export class AdminProjectFormComponent implements OnInit {
         form.setValue({ ...form.value, slug });
     }
 
-    onDragOver(e: DragEvent) { e.preventDefault(); this.dragOver.set(true); }
-    onDragLeave() { this.dragOver.set(false); }
-    onDrop(e: DragEvent) {
-        e.preventDefault();
-        this.dragOver.set(false);
-        const file = e.dataTransfer?.files?.[0];
-        if (file) this.uploadFile(file);
-    }
-    onFileInput(e: Event) {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (file) this.uploadFile(file);
-    }
-
-    private uploadFile(file: File) {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
-        if (!allowed.includes(file.type)) { this.uploadError.set('Invalid type — use JPEG, PNG, WebP, GIF or SVG.'); return; }
-        if (file.size > 5 * 1024 * 1024) { this.uploadError.set('File exceeds 5 MB limit.'); return; }
+    /** Receives an already-validated file from <app-img-upload> and uploads it. */
+    onFileSelected(file: File) {
         this.uploadError.set(null);
         this.uploading.set(true);
         this.service.uploadImage(file).subscribe({
             next: ({ url }) => { this.thumbPreview.set(url); this.uploading.set(false); },
             error: () => { this.uploadError.set('Upload failed. Please try again.'); this.uploading.set(false); },
         });
-    }
-
-    format(el: HTMLTextAreaElement, open: string, close: string): void {
-        const start = el.selectionStart;
-        const end = el.selectionEnd;
-        const sel = el.value.substring(start, end);
-        el.setRangeText(open + (sel || 'text') + close, start, end, 'select');
-        el.focus();
-        el.dispatchEvent(new Event('input'));
-    }
-
-    insertLink(el: HTMLTextAreaElement): void {
-        const url = prompt('Enter URL:');
-        if (!url) { el.focus(); return; }
-        const start = el.selectionStart;
-        const end = el.selectionEnd;
-        const sel = el.value.substring(start, end) || 'link text';
-        el.setRangeText(`<a href="${url}">${sel}</a>`, start, end, 'end');
-        el.focus();
-        el.dispatchEvent(new Event('input'));
     }
 }
