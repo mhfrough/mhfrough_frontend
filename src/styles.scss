@@ -11,10 +11,13 @@
 
 // --- Tokens ------------------------------------------------------------------
 :root {
-    --font-mono: "Inconsolata", "Courier New", monospace;
-    --font-serif: "Inconsolata", "Courier New", monospace;
-    --font-sans: "Inconsolata", "Courier New", monospace;
+    // One font for the whole site. Change it here and it changes everywhere.
+    // The -sans / -serif / -mono names are kept only because ~200 rules across
+    // the codebase reference them; they all just alias the single base font.
     --font: "Inconsolata", "Courier New", monospace;
+    --font-mono: var(--font);
+    --font-serif: var(--font);
+    --font-sans: var(--font);
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
     --dur: 220ms;
     --dur-fast: 120ms;

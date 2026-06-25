@@ -140,6 +140,7 @@ label>input[type="checkbox"] {
 
 /* Inline error message shown below invalid fields */
 .form-error {
+    font-family: var(--font);
     color: var(--danger);
     font-size: 0.78rem;
     margin-top: 0.25rem;
