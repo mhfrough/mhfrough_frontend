@@ -49,7 +49,14 @@ export class GalleryService extends OfflineResourceService {
 
     getCategories() { return this.http.get<string[]>(`${this.base}/categories`); }
     getTags() { return this.http.get<string[]>(`${this.base}/tags`); }
-    getOne(id: string) { return this.http.get<GalleryItem>(`${this.base}/${id}`); }
+
+    getOne(id: string): Observable<GalleryItem> {
+        return this.staleOne<GalleryItem>({
+            store: 'gallery',
+            key: id,
+            fetch: () => this.http.get<GalleryItem>(`${this.base}/${id}`),
+        });
+    }
 
     create(data: Partial<GalleryItem>) { return this.mutate('POST', this.base, data); }
     update(id: string, data: Partial<GalleryItem>) { return this.mutate('PUT', `${this.base}/${id}`, data); }

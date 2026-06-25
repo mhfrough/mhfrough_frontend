@@ -139,7 +139,10 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private setupScrollReveal() {
         const host: HTMLElement = this.elRef.nativeElement;
-        const targets = host.querySelectorAll<HTMLElement>('.section, .stats-strip, .hero');
+        // NOTE: `.hero` is intentionally excluded — it is the above-the-fold LCP
+        // element. Applying the reveal (opacity:0 → fade) to it delays Largest
+        // Contentful Paint until JS executes and the transition finishes.
+        const targets = host.querySelectorAll<HTMLElement>('.section, .stats-strip');
         targets.forEach(el => el.classList.add('reveal'));
 
         const obs = new IntersectionObserver(entries => {

@@ -47,7 +47,14 @@ export class ProjectsService extends OfflineResourceService {
     getTags() { return this.http.get<string[]>(`${this.base}/tags`); }
     getAllAdmin() { return this.http.get<any[]>(`${this.base}/all`); }
     getOne(id: string) { return this.http.get<any>(`${this.base}/${id}`); }
-    getBySlug(slug: string) { return this.http.get<any>(`${this.base}/slug/${slug}`); }
+
+    getBySlug(slug: string): Observable<any> {
+        return this.staleOne<any>({
+            store: 'projects',
+            match: items => items.find(p => p?.slug === slug),
+            fetch: () => this.http.get<any>(`${this.base}/slug/${slug}`),
+        });
+    }
 
     create(data: any) { return this.mutate('POST', this.base, data); }
     update(id: string, data: any) { return this.mutate('PUT', `${this.base}/${id}`, data); }

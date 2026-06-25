@@ -6,7 +6,6 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { ChatWidgetComponent } from '../../../shared/chat-widget/chat-widget.component';
 import { RealtimeService } from '../../../core/services/realtime.service';
-import { FcmService } from '../../../core/services/fcm.service';
 import { CookieConsentComponent } from '../../../shared/cookie-consent/cookie-consent.component';
 import { FooterSettingsService } from '../../../core/services/footer-settings.service';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
@@ -28,18 +27,27 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
     private readonly scroller = inject(ViewportScroller);
     private readonly realtime = inject(RealtimeService);
-    private readonly fcm = inject(FcmService);
     private readonly platformId = inject(PLATFORM_ID);
     readonly footerSettings = inject(FooterSettingsService);
     private readonly tracker = inject(VisitorTrackingService);
     private readonly router = inject(Router);
     private trackingSub = new Subscription();
-    private permissionTimer: ReturnType<typeof setTimeout> | null = null;
 
     ngOnInit() {
         this.scroller.setOffset([0, 80]);
-        this.realtime.connect();
         this.footerSettings.load();
+
+        // Defer the realtime socket connection until the browser is idle. The
+        // socket.io chunk + WebSocket handshake are not needed for first paint,
+        // so keeping them off the critical path improves LCP/TBT on load.
+        if (isPlatformBrowser(this.platformId)) {
+            const connect = () => this.realtime.connect();
+            if ('requestIdleCallback' in window) {
+                (window as any).requestIdleCallback(connect, { timeout: 3000 });
+            } else {
+                setTimeout(connect, 1500);
+            }
+        }
 
         // Visitor tracking — browser only
         if (isPlatformBrowser(this.platformId)) {
@@ -51,17 +59,13 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
             document.addEventListener('visibilitychange', this.onVisibilityChange);
         }
 
-        if (isPlatformBrowser(this.platformId)) {
-            this.permissionTimer = setTimeout(() => {
-                if (this.fcm.permissionState === 'default') {
-                    this.fcm.requestPermissionAndRegister();
-                }
-            }, 10000);
-        }
+        // NOTE: notification permission is intentionally NOT requested on load.
+        // Auto-prompting without a user gesture is a poor UX pattern and trips
+        // Lighthouse's "notification-on-start" best-practices audit. Permission
+        // is requested only via an explicit user action (admin Settings tab).
     }
 
     ngOnDestroy() {
-        if (this.permissionTimer !== null) clearTimeout(this.permissionTimer);
         this.tracker.sendLeave();
         this.trackingSub.unsubscribe();
         document.removeEventListener('visibilitychange', this.onVisibilityChange);

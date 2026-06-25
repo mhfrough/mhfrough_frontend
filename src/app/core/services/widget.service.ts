@@ -40,6 +40,20 @@ const LS_KEY_USD = 'widget_usd_v1';
 
 interface CacheEntry<T> { data: T; ts: number; }
 
+// ── Validity guards ───────────────────────────────────────────────────────────
+// The backend returns an error sentinel (e.g. `{ error: 'not_configured' }`) when
+// an API key is missing or the upstream call fails. Treat any payload that lacks
+// the widget's required key as "no data" so the carousel can hide that widget.
+function isWeather(d: unknown): d is WeatherData {
+    return !!d && typeof (d as WeatherData).temp === 'number';
+}
+function isGold(d: unknown): d is GoldData {
+    return !!d && typeof (d as GoldData).pricePerTola === 'number';
+}
+function isUsdPkr(d: unknown): d is UsdPkrData {
+    return !!d && typeof (d as UsdPkrData).rate === 'number';
+}
+
 // ── Service ───────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
@@ -80,33 +94,42 @@ export class WidgetService {
 
     // ── Public fetch methods ──────────────────────────────────────────────────
 
-    fetchWeather(): Observable<WeatherData> {
+    fetchWeather(): Observable<WeatherData | null> {
         const cached = this.readCache<WeatherData>(LS_KEY_WEATHER, WEATHER_TTL);
-        if (cached) { this.weatherData.set(cached); return of(cached); }
+        if (isWeather(cached)) { this.weatherData.set(cached); return of(cached); }
 
         return this.http.get<WeatherData>(`${environment.apiUrl}/widgets/weather`).pipe(
-            tap(d => { this.weatherData.set(d); this.writeCache(LS_KEY_WEATHER, d); this.weatherError.set(false); }),
-            catchError(() => { this.weatherError.set(true); return of(this.weatherData() as WeatherData); }),
+            tap(d => {
+                if (isWeather(d)) { this.weatherData.set(d); this.writeCache(LS_KEY_WEATHER, d); this.weatherError.set(false); }
+                else { this.weatherData.set(null); this.weatherError.set(true); }
+            }),
+            catchError(() => { this.weatherError.set(true); return of(this.weatherData()); }),
         );
     }
 
-    fetchGold(): Observable<GoldData> {
+    fetchGold(): Observable<GoldData | null> {
         const cached = this.readCache<GoldData>(LS_KEY_GOLD, GOLD_TTL);
-        if (cached) { this.goldData.set(cached); return of(cached); }
+        if (isGold(cached)) { this.goldData.set(cached); return of(cached); }
 
         return this.http.get<GoldData>(`${environment.apiUrl}/widgets/gold`).pipe(
-            tap(d => { this.goldData.set(d); this.writeCache(LS_KEY_GOLD, d); this.goldError.set(false); }),
-            catchError(() => { this.goldError.set(true); return of(this.goldData() as GoldData); }),
+            tap(d => {
+                if (isGold(d)) { this.goldData.set(d); this.writeCache(LS_KEY_GOLD, d); this.goldError.set(false); }
+                else { this.goldData.set(null); this.goldError.set(true); }
+            }),
+            catchError(() => { this.goldError.set(true); return of(this.goldData()); }),
         );
     }
 
-    fetchUsdPkr(): Observable<UsdPkrData> {
+    fetchUsdPkr(): Observable<UsdPkrData | null> {
         const cached = this.readCache<UsdPkrData>(LS_KEY_USD, USD_TTL);
-        if (cached) { this.usdPkrData.set(cached); return of(cached); }
+        if (isUsdPkr(cached)) { this.usdPkrData.set(cached); return of(cached); }
 
         return this.http.get<UsdPkrData>(`${environment.apiUrl}/widgets/usd-pkr`).pipe(
-            tap(d => { this.usdPkrData.set(d); this.writeCache(LS_KEY_USD, d); this.usdError.set(false); }),
-            catchError(() => { this.usdError.set(true); return of(this.usdPkrData() as UsdPkrData); }),
+            tap(d => {
+                if (isUsdPkr(d)) { this.usdPkrData.set(d); this.writeCache(LS_KEY_USD, d); this.usdError.set(false); }
+                else { this.usdPkrData.set(null); this.usdError.set(true); }
+            }),
+            catchError(() => { this.usdError.set(true); return of(this.usdPkrData()); }),
         );
     }
 

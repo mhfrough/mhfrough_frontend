@@ -1,8 +1,7 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage, Messaging, isSupported } from 'firebase/messaging';
+import type { Messaging } from 'firebase/messaging';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -12,16 +11,22 @@ export class FcmService {
     private messaging: Messaging | null = null;
     private currentToken: string | null = null;
 
-    /** Call once on app init (browser only) */
-    async init(): Promise<void> {
-        if (!isPlatformBrowser(this.platformId)) return;
+    /**
+     * Lazily import the Firebase SDK and initialise Messaging on first use.
+     * Firebase (~150 KB) is code-split into its own chunk so it never lands in
+     * the initial bundle — it is only fetched when notifications are actually
+     * used (granted before, or the user opts in).
+     */
+    private async ensureMessaging(): Promise<Messaging | null> {
+        if (!isPlatformBrowser(this.platformId)) return null;
+        if (this.messaging) return this.messaging;
 
-        const supported = await isSupported().catch(() => false);
-        if (!supported) return;
+        const [{ initializeApp, getApps }, { getMessaging, onMessage, isSupported }] =
+            await Promise.all([import('firebase/app'), import('firebase/messaging')]);
 
-        const app: FirebaseApp =
-            getApps().length > 0 ? getApps()[0]! : initializeApp(environment.firebase);
+        if (!(await isSupported().catch(() => false))) return null;
 
+        const app = getApps().length > 0 ? getApps()[0]! : initializeApp(environment.firebase);
         this.messaging = getMessaging(app);
 
         // Listen for foreground messages
@@ -35,17 +40,34 @@ export class FcmService {
                 } as NotificationOptions);
             }
         });
+
+        return this.messaging;
+    }
+
+    /**
+     * Call once on app init (browser only). Only wires up Firebase for visitors
+     * who have *already* granted notification permission — first-time visitors
+     * pay no Firebase cost on load.
+     */
+    async init(): Promise<void> {
+        if (!isPlatformBrowser(this.platformId)) return;
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        await this.ensureMessaging();
     }
 
     /** Request permission and register the FCM token with the backend */
     async requestPermissionAndRegister(): Promise<boolean> {
-        if (!isPlatformBrowser(this.platformId) || !this.messaging) return false;
+        if (!isPlatformBrowser(this.platformId)) return false;
 
         try {
             const permission = await Notification.requestPermission();
             if (permission !== 'granted') return false;
 
-            const token = await getToken(this.messaging, {
+            const messaging = await this.ensureMessaging();
+            if (!messaging) return false;
+
+            const { getToken } = await import('firebase/messaging');
+            const token = await getToken(messaging, {
                 vapidKey: environment.firebase.vapidKey,
                 serviceWorkerRegistration: await navigator.serviceWorker.getRegistration(
                     '/firebase-messaging-sw.js',

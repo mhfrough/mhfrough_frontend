@@ -82,4 +82,42 @@ export abstract class OfflineResourceService {
             });
         });
     }
+
+    /**
+     * Stale-while-revalidate for a single record: emits the matching cached
+     * item immediately (if any), then fetches fresh, refreshes the cache, and
+     * emits that. Lets detail pages paint instantly while the free-tier backend
+     * wakes from a cold start instead of blocking on the ~50s spin-up.
+     *
+     * `match` locates the cached record from the store's contents — used when
+     * the lookup key differs from the store key (e.g. by `slug`). Omit it to
+     * look up directly by `key`.
+     */
+    protected staleOne<T>(opts: {
+        store: IdbStoreName;
+        key?: IDBValidKey;
+        match?: (items: T[]) => T | undefined;
+        fetch: () => Observable<T>;
+    }): Observable<T> {
+        return new Observable<T>(subscriber => {
+            const cached = opts.match
+                ? this.idb.getAll<T>(opts.store).then(opts.match)
+                : opts.key != null
+                    ? this.idb.get<T>(opts.store, opts.key)
+                    : Promise.resolve(undefined);
+
+            cached.then(hit => {
+                if (hit) subscriber.next(hit);
+            });
+
+            opts.fetch().subscribe({
+                next: fresh => {
+                    if (fresh) this.idb.put(opts.store, fresh).catch(() => {});
+                    subscriber.next(fresh);
+                    subscriber.complete();
+                },
+                error: err => subscriber.error(err),
+            });
+        });
+    }
 }

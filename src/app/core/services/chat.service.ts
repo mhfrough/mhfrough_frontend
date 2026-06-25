@@ -307,6 +307,9 @@ export class ChatService {
 
         this.socket = io(`${this.socketUrl}/chat`, {
             transports: ['websocket', 'polling'],
+            // Send the httpOnly access_token cookie on the handshake so the
+            // server can verify this is a real admin before granting admin:join.
+            withCredentials: true,
         });
 
         this.socket.on('connect', () => {

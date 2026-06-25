@@ -33,6 +33,8 @@ export class RealtimeService implements OnDestroy {
 
         this.socket = io(`${socketUrl}/events`, {
             transports: ['websocket', 'polling'],
+            // Forward the admin auth cookie so join_admin can be verified server-side.
+            withCredentials: true,
         });
 
         this.socket.on('connect', () => {
