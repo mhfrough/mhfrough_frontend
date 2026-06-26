@@ -9,44 +9,90 @@
 
     <div class="legal-body">
 
-      <p>This site is designed, built, and maintained by <strong>Mohammad Hamza</strong>. It's a
+      <p>This site is designed, built, and maintained by <strong>Mohammad Hamza</strong>. It is a
         full-stack application — an Angular front end talking to a NestJS API over REST and
-        WebSockets — and it stands on the shoulders of a lot of excellent open-source work. Thanks to
-        everyone who builds and maintains the projects below.</p>
+        WebSockets — and it stands on the shoulders of a great deal of excellent open-source work. The
+        following acknowledges, with gratitude, the projects, services, and people that make it possible.</p>
 
       <h2>Frameworks &amp; Runtime</h2>
       <ul>
         <li><strong><a href="https://angular.dev" target="_blank" rel="noopener noreferrer">Angular</a></strong> &ndash;
-          standalone components, signals, and SSR power the front end.</li>
+          standalone components, signals, the router, reactive forms, and SSR power the front end.</li>
         <li><strong><a href="https://nestjs.com" target="_blank" rel="noopener noreferrer">NestJS</a></strong> &ndash;
-          the back-end framework running the API.</li>
+          the back-end framework running the REST API, WebSocket gateways, and module system.</li>
         <li><strong><a href="https://nodejs.org" target="_blank" rel="noopener noreferrer">Node.js</a></strong> &ndash;
           the runtime behind it all.</li>
         <li><strong><a href="https://www.typescriptlang.org" target="_blank" rel="noopener noreferrer">TypeScript</a></strong>
           &ndash; end-to-end type safety on both client and server.</li>
+        <li><strong><a href="https://rxjs.dev" target="_blank" rel="noopener noreferrer">RxJS</a></strong> &ndash;
+          reactive streams across the stack.</li>
       </ul>
 
-      <h2>Data &amp; Real-time</h2>
+      <h2>Data, Real-time &amp; Messaging</h2>
       <ul>
         <li><strong><a href="https://www.postgresql.org" target="_blank" rel="noopener noreferrer">PostgreSQL</a></strong>
-          &ndash; the primary database.</li>
+          &ndash; the primary relational database, accessed via the <strong>node-postgres (pg)</strong> driver.</li>
         <li><strong><a href="https://typeorm.io" target="_blank" rel="noopener noreferrer">TypeORM</a></strong> &ndash;
-          object-relational mapping and migrations.</li>
+          object-relational mapping and database migrations.</li>
         <li><strong><a href="https://socket.io" target="_blank" rel="noopener noreferrer">Socket.IO</a></strong> &ndash;
-          the live chat and real-time admin updates.</li>
+          the live chat and real-time admin updates, on both client and server.</li>
         <li><strong><a href="https://firebase.google.com/docs/cloud-messaging" target="_blank" rel="noopener noreferrer">Firebase
-              Cloud Messaging</a></strong> &ndash; web push notifications.</li>
+              Cloud Messaging</a></strong> &ndash; web push notifications, via the Firebase web SDK and the
+          Firebase Admin SDK.</li>
+        <li><strong><a href="https://github.com/jaredwray/keyv" target="_blank" rel="noopener noreferrer">Keyv</a></strong>
+          &amp; <strong>cache-manager</strong> &ndash; caching across the API.</li>
+      </ul>
+
+      <h2>API Security &amp; Validation</h2>
+      <ul>
+        <li><strong><a href="https://helmetjs.github.io" target="_blank" rel="noopener noreferrer">Helmet</a></strong>
+          &ndash; secure HTTP headers.</li>
+        <li><strong><a href="https://www.passportjs.org" target="_blank" rel="noopener noreferrer">Passport</a></strong>
+          with JWT and local strategies, and <strong>@nestjs/jwt</strong> &ndash; authentication and token handling.</li>
+        <li><strong><a href="https://github.com/typestack/class-validator" target="_blank" rel="noopener noreferrer">class-validator</a></strong>
+          &amp; <strong>class-transformer</strong> &ndash; request validation and DTO transformation.</li>
+        <li><strong><a href="https://github.com/kelektiv/node.bcrypt.js" target="_blank" rel="noopener noreferrer">bcrypt</a></strong>
+          &ndash; password hashing.</li>
+        <li><strong>@nestjs/throttler</strong> &ndash; rate limiting, and <strong>cookie-parser</strong> &ndash; secure
+          cookie handling.</li>
+      </ul>
+
+      <h2>Media, Files &amp; Geolocation</h2>
+      <ul>
+        <li><strong><a href="https://sharp.pixelplumbing.com" target="_blank" rel="noopener noreferrer">sharp</a></strong>
+          &ndash; high-performance image processing and WebP conversion for uploads.</li>
+        <li><strong><a href="https://github.com/expressjs/multer" target="_blank" rel="noopener noreferrer">Multer</a></strong>
+          &ndash; multipart file-upload handling.</li>
+        <li><strong><a href="https://github.com/geoip-lite/node-geoip" target="_blank" rel="noopener noreferrer">geoip-lite</a></strong>
+          &ndash; approximate, privacy-respecting visitor geolocation.</li>
+        <li><strong><a href="https://github.com/jakearchibald/idb" target="_blank" rel="noopener noreferrer">idb</a></strong>
+          &ndash; an IndexedDB wrapper for offline-first client caching.</li>
       </ul>
 
       <h2>Design, Type &amp; Icons</h2>
       <ul>
-        <li><strong><a href="https://fonts.google.com/specimen/Inconsolata" target="_blank" rel="noopener noreferrer">Inconsolata</a></strong>
-          &ndash; the monospace typeface used throughout the site.</li>
-        <li><strong><a href="https://icons.getbootstrap.com" target="_blank" rel="noopener noreferrer">Bootstrap
-              Icons</a></strong> &ndash; the icon set.</li>
+        <li><strong><a href="https://fonts.google.com/specimen/Inconsolata" target="_blank" rel="noopener noreferrer">Inconsolata</a></strong>,
+          <strong><a href="https://fonts.google.com/specimen/IBM+Plex+Mono" target="_blank" rel="noopener noreferrer">IBM
+              Plex Mono</a></strong>, <strong><a href="https://fonts.google.com/specimen/DM+Sans" target="_blank"
+              rel="noopener noreferrer">DM Sans</a></strong>, and <strong><a
+              href="https://fonts.google.com/specimen/Cormorant+Garamond" target="_blank"
+              rel="noopener noreferrer">Cormorant Garamond</a></strong> &ndash; the typefaces used throughout the site,
+          self-hosted via <strong><a href="https://fontsource.org" target="_blank" rel="noopener noreferrer">Fontsource</a></strong>.</li>
+        <li><strong><a href="https://getbootstrap.com" target="_blank" rel="noopener noreferrer">Bootstrap</a></strong>
+          and <strong><a href="https://icons.getbootstrap.com" target="_blank" rel="noopener noreferrer">Bootstrap
+              Icons</a></strong> &ndash; layout utilities and the icon set.</li>
+        <li><strong><a href="https://material.angular.io" target="_blank" rel="noopener noreferrer">Angular Material</a></strong>
+          &amp; <strong>Angular CDK</strong> &ndash; UI primitives and the drag-and-drop used in the leads pipeline.</li>
         <li><strong><a href="https://www.figma.com" target="_blank" rel="noopener noreferrer">Figma</a></strong> and
           <strong><a href="https://www.adobe.com/products/xd.html" target="_blank" rel="noopener noreferrer">Adobe
               XD</a></strong> &ndash; interface design and prototyping.</li>
+      </ul>
+
+      <h2>Progressive Web App</h2>
+      <ul>
+        <li><strong><a href="https://angular.dev/ecosystem/service-workers" target="_blank" rel="noopener noreferrer">Angular
+              Service Worker</a></strong> and <strong>@angular/pwa</strong> &ndash; offline support, installability, and
+          media caching.</li>
       </ul>
 
       <h2>Services &amp; Infrastructure</h2>
@@ -61,18 +107,30 @@
           &ndash; AI-assisted chat replies.</li>
       </ul>
 
-      <h2>Notable Open-source Libraries</h2>
+      <h2>Tooling &amp; Quality</h2>
       <ul>
-        <li><strong>RxJS</strong> &ndash; reactive streams across the stack.</li>
-        <li><strong>Angular CDK</strong> &ndash; drag-and-drop for the leads pipeline and other primitives.</li>
-        <li><strong>Helmet</strong>, <strong>Passport</strong> &amp; <strong>class-validator</strong> &ndash; security,
-          authentication, and request validation on the API.</li>
-        <li><strong>geoip-lite</strong> &ndash; approximate, privacy-respecting visitor geolocation.</li>
+        <li><strong><a href="https://cli.angular.io" target="_blank" rel="noopener noreferrer">Angular CLI</a></strong>
+          and the <strong>NestJS CLI</strong> &ndash; build, serve, and scaffolding.</li>
+        <li><strong><a href="https://eslint.org" target="_blank" rel="noopener noreferrer">ESLint</a></strong> and
+          <strong><a href="https://prettier.io" target="_blank" rel="noopener noreferrer">Prettier</a></strong> &ndash;
+          linting and consistent formatting.</li>
+        <li><strong><a href="https://vitest.dev" target="_blank" rel="noopener noreferrer">Vitest</a></strong> with
+          <strong>jsdom</strong>, and <strong><a href="https://jestjs.io" target="_blank" rel="noopener noreferrer">Jest</a></strong>
+          &ndash; client and server testing.</li>
+        <li><strong><a href="https://swagger.io" target="_blank" rel="noopener noreferrer">Swagger</a></strong> (OpenAPI)
+          &ndash; API documentation.</li>
       </ul>
 
+      <h2>Licensing &amp; Acknowledgements</h2>
+      <p>All third-party frameworks, libraries, fonts, icons, and services named above remain the property of their
+        respective authors and rights-holders and are used under their own open-source or commercial licences. Their
+        inclusion here is an acknowledgement of gratitude and does not imply any affiliation with, sponsorship by, or
+        endorsement from those projects or their maintainers. All product names, logos, and trademarks are the property
+        of their respective owners. Any omission from this list is unintentional.</p>
+
       <h2>Thanks</h2>
-      <p>And a genuine thank-you to the clients, collaborators, and friends who've trusted me with
-        their projects. If you'd like to work together, the <a routerLink="/contact">contact page</a>
+      <p>And a genuine thank-you to the clients, collaborators, and friends who have trusted me with
+        their projects. If you would like to work together, the <a routerLink="/contact">contact page</a>
         is the best place to start.</p>
 
     </div>

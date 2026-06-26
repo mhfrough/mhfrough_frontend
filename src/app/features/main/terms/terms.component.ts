@@ -15,8 +15,8 @@ export class TermsComponent implements OnInit {
 
     ngOnInit() {
         this.seo.update({
-            title: 'Terms of Service | Mohammad Hamza',
-            description: 'Terms of service for mhfrough.dev — the conditions that apply when using this website and its services.',
+            title: 'Terms & Conditions | Mohammad Hamza',
+            description: 'Terms & Conditions for mhfrough.dev — the conditions that apply when using this website and engaging freelance services.',
             url: '/terms',
         });
         this.footerSettings.load();
