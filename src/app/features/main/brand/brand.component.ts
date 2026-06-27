@@ -66,11 +66,29 @@ export class BrandComponent implements OnInit {
         { num: '06', id: 'radius', label: 'Radius & Borders' },
         { num: '07', id: 'elevation', label: 'Elevation' },
         { num: '08', id: 'motion', label: 'Motion' },
-        { num: '09', id: 'components', label: 'Components' },
-        { num: '10', id: 'icons', label: 'Iconography' },
-        { num: '11', id: 'layout', label: 'Layout & Grid' },
-        { num: '12', id: 'a11y', label: 'Accessibility' },
+        { num: '09', id: 'buttons', label: 'Buttons & Actions' },
+        { num: '10', id: 'forms', label: 'Forms' },
+        { num: '11', id: 'tables', label: 'Tables' },
+        { num: '12', id: 'data', label: 'Cards & Data' },
+        { num: '13', id: 'media', label: 'Media & Images' },
+        { num: '14', id: 'feedback', label: 'Feedback & Overlays' },
+        { num: '15', id: 'nav', label: 'Navigation' },
+        { num: '16', id: 'icons', label: 'Iconography' },
+        { num: '17', id: 'layout', label: 'Layout & Grid' },
+        { num: '18', id: 'a11y', label: 'Accessibility' },
     ];
+
+    // --- Showcase data for the expanded component sections -------------------
+    readonly avatars = [24, 32, 40, 48, 64, 96];
+
+    readonly aspectRatios = [
+        { label: '1 : 1', cls: 'ar-1-1', use: 'Avatars · gallery' },
+        { label: '4 : 3', cls: 'ar-4-3', use: 'Cards' },
+        { label: '16 : 10', cls: 'ar-16-10', use: 'Project mockups' },
+        { label: '16 : 9', cls: 'ar-16-9', use: 'Video · hero' },
+    ];
+
+    readonly tabs = ['Profile', 'Security', 'Notifications', 'Data'];
 
     // --- Brand principles ----------------------------------------------------
     readonly principles: Principle[] = [
@@ -104,13 +122,49 @@ export class BrandComponent implements OnInit {
             ],
         },
         {
-            title: 'Accent & Semantic',
-            note: 'Indigo is the single brand accent — the dot in the wordmark.',
+            title: 'Accent & Semantic — fills',
+            note: 'Indigo is the single brand accent (the dot). These shades are tuned for solid fills & buttons.',
             swatches: [
                 { name: '--primary', value: '#6366f1', role: 'Accent · the dot', ink: 'dark' },
                 { name: '--success', value: '#4ade80', role: 'Success · online', ink: 'light' },
                 { name: '--warn', value: '#d97706', role: 'Warning', ink: 'dark' },
                 { name: '--danger', value: '#dc2626', role: 'Danger · destructive', ink: 'dark' },
+            ],
+        },
+        {
+            title: 'State shades — text & pressed',
+            note: 'Lighter tints that read as text/icons on the dark theme, plus darker pressed/hover fills.',
+            swatches: [
+                { name: '--danger-text', value: '#f87171', role: 'Error text · validation', ink: 'dark' },
+                { name: '--warn-text', value: '#f59e0b', role: 'Warnings · star ratings', ink: 'dark' },
+                { name: '--success-text', value: '#22c55e', role: 'Success text', ink: 'dark' },
+                { name: '--primary-300', value: '#818cf8', role: 'Lighter accent', ink: 'dark' },
+                { name: '--danger-strong', value: '#b91c1c', role: 'Danger hover', ink: 'dark' },
+                { name: '--success-strong', value: '#16a34a', role: 'Solid success btn', ink: 'dark' },
+                { name: '--primary-600', value: '#4f46e5', role: 'Primary hover', ink: 'dark' },
+                { name: '--neutral', value: '#6b7280', role: 'Muted · disabled', ink: 'dark' },
+            ],
+        },
+        {
+            title: 'Status palette',
+            note: 'Admin pipelines, appointments & presence dots — each alias resolves to a shade above.',
+            swatches: [
+                { name: '--status-pending', value: '#f59e0b', role: 'Pending', ink: 'dark' },
+                { name: '--status-confirmed', value: '#818cf8', role: 'Confirmed', ink: 'dark' },
+                { name: '--status-completed', value: '#22c55e', role: 'Completed', ink: 'dark' },
+                { name: '--status-cancelled', value: '#6b7280', role: 'Cancelled', ink: 'dark' },
+            ],
+        },
+        {
+            title: 'Pipeline — data-viz scale',
+            note: 'A warm sequential ramp for the lead funnel (cool → warm → resolve). Separate from the semantic set.',
+            swatches: [
+                { name: '--pipeline-new', value: '#928e87', role: 'New', ink: 'dark' },
+                { name: '--pipeline-contacted', value: '#9c8f7a', role: 'Contacted', ink: 'dark' },
+                { name: '--pipeline-qualified', value: '#c2a25e', role: 'Qualified', ink: 'dark' },
+                { name: '--pipeline-quoted', value: '#d98c4a', role: 'Quoted', ink: 'dark' },
+                { name: '--pipeline-won', value: '#6bbf8a', role: 'Won', ink: 'dark' },
+                { name: '--pipeline-lost', value: '#c46a6a', role: 'Lost', ink: 'dark' },
             ],
         },
     ];

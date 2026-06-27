@@ -124,9 +124,9 @@ export class SettingsHealthComponent implements OnInit {
 
     statusColor(status?: string): string {
         if (!status) return 'var(--text-muted)';
-        if (['live', 'success', 'succeeded', 'available'].includes(status)) return '#4ade80';
-        if (['build_in_progress', 'update_in_progress', 'pre_deploy_in_progress', 'queued', 'creating'].includes(status)) return '#d97706';
-        if (['build_failed', 'update_failed', 'deactivated', 'canceled', 'suspended', 'expired'].includes(status)) return '#dc2626';
+        if (['live', 'success', 'succeeded', 'available'].includes(status)) return 'var(--success)';
+        if (['build_in_progress', 'update_in_progress', 'pre_deploy_in_progress', 'queued', 'creating'].includes(status)) return 'var(--warn)';
+        if (['build_failed', 'update_failed', 'deactivated', 'canceled', 'suspended', 'expired'].includes(status)) return 'var(--danger)';
         return 'var(--text-muted)';
     }
 }

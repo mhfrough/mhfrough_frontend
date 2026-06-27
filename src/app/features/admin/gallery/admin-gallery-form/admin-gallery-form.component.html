@@ -23,7 +23,7 @@
                 [uploading]="uploading()" [uploadError]="uploadError()" (fileSelected)="onFileSelected($event)"
                 (cleared)="mediaPreview.set(null)" />
             @if (!mediaPreview() && f.submitted) {
-            <p style="font-size:0.78rem;color:#ef4444;margin-top:0.35rem;margin-bottom:0">
+            <p style="font-size:0.78rem;color:var(--danger-text);margin-top:0.35rem;margin-bottom:0">
                 <i class="bi bi-exclamation-circle"></i> Please upload a media file.
             </p>
             }

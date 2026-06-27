@@ -66,7 +66,7 @@
                 </td>
                 <td>
                     <i class="bi" [class.bi-star-fill]="p.featured" [class.bi-star]="!p.featured"
-                        [style.color]="p.featured ? '#d97706' : 'var(--text-muted)'"></i>
+                        [style.color]="p.featured ? 'var(--warn)' : 'var(--text-muted)'"></i>
                 </td>
                 <td style="text-align:right;white-space:nowrap">
                     <button class="btn-text" (click)="edit(p)" style="margin-right:1.25rem">
@@ -75,7 +75,7 @@
                     <button class="btn-text" (click)="toggleFeatured(p)" style="margin-right:1.25rem"
                         [title]="p.featured ? 'Remove from home page' : 'Show on home page'">
                         <i class="bi" [class.bi-star-fill]="p.featured" [class.bi-star]="!p.featured"
-                            [style.color]="p.featured ? '#d97706' : 'var(--text-muted)'"></i>
+                            [style.color]="p.featured ? 'var(--warn)' : 'var(--text-muted)'"></i>
                         {{ p.featured ? 'Unfeature' : 'Feature' }}
                     </button>
                     @if (p.isPublished) {

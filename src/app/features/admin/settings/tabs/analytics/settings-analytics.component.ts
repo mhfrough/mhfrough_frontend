@@ -13,12 +13,12 @@ interface SeriesCard {
 }
 
 const LEAD_STAGES: { key: string; label: string; accent: string }[] = [
-    { key: 'new', label: 'New', accent: '#928e87' },
-    { key: 'contacted', label: 'Contacted', accent: '#9c8f7a' },
-    { key: 'qualified', label: 'Qualified', accent: '#c2a25e' },
-    { key: 'quoted', label: 'Quoted', accent: '#d98c4a' },
-    { key: 'won', label: 'Won', accent: '#6bbf8a' },
-    { key: 'lost', label: 'Lost', accent: '#c46a6a' },
+    { key: 'new', label: 'New', accent: 'var(--pipeline-new)' },
+    { key: 'contacted', label: 'Contacted', accent: 'var(--pipeline-contacted)' },
+    { key: 'qualified', label: 'Qualified', accent: 'var(--pipeline-qualified)' },
+    { key: 'quoted', label: 'Quoted', accent: 'var(--pipeline-quoted)' },
+    { key: 'won', label: 'Won', accent: 'var(--pipeline-won)' },
+    { key: 'lost', label: 'Lost', accent: 'var(--pipeline-lost)' },
 ];
 
 @Component({

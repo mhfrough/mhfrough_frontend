@@ -260,16 +260,15 @@
     </div>
   </section>
 
-  <!-- ─── 09 · Components ───────────────────────────────────────────────── -->
-  <section id="components" class="brand-section">
+  <!-- ─── 09 · Buttons & Actions ────────────────────────────────────────── -->
+  <section id="buttons" class="brand-section">
     <div class="sec-head">
       <span class="sec-num">09</span>
-      <h2 class="sec-title">Components</h2>
+      <h2 class="sec-title">Buttons &amp; Actions</h2>
     </div>
 
-    <!-- Buttons -->
     <div class="comp-block">
-      <p class="comp-label">Buttons</p>
+      <p class="comp-label">Buttons — <code>.btn-primary</code> · <code>.btn-ghost</code></p>
       <div class="comp-demo">
         <button class="btn-primary" type="button">Primary <i class="bi bi-arrow-right"></i></button>
         <button class="btn-ghost" type="button">Ghost</button>
@@ -277,7 +276,16 @@
       </div>
     </div>
 
-    <!-- Tags / chips -->
+    <div class="comp-block">
+      <p class="comp-label">Icon &amp; text actions</p>
+      <div class="comp-demo">
+        <button class="ds-icon-btn" type="button" aria-label="Edit"><i class="bi bi-pencil"></i></button>
+        <button class="ds-icon-btn" type="button" aria-label="Delete"><i class="bi bi-trash"></i></button>
+        <a class="link-arrow" href="#buttons">View all <i class="bi bi-arrow-right"></i></a>
+        <button class="ds-text-btn" type="button">Back to top ↑</button>
+      </div>
+    </div>
+
     <div class="comp-block">
       <p class="comp-label">Tags &amp; chips</p>
       <div class="comp-demo">
@@ -288,28 +296,141 @@
       </div>
     </div>
 
-    <!-- Badges -->
     <div class="comp-block">
-      <p class="comp-label">Status badges</p>
+      <p class="comp-label">Status badges — <code>.admin-badge</code></p>
       <div class="comp-demo">
-        <span class="demo-badge demo-badge--on"><span class="dotmark"></span> Online</span>
-        <span class="demo-badge demo-badge--warn">Pending</span>
-        <span class="demo-badge demo-badge--danger">Closed</span>
+        <span class="admin-badge">Default</span>
+        <span class="admin-badge admin-badge--on">Active</span>
+        <span class="admin-badge admin-badge--warn">Pending</span>
+        <span class="admin-badge admin-badge--danger">Failed</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 10 · Forms ────────────────────────────────────────────────────── -->
+  <section id="forms" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">10</span>
+      <h2 class="sec-title">Forms</h2>
+    </div>
+    <p class="sec-lede">Two input treatments share one theme: a <strong>bordered</strong> box on public pages and a
+      <strong>underline</strong> field in the admin. Focus darkens the border to <code>--text</code>; invalid turns
+      it <code>--danger</code>.</p>
+
+    <div class="form-grid">
+      <!-- Bordered (public) -->
+      <label class="fld">
+        <span class="fld-label">Email <span class="label-optional"></span></span>
+        <input type="email" placeholder="you@example.com" />
+      </label>
+
+      <!-- Underline (admin) -->
+      <div class="fld">
+        <span class="fld-label">Full name <span class="required">*</span></span>
+        <input class="admin-form-input" type="text" placeholder="Jane Doe" />
+      </div>
+
+      <!-- Select -->
+      <div class="fld">
+        <span class="fld-label">Project type</span>
+        <select class="admin-form-select">
+          <option>Web application</option>
+          <option>Marketing site</option>
+          <option>Mobile app</option>
+        </select>
+      </div>
+
+      <!-- Search -->
+      <div class="fld">
+        <span class="fld-label">Search</span>
+        <span class="fld-search">
+          <i class="bi bi-search"></i>
+          <input type="search" placeholder="Search projects…" />
+        </span>
+      </div>
+
+      <!-- Textarea -->
+      <div class="fld fld--full">
+        <span class="fld-label">Message</span>
+        <textarea class="admin-form-textarea" rows="3" placeholder="Tell me about your project…"></textarea>
+        <span class="char-count">0 / 500</span>
+      </div>
+
+      <!-- Invalid -->
+      <div class="fld fld--full">
+        <span class="fld-label">Website</span>
+        <input class="is-invalid" type="url" value="not-a-url" />
+        <span class="form-error">Enter a valid URL.</span>
       </div>
     </div>
 
-    <!-- Form field -->
     <div class="comp-block">
-      <p class="comp-label">Input field</p>
-      <div class="comp-demo comp-demo--stack">
-        <label class="demo-field">
-          <span class="demo-field-label">Email</span>
-          <input class="demo-input" type="email" placeholder="you@example.com" />
-        </label>
+      <p class="comp-label">Choice controls</p>
+      <div class="comp-demo comp-demo--wrap">
+        <label class="checkbox-field"><input type="checkbox" checked /> Subscribe to updates</label>
+        <label class="checkbox-field"><input type="checkbox" /> Remember me</label>
+        <label class="ds-radio"><input type="radio" name="plan" checked /> Monthly</label>
+        <label class="ds-radio"><input type="radio" name="plan" /> Annual</label>
+        <button class="ds-toggle is-on" type="button" role="switch" aria-checked="true">
+          <span class="ds-toggle-thumb"></span>
+        </button>
+        <button class="ds-toggle" type="button" role="switch" aria-checked="false">
+          <span class="ds-toggle-thumb"></span>
+        </button>
       </div>
     </div>
+  </section>
 
-    <!-- Card -->
+  <!-- ─── 11 · Tables ───────────────────────────────────────────────────── -->
+  <section id="tables" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">11</span>
+      <h2 class="sec-title">Tables</h2>
+    </div>
+    <p class="sec-lede">Dense, border-collapsed data tables — uppercase column labels, hairline row dividers and a
+      subtle row hover. <code>.admin-table-wrap</code> + <code>.admin-table</code>.</p>
+
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Project</th>
+            <th>Status</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Aurora Labs</td>
+            <td>Platform redesign</td>
+            <td><span class="admin-badge admin-badge--on">Paid</span></td>
+            <td>$12,400</td>
+          </tr>
+          <tr>
+            <td>Northwind</td>
+            <td>Marketing site</td>
+            <td><span class="admin-badge admin-badge--warn">Sent</span></td>
+            <td>$4,800</td>
+          </tr>
+          <tr>
+            <td>Helios</td>
+            <td>Mobile app</td>
+            <td><span class="admin-badge">Draft</span></td>
+            <td>$9,200</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── 12 · Cards & Data ─────────────────────────────────────────────── -->
+  <section id="data" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">12</span>
+      <h2 class="sec-title">Cards &amp; Data</h2>
+    </div>
+
     <div class="comp-block">
       <p class="comp-label">Card</p>
       <div class="comp-demo">
@@ -318,16 +439,202 @@
           <h3 class="demo-card-title">Editorial card</h3>
           <p class="demo-card-desc">Hairline border, square corners, hover lifts the background a shade. The
             recurring surface across projects, blog and gallery.</p>
-          <a class="demo-card-link" href="#components">Read more <i class="bi bi-arrow-right"></i></a>
+          <a class="demo-card-link" href="#data">Read more <i class="bi bi-arrow-right"></i></a>
         </article>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Stats — <code>.stat-item</code></p>
+      <div class="ds-stat-row">
+        <div class="stat-item">
+          <span class="stat-value">48</span>
+          <span class="stat-label">Projects</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">12k</span>
+          <span class="stat-label">Commits</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">99.9%</span>
+          <span class="stat-label">Uptime</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">7</span>
+          <span class="stat-label">Years</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Accordion — <code>.faq-list</code></p>
+      <div class="faq-list">
+        <div class="faq-item is-open">
+          <button class="faq-question" type="button">
+            <span class="faq-q-text">How is the design system structured?</span>
+            <i class="bi bi-plus faq-icon"></i>
+          </button>
+          <div class="faq-answer">
+            <p class="faq-answer-inner">Tokens in <code>:root</code> drive every component. The open panel animates
+              its max-height; the icon rotates 45° into a cross.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span class="faq-q-text">Can it be re-themed?</span>
+            <i class="bi bi-plus faq-icon"></i>
+          </button>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ─── 10 · Iconography ──────────────────────────────────────────────── -->
+  <!-- ─── 13 · Media & Images ───────────────────────────────────────────── -->
+  <section id="media" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">13</span>
+      <h2 class="sec-title">Media &amp; Images</h2>
+    </div>
+    <p class="sec-lede">Imagery is framed by hairline borders, cropped with <code>object-fit: cover</code> and
+      desaturated at rest — colour returns on hover. Logos render monochrome.</p>
+
+    <div class="comp-block">
+      <p class="comp-label">Avatars — <code>--radius-circle</code></p>
+      <div class="ds-avatar-row">
+        @for (a of avatars; track a) {
+        <div class="ds-avatar-cell">
+          <span class="ds-avatar" [style.width.px]="a" [style.height.px]="a">MH</span>
+          <span class="ds-avatar-size">{{ a }}</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Aspect ratios</p>
+      <div class="ds-frame-grid">
+        @for (r of aspectRatios; track r.label) {
+        <div class="ds-frame-cell">
+          <div class="ds-frame" [class]="r.cls"><i class="bi bi-image"></i></div>
+          <span class="ds-frame-label">{{ r.label }}</span>
+          <span class="ds-frame-use">{{ r.use }}</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Treatment — grayscale → colour on hover</p>
+      <div class="ds-media-row">
+        <figure class="ds-media"><div class="ds-media-img"></div><figcaption>Hover me</figcaption></figure>
+        <figure class="ds-media ds-media--overlay">
+          <div class="ds-media-img"></div>
+          <span class="ds-media-overlay"><i class="bi bi-arrow-up-right"></i> View project</span>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 14 · Feedback & Overlays ──────────────────────────────────────── -->
+  <section id="feedback" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">14</span>
+      <h2 class="sec-title">Feedback &amp; Overlays</h2>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Inline alerts</p>
+      <div class="comp-demo comp-demo--stack">
+        <div class="ds-alert ds-alert--success"><i class="bi bi-check-circle"></i> Settings saved.</div>
+        <div class="ds-alert ds-alert--warn"><i class="bi bi-exclamation-triangle"></i> Your session expires soon.</div>
+        <div class="ds-alert ds-alert--danger"><i class="bi bi-x-circle"></i> Could not reach the server.</div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Toasts — <code>.admin-toast</code></p>
+      <div class="comp-demo comp-demo--stack">
+        <div class="admin-toast"><i class="bi bi-check-circle"></i><span>Changes published</span>
+          <button class="admin-toast-close" aria-label="Dismiss"><i class="bi bi-x"></i></button></div>
+        <div class="admin-toast admin-toast--inquiry"><i class="bi bi-envelope"></i><span>New inquiry received</span>
+          <button class="admin-toast-close" aria-label="Dismiss"><i class="bi bi-x"></i></button></div>
+        <div class="admin-toast admin-toast--feedback"><i class="bi bi-star"></i><span>New 5-star review</span>
+          <button class="admin-toast-close" aria-label="Dismiss"><i class="bi bi-x"></i></button></div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Modal &amp; tooltip</p>
+      <div class="comp-demo comp-demo--top">
+        <div class="ds-modal">
+          <p class="ds-modal-title">Delete project?</p>
+          <p class="ds-modal-body">This permanently removes the project and its media. This can’t be undone.</p>
+          <div class="ds-modal-actions">
+            <button class="btn-ghost" type="button">Cancel</button>
+            <button class="ds-btn-danger" type="button">Delete</button>
+          </div>
+        </div>
+        <span class="ds-tooltip-wrap">
+          <span class="ds-tooltip">Copied to clipboard</span>
+          <button class="ds-icon-btn" type="button" aria-label="Copy"><i class="bi bi-clipboard"></i></button>
+        </span>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Loading &amp; empty states</p>
+      <div class="comp-demo comp-demo--wrap">
+        <div class="loading-state"><span class="spinner"></span></div>
+        <p class="empty-state">No results found.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 15 · Navigation ───────────────────────────────────────────────── -->
+  <section id="nav" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">15</span>
+      <h2 class="sec-title">Navigation</h2>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Tabs</p>
+      <div class="ds-tabs">
+        @for (t of tabs; track t; let i = $index) {
+        <button class="ds-tab" type="button" [class.is-active]="i === 0">{{ t }}</button>
+        }
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Breadcrumb</p>
+      <nav class="ds-crumbs" aria-label="Breadcrumb">
+        <a href="#nav">Home</a>
+        <span class="ds-crumb-sep">/</span>
+        <a href="#nav">Projects</a>
+        <span class="ds-crumb-sep">/</span>
+        <span class="ds-crumb-current">Design System</span>
+      </nav>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Pagination</p>
+      <nav class="ds-pager" aria-label="Pagination">
+        <button class="ds-page" type="button" aria-label="Previous"><i class="bi bi-chevron-left"></i></button>
+        <button class="ds-page is-active" type="button">1</button>
+        <button class="ds-page" type="button">2</button>
+        <button class="ds-page" type="button">3</button>
+        <span class="ds-page-gap">…</span>
+        <button class="ds-page" type="button">9</button>
+        <button class="ds-page" type="button" aria-label="Next"><i class="bi bi-chevron-right"></i></button>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ─── 16 · Iconography ──────────────────────────────────────────────── -->
   <section id="icons" class="brand-section">
     <div class="sec-head">
-      <span class="sec-num">10</span>
+      <span class="sec-num">16</span>
       <h2 class="sec-title">Iconography</h2>
     </div>
     <p class="sec-lede">One family — <strong>Bootstrap Icons</strong>. Uniform stroke, line style, sized 16–24px
@@ -343,10 +650,10 @@
     </div>
   </section>
 
-  <!-- ─── 11 · Layout & Grid ────────────────────────────────────────────── -->
+  <!-- ─── 17 · Layout & Grid ────────────────────────────────────────────── -->
   <section id="layout" class="brand-section">
     <div class="sec-head">
-      <span class="sec-num">11</span>
+      <span class="sec-num">17</span>
       <h2 class="sec-title">Layout &amp; Grid</h2>
     </div>
     <p class="sec-lede">A centred <strong>1140px</strong> container with 2.5rem gutters. Sections are separated by
@@ -366,10 +673,10 @@
     </div>
   </section>
 
-  <!-- ─── 12 · Accessibility ────────────────────────────────────────────── -->
+  <!-- ─── 18 · Accessibility ────────────────────────────────────────────── -->
   <section id="a11y" class="brand-section">
     <div class="sec-head">
-      <span class="sec-num">12</span>
+      <span class="sec-num">18</span>
       <h2 class="sec-title">Accessibility</h2>
     </div>
 

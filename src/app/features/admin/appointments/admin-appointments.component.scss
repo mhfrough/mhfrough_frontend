@@ -21,7 +21,7 @@
     gap: 0.75rem;
 }
 
-.rem-req { color: #f87171; }
+.rem-req { color: var(--danger-text); }
 
 // ── View toggle button group ───────────────────────────────────────────────────
 .rem-btn-group {
@@ -105,8 +105,8 @@
     border: 1px solid var(--border);
     color: var(--text-muted);
 
-    &.rem-alert-chip--pending   { color: #f59e0b; border-color: rgba(245,158,11,0.3); }
-    &.rem-alert-chip--confirmed { color: #818cf8; border-color: rgba(99,102,241,0.3); }
+    &.rem-alert-chip--pending   { color: var(--status-pending); border-color: rgba(var(--warn-text-rgb),0.3); }
+    &.rem-alert-chip--confirmed { color: var(--status-confirmed); border-color: rgba(var(--indigo-rgb),0.3); }
 }
 
 .rem-alert-dismiss {
@@ -256,10 +256,10 @@
     min-width: 0;
     color: var(--text-muted);
 
-    &.rem-cal-item--pending   { color: #f59e0b; }
-    &.rem-cal-item--confirmed { color: #818cf8; }
+    &.rem-cal-item--pending   { color: var(--status-pending); }
+    &.rem-cal-item--confirmed { color: var(--status-confirmed); }
     &.rem-cal-item--completed { color: var(--success); }
-    &.rem-cal-item--cancelled { color: #6b7280; }
+    &.rem-cal-item--cancelled { color: var(--status-cancelled); }
 }
 
 .rem-cal-item-dot {
@@ -299,10 +299,10 @@
     border-radius: 50%;
     flex-shrink: 0;
 
-    &.rem-legend-dot--pending   { background: #f59e0b; }
+    &.rem-legend-dot--pending   { background: var(--status-pending); }
     &.rem-legend-dot--confirmed { background: var(--indigo); }
-    &.rem-legend-dot--completed { background: #22c55e; }
-    &.rem-legend-dot--cancelled { background: #6b7280; }
+    &.rem-legend-dot--completed { background: var(--status-completed); }
+    &.rem-legend-dot--cancelled { background: var(--status-cancelled); }
 }
 
 .rem-legend-label {
@@ -328,8 +328,8 @@
 
     &:hover, &:focus { border-color: var(--text-muted); }
 
-    &.rem-status-select--pending   { color: #f59e0b; border-color: rgba(245,158,11,0.3); }
-    &.rem-status-select--confirmed { color: #818cf8; border-color: rgba(99,102,241,0.3); }
+    &.rem-status-select--pending   { color: var(--status-pending); border-color: rgba(var(--warn-text-rgb),0.3); }
+    &.rem-status-select--confirmed { color: var(--status-confirmed); border-color: rgba(var(--indigo-rgb),0.3); }
     &.rem-status-select--completed { color: var(--success); border-color: rgba(34,197,94,0.3); }
     &.rem-status-select--cancelled { color: #9ca3af; }
 
@@ -386,10 +386,10 @@
     border-radius: 50%;
     flex-shrink: 0;
 
-    &.rem-table-dot--pending   { background: #f59e0b; }
+    &.rem-table-dot--pending   { background: var(--status-pending); }
     &.rem-table-dot--confirmed { background: var(--indigo); }
-    &.rem-table-dot--completed { background: #22c55e; }
-    &.rem-table-dot--cancelled { background: #6b7280; }
+    &.rem-table-dot--completed { background: var(--status-completed); }
+    &.rem-table-dot--cancelled { background: var(--status-cancelled); }
 }
 
 .rem-table-notes {
@@ -461,10 +461,10 @@
     border-left: 2px solid transparent;
     margin-left: -0.75rem;
 
-    &.rem-day-item--pending   { border-left-color: #f59e0b; }
+    &.rem-day-item--pending   { border-left-color: var(--status-pending); }
     &.rem-day-item--confirmed { border-left-color: var(--indigo); }
-    &.rem-day-item--completed { border-left-color: #22c55e; }
-    &.rem-day-item--cancelled { border-left-color: #6b7280; opacity: 0.6; }
+    &.rem-day-item--completed { border-left-color: var(--status-completed); }
+    &.rem-day-item--cancelled { border-left-color: var(--status-cancelled); opacity: 0.6; }
 
     &:last-child { border-bottom: none; }
 }
@@ -543,7 +543,7 @@
 .rem-form-error {
     font-family: var(--font-sans);
     font-size: 0.75rem;
-    color: #f87171;
+    color: var(--danger-text);
     display: flex;
     align-items: center;
     gap: 0.5rem;

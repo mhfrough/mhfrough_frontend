@@ -43,6 +43,7 @@
     // Surfaces (raised fills + hover overlays — tinted light for the dark theme)
     --surface: #242220;
     --surface-alt: #1f1d1b;
+    --surface-alt-rgb: 31, 29, 27; // for translucent fills (canvas tooltips etc.)
     --surface-hover: rgba(228, 224, 216, 0.05);
     --bg-soft: #242220;
     --bg-subtle: rgba(228, 224, 216, 0.04);
@@ -62,6 +63,49 @@
     --danger-rgb: 220, 38, 38;
     --warn: #d97706;
     --warn-rgb: 217, 119, 6;
+
+    // Text-weight semantic shades — lighter tints that read as TEXT / icons on
+    // the dark theme. The base --danger/--warn/--success above are tuned for
+    // solid fills; these are their on-dark text counterparts.
+    --danger-text: #f87171; // red-400  — error text, .required, validation
+    --danger-text-rgb: 248, 113, 113;
+    --warn-text: #f59e0b; // amber-500 — warnings, star ratings, "pending"
+    --warn-text-rgb: 245, 158, 11;
+    --success-text: #22c55e; // green-500 — success text / "completed"
+    --success-text-rgb: 34, 197, 94;
+
+    // Strong / pressed fills (button hover, solid status backgrounds)
+    --danger-strong: #b91c1c; // red-700   — danger button hover / pressed
+    --success-strong: #16a34a; // green-600 — solid success button
+
+    // Accent ramp (indigo)
+    --primary-600: #4f46e5; // indigo-600 — primary / indigo hover + pressed
+    --primary-300: #818cf8; // indigo-300 — lighter accent / "confirmed"
+    --primary-300-rgb: 129, 140, 248;
+
+    // Soft translucent fills (badge / toast backgrounds)
+    --danger-soft: rgba(153, 27, 27, 0.15);
+    --warn-soft: rgba(120, 80, 0, 0.18);
+
+    // Neutral muted gray — disabled / "cancelled"
+    --neutral: #6b7280; // gray-500
+    --neutral-rgb: 107, 114, 128;
+
+    // Status palette — admin pipelines, appointments, presence dots. Aliases of
+    // the shades above so one intent reads one colour everywhere.
+    --status-pending: var(--warn-text);
+    --status-confirmed: var(--primary-300);
+    --status-completed: var(--success-text);
+    --status-cancelled: var(--neutral);
+
+    // Lead-pipeline funnel palette — a warm sequential data-viz scale, distinct
+    // from the semantic set and tuned to the charcoal theme (cool→warm→resolve).
+    --pipeline-new: var(--text-muted); // #928e87 — neutral start
+    --pipeline-contacted: #9c8f7a;
+    --pipeline-qualified: #c2a25e;
+    --pipeline-quoted: #d98c4a;
+    --pipeline-won: #6bbf8a; // muted green — resolved positive
+    --pipeline-lost: #c46a6a; // muted red — resolved negative
 
     // Badge semantic color tokens (alias the semantic set above)
     --badge-success: var(--success);
@@ -204,7 +248,6 @@ body::before {
         height: 64px;
         display: flex;
         align-items: center;
-        justify-content: center;
         position: relative;
 
         @media (max-width: 480px) {
@@ -213,13 +256,7 @@ body::before {
     }
 
     .nav-logo {
-        position: absolute;
-        left: 2.5rem;
-
-        @media (max-width: 480px) {
-            left: 1.25rem;
-        }
-
+        flex-shrink: 0;
         font-family: var(--font-sans);
         font-size: 0.78rem;
         font-weight: 600;
@@ -242,11 +279,13 @@ body::before {
     }
 
     .nav-links {
+        flex: 1;
         display: flex;
         list-style: none;
         margin: 0;
         padding: 0;
         gap: 2.5rem;
+        justify-content: center;
 
         a {
             display: block;
@@ -271,15 +310,11 @@ body::before {
     }
 
     .nav-actions {
-        position: absolute;
-        right: 2.5rem;
+        flex-shrink: 0;
+        margin-left: auto;
         display: flex;
         align-items: center;
         gap: 0.5rem;
-
-        @media (max-width: 480px) {
-            right: 1.25rem;
-        }
     }
 
     // --- Clock Widget ---------------------------------------------------------
@@ -2204,8 +2239,8 @@ body::before {
     color: #fff;
 
     &:hover {
-        background-color: #4f46e5;
-        border-color: #4f46e5;
+        background-color: var(--primary-600);
+        border-color: var(--primary-600);
         color: #fff;
     }
 }
@@ -5003,7 +5038,7 @@ button.admin-nav-link:last-child:hover {
 
 .btn-primary {
     &.btn--success {
-        background: #16a34a !important;
+        background: var(--success-strong) !important;
         color: #fff !important;
         opacity: 1 !important;
         pointer-events: none;
@@ -5033,8 +5068,8 @@ button.admin-nav-link:last-child:hover {
     gap: 0.5rem;
 
     &--error {
-        color: #f87171;
-        background: rgba(153, 27, 27, 0.15);
+        color: var(--danger-text);
+        background: var(--danger-soft);
         border-color: rgba(248, 113, 113, 0.25);
     }
 
@@ -5045,14 +5080,14 @@ button.admin-nav-link:last-child:hover {
     }
 
     &--danger {
-        color: #f87171;
-        background: rgba(153, 27, 27, 0.15);
+        color: var(--danger-text);
+        background: var(--danger-soft);
         border-color: rgba(248, 113, 113, 0.25);
     }
 
     &--warning {
         color: #fbbf24;
-        background: rgba(120, 80, 0, 0.18);
+        background: var(--warn-soft);
         border-color: rgba(251, 191, 36, 0.3);
         align-items: flex-start;
     }
@@ -5081,7 +5116,7 @@ button.admin-nav-link:last-child:hover {
 .admin-error-msg {
     font-family: var(--font-mono);
     font-size: 0.72rem;
-    color: #f87171;
+    color: var(--danger-text);
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -5122,7 +5157,7 @@ button.admin-nav-link:last-child:hover {
 }
 
 .required {
-    color: #f87171;
+    color: var(--danger-text);
 }
 
 // --- Admin Login Page ---------------------------------------------------------
@@ -5259,7 +5294,7 @@ button.admin-nav-link:last-child:hover {
 
 // --- Stars Rating -------------------------------------------------------------
 .stars {
-    color: #f59e0b;
+    color: var(--warn-text);
     letter-spacing: 2px;
 }
 
@@ -5392,8 +5427,8 @@ button.admin-nav-link:last-child:hover {
     }
 
     &--error {
-        color: #f87171;
-        background: rgba(153, 27, 27, 0.15);
+        color: var(--danger-text);
+        background: var(--danger-soft);
         border-color: rgba(248, 113, 113, 0.25);
     }
 }
@@ -7261,7 +7296,7 @@ tr.session-current-row {
 .session-revoked-time {
     display: block;
     font-size: 0.73rem;
-    color: #f87171;
+    color: var(--danger-text);
     margin-top: 0.15rem;
 }
 
@@ -7995,8 +8030,8 @@ tr.session-current-row {
     transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
 
     &:hover {
-        background: #b91c1c;
-        border-color: #b91c1c;
+        background: var(--danger-strong);
+        border-color: var(--danger-strong);
     }
 }
 
@@ -8953,7 +8988,7 @@ tr.session-current-row {
             border-color: rgba(99, 102, 241, 0.5);
 
             i {
-                color: #818cf8;
+                color: var(--primary-300);
             }
         }
     }

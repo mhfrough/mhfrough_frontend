@@ -156,10 +156,24 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this._setupChartHover();
     }
 
+    /** Resolves themeable chart colours from CSS custom properties so the canvas
+     *  follows --text / --bg instead of hard-coded hex (canvas can't read vars). */
+    private _themeColors() {
+        const cs = getComputedStyle(document.documentElement);
+        const v = (name: string, fallback: string) => cs.getPropertyValue(name).trim() || fallback;
+        return {
+            text: v('--text', '#e4e0d8'),
+            textRgb: v('--text-rgb', '228, 224, 216'),
+            bg: v('--bg', '#1a1917'),
+            surfaceAltRgb: v('--surface-alt-rgb', '31, 29, 27'),
+        };
+    }
+
     private _drawVisitorChart(hoverIdx: number | null) {
         const canvas = this.chartCanvas.nativeElement;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
+        const C = this._themeColors();
 
         const raw = this._chartRaw;
         const W = this._chartW || canvas.width;
@@ -175,7 +189,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         const getY = (v: number) => padT + chartH - (v / maxCount) * chartH;
 
         const gridLines = 4;
-        ctx.strokeStyle = 'rgba(228,224,216,0.06)';
+        ctx.strokeStyle = `rgba(${C.textRgb}, 0.06)`;
         ctx.lineWidth = 1;
         for (let g = 0; g <= gridLines; g++) {
             const y = padT + (g / gridLines) * chartH;
@@ -186,8 +200,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         }
 
         const grad = ctx.createLinearGradient(0, padT, 0, H);
-        grad.addColorStop(0, 'rgba(228,224,216,0.18)');
-        grad.addColorStop(1, 'rgba(228,224,216,0)');
+        grad.addColorStop(0, `rgba(${C.textRgb}, 0.18)`);
+        grad.addColorStop(1, `rgba(${C.textRgb}, 0)`);
         ctx.beginPath();
         ctx.moveTo(getX(0), getY(counts[0]));
         for (let i = 1; i < counts.length; i++) {
@@ -206,7 +220,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             const cpx = (getX(i - 1) + getX(i)) / 2;
             ctx.bezierCurveTo(cpx, getY(counts[i - 1]), cpx, getY(counts[i]), getX(i), getY(counts[i]));
         }
-        ctx.strokeStyle = '#e4e0d8';
+        ctx.strokeStyle = C.text;
         ctx.lineWidth = 2;
         ctx.lineJoin = 'round';
         ctx.stroke();
@@ -215,7 +229,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             counts.forEach((v, i) => {
                 ctx.beginPath();
                 ctx.arc(getX(i), getY(v), 2.5, 0, Math.PI * 2);
-                ctx.fillStyle = '#e4e0d8';
+                ctx.fillStyle = C.text;
                 ctx.fill();
             });
         }
@@ -226,7 +240,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
             ctx.save();
             ctx.setLineDash([3, 3]);
-            ctx.strokeStyle = 'rgba(228,224,216,0.4)';
+            ctx.strokeStyle = `rgba(${C.textRgb}, 0.4)`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(hx, padT);
@@ -236,15 +250,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
             ctx.beginPath();
             ctx.arc(hx, hy, 5, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(228,224,216,0.25)';
+            ctx.fillStyle = `rgba(${C.textRgb}, 0.25)`;
             ctx.fill();
             ctx.beginPath();
             ctx.arc(hx, hy, 3, 0, Math.PI * 2);
-            ctx.fillStyle = '#e4e0d8';
+            ctx.fillStyle = C.text;
             ctx.fill();
             ctx.beginPath();
             ctx.arc(hx, hy, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = '#1a1917';
+            ctx.fillStyle = C.bg;
             ctx.fill();
 
             const date = new Date(raw[hoverIdx].day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -257,8 +271,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             if (tx + tw > W - 2) tx = W - tw - 2;
             const ty = padT - 2;
 
-            ctx.fillStyle = 'rgba(31,29,27,0.95)';
-            ctx.strokeStyle = 'rgba(228,224,216,0.25)';
+            ctx.fillStyle = `rgba(${C.surfaceAltRgb}, 0.95)`;
+            ctx.strokeStyle = `rgba(${C.textRgb}, 0.25)`;
             ctx.lineWidth = 1;
             if ((ctx as any).roundRect) {
                 ctx.beginPath();
@@ -269,7 +283,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                 ctx.fillRect(tx, ty, tw, th);
                 ctx.strokeRect(tx, ty, tw, th);
             }
-            ctx.fillStyle = '#e4e0d8';
+            ctx.fillStyle = C.text;
             ctx.fillText(text, tx + 7, ty + 12);
         }
     }

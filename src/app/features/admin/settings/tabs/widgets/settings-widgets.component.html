@@ -50,18 +50,18 @@
     </div>
 
     <div class="widget-key-status" style="margin-top:1.25rem;display:flex;gap:0.75rem;flex-wrap:wrap">
-        <span class="admin-badge" [style.color]="settings.weatherApiKey ? '#4ade80' : 'var(--text-muted)'"
-            [style.border-color]="settings.weatherApiKey ? 'rgba(74,222,128,0.3)' : 'var(--border)'">
+        <span class="admin-badge" [style.color]="settings.weatherApiKey ? 'var(--success)' : 'var(--text-muted)'"
+            [style.border-color]="settings.weatherApiKey ? 'rgba(var(--success-rgb),0.3)' : 'var(--border)'">
             <i class="bi" [class.bi-check-circle-fill]="settings.weatherApiKey" [class.bi-exclamation-circle]="!settings.weatherApiKey"></i>
             &nbsp;Weather: {{ settings.weatherApiKey ? 'Configured' : 'Not set' }}
         </span>
-        <span class="admin-badge" [style.color]="settings.goldApiKey ? '#4ade80' : 'var(--text-muted)'"
-            [style.border-color]="settings.goldApiKey ? 'rgba(74,222,128,0.3)' : 'var(--border)'">
+        <span class="admin-badge" [style.color]="settings.goldApiKey ? 'var(--success)' : 'var(--text-muted)'"
+            [style.border-color]="settings.goldApiKey ? 'rgba(var(--success-rgb),0.3)' : 'var(--border)'">
             <i class="bi" [class.bi-check-circle-fill]="settings.goldApiKey" [class.bi-exclamation-circle]="!settings.goldApiKey"></i>
             &nbsp;Gold: {{ settings.goldApiKey ? 'Configured' : 'Not set' }}
         </span>
-        <span class="admin-badge" [style.color]="settings.currencyApiKey ? '#4ade80' : 'var(--text-muted)'"
-            [style.border-color]="settings.currencyApiKey ? 'rgba(74,222,128,0.3)' : 'var(--border)'">
+        <span class="admin-badge" [style.color]="settings.currencyApiKey ? 'var(--success)' : 'var(--text-muted)'"
+            [style.border-color]="settings.currencyApiKey ? 'rgba(var(--success-rgb),0.3)' : 'var(--border)'">
             <i class="bi" [class.bi-check-circle-fill]="settings.currencyApiKey" [class.bi-exclamation-circle]="!settings.currencyApiKey"></i>
             &nbsp;Currency: {{ settings.currencyApiKey ? 'Configured' : 'Not set' }}
         </span>
