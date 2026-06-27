@@ -1,11 +1,11 @@
 {
   "/api": {
-    "target": "http://localhost:3023",
+    "target": "http://127.0.0.1:3023",
     "secure": false,
     "changeOrigin": true
   },
   "/socket.io": {
-    "target": "http://localhost:3023",
+    "target": "http://127.0.0.1:3023",
     "secure": false,
     "changeOrigin": true,
     "ws": true

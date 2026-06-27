@@ -1,0 +1,397 @@
+<section class="brand-page">
+
+  <!-- ─── Hero ──────────────────────────────────────────────────────────── -->
+  <header class="brand-hero">
+    <p class="brand-eyebrow">Brand &amp; Design System</p>
+    <h1 class="brand-title">
+      The system behind
+      <span class="brand-title-mark">MHFrough<span class="dot">.</span></span>
+    </h1>
+    <p class="brand-lede">
+      A warm-charcoal, monospace-first design language built on shared tokens. Every colour, size and
+      motion on this site resolves from the variables documented below — change a token here and it
+      changes everywhere.
+    </p>
+
+    <nav class="brand-toc" aria-label="Sections">
+      @for (item of toc; track item.id) {
+      <a class="toc-item" [href]="'#' + item.id">
+        <span class="toc-num">{{ item.num }}</span>
+        <span class="toc-label">{{ item.label }}</span>
+      </a>
+      }
+    </nav>
+  </header>
+
+  <!-- ─── 01 · Logo & Mark ──────────────────────────────────────────────── -->
+  <section id="logo" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2 class="sec-title">Logo &amp; Mark</h2>
+    </div>
+
+    <div class="logo-grid">
+      <div class="logo-cell logo-cell--wide">
+        <div class="logo-stage">
+          <span class="wordmark">MHFrough<span class="dot">.</span></span>
+        </div>
+        <div class="logo-meta">
+          <p class="logo-name">Wordmark</p>
+          <p class="logo-desc">Set in Inconsolata 600. The terminal dot is the only place the indigo accent
+            (<code>--primary</code>) appears in the identity.</p>
+        </div>
+      </div>
+
+      <div class="logo-cell">
+        <div class="logo-stage logo-stage--dark">
+          <span class="appmark">ء</span>
+        </div>
+        <div class="logo-meta">
+          <p class="logo-name">App mark</p>
+          <p class="logo-desc">The hamza (ء) — used as the favicon, PWA icon and the floating home button.</p>
+        </div>
+      </div>
+
+      <div class="logo-cell">
+        <div class="logo-stage logo-stage--clear">
+          <span class="wordmark wordmark--sm">MHFrough<span class="dot">.</span></span>
+        </div>
+        <div class="logo-meta">
+          <p class="logo-name">Clearspace</p>
+          <p class="logo-desc">Keep at least the cap-height of the “M” clear on every side. Minimum wordmark width 88px.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dont-row">
+      <p class="dont"><i class="bi bi-x-circle"></i> Don’t recolour the wordmark</p>
+      <p class="dont"><i class="bi bi-x-circle"></i> Don’t move or drop the dot</p>
+      <p class="dont"><i class="bi bi-x-circle"></i> Don’t add a stroke or shadow</p>
+      <p class="dont"><i class="bi bi-x-circle"></i> Don’t rotate or skew</p>
+    </div>
+  </section>
+
+  <!-- ─── 02 · Principles ───────────────────────────────────────────────── -->
+  <section id="principles" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2 class="sec-title">Principles</h2>
+    </div>
+
+    <div class="principles-grid">
+      @for (p of principles; track p.title) {
+      <article class="principle">
+        <i class="bi principle-icon" [class]="p.icon"></i>
+        <h3 class="principle-title">{{ p.title }}</h3>
+        <p class="principle-body">{{ p.body }}</p>
+      </article>
+      }
+    </div>
+  </section>
+
+  <!-- ─── 03 · Color ────────────────────────────────────────────────────── -->
+  <section id="color" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2 class="sec-title">Color</h2>
+    </div>
+
+    @for (group of colorGroups; track group.title) {
+    <div class="color-group">
+      <div class="color-group-head">
+        <h3 class="color-group-title">{{ group.title }}</h3>
+        <p class="color-group-note">{{ group.note }}</p>
+      </div>
+      <div class="swatch-grid">
+        @for (s of group.swatches; track s.name) {
+        <div class="swatch">
+          <div class="swatch-chip" [class.swatch-chip--ink-dark]="s.ink === 'dark'"
+            [style.background]="s.value">
+            <span class="swatch-token">{{ s.name }}</span>
+          </div>
+          <div class="swatch-meta">
+            <span class="swatch-value">{{ s.value }}</span>
+            <span class="swatch-role">{{ s.role }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+  </section>
+
+  <!-- ─── 04 · Typography ───────────────────────────────────────────────── -->
+  <section id="type" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2 class="sec-title">Typography</h2>
+    </div>
+
+    <div class="type-intro">
+      <div class="type-intro-mark">Aa</div>
+      <div class="type-intro-body">
+        <p class="type-intro-name">Inconsolata</p>
+        <p class="type-intro-desc">One typeface for the entire site, self-hosted via Fontsource. The
+          <code>--font-sans</code>, <code>--font-serif</code> and <code>--font-mono</code> aliases all resolve to
+          it — a single monospace voice across headings, body and code.</p>
+        <p class="type-weights">
+          <span style="font-weight:300">Light 300</span>
+          <span style="font-weight:400">Regular 400</span>
+          <span style="font-weight:500">Medium 500</span>
+          <span style="font-weight:600">Semibold 600</span>
+          <span style="font-weight:700">Bold 700</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="type-scale">
+      @for (t of typeScale; track t.label) {
+      <div class="type-row">
+        <div class="type-row-meta">
+          <span class="type-row-label">{{ t.label }}</span>
+          <span class="type-row-spec">{{ t.meta }}</span>
+        </div>
+        <p class="type-row-sample" [class]="t.cls">{{ t.sample }}</p>
+      </div>
+      }
+    </div>
+  </section>
+
+  <!-- ─── 05 · Spacing ──────────────────────────────────────────────────── -->
+  <section id="spacing" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2 class="sec-title">Spacing</h2>
+    </div>
+    <p class="sec-lede">An 8px base rhythm. Margins, padding, gaps and section spacing all snap to this scale.</p>
+
+    <div class="space-scale">
+      @for (s of spacing; track s.token) {
+      <div class="space-row">
+        <span class="space-token">{{ s.token }}</span>
+        <span class="space-bar" [style.width.px]="s.px"></span>
+        <span class="space-px">{{ s.px }}px</span>
+      </div>
+      }
+    </div>
+  </section>
+
+  <!-- ─── 06 · Radius & Borders ─────────────────────────────────────────── -->
+  <section id="radius" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <h2 class="sec-title">Radius &amp; Borders</h2>
+    </div>
+    <p class="sec-lede">Pointy-edge house style: rectangular surfaces have <code>--radius: 0</code>. Rounding is
+      reserved for pills and avatars only.</p>
+
+    <div class="radius-grid">
+      <div class="radius-cell">
+        <div class="radius-demo" style="border-radius:0"></div>
+        <span class="radius-token">--radius</span>
+        <span class="radius-val">0 · cards, inputs, buttons</span>
+      </div>
+      <div class="radius-cell">
+        <div class="radius-demo radius-demo--pill"></div>
+        <span class="radius-token">--radius-pill</span>
+        <span class="radius-val">999px · status pills, toggles</span>
+      </div>
+      <div class="radius-cell">
+        <div class="radius-demo radius-demo--circle"></div>
+        <span class="radius-token">--radius-circle</span>
+        <span class="radius-val">50% · avatars, icon dots</span>
+      </div>
+    </div>
+
+    <div class="border-row">
+      <div class="border-demo" style="border-width:1px"><span>1px hairline</span></div>
+      <div class="border-demo" style="border-width:2px"><span>2px emphasis</span></div>
+      <div class="border-demo border-demo--dashed"><span>dashed</span></div>
+    </div>
+  </section>
+
+  <!-- ─── 07 · Elevation ────────────────────────────────────────────────── -->
+  <section id="elevation" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">07</span>
+      <h2 class="sec-title">Elevation</h2>
+    </div>
+    <p class="sec-lede">The interface is mostly flat — borders carry hierarchy. Soft shadows appear only on
+      floating layers (sticky header, panels, bubbles).</p>
+
+    <div class="elev-grid">
+      <div class="elev-cell">
+        <div class="elev-demo elev-1"></div>
+        <span class="elev-token">header / scrolled</span>
+        <span class="elev-val">0 1px 16px rgba(0,0,0,.18)</span>
+      </div>
+      <div class="elev-cell">
+        <div class="elev-demo elev-2"></div>
+        <span class="elev-token">panel / popover</span>
+        <span class="elev-val">0 4px 24px rgba(0,0,0,.08)</span>
+      </div>
+      <div class="elev-cell">
+        <div class="elev-demo elev-3"></div>
+        <span class="elev-token">floating button</span>
+        <span class="elev-val">0 6px 20px rgba(0,0,0,.45)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 08 · Motion ───────────────────────────────────────────────────── -->
+  <section id="motion" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">08</span>
+      <h2 class="sec-title">Motion</h2>
+    </div>
+    <p class="sec-lede">Short, purposeful transitions on a single easing curve
+      <code>{{ ease }}</code>. Hover any bar to preview.</p>
+
+    <div class="motion-grid">
+      @for (m of motion; track m.token) {
+      <div class="motion-cell">
+        <div class="motion-track"><span class="motion-dot" [style.transition-duration]="m.value"></span></div>
+        <div class="motion-meta">
+          <span class="motion-token">{{ m.token }}</span>
+          <span class="motion-val">{{ m.value }} · {{ m.use }}</span>
+        </div>
+      </div>
+      }
+    </div>
+  </section>
+
+  <!-- ─── 09 · Components ───────────────────────────────────────────────── -->
+  <section id="components" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">09</span>
+      <h2 class="sec-title">Components</h2>
+    </div>
+
+    <!-- Buttons -->
+    <div class="comp-block">
+      <p class="comp-label">Buttons</p>
+      <div class="comp-demo">
+        <button class="btn-primary" type="button">Primary <i class="bi bi-arrow-right"></i></button>
+        <button class="btn-ghost" type="button">Ghost</button>
+        <button class="btn-primary" type="button" disabled>Disabled</button>
+      </div>
+    </div>
+
+    <!-- Tags / chips -->
+    <div class="comp-block">
+      <p class="comp-label">Tags &amp; chips</p>
+      <div class="comp-demo">
+        <span class="demo-tag">Angular</span>
+        <span class="demo-tag">NestJS</span>
+        <span class="demo-tag">PostgreSQL</span>
+        <span class="demo-chip">Typescript</span>
+      </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="comp-block">
+      <p class="comp-label">Status badges</p>
+      <div class="comp-demo">
+        <span class="demo-badge demo-badge--on"><span class="dotmark"></span> Online</span>
+        <span class="demo-badge demo-badge--warn">Pending</span>
+        <span class="demo-badge demo-badge--danger">Closed</span>
+      </div>
+    </div>
+
+    <!-- Form field -->
+    <div class="comp-block">
+      <p class="comp-label">Input field</p>
+      <div class="comp-demo comp-demo--stack">
+        <label class="demo-field">
+          <span class="demo-field-label">Email</span>
+          <input class="demo-input" type="email" placeholder="you@example.com" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Card -->
+    <div class="comp-block">
+      <p class="comp-label">Card</p>
+      <div class="comp-demo">
+        <article class="demo-card">
+          <span class="demo-card-tag">Case study</span>
+          <h3 class="demo-card-title">Editorial card</h3>
+          <p class="demo-card-desc">Hairline border, square corners, hover lifts the background a shade. The
+            recurring surface across projects, blog and gallery.</p>
+          <a class="demo-card-link" href="#components">Read more <i class="bi bi-arrow-right"></i></a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 10 · Iconography ──────────────────────────────────────────────── -->
+  <section id="icons" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">10</span>
+      <h2 class="sec-title">Iconography</h2>
+    </div>
+    <p class="sec-lede">One family — <strong>Bootstrap Icons</strong>. Uniform stroke, line style, sized 16–24px
+      and tinted <code>--text-muted</code> by default.</p>
+
+    <div class="icon-grid">
+      @for (ic of icons; track ic) {
+      <div class="icon-cell">
+        <i class="bi" [class]="ic"></i>
+        <span class="icon-name">{{ ic }}</span>
+      </div>
+      }
+    </div>
+  </section>
+
+  <!-- ─── 11 · Layout & Grid ────────────────────────────────────────────── -->
+  <section id="layout" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">11</span>
+      <h2 class="sec-title">Layout &amp; Grid</h2>
+    </div>
+    <p class="sec-lede">A centred <strong>1140px</strong> container with 2.5rem gutters. Sections are separated by
+      hairline borders rather than cards.</p>
+
+    <div class="bp-table">
+      <div class="bp-row bp-row--head">
+        <span>Breakpoint</span><span>Range (px)</span><span>Grid</span>
+      </div>
+      @for (b of breakpoints; track b.label) {
+      <div class="bp-row">
+        <span class="bp-name">{{ b.label }}</span>
+        <span class="bp-range">{{ b.range }}</span>
+        <span class="bp-cols">{{ b.cols }}</span>
+      </div>
+      }
+    </div>
+  </section>
+
+  <!-- ─── 12 · Accessibility ────────────────────────────────────────────── -->
+  <section id="a11y" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">12</span>
+      <h2 class="sec-title">Accessibility</h2>
+    </div>
+
+    <ul class="a11y-list">
+      <li><i class="bi bi-check2"></i> Text meets WCAG AA contrast on every surface (bone on charcoal ≈ 11:1).</li>
+      <li><i class="bi bi-check2"></i> Every interactive element keeps a visible focus ring.</li>
+      <li><i class="bi bi-check2"></i> Touch targets are at least <strong>44 × 44px</strong>.</li>
+      <li><i class="bi bi-check2"></i> Semantic HTML and ARIA labels on icon-only controls.</li>
+      <li><i class="bi bi-check2"></i> <code>prefers-reduced-motion</code> is honoured for transitions and reveals.</li>
+      <li><i class="bi bi-check2"></i> Colour never carries meaning alone — pair it with text or an icon.</li>
+    </ul>
+  </section>
+
+  <!-- ─── Footer / golden rule ──────────────────────────────────────────── -->
+  <footer class="brand-footer">
+    <p class="brand-rule-label">The golden rule</p>
+    <p class="brand-rule">Every visual property comes from a design&nbsp;token.</p>
+    <div class="brand-footer-links">
+      <a routerLink="/credits" class="brand-link">Credits</a>
+      <a routerLink="/about" class="brand-link">About</a>
+      <a routerLink="/" class="brand-link">Back to Home</a>
+    </div>
+  </footer>
+
+</section>

@@ -54,7 +54,7 @@
     <div class="stats-container">
         @for (stat of statsConfig; track stat.label; let i = $index) {
         <div class="stat-item">
-            <span class="stat-value">{{ statsDisplayed()[i] }}</span>
+            <span class="stat-value" [appCountUp]="stat.target" [suffix]="stat.suffix" [startDelay]="i * 120">{{ stat.target }}{{ stat.suffix }}</span>
             <span class="stat-label">{{ stat.label }}</span>
         </div>
         }

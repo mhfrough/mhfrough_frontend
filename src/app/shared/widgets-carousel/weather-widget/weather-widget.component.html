@@ -1,6 +1,9 @@
-<div class="weather-widget" [attr.title]="'Weather · ' + location">
+<div class="weather-widget"
+    [attr.title]="'Weather · ' + location"
+    [class.avatar-hovering]="avatarHovered"
+    (click)="closeLogin()">
 
-    <!-- ── Icon ─────────────────────────────────────────────── -->
+    <!-- ── Weather Icon ───────────────────────────────────────── -->
     <div class="weather-icon" [class]="'weather-icon--' + conditionKey" aria-hidden="true">
 
         @switch (conditionKey) {
@@ -84,10 +87,70 @@
         }
     </div>
 
-    <!-- ── Text ─────────────────────────────────────────────── -->
-    <div class="weather-text">
-        <span class="weather-temp">{{ displayTemp }}</span>
-        <span class="weather-cond">{{ displayLabel }}</span>
+    <!-- ── Text layer (weather / visitor info) ───────────────── -->
+    <div class="weather-text-wrap">
+        <div class="weather-text weather-text--weather">
+            <span class="weather-temp">{{ displayTemp }}</span>
+            <span class="weather-cond">{{ displayLabel }}</span>
+        </div>
+        @if (visitorProfile) {
+        <div class="weather-text weather-text--visitor">
+            <span class="weather-visitor-name">{{ visitorProfile.displayName || visitorProfile.email || 'Visitor' }}</span>
+            <span class="weather-visitor-source">{{ visitorAuth.providerLabel(visitorProfile.provider) }}</span>
+        </div>
+        }
     </div>
+
+    <!-- ── Avatar / Login circle ─────────────────────────────── -->
+    @if (visitorProfile) {
+
+    <!-- Logged-in: avatar + hover shows name/source, click shows sign-out -->
+    <div class="weather-avatar weather-avatar--user"
+        (mouseenter)="onAvatarEnter()"
+        (mouseleave)="onAvatarLeave()"
+        (click)="toggleLogin($event)"
+        [attr.aria-label]="visitorProfile.displayName || 'Your profile'">
+        <img [src]="visitorProfile.avatarUrl"
+            [alt]="visitorProfile.displayName || 'visitor avatar'"
+            loading="lazy"
+            onerror="this.style.display='none'">
+        <span class="avatar-fallback" aria-hidden="true">
+            <i class="bi bi-person-fill"></i>
+        </span>
+        @if (loginOpen) {
+        <div class="visitor-dropdown visitor-dropdown--signout" (click)="$event.stopPropagation()">
+            <span class="visitor-dropdown-name">{{ visitorProfile.displayName || visitorProfile.email }}</span>
+            <span class="visitor-dropdown-source">{{ visitorAuth.providerLabel(visitorProfile.provider) }}</span>
+            <button class="visitor-dropdown-btn visitor-dropdown-btn--out" (click)="logout()">
+                <i class="bi bi-box-arrow-right"></i> Sign out
+            </button>
+        </div>
+        }
+    </div>
+
+    } @else if (authLoaded && enabledProviders.length > 0) {
+
+    <!-- Not logged in: login circle -->
+    <div class="weather-avatar weather-avatar--login"
+        (click)="toggleLogin($event)"
+        title="Sign in to personalise">
+        <i class="bi bi-person" aria-hidden="true"></i>
+        @if (loginOpen) {
+        <div class="visitor-dropdown visitor-dropdown--login" (click)="$event.stopPropagation()">
+            <span class="visitor-dropdown-title">Sign in with</span>
+            @for (p of enabledProviders; track p.provider) {
+            <button class="visitor-dropdown-btn" (click)="loginWith(p.provider)">
+                <i [class]="'bi ' + providerIcon(p.provider)"></i> {{ p.label }}
+            </button>
+            }
+            <p class="visitor-dropdown-note">
+                Your info is only used to personalise your experience on this site.
+                See <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+            </p>
+        </div>
+        }
+    </div>
+
+    }
 
 </div>

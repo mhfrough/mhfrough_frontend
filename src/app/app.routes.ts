@@ -172,6 +172,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/main/credits/credits.component').then(m => m.CreditsComponent),
             },
             {
+                path: 'brand',
+                loadComponent: () => import('./features/main/brand/brand.component').then(m => m.BrandComponent),
+            },
+            {
                 path: 'feedback',
                 loadComponent: () => import('./features/main/feedback/feedback.component').then(m => m.FeedbackComponent),
             },

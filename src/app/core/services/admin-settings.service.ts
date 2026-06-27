@@ -43,6 +43,20 @@ export interface AdminSettings {
     emailFromAddress: string | null;
     emailFromName: string;
     emailEnabled: boolean;
+    // Visitor Authentication (OAuth)
+    visitorAuthEnabled: boolean;
+    googleOAuthEnabled: boolean;
+    googleClientId: string | null;
+    googleClientSecret: string | null;
+    githubOAuthEnabled: boolean;
+    githubClientId: string | null;
+    githubClientSecret: string | null;
+    linkedinOAuthEnabled: boolean;
+    linkedinClientId: string | null;
+    linkedinClientSecret: string | null;
+    discordOAuthEnabled: boolean;
+    discordClientId: string | null;
+    discordClientSecret: string | null;
     updatedAt: string;
 }
 
@@ -165,6 +179,19 @@ const DEFAULTS: AdminSettings = {
     emailFromAddress: null,
     emailFromName: 'Mohammad Hamza',
     emailEnabled: false,
+    visitorAuthEnabled: false,
+    googleOAuthEnabled: false,
+    googleClientId: null,
+    googleClientSecret: null,
+    githubOAuthEnabled: false,
+    githubClientId: null,
+    githubClientSecret: null,
+    linkedinOAuthEnabled: false,
+    linkedinClientId: null,
+    linkedinClientSecret: null,
+    discordOAuthEnabled: false,
+    discordClientId: null,
+    discordClientSecret: null,
     updatedAt: '',
 };
 

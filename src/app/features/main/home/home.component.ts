@@ -10,13 +10,14 @@ import { FeedbackService } from '../../../core/services/inquiry-feedback.service
 import { PreconnectService } from '../../../core/services/preconnect.service';
 import { SeoService } from '../../../core/services/seo.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
+import { CountUpDirective } from '../../../shared/directives/count-up.directive';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 import { SERVICES, FAQS } from '../../../core/data/site-content';
 
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, RouterLink, NgOptimizedImage, ImgFallbackDirective, ExternalUrlPipe],
+    imports: [CommonModule, RouterLink, NgOptimizedImage, ImgFallbackDirective, CountUpDirective, ExternalUrlPipe],
     templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -47,8 +48,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         { target: 10, suffix: '+', label: 'Happy Clients' },
         { target: 100, suffix: '%', label: 'On-time Delivery' },
     ];
-    readonly statsDisplayed = signal(['6+', '30+', '10+', '100%']);
-    private statsAnimated = false;
     private observers: IntersectionObserver[] = [];
 
     // Home shows only teasers; the full lists live on /services and /faq.
@@ -115,7 +114,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     ngAfterViewInit() {
         if (!isPlatformBrowser(this.platformId)) return;
         this.setupScrollReveal();
-        this.setupStatsObserver();
     }
 
     ngOnDestroy() {
@@ -156,44 +154,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
         targets.forEach(el => obs.observe(el));
         this.observers.push(obs);
-    }
-
-    private setupStatsObserver() {
-        const host: HTMLElement = this.elRef.nativeElement;
-        const strip = host.querySelector('.stats-strip');
-        if (!strip) return;
-
-        const obs = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && !this.statsAnimated) {
-                this.statsAnimated = true;
-                this.statsConfig.forEach((stat, i) => this.animateStat(i, stat.target, stat.suffix, i * 120));
-                obs.disconnect();
-            }
-        }, { threshold: 0.4 });
-
-        obs.observe(strip);
-        this.observers.push(obs);
-    }
-
-    private animateStat(index: number, target: number, suffix: string, delay: number) {
-        setTimeout(() => {
-            const total = 300;
-            const start = performance.now();
-
-            const tick = () => {
-                const elapsed = performance.now() - start;
-                if (elapsed >= total) {
-                    this.statsDisplayed.update(arr => { const c = [...arr]; c[index] = target + suffix; return c; });
-                    return;
-                }
-                const eased = 1 - Math.pow(1 - elapsed / total, 3);
-                const val = Math.round(eased * target);
-                this.statsDisplayed.update(arr => { const c = [...arr]; c[index] = val + suffix; return c; });
-                requestAnimationFrame(tick);
-            };
-
-            requestAnimationFrame(tick);
-        }, delay);
     }
 
     private pick(arr: string[], seed: number): string {

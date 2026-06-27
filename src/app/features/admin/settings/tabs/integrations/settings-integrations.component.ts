@@ -43,6 +43,25 @@ export class SettingsIntegrationsComponent implements OnInit {
     emailFromAddress = '';
     emailFromName = 'Mohammad Hamza';
 
+    // ── Visitor Authentication (OAuth) ────────────────────────────────────────
+    readonly oauthSaving = signal(false);
+    readonly oauthSaved = signal(false);
+    readonly oauthError = signal('');
+
+    visitorAuthEnabled = false;
+    googleOAuthEnabled = false;
+    googleClientId = '';
+    googleClientSecret = '';
+    githubOAuthEnabled = false;
+    githubClientId = '';
+    githubClientSecret = '';
+    linkedinOAuthEnabled = false;
+    linkedinClientId = '';
+    linkedinClientSecret = '';
+    discordOAuthEnabled = false;
+    discordClientId = '';
+    discordClientSecret = '';
+
     ngOnInit() {
         this.settingsService.load();
         this.syncFormFromSettings(this.settingsService.settings());
@@ -64,12 +83,26 @@ export class SettingsIntegrationsComponent implements OnInit {
         this.aiInstruction = s.aiInstruction ?? '';
         this.aiAutoReplyDelay = s.aiAutoReplyDelay ?? 1500;
         this.aiMaxResponseLength = s.aiMaxResponseLength ?? 300;
-        this.aiMaxQuestions = s.aiMaxQuestions ?? 12;
+        this.aiMaxQuestions = (s as any).aiMaxQuestions ?? 12;
         // Email (Resend)
         this.emailEnabled = s.emailEnabled ?? false;
         this.resendApiKey = s.resendApiKey ? '••••••••' : '';
         this.emailFromAddress = s.emailFromAddress ?? '';
         this.emailFromName = s.emailFromName ?? 'Mohammad Hamza';
+        // OAuth
+        this.visitorAuthEnabled = s.visitorAuthEnabled ?? false;
+        this.googleOAuthEnabled = s.googleOAuthEnabled ?? false;
+        this.googleClientId = s.googleClientId ?? '';
+        this.googleClientSecret = s.googleClientSecret ? '••••••••' : '';
+        this.githubOAuthEnabled = s.githubOAuthEnabled ?? false;
+        this.githubClientId = s.githubClientId ?? '';
+        this.githubClientSecret = s.githubClientSecret ? '••••••••' : '';
+        this.linkedinOAuthEnabled = s.linkedinOAuthEnabled ?? false;
+        this.linkedinClientId = s.linkedinClientId ?? '';
+        this.linkedinClientSecret = s.linkedinClientSecret ? '••••••••' : '';
+        this.discordOAuthEnabled = s.discordOAuthEnabled ?? false;
+        this.discordClientId = s.discordClientId ?? '';
+        this.discordClientSecret = s.discordClientSecret ? '••••••••' : '';
     }
 
     private resolveKey(val: string): string | undefined {
@@ -87,7 +120,7 @@ export class SettingsIntegrationsComponent implements OnInit {
             aiInstruction: this.aiInstruction || undefined,
             aiAutoReplyDelay: this.aiAutoReplyDelay,
             aiMaxResponseLength: this.aiMaxResponseLength,
-            aiMaxQuestions: this.aiMaxQuestions,
+            aiMaxQuestions: this.aiMaxQuestions as any,
         };
         const resolvedKey = this.resolveKey(this.aiApiKey);
         if (resolvedKey !== undefined) payload['geminiApiKey'] = resolvedKey;
@@ -127,6 +160,44 @@ export class SettingsIntegrationsComponent implements OnInit {
             error: (e: any) => {
                 this.emailSaving.set(false);
                 this.emailError.set(e?.error?.message ?? 'Failed to save email settings.');
+            },
+        });
+    }
+
+    saveOAuthSettings(): void {
+        this.oauthSaving.set(true);
+        this.oauthSaved.set(false);
+        this.oauthError.set('');
+
+        const payload: Partial<AdminSettings> = {
+            visitorAuthEnabled: this.visitorAuthEnabled,
+            googleOAuthEnabled: this.googleOAuthEnabled,
+            googleClientId: this.googleClientId || undefined,
+            githubOAuthEnabled: this.githubOAuthEnabled,
+            githubClientId: this.githubClientId || undefined,
+            linkedinOAuthEnabled: this.linkedinOAuthEnabled,
+            linkedinClientId: this.linkedinClientId || undefined,
+            discordOAuthEnabled: this.discordOAuthEnabled,
+            discordClientId: this.discordClientId || undefined,
+        };
+        const gSecret = this.resolveKey(this.googleClientSecret);
+        if (gSecret !== undefined) payload['googleClientSecret'] = gSecret;
+        const ghSecret = this.resolveKey(this.githubClientSecret);
+        if (ghSecret !== undefined) payload['githubClientSecret'] = ghSecret;
+        const liSecret = this.resolveKey(this.linkedinClientSecret);
+        if (liSecret !== undefined) payload['linkedinClientSecret'] = liSecret;
+        const dcSecret = this.resolveKey(this.discordClientSecret);
+        if (dcSecret !== undefined) payload['discordClientSecret'] = dcSecret;
+
+        this.settingsService.update(payload).subscribe({
+            next: () => {
+                this.oauthSaving.set(false);
+                this.oauthSaved.set(true);
+                setTimeout(() => this.oauthSaved.set(false), 3000);
+            },
+            error: (e: any) => {
+                this.oauthSaving.set(false);
+                this.oauthError.set(e?.error?.message ?? 'Failed to save OAuth settings.');
             },
         });
     }

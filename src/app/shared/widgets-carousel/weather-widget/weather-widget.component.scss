@@ -8,6 +8,9 @@
   align-items: center;
   gap: 0.5rem;
   cursor: default;
+  position: relative;
+
+  // ── Weather Icon ─────────────────────────────────────────────────────────
 
   .weather-icon {
     width: 20px;
@@ -17,6 +20,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
 
     svg {
       width: 20px;
@@ -28,35 +32,61 @@
       will-change: transform, opacity;
     }
 
-    &:hover svg,
-    &:focus-within svg {
-      transform: translateY(-2px) scale(1.04);
-      opacity: 0.98;
-    }
+    &--sunny svg   { filter: drop-shadow(0 4px 8px rgba(255, 183, 3, 0.20)); }
+    &--rain svg    { filter: drop-shadow(0 4px 8px rgba(105, 167, 255, 0.15)); }
+    &--thunderstorm svg { filter: drop-shadow(0 4px 8px rgba(255, 209, 102, 0.15)); }
+    &--snow svg    { filter: drop-shadow(0 4px 8px rgba(216, 233, 255, 0.12)); }
+  }
 
-    // condition-specific colour hints
-    &--sunny svg {
-      filter: drop-shadow(0 4px 8px rgba(255, 183, 3, 0.20));
-    }
+  // Dim the weather icon when the avatar is hovered
+  &.avatar-hovering .weather-icon {
+    opacity: 0.35;
+    transform: scale(0.88);
+  }
 
-    &--rain svg {
-      filter: drop-shadow(0 4px 8px rgba(105, 167, 255, 0.15));
-    }
+  // ── Text wrap (weather ↔ visitor info transition) ────────────────────────
 
-    &--thunderstorm svg {
-      filter: drop-shadow(0 4px 8px rgba(255, 209, 102, 0.15));
-    }
-
-    &--snow svg {
-      filter: drop-shadow(0 4px 8px rgba(216, 233, 255, 0.12));
-    }
+  .weather-text-wrap {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    height: 2.2rem; // fixed height to avoid layout shift
   }
 
   .weather-text {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     line-height: 1;
     gap: 0.25rem;
+    transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+    will-change: opacity, transform;
+
+    &--weather {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    &--visitor {
+      opacity: 0;
+      transform: translateY(4px);
+      pointer-events: none;
+    }
+  }
+
+  // On avatar hover: weather fades up, visitor info fades in
+  &.avatar-hovering {
+    .weather-text--weather {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    .weather-text--visitor {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
   }
 
   .weather-temp {
@@ -71,9 +101,175 @@
     font-size: 0.65rem;
     color: var(--text-muted);
     text-transform: capitalize;
+    transition: color var(--dur) var(--ease);
   }
 
-  &:hover .weather-cond {
+  &:hover .weather-cond { color: var(--text); }
+
+  .weather-visitor-name {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 600;
     color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .weather-visitor-source {
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-transform: capitalize;
+  }
+
+  // ── Avatar circle ────────────────────────────────────────────────────────
+
+  .weather-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+
+    &--user {
+      overflow: visible;
+      border: 1.5px solid var(--border);
+
+      img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+        position: relative;
+        z-index: 1;
+      }
+
+      .avatar-fallback {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      &:hover {
+        box-shadow: 0 0 0 2px var(--accent);
+        transform: scale(1.06);
+      }
+    }
+
+    &--login {
+      border: 1.5px dashed var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+
+      &:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: scale(1.06);
+      }
+    }
+  }
+
+  // ── Visitor dropdown ─────────────────────────────────────────────────────
+
+  .visitor-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    min-width: 160px;
+    max-width: 220px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    &--login {
+      .visitor-dropdown-title {
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0 0.2rem 0.2rem;
+      }
+    }
+
+    &--signout {
+      .visitor-dropdown-name {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--text);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 0 0.2rem;
+      }
+
+      .visitor-dropdown-source {
+        font-size: 0.6rem;
+        color: var(--text-muted);
+        padding: 0 0.2rem 0.2rem;
+      }
+    }
+  }
+
+  .visitor-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.72rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+
+    i { font-size: 0.8rem; }
+
+    &:hover { background: var(--surface-2); }
+
+    &--out {
+      border-color: transparent;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+
+      &:hover {
+        background: rgba(var(--error-rgb, 220 50 50) / 0.1);
+        color: var(--error, #e05);
+        border-color: transparent;
+      }
+    }
+  }
+
+  .visitor-dropdown-note {
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    margin: 0.2rem 0 0;
+    line-height: 1.4;
+    padding: 0 0.2rem;
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
+    }
   }
 }

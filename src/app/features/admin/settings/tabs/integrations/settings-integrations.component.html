@@ -1,3 +1,151 @@
+<!-- ── Visitor Authentication (OAuth) ─────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-header">
+        <div>
+            <h2 class="settings-card-title"><i class="bi bi-person-badge"></i> Visitor Authentication</h2>
+            <p class="settings-card-sub">
+                OAuth sign-in for visitors. Enables profile picture in the weather widget and richer contact info on reviews and messages.
+                Collected: name, avatar, email (if provided by the provider).
+            </p>
+        </div>
+    </div>
+
+    <!-- Master toggle -->
+    <div class="settings-toggle-row">
+        <div>
+            <span class="settings-toggle-title">Enable Visitor Sign-In</span>
+            <span class="settings-toggle-sub">Master switch — disables all OAuth routes when off, regardless of per-provider toggles.</span>
+        </div>
+        <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="visitorAuthEnabled">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <hr class="settings-divider">
+
+    <!-- ── Google ── -->
+    <div class="settings-provider-block" [class.provider-disabled]="!visitorAuthEnabled">
+        <div class="settings-provider-header">
+            <span class="settings-provider-icon"><i class="bi bi-google"></i></span>
+            <div>
+                <span class="settings-toggle-title">Google</span>
+                <span class="settings-toggle-sub">Widest coverage. Recommended default.</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="googleOAuthEnabled" [disabled]="!visitorAuthEnabled">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        @if (googleOAuthEnabled && visitorAuthEnabled) {
+        <div class="admin-form-grid" style="margin-top:0.75rem">
+            <div class="admin-form-field">
+                <label class="admin-form-label">Client ID</label>
+                <p class="form-hint">From <strong>console.cloud.google.com</strong> → APIs &amp; Services → Credentials. Callback URL: <code>{{ '{BACKEND_URL}' }}/api/v1/visitor-auth/google/callback</code></p>
+                <input type="text" class="admin-form-input" [(ngModel)]="googleClientId" placeholder="*.apps.googleusercontent.com" autocomplete="off">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Client Secret</label>
+                <input type="password" class="admin-form-input" [(ngModel)]="googleClientSecret" placeholder="GOCSPX-..." autocomplete="off">
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- ── GitHub ── -->
+    <div class="settings-provider-block" [class.provider-disabled]="!visitorAuthEnabled">
+        <div class="settings-provider-header">
+            <span class="settings-provider-icon"><i class="bi bi-github"></i></span>
+            <div>
+                <span class="settings-toggle-title">GitHub</span>
+                <span class="settings-toggle-sub">Good fit for developer visitors.</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="githubOAuthEnabled" [disabled]="!visitorAuthEnabled">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        @if (githubOAuthEnabled && visitorAuthEnabled) {
+        <div class="admin-form-grid" style="margin-top:0.75rem">
+            <div class="admin-form-field">
+                <label class="admin-form-label">Client ID</label>
+                <p class="form-hint">From <strong>github.com</strong> → Settings → Developer settings → OAuth Apps. Callback URL: <code>{{ '{BACKEND_URL}' }}/api/v1/visitor-auth/github/callback</code></p>
+                <input type="text" class="admin-form-input" [(ngModel)]="githubClientId" placeholder="Iv1...." autocomplete="off">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Client Secret</label>
+                <input type="password" class="admin-form-input" [(ngModel)]="githubClientSecret" autocomplete="off">
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- ── LinkedIn ── -->
+    <div class="settings-provider-block" [class.provider-disabled]="!visitorAuthEnabled">
+        <div class="settings-provider-header">
+            <span class="settings-provider-icon"><i class="bi bi-linkedin"></i></span>
+            <div>
+                <span class="settings-toggle-title">LinkedIn</span>
+                <span class="settings-toggle-sub">Good for recruiters. Requires "Sign In with LinkedIn using OpenID Connect" enabled in your app.</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="linkedinOAuthEnabled" [disabled]="!visitorAuthEnabled">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        @if (linkedinOAuthEnabled && visitorAuthEnabled) {
+        <div class="admin-form-grid" style="margin-top:0.75rem">
+            <div class="admin-form-field">
+                <label class="admin-form-label">Client ID</label>
+                <p class="form-hint">From <strong>developer.linkedin.com</strong> → My Apps → Auth. Callback URL: <code>{{ '{BACKEND_URL}' }}/api/v1/visitor-auth/linkedin/callback</code></p>
+                <input type="text" class="admin-form-input" [(ngModel)]="linkedinClientId" autocomplete="off">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Client Secret</label>
+                <input type="password" class="admin-form-input" [(ngModel)]="linkedinClientSecret" autocomplete="off">
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- ── Discord ── -->
+    <div class="settings-provider-block" [class.provider-disabled]="!visitorAuthEnabled">
+        <div class="settings-provider-header">
+            <span class="settings-provider-icon"><i class="bi bi-discord"></i></span>
+            <div>
+                <span class="settings-toggle-title">Discord</span>
+                <span class="settings-toggle-sub">Popular in developer communities.</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="discordOAuthEnabled" [disabled]="!visitorAuthEnabled">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        @if (discordOAuthEnabled && visitorAuthEnabled) {
+        <div class="admin-form-grid" style="margin-top:0.75rem">
+            <div class="admin-form-field">
+                <label class="admin-form-label">Client ID</label>
+                <p class="form-hint">From <strong>discord.com/developers/applications</strong> → OAuth2. Callback URL: <code>{{ '{BACKEND_URL}' }}/api/v1/visitor-auth/discord/callback</code></p>
+                <input type="text" class="admin-form-input" [(ngModel)]="discordClientId" autocomplete="off">
+            </div>
+            <div class="admin-form-field">
+                <label class="admin-form-label">Client Secret</label>
+                <input type="password" class="admin-form-input" [(ngModel)]="discordClientSecret" autocomplete="off">
+            </div>
+        </div>
+        }
+    </div>
+
+    <div class="admin-form-actions" style="margin-top:1.25rem">
+        <button class="btn-primary" (click)="saveOAuthSettings()" [disabled]="oauthSaving()">
+            @if (oauthSaving()) { <span class="contact-spinner"></span> Saving… } @else { <i class="bi bi-person-badge"></i> Save Auth Settings }
+        </button>
+        @if (oauthSaved()) { <span class="settings-saved-msg"><i class="bi bi-check-circle-fill"></i> Saved!</span> }
+        @if (oauthError()) { <span class="settings-error-msg">{{ oauthError() }}</span> }
+    </div>
+
+</div>
+
 <!-- ── AI Chat Auto-Reply ─────────────────────────────────────────────────── -->
 <div class="settings-card">
     <div class="settings-card-header">
