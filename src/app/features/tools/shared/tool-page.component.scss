@@ -1,0 +1,126 @@
+.tool-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.tool-breadcrumb {
+    a {
+        font-family: var(--font);
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: color var(--dur) var(--ease);
+
+        &:hover {
+            color: var(--text);
+        }
+
+        i {
+            font-size: 0.72rem;
+        }
+    }
+}
+
+.tool-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.tool-head-icon {
+    font-size: 1.75rem;
+    color: var(--text-muted);
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+}
+
+.tool-head-text {
+    min-width: 0;
+}
+
+.tool-head-title {
+    font-family: var(--font);
+    font-size: clamp(1.5rem, 4dvw, 2.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0 0 0.5rem;
+}
+
+.tool-head-blurb {
+    font-family: var(--font);
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 46rem;
+}
+
+// --- Alert / loading ---------------------------------------------------------
+.tool-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font);
+    font-size: 0.82rem;
+
+    i {
+        flex-shrink: 0;
+    }
+}
+
+.tool-alert--error {
+    color: var(--danger-text);
+    border-color: rgba(var(--danger-text-rgb), 0.4);
+    background: var(--danger-soft);
+}
+
+.tool-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+}
+
+.tool-spinner {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--border);
+    border-top-color: var(--text);
+    border-radius: var(--radius-circle);
+    animation: tool-spin 0.7s linear infinite;
+}
+
+@keyframes tool-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tool-spinner {
+        animation-duration: 1.5s;
+    }
+}
+
+.tool-body {
+    display: flex;
+    flex-direction: column;
+}

@@ -1,0 +1,40 @@
+@use '../shared/tool-controls';
+
+.uc {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.uc-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+}
+
+.uc-radios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.25rem;
+}
+
+.uc-output {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.uc-output-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .t-label {
+        margin: 0;
+    }
+}

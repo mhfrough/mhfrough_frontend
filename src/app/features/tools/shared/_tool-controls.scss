@@ -1,0 +1,233 @@
+// Shared visual primitives for individual tool pages. Tokens only — no literal
+// hex. Imported by each tool component's scoped stylesheet via @use.
+
+.t-panel {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 1.25rem;
+}
+
+.t-label {
+    display: block;
+    font-family: var(--font);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.5rem;
+}
+
+.t-field {
+    width: 100%;
+    font-family: var(--font);
+    font-size: 0.85rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.6rem 0.8rem;
+    transition: border-color var(--dur) var(--ease);
+
+    &:focus {
+        outline: none;
+        border-color: var(--text-muted);
+    }
+}
+
+.t-textarea {
+    @extend .t-field;
+    min-height: 220px;
+    resize: vertical;
+    line-height: 1.6;
+    white-space: pre;
+    overflow: auto;
+    tab-size: 2;
+}
+
+.t-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.t-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+// --- Tabs / segmented toggles ------------------------------------------------
+.t-tabs {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.t-tab {
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+
+    &:last-child {
+        border-right: none;
+    }
+
+    &:hover {
+        color: var(--text);
+    }
+
+    &.active {
+        background: var(--text);
+        color: var(--bg);
+    }
+}
+
+// --- Buttons (small, tool-scoped) -------------------------------------------
+.t-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.55rem 1.1rem;
+    border: 1px solid var(--text);
+    background: var(--text);
+    color: var(--bg);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: opacity var(--dur) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease);
+
+    &:hover:not(:disabled) {
+        opacity: 0.85;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    i {
+        font-size: 0.8rem;
+    }
+}
+
+.t-btn--ghost {
+    background: transparent;
+    color: var(--text);
+
+    &:hover:not(:disabled) {
+        background: var(--surface-hover);
+        opacity: 1;
+    }
+}
+
+// --- Checkbox ----------------------------------------------------------------
+.t-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+
+    input {
+        width: 15px;
+        height: 15px;
+        accent-color: var(--primary);
+        cursor: pointer;
+    }
+
+    &:hover {
+        color: var(--text);
+    }
+}
+
+// --- Result / output card ----------------------------------------------------
+.t-result {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    padding: 1rem 1.25rem;
+}
+
+.t-result-value {
+    font-family: var(--font);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    word-break: break-all;
+}
+
+.t-result-label {
+    font-family: var(--font);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.35rem;
+}
+
+// --- Stats strip -------------------------------------------------------------
+.t-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.t-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.t-stat-num {
+    font-family: var(--font);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.t-stat-num--good {
+    color: var(--success-text);
+}
+
+.t-stat-label {
+    font-family: var(--font);
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+// --- Grids -------------------------------------------------------------------
+.t-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+
+    @media (max-width: 720px) {
+        grid-template-columns: 1fr;
+    }
+}

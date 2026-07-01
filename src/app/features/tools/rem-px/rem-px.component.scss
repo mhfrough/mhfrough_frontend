@@ -1,0 +1,26 @@
+@use '../shared/tool-controls';
+
+.rempx {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.rempx-root {
+    max-width: 320px;
+}
+
+.rempx-out {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+
+    small {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-left: 0.15rem;
+    }
+}

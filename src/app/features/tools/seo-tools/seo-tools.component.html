@@ -1,0 +1,153 @@
+<app-tool-page title="SEO Audit" icon="bi-search"
+    [loading]="loading()" [error]="error()"
+    blurb="Audit a page for on-page SEO — title and description length, canonical, robots, Open Graph, Twitter cards, H1s, image alt coverage and issues.">
+
+    <div class="seo">
+        <div class="seo-controls">
+            <div class="seo-url">
+                <label class="t-label" for="seoUrl">Page URL</label>
+                <input id="seoUrl" type="url" class="t-field" spellcheck="false" autocomplete="off"
+                    placeholder="https://example.com"
+                    [ngModel]="url()" (ngModelChange)="url.set($event)"
+                    (keyup.enter)="audit()" />
+            </div>
+            <div class="t-actions">
+                <button type="button" class="t-btn" (click)="audit()" [disabled]="loading()">
+                    <i class="bi bi-search"></i> Audit
+                </button>
+            </div>
+        </div>
+
+        @if (report(); as r) {
+        <div class="seo-report">
+
+            <!-- Issues -->
+            @if (r.issues.length) {
+            <section class="seo-section">
+                <h2 class="seo-section-title">Issues</h2>
+                <ul class="seo-issues">
+                    @for (issue of r.issues; track $index) {
+                    <li class="seo-issue" [class]="'seo-issue--' + issue.level">
+                        <i class="bi"
+                            [class.bi-check-circle]="issue.level === 'good'"
+                            [class.bi-exclamation-triangle]="issue.level === 'warn'"
+                            [class.bi-x-circle]="issue.level === 'error'"></i>
+                        <span>{{ issue.msg }}</span>
+                    </li>
+                    }
+                </ul>
+            </section>
+            }
+
+            <!-- Title + Description -->
+            <section class="seo-section">
+                <h2 class="seo-section-title">Title &amp; Description</h2>
+                <div class="seo-field t-panel">
+                    <div class="seo-field-head">
+                        <span class="t-label">Title</span>
+                        <span class="seo-count" [class]="'seo-count--' + titleState(r.titleLength)">
+                            {{ r.titleLength }} chars
+                        </span>
+                    </div>
+                    <p class="seo-field-value">{{ r.title || '— none —' }}</p>
+                </div>
+                <div class="seo-field t-panel">
+                    <div class="seo-field-head">
+                        <span class="t-label">Meta description</span>
+                        <span class="seo-count" [class]="'seo-count--' + descriptionState(r.descriptionLength)">
+                            {{ r.descriptionLength }} chars
+                        </span>
+                    </div>
+                    <p class="seo-field-value">{{ r.description || '— none —' }}</p>
+                </div>
+            </section>
+
+            <!-- Canonical + Robots -->
+            <section class="seo-section">
+                <h2 class="seo-section-title">Indexing</h2>
+                <dl class="seo-kv">
+                    <div class="seo-kv-row">
+                        <dt>Canonical</dt>
+                        <dd>{{ r.canonical || '— none —' }}</dd>
+                    </div>
+                    <div class="seo-kv-row">
+                        <dt>Robots</dt>
+                        <dd>{{ r.robots || '— none —' }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <!-- Open Graph -->
+            <section class="seo-section">
+                <h2 class="seo-section-title">Open Graph</h2>
+                @if (ogRows().length) {
+                <table class="seo-table">
+                    <tbody>
+                        @for (row of ogRows(); track row.key) {
+                        <tr>
+                            <th scope="row">{{ row.key }}</th>
+                            <td>{{ row.value }}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+                } @else {
+                <p class="seo-empty">No Open Graph tags found.</p>
+                }
+            </section>
+
+            <!-- Twitter -->
+            <section class="seo-section">
+                <h2 class="seo-section-title">Twitter Card</h2>
+                @if (twitterRows().length) {
+                <table class="seo-table">
+                    <tbody>
+                        @for (row of twitterRows(); track row.key) {
+                        <tr>
+                            <th scope="row">{{ row.key }}</th>
+                            <td>{{ row.value }}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+                } @else {
+                <p class="seo-empty">No Twitter card tags found.</p>
+                }
+            </section>
+
+            <!-- Headings -->
+            <section class="seo-section">
+                <h2 class="seo-section-title">H1 Tags
+                    <span class="seo-badge">{{ r.h1.length }}</span>
+                </h2>
+                @if (r.h1.length) {
+                <ul class="seo-h1-list">
+                    @for (h of r.h1; track $index) {
+                    <li>{{ h }}</li>
+                    }
+                </ul>
+                } @else {
+                <p class="seo-empty">No H1 tags found.</p>
+                }
+            </section>
+
+            <!-- Images -->
+            <section class="seo-section">
+                <h2 class="seo-section-title">Images</h2>
+                <div class="t-stats">
+                    <div class="t-stat">
+                        <span class="t-stat-num">{{ r.images.total }}</span>
+                        <span class="t-stat-label">Total images</span>
+                    </div>
+                    <div class="t-stat">
+                        <span class="t-stat-num"
+                            [class.t-stat-num--good]="r.images.missingAlt === 0">{{ r.images.missingAlt }}</span>
+                        <span class="t-stat-label">Missing alt</span>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+        }
+    </div>
+</app-tool-page>

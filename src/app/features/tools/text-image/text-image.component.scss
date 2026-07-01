@@ -1,0 +1,91 @@
+@use '../shared/tool-controls';
+
+.ti {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.ti-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem;
+
+    @media (max-width: 860px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ti-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ti-text {
+    min-height: 120px;
+    white-space: pre-wrap;
+}
+
+.ti-color {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.ti-color-input {
+    width: 44px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+}
+
+.ti-transparent {
+    margin-top: 0.5rem;
+}
+
+.ti-preview-wrap {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.ti-canvas-box {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    min-height: 200px;
+
+    // Checkerboard hint behind transparent renders.
+    &--checker {
+        background-color: var(--surface);
+        background-image:
+            linear-gradient(45deg, var(--border) 25%, transparent 25%),
+            linear-gradient(-45deg, var(--border) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, var(--border) 75%),
+            linear-gradient(-45deg, transparent 75%, var(--border) 75%);
+        background-size: 16px 16px;
+        background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    }
+}
+
+.ti-canvas {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}

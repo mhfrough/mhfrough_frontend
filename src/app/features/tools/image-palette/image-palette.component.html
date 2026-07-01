@@ -1,0 +1,58 @@
+<app-tool-page title="Color Palette Extractor" icon="bi-palette"
+    [loading]="loading()" [error]="error()"
+    blurb="Pull the dominant colors out of any image. Click a swatch to copy its hex value.">
+
+    <div class="img">
+        <!-- Upload zone -->
+        <div class="img-drop" [class.over]="dragOver()"
+            (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+            <input type="file" id="palFile" class="img-drop-input" accept="image/*" (change)="onFileInput($event)" />
+            <label for="palFile" class="img-drop-label">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span>Drop an image here or <strong>browse</strong></span>
+            </label>
+        </div>
+
+        <!-- Count control -->
+        <div class="img-control">
+            <label class="t-label" for="palCount">Colors — {{ count() }}</label>
+            <input type="range" id="palCount" class="img-range" min="3" max="12" step="1"
+                [ngModel]="count()" (ngModelChange)="count.set(+$event)" />
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="run()" [disabled]="loading() || !file()">
+                <i class="bi bi-palette"></i> Extract palette
+            </button>
+        </div>
+
+        <!-- Original preview -->
+        @if (previewUrl(); as src) {
+        <figure class="img-card img-card--single">
+            <figcaption class="t-label">Source</figcaption>
+            <img class="img-preview" [src]="src" alt="Source image preview" />
+            @if (file(); as f) {
+            <p class="img-meta">{{ f.name }}</p>
+            }
+        </figure>
+        }
+
+        <!-- Swatches -->
+        @if (colors(); as cols) {
+        <div class="pal-grid">
+            @for (c of cols; track c.hex) {
+            <button type="button" class="pal-swatch" [style.background]="c.hex" [style.color]="textOn(c)"
+                (click)="copyHex(c.hex)" [attr.aria-label]="'Copy ' + c.hex">
+                <span class="pal-hex">
+                    <i class="bi" [class]="copiedHex() === c.hex ? 'bi-check2' : 'bi-clipboard'"></i>
+                    {{ copiedHex() === c.hex ? 'Copied' : c.hex }}
+                </span>
+                <span class="pal-bar-track" [style.color]="textOn(c)">
+                    <span class="pal-bar-fill" [style.width.%]="populationPct(c)"></span>
+                </span>
+            </button>
+            }
+        </div>
+        }
+    </div>
+</app-tool-page>

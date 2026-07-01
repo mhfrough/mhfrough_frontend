@@ -1,0 +1,161 @@
+@use '../shared/tool-controls';
+
+.dx {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.dx-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.dx-url {
+    flex: 1;
+    min-width: 240px;
+}
+
+.dx-output {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+// --- Meta card ---------------------------------------------------------------
+.dx-meta {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.dx-favicon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+
+    &--empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+}
+
+.dx-meta-text {
+    min-width: 0;
+}
+
+.dx-meta-title {
+    font-family: var(--font);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 0.35rem;
+}
+
+.dx-meta-desc {
+    font-family: var(--font);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+// --- Sections ----------------------------------------------------------------
+.dx-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+}
+
+.dx-count {
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.05rem 0.4rem;
+}
+
+.dx-swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 0.6rem;
+}
+
+.dx-swatch {
+    position: relative;
+    height: 84px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transition: transform var(--dur) var(--ease);
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
+
+.dx-swatch-hex {
+    width: 100%;
+    text-align: center;
+    font-family: var(--font);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 0.3rem 0.2rem;
+
+    i {
+        color: var(--success-text);
+    }
+}
+
+.dx-fonts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dx-font {
+    font-size: 0.95rem;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 0.6rem 0.9rem;
+}
+
+.dx-empty {
+    font-family: var(--font);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0;
+}

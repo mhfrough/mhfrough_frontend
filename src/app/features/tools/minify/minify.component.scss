@@ -1,0 +1,33 @@
+@use '../shared/tool-controls';
+
+.min {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.min-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+}
+
+.min-output {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.min-output-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .t-label {
+        margin: 0;
+    }
+}

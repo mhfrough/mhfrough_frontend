@@ -1,0 +1,79 @@
+<app-tool-page title="Favicon Generator" icon="bi-window"
+    [loading]="loading()" [error]="error()"
+    blurb="Turn any image into a multi-size favicon.ico packing 16, 32, 48 and 64 px icons in a single file.">
+
+    <div class="img">
+        <!-- Upload zone -->
+        <div class="img-drop" [class.over]="dragOver()"
+            (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+            <input type="file" id="icoFile" class="img-drop-input" accept="image/*" (change)="onFileInput($event)" />
+            <label for="icoFile" class="img-drop-label">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span>Drop an image here or <strong>browse</strong></span>
+            </label>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="run()" [disabled]="loading() || !file()">
+                <i class="bi bi-window"></i> Generate favicon
+            </button>
+        </div>
+
+        <!-- Source preview -->
+        @if (previewUrl(); as src) {
+        <figure class="img-card img-card--single">
+            <figcaption class="t-label">Source</figcaption>
+            <img class="img-preview" [src]="src" alt="Source image preview" />
+            @if (file(); as f) {
+            <p class="img-meta">{{ formatBytes(f.size) }}</p>
+            }
+        </figure>
+        }
+
+        <!-- Result -->
+        @if (result(); as res) {
+        <div class="t-result">
+            <p class="t-label">Favicon preview</p>
+            <div class="ico-sizes">
+                <figure class="ico-chip">
+                    <img class="ico-img" [src]="res.output" alt="Favicon at 16 pixels" width="16" height="16" />
+                    <figcaption>16</figcaption>
+                </figure>
+                <figure class="ico-chip">
+                    <img class="ico-img" [src]="res.output" alt="Favicon at 32 pixels" width="32" height="32" />
+                    <figcaption>32</figcaption>
+                </figure>
+                <figure class="ico-chip">
+                    <img class="ico-img" [src]="res.output" alt="Favicon at 48 pixels" width="48" height="48" />
+                    <figcaption>48</figcaption>
+                </figure>
+                <figure class="ico-chip">
+                    <img class="ico-img" [src]="res.output" alt="Favicon at 64 pixels" width="64" height="64" />
+                    <figcaption>64</figcaption>
+                </figure>
+            </div>
+
+            <div class="t-stats ico-stats">
+                <div class="t-stat">
+                    <span class="t-stat-num">ICO</span>
+                    <span class="t-stat-label">Format</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ formatBytes(res.bytesOut) }}</span>
+                    <span class="t-stat-label">Size</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num">16/32/48/64</span>
+                    <span class="t-stat-label">Bundled px</span>
+                </div>
+            </div>
+
+            <div class="t-actions img-result-actions">
+                <button type="button" class="t-btn" (click)="download()">
+                    <i class="bi bi-download"></i> Download favicon.ico
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+</app-tool-page>

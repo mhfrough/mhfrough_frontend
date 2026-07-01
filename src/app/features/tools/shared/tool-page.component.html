@@ -1,0 +1,35 @@
+<div class="tool-page">
+    <nav class="tool-breadcrumb" aria-label="Breadcrumb">
+        <a routerLink="/tools"><i class="bi bi-arrow-left"></i> All tools</a>
+    </nav>
+
+    <header class="tool-head">
+        @if (icon) {
+        <i class="tool-head-icon bi" [class]="icon"></i>
+        }
+        <div class="tool-head-text">
+            <h1 class="tool-head-title">{{ title }}</h1>
+            @if (blurb) {
+            <p class="tool-head-blurb">{{ blurb }}</p>
+            }
+        </div>
+    </header>
+
+    @if (error) {
+    <div class="tool-alert tool-alert--error" role="alert">
+        <i class="bi bi-exclamation-triangle"></i>
+        <span>{{ error }}</span>
+    </div>
+    }
+
+    @if (loading) {
+    <div class="tool-loading" role="status" aria-live="polite">
+        <span class="tool-spinner" aria-hidden="true"></span>
+        <span>Working…</span>
+    </div>
+    }
+
+    <div class="tool-body">
+        <ng-content></ng-content>
+    </div>
+</div>

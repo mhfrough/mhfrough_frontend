@@ -1,0 +1,291 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 100dvh;
+    // Distinct tools surface — sits a touch darker than the main site canvas.
+    background: var(--bg-alt);
+    color: var(--text);
+}
+
+// --- Header ------------------------------------------------------------------
+.tools-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.tools-nav {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+
+    @media (max-width: 560px) {
+        padding: 0 1.25rem;
+        gap: 1rem;
+    }
+}
+
+.tools-wordmark {
+    flex-shrink: 0;
+    font-family: var(--font);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    text-decoration: none;
+    transition: opacity var(--dur) var(--ease);
+
+    &:hover {
+        opacity: 0.7;
+    }
+}
+
+.tools-tag {
+    color: var(--primary);
+    margin-left: 0.4rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+}
+
+// --- Dropdown ----------------------------------------------------------------
+.tools-dropdown {
+    position: relative;
+}
+
+.tools-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.85rem;
+    cursor: pointer;
+    transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+
+    &:hover {
+        color: var(--text);
+        border-color: var(--text-muted);
+    }
+
+    .chev {
+        font-size: 0.6rem;
+        transition: transform var(--dur) var(--ease);
+    }
+
+    .tools-dropdown.open & .chev {
+        transform: rotate(180deg);
+    }
+}
+
+.tools-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 250px;
+    max-height: 70dvh;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    padding: 0.35rem;
+    z-index: 200;
+    animation: tools-dd-in var(--dur) var(--ease);
+}
+
+@keyframes tools-dd-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tools-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 0.7rem;
+    font-family: var(--font);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+
+    i {
+        font-size: 0.95rem;
+        width: 1.2rem;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .tdi-name {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &:not(.is-soon):hover,
+    &.active {
+        background: var(--surface-hover);
+        color: var(--text);
+    }
+
+    &.is-soon {
+        opacity: 0.55;
+        cursor: default;
+    }
+}
+
+.tdi-soon {
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 0.05rem 0.45rem;
+    flex-shrink: 0;
+}
+
+.tools-back {
+    margin-left: auto;
+    font-family: var(--font);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
+    white-space: nowrap;
+
+    &:hover {
+        color: var(--text);
+    }
+}
+
+// --- Main --------------------------------------------------------------------
+.tools-main {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 3.5rem;
+
+    @media (max-width: 560px) {
+        padding: 2rem 1.25rem 2.5rem;
+    }
+}
+
+// --- Footer ------------------------------------------------------------------
+.tools-footer {
+    border-top: 1px solid var(--border);
+    background: var(--bg-footer);
+}
+
+.tools-footer-inner {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    @media (max-width: 560px) {
+        padding: 1.75rem 1.25rem;
+    }
+}
+
+.tools-footer-credits {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.tools-footer-label {
+    font-family: var(--font);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.tools-footer-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tools-pill {
+    font-family: var(--font);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 0.2rem 0.7rem;
+    transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+
+    &:hover {
+        color: var(--text);
+        border-color: var(--text-muted);
+    }
+}
+
+.tools-footer-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+}
+
+.tools-footer-crafted {
+    margin-right: auto;
+}
+
+.tools-footer-links {
+    display: flex;
+    gap: 1.25rem;
+
+    a {
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color var(--dur) var(--ease);
+
+        &:hover {
+            color: var(--text);
+        }
+    }
+}
+
+.tools-footer-copy {
+    color: var(--text-muted);
+}

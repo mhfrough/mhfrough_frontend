@@ -1,0 +1,163 @@
+@use '../shared/tool-controls';
+
+.img {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.img-drop {
+    position: relative;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+
+    &.over {
+        border-color: var(--text-muted);
+        background: var(--surface-hover);
+    }
+}
+
+.img-drop-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.img-drop-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 2.5rem 1.25rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    pointer-events: none;
+
+    i {
+        font-size: 1.8rem;
+        color: var(--text-muted);
+    }
+
+    strong {
+        color: var(--text);
+        font-weight: 600;
+    }
+}
+
+.img-control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.img-range {
+    width: 100%;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.img-card {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    padding: 1rem;
+}
+
+.img-card--single {
+    max-width: 420px;
+}
+
+.img-preview {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+    object-fit: contain;
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+}
+
+.img-meta {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    word-break: break-all;
+}
+
+// --- Palette swatches --------------------------------------------------------
+.pal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+}
+
+.pal-swatch {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 110px;
+    padding: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font);
+    transition: transform var(--dur) var(--ease);
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
+
+.pal-hex {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+
+    i {
+        font-size: 0.8rem;
+    }
+}
+
+.pal-bar-track {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 4px;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+
+    // Faint full-width groove drawn from the readable text color, kept low
+    // via a pseudo-element so it does NOT cascade opacity onto the fill.
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: currentColor;
+        opacity: 0.25;
+    }
+}
+
+.pal-bar-fill {
+    position: relative;
+    display: block;
+    height: 100%;
+    background: currentColor;
+    border-radius: var(--radius-pill);
+}

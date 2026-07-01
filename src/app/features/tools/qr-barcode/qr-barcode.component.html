@@ -1,0 +1,120 @@
+<app-tool-page title="QR / Barcode Generator" icon="bi-qr-code"
+    [loading]="loading()" [error]="error()"
+    blurb="Generate customisable QR codes and barcodes for any payload, then download as PNG or SVG.">
+
+    <div class="qb">
+        <!-- Mode toggle -->
+        <div class="t-tabs" role="tablist" aria-label="Code type">
+            <button type="button" class="t-tab" [class.active]="mode() === 'qr'" (click)="setMode('qr')">QR Code</button>
+            <button type="button" class="t-tab" [class.active]="mode() === 'barcode'" (click)="setMode('barcode')">Barcode</button>
+        </div>
+
+        <!-- Payload -->
+        <div>
+            <label class="t-label" for="qbText">{{ mode() === 'qr' ? 'Text or URL' : 'Barcode value' }}</label>
+            <input id="qbText" class="t-field" type="text" spellcheck="false"
+                placeholder="Enter text…" [ngModel]="text()" (ngModelChange)="text.set($event)" />
+        </div>
+
+        <!-- QR options -->
+        @if (mode() === 'qr') {
+        <div class="qb-opts">
+            <div class="qb-opt">
+                <label class="t-label" for="qbSize">Size (px)</label>
+                <input id="qbSize" class="t-field" type="number" min="64" max="1024" step="16"
+                    [ngModel]="size()" (ngModelChange)="size.set(+$event)" />
+            </div>
+            <div class="qb-opt">
+                <label class="t-label" for="qbMargin">Margin</label>
+                <input id="qbMargin" class="t-field" type="number" min="0" max="10"
+                    [ngModel]="margin()" (ngModelChange)="margin.set(+$event)" />
+            </div>
+            <div class="qb-opt">
+                <label class="t-label" for="qbEc">Error correction</label>
+                <select id="qbEc" class="t-field" [ngModel]="ecLevel()" (ngModelChange)="ecLevel.set($event)">
+                    <option value="L">L — Low</option>
+                    <option value="M">M — Medium</option>
+                    <option value="Q">Q — Quartile</option>
+                    <option value="H">H — High</option>
+                </select>
+            </div>
+            <div class="qb-opt">
+                <label class="t-label" for="qbFmt">Format</label>
+                <select id="qbFmt" class="t-field" [ngModel]="format()" (ngModelChange)="format.set($event)">
+                    <option value="png">PNG</option>
+                    <option value="svg">SVG</option>
+                </select>
+            </div>
+            <div class="qb-opt">
+                <label class="t-label" for="qbDark">Foreground</label>
+                <input id="qbDark" class="qb-color" type="color"
+                    [ngModel]="dark()" (ngModelChange)="dark.set($event)" />
+            </div>
+            <div class="qb-opt">
+                <label class="t-label" for="qbLight">Background</label>
+                <input id="qbLight" class="qb-color" type="color"
+                    [ngModel]="light()" (ngModelChange)="light.set($event)" />
+            </div>
+        </div>
+        }
+
+        <!-- Barcode options -->
+        @if (mode() === 'barcode') {
+        <div class="qb-opts">
+            <div class="qb-opt">
+                <label class="t-label" for="qbType">Symbology</label>
+                <select id="qbType" class="t-field" [ngModel]="barcodeType()" (ngModelChange)="barcodeType.set($event)">
+                    @for (t of barcodeTypes; track t.id) {
+                    <option [value]="t.id">{{ t.label }}</option>
+                    }
+                </select>
+            </div>
+            <div class="qb-opt">
+                <label class="t-label" for="qbScale">Scale</label>
+                <input id="qbScale" class="t-field" type="number" min="1" max="8"
+                    [ngModel]="scale()" (ngModelChange)="scale.set(+$event)" />
+            </div>
+            <div class="qb-opt">
+                <label class="t-label" for="qbHeight">Height</label>
+                <input id="qbHeight" class="t-field" type="number" min="4" max="40"
+                    [ngModel]="height()" (ngModelChange)="height.set(+$event)" />
+            </div>
+            <label class="t-check qb-opt-check">
+                <input type="checkbox" [checked]="includetext()"
+                    (change)="includetext.set($any($event.target).checked)" />
+                Show text
+            </label>
+        </div>
+        }
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="generate()" [disabled]="loading()">
+                <i class="bi bi-qr-code"></i> Generate
+            </button>
+        </div>
+
+        <!-- Output -->
+        @if (result(); as r) {
+        <div class="qb-output">
+            <div class="qb-preview">
+                @if (isSvg()) {
+                <div class="qb-svg" [innerHTML]="safeSvg()"></div>
+                } @else {
+                <img class="qb-img" [src]="r.output" alt="Generated {{ mode() }}" />
+                }
+            </div>
+            <div class="t-actions">
+                <button type="button" class="t-btn t-btn--ghost" (click)="download()">
+                    <i class="bi bi-download"></i> Download {{ isSvg() ? 'SVG' : 'PNG' }}
+                </button>
+                @if (isSvg()) {
+                <button type="button" class="t-btn t-btn--ghost" (click)="copySvg()">
+                    <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                    {{ copied() ? 'Copied' : 'Copy markup' }}
+                </button>
+                }
+            </div>
+        </div>
+        }
+    </div>
+</app-tool-page>

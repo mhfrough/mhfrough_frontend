@@ -1,0 +1,49 @@
+<app-tool-page title="REM ↔ PX" icon="bi-arrows-collapse"
+    blurb="Convert between rem and px against any root font-size. Everything runs in your browser.">
+
+    <div class="rempx">
+        <div class="rempx-root t-panel">
+            <label class="t-label" for="rootSize">Root font-size (px)</label>
+            <input id="rootSize" class="t-field" type="number" min="1" step="1"
+                [ngModel]="rootSize()" (ngModelChange)="rootSize.set($event)" />
+        </div>
+
+        <div class="t-grid-2">
+            <!-- rem → px -->
+            <div class="t-panel">
+                <label class="t-label" for="remIn">rem → px</label>
+                <input id="remIn" class="t-field" type="number" step="any"
+                    [ngModel]="remValue()" (ngModelChange)="remValue.set($event)"
+                    (change)="convert()" />
+                <div class="t-result rempx-out">
+                    <div>
+                        <p class="t-result-label">Result</p>
+                        <span class="t-result-value">{{ remToPx() }}<small>px</small></span>
+                    </div>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copy('px')">
+                        <i class="bi" [class]="copied() === 'px' ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() === 'px' ? 'Copied' : 'Copy' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- px → rem -->
+            <div class="t-panel">
+                <label class="t-label" for="pxIn">px → rem</label>
+                <input id="pxIn" class="t-field" type="number" step="any"
+                    [ngModel]="pxValue()" (ngModelChange)="pxValue.set($event)"
+                    (change)="convert()" />
+                <div class="t-result rempx-out">
+                    <div>
+                        <p class="t-result-label">Result</p>
+                        <span class="t-result-value">{{ pxToRem() }}<small>rem</small></span>
+                    </div>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copy('rem')">
+                        <i class="bi" [class]="copied() === 'rem' ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() === 'rem' ? 'Copied' : 'Copy' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-tool-page>

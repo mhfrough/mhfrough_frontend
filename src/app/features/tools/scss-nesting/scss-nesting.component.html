@@ -1,0 +1,43 @@
+<app-tool-page title="CSS → Nested SCSS" icon="bi-diagram-3"
+    [loading]="loading()" [error]="error()"
+    blurb="Convert flat CSS with repeated selectors into clean, nested SCSS.">
+
+    <div class="nest">
+        <!-- Input -->
+        <div>
+            <label class="t-label" for="nestInput">Flat CSS</label>
+            <textarea id="nestInput" class="t-textarea" spellcheck="false"
+                placeholder="Paste your flat CSS here…"
+                [ngModel]="code()" (ngModelChange)="code.set($event)"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="nest()" [disabled]="loading()">
+                <i class="bi bi-diagram-3"></i> Nest
+            </button>
+        </div>
+
+        <!-- Output -->
+        @if (output(); as out) {
+        <div class="nest-output">
+            <div class="nest-output-head">
+                <label class="t-label" for="nestOutput">Nested SCSS
+                    @if (durationMs() !== null) {
+                    <span class="nest-time">· {{ durationMs() }} ms</span>
+                    }
+                </label>
+                <div class="t-actions">
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copyOutput()">
+                        <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() ? 'Copied' : 'Copy' }}
+                    </button>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="downloadOutput()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                </div>
+            </div>
+            <textarea id="nestOutput" class="t-textarea" readonly spellcheck="false" [value]="out"></textarea>
+        </div>
+        }
+    </div>
+</app-tool-page>

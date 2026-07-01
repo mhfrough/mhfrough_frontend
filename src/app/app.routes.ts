@@ -131,6 +131,115 @@ export const routes: Routes = [
         ],
     },
 
+    // --- Public dev-tools (own layout/chrome, before the catch-all '') --------
+    {
+        path: 'tools',
+        loadComponent: () => import('./features/tools/layout/tools-layout.component').then(m => m.ToolsLayoutComponent),
+        children: [
+            {
+                path: '',
+                loadComponent: () => import('./features/tools/landing/tools-landing.component').then(m => m.ToolsLandingComponent),
+            },
+            {
+                path: 'rem-px',
+                loadComponent: () => import('./features/tools/rem-px/rem-px.component').then(m => m.RemPxComponent),
+            },
+            {
+                path: 'css-units',
+                loadComponent: () => import('./features/tools/unit-converter/unit-converter.component').then(m => m.UnitConverterComponent),
+            },
+            {
+                path: 'minify',
+                loadComponent: () => import('./features/tools/minify/minify.component').then(m => m.MinifyComponent),
+            },
+            {
+                path: 'css-scss',
+                loadComponent: () => import('./features/tools/css-scss/css-scss.component').then(m => m.CssScssComponent),
+            },
+            {
+                path: 'scss-nesting',
+                loadComponent: () => import('./features/tools/scss-nesting/scss-nesting.component').then(m => m.ScssNestingComponent),
+            },
+            {
+                path: 'image-compress',
+                loadComponent: () => import('./features/tools/image-compress/image-compress.component').then(m => m.ImageCompressComponent),
+            },
+            {
+                path: 'image-format',
+                loadComponent: () => import('./features/tools/image-format/image-format.component').then(m => m.ImageFormatComponent),
+            },
+            {
+                path: 'image-webp',
+                loadComponent: () => import('./features/tools/image-webp/image-webp.component').then(m => m.ImageWebpComponent),
+            },
+            {
+                path: 'image-upscale',
+                loadComponent: () => import('./features/tools/image-upscale/image-upscale.component').then(m => m.ImageUpscaleComponent),
+            },
+            {
+                path: 'image-palette',
+                loadComponent: () => import('./features/tools/image-palette/image-palette.component').then(m => m.ImagePaletteComponent),
+            },
+            {
+                path: 'favicon',
+                loadComponent: () => import('./features/tools/favicon-ico/favicon-ico.component').then(m => m.FaviconIcoComponent),
+            },
+            {
+                path: 'text-image',
+                loadComponent: () => import('./features/tools/text-image/text-image.component').then(m => m.TextImageComponent),
+            },
+            {
+                path: 'code-image',
+                loadComponent: () => import('./features/tools/code-image/code-image.component').then(m => m.CodeImageComponent),
+            },
+            {
+                path: 'whatsapp-format',
+                loadComponent: () => import('./features/tools/whatsapp-format/whatsapp-format.component').then(m => m.WhatsappFormatComponent),
+            },
+            {
+                path: 'palette-generator',
+                loadComponent: () => import('./features/tools/palette-generator/palette-generator.component').then(m => m.PaletteGeneratorComponent),
+            },
+            {
+                path: 'design-extractor',
+                loadComponent: () => import('./features/tools/design-extractor/design-extractor.component').then(m => m.DesignExtractorComponent),
+            },
+            {
+                path: 'seo-tools',
+                loadComponent: () => import('./features/tools/seo-tools/seo-tools.component').then(m => m.SeoToolsComponent),
+            },
+            {
+                path: 'sitemap',
+                loadComponent: () => import('./features/tools/sitemap-gen/sitemap-gen.component').then(m => m.SitemapGenComponent),
+            },
+            {
+                path: 'robots-txt',
+                loadComponent: () => import('./features/tools/robots-gen/robots-gen.component').then(m => m.RobotsGenComponent),
+            },
+            {
+                path: 'qr-barcode',
+                loadComponent: () => import('./features/tools/qr-barcode/qr-barcode.component').then(m => m.QrBarcodeComponent),
+            },
+            {
+                path: 'password-gen',
+                loadComponent: () => import('./features/tools/password-gen/password-gen.component').then(m => m.PasswordGenComponent),
+            },
+            {
+                path: 'url-codec',
+                loadComponent: () => import('./features/tools/url-codec/url-codec.component').then(m => m.UrlCodecComponent),
+            },
+            {
+                path: 'base64-codec',
+                loadComponent: () => import('./features/tools/base64-codec/base64-codec.component').then(m => m.Base64CodecComponent),
+            },
+            {
+                path: 'jwt-codec',
+                loadComponent: () => import('./features/tools/jwt-codec/jwt-codec.component').then(m => m.JwtCodecComponent),
+            },
+            { path: '**', redirectTo: '' },
+        ],
+    },
+
     // --- Main site (wrapped in MainLayoutComponent) ---------------------------
     // '' prefix matches everything not already matched above.
     // The '**' child ensures unknown public URLs show the 404 page inside the layout.

@@ -1,0 +1,65 @@
+@use '../shared/tool-controls';
+
+.rb {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.rb-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rb-group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    .t-label {
+        margin: 0;
+    }
+}
+
+.rb-remove {
+    color: var(--danger-text);
+
+    i {
+        font-size: 0.8rem;
+    }
+}
+
+.rb-field {
+    min-width: 0;
+}
+
+.rb-field--sm {
+    max-width: 220px;
+}
+
+.rb-paths {
+    min-height: 120px;
+    white-space: pre;
+}
+
+.rb-output {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.rb-output-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .t-label {
+        margin: 0;
+    }
+}

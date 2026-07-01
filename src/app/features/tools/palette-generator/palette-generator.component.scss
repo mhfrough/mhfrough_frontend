@@ -1,0 +1,93 @@
+@use '../shared/tool-controls';
+
+.pal {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.pal-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem 1.25rem;
+}
+
+.pal-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+
+    &--count {
+        min-width: 100px;
+        max-width: 120px;
+    }
+}
+
+.pal-base {
+    display: flex;
+    align-items: stretch;
+    gap: 0.6rem;
+}
+
+.pal-swatch-input {
+    width: 48px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.pal-hex {
+    flex: 1;
+    min-width: 0;
+}
+
+.pal-output {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.pal-swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+}
+
+.pal-swatch {
+    position: relative;
+    height: 110px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transition: transform var(--dur) var(--ease);
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
+
+.pal-swatch-hex {
+    width: 100%;
+    text-align: center;
+    font-family: var(--font);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 0.4rem 0.25rem;
+
+    i {
+        color: var(--success-text);
+    }
+}

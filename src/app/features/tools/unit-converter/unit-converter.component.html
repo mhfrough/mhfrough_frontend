@@ -1,0 +1,57 @@
+<app-tool-page title="CSS Unit Converter" icon="bi-rulers"
+    blurb="Convert between px, rem, em, pt, %, vw and vh. Set the base font-size and viewport for accurate relative units. Runs in your browser.">
+
+    <div class="uc">
+        <!-- Input -->
+        <div class="t-panel">
+            <div class="uc-input-row">
+                <div class="uc-amount">
+                    <label class="t-label" for="amount">Value</label>
+                    <input id="amount" class="t-field" type="number" step="any"
+                        [ngModel]="amount()" (ngModelChange)="amount.set($event)" (change)="convert()" />
+                </div>
+                <div class="uc-from">
+                    <label class="t-label" for="fromUnit">From unit</label>
+                    <select id="fromUnit" class="t-field" [ngModel]="fromUnit()"
+                        (ngModelChange)="fromUnit.set($event)" (change)="convert()">
+                        @for (u of units; track u) {
+                        <option [value]="u">{{ u }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Context -->
+        <div class="t-panel">
+            <p class="t-label">Context</p>
+            <div class="uc-context">
+                <div>
+                    <label class="t-label uc-sub" for="base">Base font-size (px)</label>
+                    <input id="base" class="t-field" type="number" min="1"
+                        [ngModel]="baseFontSize()" (ngModelChange)="baseFontSize.set($event)" />
+                </div>
+                <div>
+                    <label class="t-label uc-sub" for="vw">Viewport width (px)</label>
+                    <input id="vw" class="t-field" type="number" min="1"
+                        [ngModel]="viewportW()" (ngModelChange)="viewportW.set($event)" />
+                </div>
+                <div>
+                    <label class="t-label uc-sub" for="vh">Viewport height (px)</label>
+                    <input id="vh" class="t-field" type="number" min="1"
+                        [ngModel]="viewportH()" (ngModelChange)="viewportH.set($event)" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="uc-results">
+            @for (row of results(); track row.unit) {
+            <div class="uc-result-card" [class.is-source]="row.unit === fromUnit()">
+                <span class="uc-result-unit">{{ row.unit }}</span>
+                <span class="uc-result-value">{{ row.value }}</span>
+            </div>
+            }
+        </div>
+    </div>
+</app-tool-page>

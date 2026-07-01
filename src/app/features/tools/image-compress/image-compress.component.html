@@ -1,0 +1,76 @@
+<app-tool-page title="Image Compressor" icon="bi-file-earmark-zip"
+    [loading]="loading()" [error]="error()"
+    blurb="Shrink JPEG, PNG, WebP and AVIF files. Pick a quality level and see exactly how many bytes you save.">
+
+    <div class="img">
+        <!-- Upload zone -->
+        <div class="img-drop" [class.over]="dragOver()"
+            (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+            <input type="file" id="cmpFile" class="img-drop-input" accept="image/*" (change)="onFileInput($event)" />
+            <label for="cmpFile" class="img-drop-label">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span>Drop an image here or <strong>browse</strong></span>
+            </label>
+        </div>
+
+        <!-- Quality control -->
+        <div class="img-control">
+            <label class="t-label" for="cmpQuality">Quality — {{ quality() }}</label>
+            <input type="range" id="cmpQuality" class="img-range" min="1" max="100" step="1"
+                [ngModel]="quality()" (ngModelChange)="quality.set(+$event)" />
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="run()" [disabled]="loading() || !file()">
+                <i class="bi bi-file-earmark-zip"></i> Compress
+            </button>
+        </div>
+
+        <!-- Previews -->
+        @if (previewUrl(); as src) {
+        <div class="img-grid">
+            <figure class="img-card">
+                <figcaption class="t-label">Original</figcaption>
+                <img class="img-preview" [src]="src" alt="Original image preview" />
+                @if (file(); as f) {
+                <p class="img-meta">{{ formatBytes(f.size) }}</p>
+                }
+            </figure>
+
+            @if (result(); as res) {
+            <figure class="img-card">
+                <figcaption class="t-label">Compressed</figcaption>
+                <img class="img-preview" [src]="res.output" alt="Compressed image preview" />
+                <p class="img-meta">{{ res.format | uppercase }} · {{ formatBytes(res.bytesOut) }}
+                    · {{ res.width }}×{{ res.height }}</p>
+            </figure>
+            }
+        </div>
+        }
+
+        <!-- Stats -->
+        @if (result(); as res) {
+        <div class="t-result">
+            <div class="t-stats">
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ formatBytes(res.bytesIn) }}</span>
+                    <span class="t-stat-label">Before</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ formatBytes(res.bytesOut) }}</span>
+                    <span class="t-stat-label">After</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num t-stat-num--good">{{ res.savedPct }}%</span>
+                    <span class="t-stat-label">Saved ({{ formatBytes(res.savedBytes) }})</span>
+                </div>
+            </div>
+            <div class="t-actions img-result-actions">
+                <button type="button" class="t-btn" (click)="download()">
+                    <i class="bi bi-download"></i> Download
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+</app-tool-page>

@@ -1,0 +1,87 @@
+<app-tool-page title="robots.txt Generator" icon="bi-robot"
+    blurb="Compose robots.txt rules with allow, disallow, crawl-delay and sitemaps. Everything runs in your browser.">
+
+    <div class="rb">
+        <!-- Groups -->
+        @for (group of groups(); track $index) {
+        <div class="t-panel rb-group">
+            <div class="rb-group-head">
+                <label class="t-label">Group {{ $index + 1 }}</label>
+                @if (groups().length > 1) {
+                <button type="button" class="t-btn t-btn--ghost rb-remove" (click)="removeGroup($index)">
+                    <i class="bi bi-trash"></i> Remove
+                </button>
+                }
+            </div>
+
+            <div class="rb-field">
+                <label class="t-label" [attr.for]="'rbUa' + $index">User-agent</label>
+                <input [id]="'rbUa' + $index" class="t-field" type="text" spellcheck="false"
+                    placeholder="*"
+                    [ngModel]="group.userAgent" (ngModelChange)="updateGroup($index, 'userAgent', $event)" />
+            </div>
+
+            <div class="t-grid-2">
+                <div class="rb-field">
+                    <label class="t-label" [attr.for]="'rbAllow' + $index">Allow (one path per line)</label>
+                    <textarea [id]="'rbAllow' + $index" class="t-textarea rb-paths" spellcheck="false"
+                        placeholder="/public/"
+                        [ngModel]="group.allow" (ngModelChange)="updateGroup($index, 'allow', $event)"></textarea>
+                </div>
+                <div class="rb-field">
+                    <label class="t-label" [attr.for]="'rbDisallow' + $index">Disallow (one path per line)</label>
+                    <textarea [id]="'rbDisallow' + $index" class="t-textarea rb-paths" spellcheck="false"
+                        placeholder="/admin/&#10;/private/"
+                        [ngModel]="group.disallow" (ngModelChange)="updateGroup($index, 'disallow', $event)"></textarea>
+                </div>
+            </div>
+
+            <div class="rb-field rb-field--sm">
+                <label class="t-label" [attr.for]="'rbDelay' + $index">Crawl-delay (optional)</label>
+                <input [id]="'rbDelay' + $index" class="t-field" type="number" min="0" step="1"
+                    placeholder="e.g. 10"
+                    [ngModel]="group.crawlDelay" (ngModelChange)="updateGroup($index, 'crawlDelay', $event)" />
+            </div>
+        </div>
+        }
+
+        <div class="t-actions">
+            <button type="button" class="t-btn t-btn--ghost" (click)="addGroup()">
+                <i class="bi bi-plus-lg"></i> Add group
+            </button>
+        </div>
+
+        <!-- Sitemaps -->
+        <div>
+            <label class="t-label" for="rbSitemaps">Sitemap URL(s) — one per line</label>
+            <textarea id="rbSitemaps" class="t-textarea rb-paths" spellcheck="false"
+                placeholder="https://example.com/sitemap.xml"
+                [ngModel]="sitemaps()" (ngModelChange)="sitemaps.set($event)"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="generate()" [disabled]="!output()">
+                <i class="bi bi-robot"></i> Generate
+            </button>
+        </div>
+
+        <!-- Output -->
+        @if (output(); as out) {
+        <div class="rb-output">
+            <div class="rb-output-head">
+                <label class="t-label" for="rbOut">robots.txt</label>
+                <div class="t-actions">
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copyOutput()">
+                        <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() ? 'Copied' : 'Copy' }}
+                    </button>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="downloadOutput()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                </div>
+            </div>
+            <textarea id="rbOut" class="t-textarea" readonly spellcheck="false" [value]="out"></textarea>
+        </div>
+        }
+    </div>
+</app-tool-page>

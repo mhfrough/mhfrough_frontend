@@ -1,0 +1,61 @@
+<app-tool-page title="Palette Generator" icon="bi-palette"
+    [loading]="loading()" [error]="error()"
+    blurb="Generate a harmonious palette from any base colour. Pick a scheme, choose how many swatches, then click a swatch to copy its hex.">
+
+    <div class="pal">
+        <div class="pal-controls">
+            <!-- Base colour -->
+            <div class="pal-field">
+                <label class="t-label" for="palBase">Base colour</label>
+                <div class="pal-base">
+                    <input id="palBase" type="color" class="pal-swatch-input"
+                        [value]="pickerValue" (input)="setBaseFromPicker($any($event.target).value)" />
+                    <input type="text" class="t-field pal-hex" spellcheck="false" autocomplete="off"
+                        placeholder="#6366f1" [ngModel]="base()" (ngModelChange)="setBaseFromText($event)" />
+                </div>
+            </div>
+
+            <!-- Scheme -->
+            <div class="pal-field">
+                <label class="t-label" for="palScheme">Scheme</label>
+                <select id="palScheme" class="t-field" [ngModel]="scheme()" (ngModelChange)="scheme.set($event)">
+                    @for (opt of schemes; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Count -->
+            <div class="pal-field pal-field--count">
+                <label class="t-label" for="palCount">Count</label>
+                <input id="palCount" type="number" class="t-field" min="3" max="10" step="1"
+                    [ngModel]="count()" (ngModelChange)="setCount($event)" />
+            </div>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="generate()" [disabled]="loading()">
+                <i class="bi bi-shuffle"></i> Generate
+            </button>
+        </div>
+
+        @if (colors(); as cols) {
+        <div class="pal-output">
+            <div class="pal-swatches">
+                @for (hex of cols; track $index) {
+                <button type="button" class="pal-swatch" [style.background]="hex"
+                    [title]="'Copy ' + hex" (click)="copyHex(hex)">
+                    <span class="pal-swatch-hex">
+                        @if (copiedHex() === hex) {
+                        <i class="bi bi-check2"></i> Copied
+                        } @else {
+                        {{ hex }}
+                        }
+                    </span>
+                </button>
+                }
+            </div>
+        </div>
+        }
+    </div>
+</app-tool-page>

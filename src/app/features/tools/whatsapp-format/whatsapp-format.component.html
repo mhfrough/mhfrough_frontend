@@ -1,0 +1,50 @@
+<app-tool-page title="WhatsApp Text Formatter" icon="bi-whatsapp"
+    blurb="Add bold, italic, strikethrough and monospace to WhatsApp messages. Everything runs in your browser.">
+
+    <div class="wa">
+        <!-- Toolbar -->
+        <div class="wa-toolbar" role="toolbar" aria-label="Formatting">
+            <button type="button" class="t-btn t-btn--ghost wa-tool" (click)="apply('*')" title="Bold">
+                <i class="bi bi-type-bold"></i> Bold
+            </button>
+            <button type="button" class="t-btn t-btn--ghost wa-tool" (click)="apply('_')" title="Italic">
+                <i class="bi bi-type-italic"></i> Italic
+            </button>
+            <button type="button" class="t-btn t-btn--ghost wa-tool" (click)="apply('~')" title="Strikethrough">
+                <i class="bi bi-type-strikethrough"></i> Strike
+            </button>
+            <button type="button" class="t-btn t-btn--ghost wa-tool" (click)="apply('```')" title="Monospace">
+                <i class="bi bi-code"></i> Mono
+            </button>
+        </div>
+
+        <div class="t-grid-2">
+            <!-- Editor -->
+            <div>
+                <label class="t-label" for="waInput">Message</label>
+                <textarea #editor id="waInput" class="t-textarea wa-input" spellcheck="false"
+                    placeholder="Type your message, select text, then tap a format button…"
+                    [ngModel]="text()" (ngModelChange)="text.set($event)"></textarea>
+            </div>
+
+            <!-- Preview -->
+            <div>
+                <label class="t-label">Preview</label>
+                <div class="wa-preview">
+                    @if (text()) {
+                    <div class="wa-bubble" [innerHTML]="previewHtml()"></div>
+                    } @else {
+                    <p class="wa-empty">Your formatted message will appear here.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="copyFormatted()" [disabled]="!text()">
+                <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                {{ copied() ? 'Copied' : 'Copy formatted text' }}
+            </button>
+        </div>
+    </div>
+</app-tool-page>

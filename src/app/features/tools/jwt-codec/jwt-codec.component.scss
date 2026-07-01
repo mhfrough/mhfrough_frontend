@@ -1,0 +1,96 @@
+@use '../shared/tool-controls';
+
+.jwt {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.jwt-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.jwt-token {
+    min-height: 120px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.jwt-json {
+    min-height: 180px;
+}
+
+.jwt-field {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.jwt-field--sm {
+    flex: 0 1 160px;
+}
+
+.jwt-decoded {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.jwt-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(var(--danger-text-rgb), 0.4);
+    border-radius: var(--radius);
+    background: var(--danger-soft);
+    font-family: var(--font);
+    font-size: 0.82rem;
+    color: var(--danger-text);
+
+    i {
+        flex-shrink: 0;
+    }
+}
+
+.jwt-note {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font);
+    font-size: 0.78rem;
+    color: var(--warn-text);
+    margin: 0;
+
+    strong {
+        font-weight: 700;
+    }
+}
+
+.jwt-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.jwt-meta-time {
+    font-family: var(--font);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.jwt-output-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .t-label {
+        margin: 0 0 0.5rem;
+    }
+}

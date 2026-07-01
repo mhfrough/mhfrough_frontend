@@ -1,0 +1,59 @@
+<app-tool-page title="CSS ↔ SCSS" icon="bi-filetype-scss"
+    [loading]="loading()" [error]="error()"
+    blurb="Convert between plain CSS and SCSS in either direction. Optionally minify the result.">
+
+    <div class="cs">
+        <div class="cs-controls">
+            <!-- Direction toggle -->
+            <div class="t-tabs" role="tablist" aria-label="Direction">
+                <button type="button" class="t-tab" [class.active]="direction() === 'css-to-scss'"
+                    (click)="setDirection('css-to-scss')">CSS → SCSS</button>
+                <button type="button" class="t-tab" [class.active]="direction() === 'scss-to-css'"
+                    (click)="setDirection('scss-to-css')">SCSS → CSS</button>
+            </div>
+
+            <label class="t-check">
+                <input type="checkbox" [checked]="minifyOutput()"
+                    (change)="minifyOutput.set($any($event.target).checked)" />
+                Minify output
+            </label>
+        </div>
+
+        <!-- Input -->
+        <div>
+            <label class="t-label" for="csInput">{{ from() | uppercase }} input</label>
+            <textarea id="csInput" class="t-textarea" spellcheck="false"
+                placeholder="Paste your {{ from() | uppercase }} here…"
+                [ngModel]="code()" (ngModelChange)="code.set($event)"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="convert()" [disabled]="loading()">
+                <i class="bi bi-arrow-left-right"></i> Convert
+            </button>
+        </div>
+
+        <!-- Output -->
+        @if (output(); as out) {
+        <div class="cs-output">
+            <div class="cs-output-head">
+                <label class="t-label" for="csOutput">{{ to() | uppercase }} output
+                    @if (durationMs() !== null) {
+                    <span class="cs-time">· {{ durationMs() }} ms</span>
+                    }
+                </label>
+                <div class="t-actions">
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copyOutput()">
+                        <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() ? 'Copied' : 'Copy' }}
+                    </button>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="downloadOutput()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                </div>
+            </div>
+            <textarea id="csOutput" class="t-textarea" readonly spellcheck="false" [value]="out"></textarea>
+        </div>
+        }
+    </div>
+</app-tool-page>

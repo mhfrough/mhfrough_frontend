@@ -1,0 +1,68 @@
+<!-- ─── Tools Header (distinct chrome) ─────────────────────────────────────── -->
+<header class="tools-header">
+    <nav class="tools-nav">
+        <a class="tools-wordmark" routerLink="/tools">
+            MHFrough<span class="tools-tag">/ tools</span>
+        </a>
+
+        <!-- Tools dropdown -->
+        <div class="tools-dropdown" [class.open]="menuOpen()">
+            <button type="button" class="tools-dropdown-trigger" (click)="toggleMenu($event)"
+                [attr.aria-expanded]="menuOpen()" aria-haspopup="true">
+                <i class="bi bi-grid"></i>
+                <span>Tools</span>
+                <i class="bi bi-chevron-down chev"></i>
+            </button>
+
+            @if (menuOpen()) {
+            <div class="tools-dropdown-menu" (click)="$event.stopPropagation()">
+                @for (tool of tools; track tool.id) {
+                @if (tool.status === 'live') {
+                <a class="tools-dropdown-item" [routerLink]="['/tools', tool.slug]" routerLinkActive="active"
+                    (click)="menuOpen.set(false)">
+                    <i class="bi" [class]="tool.icon"></i>
+                    <span class="tdi-name">{{ tool.name }}</span>
+                </a>
+                } @else {
+                <span class="tools-dropdown-item is-soon" aria-disabled="true">
+                    <i class="bi" [class]="tool.icon"></i>
+                    <span class="tdi-name">{{ tool.name }}</span>
+                    <span class="tdi-soon">soon</span>
+                </span>
+                }
+                }
+            </div>
+            }
+        </div>
+
+        <a class="tools-back" routerLink="/">← Back to site</a>
+    </nav>
+</header>
+
+<!-- ─── Page Content ───────────────────────────────────────────────────────── -->
+<main class="tools-main">
+    <router-outlet />
+</main>
+
+<!-- ─── Tools Footer (credits) ─────────────────────────────────────────────── -->
+<footer class="tools-footer">
+    <div class="tools-footer-inner">
+        <div class="tools-footer-credits">
+            <span class="tools-footer-label">Built with</span>
+            <div class="tools-footer-pills">
+                @for (pkg of builtWith; track pkg.label) {
+                <a class="tools-pill" [href]="pkg.href" target="_blank" rel="noopener">{{ pkg.label }}</a>
+                }
+            </div>
+        </div>
+
+        <div class="tools-footer-meta">
+            <span class="tools-footer-crafted">Crafted by Mohammad Hamza</span>
+            <nav class="tools-footer-links" aria-label="Tools footer">
+                <a routerLink="/">Home</a>
+                <a routerLink="/brand">Brand</a>
+            </nav>
+            <span class="tools-footer-copy">© {{ year }}</span>
+        </div>
+    </div>
+</footer>

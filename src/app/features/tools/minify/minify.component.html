@@ -1,0 +1,80 @@
+<app-tool-page title="HTML / CSS / JS Minifier" icon="bi-file-zip"
+    [loading]="loading()" [error]="error()"
+    blurb="Strip whitespace and comments to shrink your code. Paste, pick a language, minify, and see the bytes saved.">
+
+    <div class="min">
+        <!-- Language tabs -->
+        <div class="t-tabs" role="tablist" aria-label="Language">
+            <button type="button" class="t-tab" [class.active]="language() === 'html'"
+                (click)="setLanguage('html')">HTML</button>
+            <button type="button" class="t-tab" [class.active]="language() === 'css'"
+                (click)="setLanguage('css')">CSS</button>
+            <button type="button" class="t-tab" [class.active]="language() === 'js'"
+                (click)="setLanguage('js')">JS</button>
+        </div>
+
+        <!-- Options -->
+        <div class="min-options">
+            @for (opt of currentOptions(); track opt.key) {
+            <label class="t-check">
+                <input type="checkbox" [checked]="!!options()[opt.key]"
+                    (change)="toggleOption(opt.key, $any($event.target).checked)" />
+                {{ opt.label }}
+            </label>
+            }
+        </div>
+
+        <!-- Input -->
+        <div>
+            <label class="t-label" for="minInput">Input</label>
+            <textarea id="minInput" class="t-textarea" spellcheck="false"
+                placeholder="Paste your {{ language() | uppercase }} here…"
+                [ngModel]="code()" (ngModelChange)="code.set($event)"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="minify()" [disabled]="loading()">
+                <i class="bi bi-file-zip"></i> Minify
+            </button>
+        </div>
+
+        <!-- Output -->
+        @if (result(); as res) {
+        <div class="min-output">
+            <div class="t-stats">
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ res.bytesIn }} B</span>
+                    <span class="t-stat-label">Before</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ res.bytesOut }} B</span>
+                    <span class="t-stat-label">After</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num t-stat-num--good">−{{ res.savedPct }}%</span>
+                    <span class="t-stat-label">Saved ({{ res.savedBytes }} B)</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ res.durationMs }} ms</span>
+                    <span class="t-stat-label">Time</span>
+                </div>
+            </div>
+
+            <div class="min-output-head">
+                <label class="t-label" for="minOutput">Output</label>
+                <div class="t-actions">
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copyOutput()">
+                        <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() ? 'Copied' : 'Copy' }}
+                    </button>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="downloadOutput()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                </div>
+            </div>
+            <textarea id="minOutput" class="t-textarea" readonly spellcheck="false"
+                [value]="res.output"></textarea>
+        </div>
+        }
+    </div>
+</app-tool-page>

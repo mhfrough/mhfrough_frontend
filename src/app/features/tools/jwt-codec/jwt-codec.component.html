@@ -1,0 +1,143 @@
+<app-tool-page title="JWT Encoder / Decoder" icon="bi-shield-lock"
+    [loading]="loading()" [error]="tab() === 'encode' ? encodeError() : null"
+    blurb="Decode and inspect JSON Web Tokens in your browser, or sign a new token on the server.">
+
+    <div class="jwt">
+        <!-- Tabs -->
+        <div class="t-tabs" role="tablist" aria-label="Mode">
+            <button type="button" class="t-tab" [class.active]="tab() === 'decode'"
+                (click)="setTab('decode')">Decode</button>
+            <button type="button" class="t-tab" [class.active]="tab() === 'encode'"
+                (click)="setTab('encode')">Encode</button>
+        </div>
+
+        <!-- ============ DECODE ============ -->
+        @if (tab() === 'decode') {
+        <div class="jwt-pane">
+            <div>
+                <label class="t-label" for="jwtToken">Token</label>
+                <textarea id="jwtToken" class="t-textarea jwt-token" spellcheck="false"
+                    placeholder="Paste a JWT (header.payload.signature)…"
+                    [ngModel]="token()" (ngModelChange)="token.set($event)" (change)="decode()"></textarea>
+            </div>
+
+            <div class="t-actions">
+                <button type="button" class="t-btn" (click)="decode()">
+                    <i class="bi bi-box-arrow-in-down-left"></i> Decode
+                </button>
+            </div>
+
+            @if (decodeError()) {
+            <div class="jwt-alert" role="alert">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span>{{ decodeError() }}</span>
+            </div>
+            }
+
+            @if (header() || payload()) {
+            <div class="jwt-decoded">
+                <p class="jwt-note">
+                    <i class="bi bi-info-circle"></i>
+                    Signature is <strong>NOT verified</strong> — this only decodes the token contents.
+                </p>
+
+                <div class="jwt-meta">
+                    @if (alg()) {
+                    <div class="t-stat">
+                        <span class="t-stat-num">{{ alg() }}</span>
+                        <span class="t-stat-label">Algorithm</span>
+                    </div>
+                    }
+                    @if (issuedAt()) {
+                    <div class="t-stat">
+                        <span class="jwt-meta-time">{{ issuedAt() }}</span>
+                        <span class="t-stat-label">Issued (iat)</span>
+                    </div>
+                    }
+                    @if (expiresAt()) {
+                    <div class="t-stat">
+                        <span class="jwt-meta-time">{{ expiresAt() }}</span>
+                        <span class="t-stat-label">Expires (exp)</span>
+                    </div>
+                    }
+                </div>
+
+                <div class="t-grid-2">
+                    <div>
+                        <label class="t-label">Header</label>
+                        <textarea class="t-textarea jwt-json" readonly spellcheck="false"
+                            [value]="header()"></textarea>
+                    </div>
+                    <div>
+                        <div class="jwt-output-head">
+                            <label class="t-label">Payload</label>
+                            <button type="button" class="t-btn t-btn--ghost" (click)="copyDecoded()">
+                                <i class="bi" [class]="copiedDecode() ? 'bi-check2' : 'bi-clipboard'"></i>
+                                {{ copiedDecode() ? 'Copied' : 'Copy' }}
+                            </button>
+                        </div>
+                        <textarea class="t-textarea jwt-json" readonly spellcheck="false"
+                            [value]="payload()"></textarea>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        }
+
+        <!-- ============ ENCODE ============ -->
+        @if (tab() === 'encode') {
+        <div class="jwt-pane">
+            <div>
+                <label class="t-label" for="jwtPayload">Payload (JSON)</label>
+                <textarea id="jwtPayload" class="t-textarea jwt-json" spellcheck="false"
+                    placeholder='{ "sub": "123", "name": "Jane" }'
+                    [ngModel]="payloadInput()" (ngModelChange)="payloadInput.set($event)"></textarea>
+            </div>
+
+            <div class="t-row">
+                <div class="jwt-field">
+                    <label class="t-label" for="jwtSecret">Secret</label>
+                    <input id="jwtSecret" class="t-field" type="text" autocomplete="off" spellcheck="false"
+                        placeholder="your-256-bit-secret"
+                        [ngModel]="secret()" (ngModelChange)="secret.set($event)" />
+                </div>
+                <div class="jwt-field jwt-field--sm">
+                    <label class="t-label" for="jwtAlg">Algorithm</label>
+                    <select id="jwtAlg" class="t-field" [ngModel]="algorithm()"
+                        (ngModelChange)="algorithm.set($event)">
+                        @for (a of algorithms; track a) {
+                        <option [value]="a">{{ a }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="jwt-field jwt-field--sm">
+                    <label class="t-label" for="jwtExp">Expires in (optional)</label>
+                    <input id="jwtExp" class="t-field" type="text" autocomplete="off" spellcheck="false"
+                        placeholder="e.g. 1h, 7d"
+                        [ngModel]="expiresIn()" (ngModelChange)="expiresIn.set($event)" />
+                </div>
+            </div>
+
+            <div class="t-actions">
+                <button type="button" class="t-btn" (click)="encode()" [disabled]="loading()">
+                    <i class="bi bi-shield-lock"></i> Sign token
+                </button>
+            </div>
+
+            @if (resultToken(); as tok) {
+            <div class="jwt-decoded">
+                <div class="jwt-output-head">
+                    <label class="t-label">Signed token</label>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copyToken()">
+                        <i class="bi" [class]="copiedEncode() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copiedEncode() ? 'Copied' : 'Copy' }}
+                    </button>
+                </div>
+                <textarea class="t-textarea jwt-token" readonly spellcheck="false" [value]="tok"></textarea>
+            </div>
+            }
+        </div>
+        }
+    </div>
+</app-tool-page>

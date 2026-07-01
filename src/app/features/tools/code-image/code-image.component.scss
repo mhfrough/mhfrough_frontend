@@ -1,0 +1,188 @@
+@use '../shared/tool-controls';
+
+.ci {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.ci-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem;
+
+    @media (max-width: 860px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ci-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ci-code-input {
+    min-height: 200px;
+    white-space: pre;
+}
+
+.ci-color {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.ci-color-input {
+    width: 44px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.ci-preview-wrap {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.ci-preview {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-alt);
+    padding: 1rem;
+    overflow: auto;
+}
+
+// --- Code window card --------------------------------------------------------
+.ci-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    min-width: min-content;
+}
+
+.ci-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.ci-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-circle);
+    display: inline-block;
+
+    &--r {
+        background: var(--ci-dot-r);
+    }
+
+    &--y {
+        background: var(--ci-dot-y);
+    }
+
+    &--g {
+        background: var(--ci-dot-g);
+    }
+}
+
+.ci-pre {
+    margin: 0;
+    font-family: var(--font);
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre;
+    overflow: visible;
+
+    code {
+        font-family: inherit;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+}
+
+// --- hljs token colours (values supplied via host CSS vars) ------------------
+// hljs injects <span class="hljs-…"> via [innerHTML]; those elements don't get
+// the component's encapsulation attribute, so we pierce with :host ::ng-deep.
+:host ::ng-deep .ci-pre {
+    .hljs-comment,
+    .hljs-quote {
+        color: var(--ci-comment);
+    }
+
+    .hljs-keyword,
+    .hljs-selector-tag {
+        color: var(--ci-keyword);
+    }
+
+    .hljs-built_in,
+    .hljs-type,
+    .hljs-class {
+        color: var(--ci-built_in);
+    }
+
+    .hljs-literal {
+        color: var(--ci-literal);
+    }
+
+    .hljs-number,
+    .hljs-bullet {
+        color: var(--ci-number);
+    }
+
+    .hljs-string,
+    .hljs-regexp {
+        color: var(--ci-string);
+    }
+
+    .hljs-symbol {
+        color: var(--ci-symbol);
+    }
+
+    .hljs-title,
+    .hljs-function,
+    .hljs-property,
+    .hljs-attr,
+    .hljs-attribute {
+        color: var(--ci-title);
+    }
+
+    .hljs-variable,
+    .hljs-template-variable,
+    .hljs-params {
+        color: var(--ci-variable);
+    }
+
+    .hljs-tag {
+        color: var(--ci-tag);
+    }
+
+    .hljs-name {
+        color: var(--ci-name);
+    }
+
+    .hljs-meta {
+        color: var(--ci-meta);
+    }
+
+    .hljs-section {
+        color: var(--ci-section);
+    }
+
+    .hljs-deletion {
+        color: var(--ci-deletion);
+    }
+
+    .hljs-addition {
+        color: var(--ci-addition);
+    }
+}

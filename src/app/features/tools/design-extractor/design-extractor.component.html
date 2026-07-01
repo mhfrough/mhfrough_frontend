@@ -1,0 +1,81 @@
+<app-tool-page title="Design Extractor" icon="bi-eyedropper"
+    [loading]="loading()" [error]="error()"
+    blurb="Pull the colour palette, fonts and page metadata from any public website. Paste a URL and extract its design tokens.">
+
+    <div class="dx">
+        <div class="dx-controls">
+            <div class="dx-url">
+                <label class="t-label" for="dxUrl">Website URL</label>
+                <input id="dxUrl" type="url" class="t-field" spellcheck="false" autocomplete="off"
+                    placeholder="https://example.com"
+                    [ngModel]="url()" (ngModelChange)="url.set($event)"
+                    (keyup.enter)="extract()" />
+            </div>
+            <div class="t-actions">
+                <button type="button" class="t-btn" (click)="extract()" [disabled]="loading()">
+                    <i class="bi bi-eyedropper"></i> Extract
+                </button>
+            </div>
+        </div>
+
+        @if (result(); as res) {
+        <div class="dx-output">
+            <!-- Meta card -->
+            <div class="dx-meta t-panel">
+                @if (res.meta.favicon) {
+                <img class="dx-favicon" [src]="res.meta.favicon" alt="" width="40" height="40" />
+                } @else {
+                <div class="dx-favicon dx-favicon--empty"><i class="bi bi-globe"></i></div>
+                }
+                <div class="dx-meta-text">
+                    <p class="dx-meta-title">{{ res.meta.title || 'Untitled page' }}</p>
+                    @if (res.meta.description) {
+                    <p class="dx-meta-desc">{{ res.meta.description }}</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Colours -->
+            <section class="dx-section">
+                <h2 class="dx-section-title">Colours
+                    <span class="dx-count">{{ res.colors.length }}</span>
+                </h2>
+                @if (res.colors.length) {
+                <div class="dx-swatches">
+                    @for (hex of res.colors; track $index) {
+                    <button type="button" class="dx-swatch" [style.background]="hex"
+                        [title]="'Copy ' + hex" (click)="copyHex(hex)">
+                        <span class="dx-swatch-hex">
+                            @if (copiedHex() === hex) {
+                            <i class="bi bi-check2"></i>
+                            } @else {
+                            {{ hex }}
+                            }
+                        </span>
+                    </button>
+                    }
+                </div>
+                } @else {
+                <p class="dx-empty">No colours found.</p>
+                }
+            </section>
+
+            <!-- Fonts -->
+            <section class="dx-section">
+                <h2 class="dx-section-title">Fonts
+                    <span class="dx-count">{{ res.fonts.length }}</span>
+                </h2>
+                @if (res.fonts.length) {
+                <ul class="dx-fonts">
+                    @for (font of res.fonts; track $index) {
+                    <li class="dx-font" [style.font-family]="font">{{ font }}</li>
+                    }
+                </ul>
+                } @else {
+                <p class="dx-empty">No font families found.</p>
+                }
+            </section>
+        </div>
+        }
+    </div>
+</app-tool-page>

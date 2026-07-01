@@ -1,0 +1,70 @@
+<app-tool-page title="Sitemap Generator" icon="bi-diagram-2"
+    blurb="Build a valid sitemap.xml from your list of URLs. Everything runs in your browser.">
+
+    <div class="sm">
+        <!-- URLs -->
+        <div>
+            <label class="t-label" for="smUrls">URLs (one per line)</label>
+            <textarea id="smUrls" class="t-textarea" spellcheck="false"
+                placeholder="https://example.com/&#10;https://example.com/about&#10;https://example.com/blog"
+                [ngModel]="urls()" (ngModelChange)="urls.set($event)"></textarea>
+        </div>
+
+        <!-- Defaults -->
+        <div class="t-panel sm-defaults">
+            <div class="t-row">
+                <div class="sm-field">
+                    <label class="t-label" for="smFreq">Change frequency</label>
+                    <select id="smFreq" class="t-field" [ngModel]="changefreq()"
+                        (ngModelChange)="changefreq.set($event)">
+                        @for (f of changeFreqs; track f) {
+                        <option [value]="f">{{ f }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="sm-field sm-field--sm">
+                    <label class="t-label" for="smPrio">Priority: <strong>{{ priority().toFixed(1) }}</strong></label>
+                    <input id="smPrio" class="sm-range" type="range" min="0" max="1" step="0.1"
+                        [ngModel]="priority()" (ngModelChange)="priority.set($event)" />
+                </div>
+                <div class="sm-field">
+                    <label class="t-label" for="smLastmod">Last modified</label>
+                    <input id="smLastmod" class="t-field" type="date"
+                        [disabled]="!includeLastmod()"
+                        [ngModel]="lastmod()" (ngModelChange)="lastmod.set($event)" />
+                </div>
+            </div>
+            <label class="t-check">
+                <input type="checkbox" [checked]="includeLastmod()"
+                    (change)="includeLastmod.set($any($event.target).checked)" />
+                Include &lt;lastmod&gt;
+            </label>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="generate()" [disabled]="!urlCount()">
+                <i class="bi bi-diagram-2"></i> Generate
+            </button>
+            <span class="sm-count">{{ urlCount() }} URL{{ urlCount() === 1 ? '' : 's' }}</span>
+        </div>
+
+        <!-- Output -->
+        @if (output(); as out) {
+        <div class="sm-output">
+            <div class="sm-output-head">
+                <label class="t-label" for="smOut">sitemap.xml</label>
+                <div class="t-actions">
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copyOutput()">
+                        <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() ? 'Copied' : 'Copy' }}
+                    </button>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="downloadOutput()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                </div>
+            </div>
+            <textarea id="smOut" class="t-textarea" readonly spellcheck="false" [value]="out"></textarea>
+        </div>
+        }
+    </div>
+</app-tool-page>

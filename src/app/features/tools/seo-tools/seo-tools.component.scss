@@ -1,0 +1,246 @@
+@use '../shared/tool-controls';
+
+.seo {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.seo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.seo-url {
+    flex: 1;
+    min-width: 240px;
+}
+
+.seo-report {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.seo-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+}
+
+.seo-badge {
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.05rem 0.4rem;
+}
+
+// --- Title / description fields ----------------------------------------------
+.seo-field {
+    & + & {
+        margin-top: 0.75rem;
+    }
+}
+
+.seo-field-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+
+    .t-label {
+        margin: 0;
+    }
+}
+
+.seo-field-value {
+    font-family: var(--font);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0;
+    word-break: break-word;
+}
+
+.seo-count {
+    font-family: var(--font);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+
+    &--good {
+        color: var(--success-text);
+    }
+
+    &--warn {
+        color: var(--warn-text);
+    }
+}
+
+// --- Key / value -------------------------------------------------------------
+.seo-kv {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.seo-kv-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+
+    & + & {
+        border-top: 1px solid var(--border);
+    }
+
+    dt {
+        font-family: var(--font);
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        padding: 0.7rem 0.9rem;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+    }
+
+    dd {
+        font-family: var(--font);
+        font-size: 0.82rem;
+        color: var(--text);
+        margin: 0;
+        padding: 0.7rem 0.9rem;
+        word-break: break-word;
+    }
+
+    @media (max-width: 540px) {
+        grid-template-columns: 1fr;
+
+        dt {
+            border-right: none;
+            border-bottom: 1px solid var(--border);
+        }
+    }
+}
+
+// --- Tables ------------------------------------------------------------------
+.seo-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    th,
+    td {
+        text-align: left;
+        font-family: var(--font);
+        font-size: 0.82rem;
+        padding: 0.6rem 0.9rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+        word-break: break-word;
+    }
+
+    tr:last-child th,
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    th {
+        width: 140px;
+        color: var(--text-muted);
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        white-space: nowrap;
+    }
+
+    td {
+        color: var(--text);
+    }
+}
+
+// --- H1 list -----------------------------------------------------------------
+.seo-h1-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    li {
+        font-family: var(--font);
+        font-size: 0.88rem;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 0.6rem 0.9rem;
+    }
+}
+
+// --- Issues ------------------------------------------------------------------
+.seo-issues {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.seo-issue {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-family: var(--font);
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 0.6rem 0.9rem;
+
+    i {
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+
+    &--good i {
+        color: var(--success-text);
+    }
+
+    &--warn i {
+        color: var(--warn-text);
+    }
+
+    &--error i {
+        color: var(--danger-text);
+    }
+}
+
+.seo-empty {
+    font-family: var(--font);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0;
+}

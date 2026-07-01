@@ -95,6 +95,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         { label: 'Services', link: '/services', icon: 'bi-stars' },
         { label: 'Writing', link: '/blog', icon: 'bi-pencil-square' },
         { label: 'Reviews', link: '/feedback', icon: 'bi-star' },
+        { label: 'Tools', link: '/tools', icon: 'bi-tools' },
         { label: 'FAQ', link: '/faq', icon: 'bi-question-circle' },
         { label: 'Work with me', link: '/contact', icon: 'bi-envelope-paper' },
     ];

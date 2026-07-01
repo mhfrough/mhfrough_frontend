@@ -1,0 +1,94 @@
+<app-tool-page title="Text to Image" icon="bi-fonts"
+    blurb="Turn text into a downloadable PNG. Pick the font, size, colours and padding — everything renders in your browser.">
+
+    <div class="ti">
+        <div class="ti-grid">
+            <!-- Controls -->
+            <div class="ti-controls">
+                <div>
+                    <label class="t-label" for="tiText">Text</label>
+                    <textarea id="tiText" class="t-textarea ti-text" spellcheck="false"
+                        placeholder="Type your text…"
+                        [ngModel]="text()" (ngModelChange)="text.set($event)"></textarea>
+                </div>
+
+                <div class="t-grid-2">
+                    <div>
+                        <label class="t-label" for="tiSize">Font size (px)</label>
+                        <input id="tiSize" type="number" class="t-field" min="8" step="1"
+                            [ngModel]="fontSize()" (ngModelChange)="fontSize.set($event)" />
+                    </div>
+                    <div>
+                        <label class="t-label" for="tiFont">Font family</label>
+                        <select id="tiFont" class="t-field"
+                            [ngModel]="fontFamily()" (ngModelChange)="fontFamily.set($event)">
+                            @for (f of fonts; track f) {
+                            <option [value]="f">{{ f }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="t-grid-2">
+                    <div>
+                        <label class="t-label" for="tiColor">Text colour</label>
+                        <div class="ti-color">
+                            <input id="tiColor" type="color" class="ti-color-input"
+                                [ngModel]="fontColor()" (ngModelChange)="fontColor.set($event)" />
+                            <input type="text" class="t-field" spellcheck="false"
+                                [ngModel]="fontColor()" (ngModelChange)="fontColor.set($event)" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="t-label" for="tiBg">Background</label>
+                        <div class="ti-color">
+                            <input id="tiBg" type="color" class="ti-color-input" [disabled]="transparent()"
+                                [ngModel]="bgColor()" (ngModelChange)="bgColor.set($event)" />
+                            <input type="text" class="t-field" spellcheck="false" [disabled]="transparent()"
+                                [ngModel]="bgColor()" (ngModelChange)="bgColor.set($event)" />
+                        </div>
+                        <label class="t-check ti-transparent">
+                            <input type="checkbox" [checked]="transparent()"
+                                (change)="transparent.set($any($event.target).checked)" />
+                            Transparent
+                        </label>
+                    </div>
+                </div>
+
+                <div class="t-grid-2">
+                    <div>
+                        <label class="t-label" for="tiPad">Padding (px)</label>
+                        <input id="tiPad" type="number" class="t-field" min="0" step="1"
+                            [ngModel]="padding()" (ngModelChange)="padding.set($event)" />
+                    </div>
+                    <div>
+                        <label class="t-label">Alignment</label>
+                        <div class="t-tabs">
+                            @for (a of aligns; track a) {
+                            <button type="button" class="t-tab" [class.active]="align() === a"
+                                (click)="align.set(a)">{{ a }}</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="ti-preview-wrap">
+                <label class="t-label">Preview</label>
+                <div class="ti-canvas-box" [class.ti-canvas-box--checker]="transparent()">
+                    <canvas #canvas class="ti-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="downloadPng()">
+                <i class="bi bi-download"></i> Download PNG
+            </button>
+            <button type="button" class="t-btn t-btn--ghost" (click)="print()">
+                <i class="bi bi-printer"></i> Print
+            </button>
+        </div>
+    </div>
+</app-tool-page>

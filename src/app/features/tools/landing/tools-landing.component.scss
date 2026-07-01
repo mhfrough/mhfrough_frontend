@@ -1,0 +1,173 @@
+.landing-head {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.landing-eyebrow {
+    font-family: var(--font);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.75rem;
+}
+
+.landing-title {
+    font-family: var(--font);
+    font-size: clamp(2rem, 5dvw, 3rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0 0 1rem;
+}
+
+.landing-sub {
+    font-family: var(--font);
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 44rem;
+    margin: 0;
+}
+
+// --- Grid --------------------------------------------------------------------
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.tool-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: inherit;
+    transition: transform var(--dur) var(--ease),
+        border-color var(--dur) var(--ease),
+        background var(--dur) var(--ease);
+
+    &:not(.is-soon):hover {
+        transform: translateY(-3px);
+        border-color: var(--text-muted);
+        background: var(--bg-alt);
+
+        .tool-card-icon {
+            color: var(--text);
+        }
+
+        .tool-card-arrow {
+            color: var(--text);
+
+            i {
+                transform: translateX(3px);
+            }
+        }
+    }
+
+    &.is-soon {
+        opacity: 0.55;
+        cursor: default;
+    }
+}
+
+.tool-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.tool-card-icon {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    line-height: 1;
+    transition: color var(--dur) var(--ease);
+}
+
+.tool-card-name {
+    font-family: var(--font);
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.01em;
+    margin: 0;
+}
+
+.tool-card-desc {
+    font-family: var(--font);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin: 0;
+    flex: 1;
+}
+
+.tool-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.tool-chip {
+    font-family: var(--font);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.15rem 0.5rem;
+    white-space: nowrap;
+}
+
+.tool-chip--soon {
+    color: var(--warn-text);
+    border-color: rgba(var(--warn-text-rgb), 0.4);
+    border-radius: var(--radius-pill);
+}
+
+.tool-chip--premium {
+    color: var(--primary-300);
+    border-color: rgba(var(--primary-300-rgb), 0.45);
+    border-radius: var(--radius-pill);
+}
+
+.tool-card-arrow {
+    font-family: var(--font);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: color var(--dur) var(--ease);
+
+    i {
+        font-size: 0.65rem;
+        transition: transform var(--dur) var(--ease);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tool-card,
+    .tool-card-arrow i {
+        transition: none;
+    }
+
+    .tool-card:not(.is-soon):hover {
+        transform: none;
+    }
+}

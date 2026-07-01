@@ -1,0 +1,59 @@
+<app-tool-page title="URL Encoder / Decoder" icon="bi-link-45deg" [error]="error()"
+    blurb="Encode and decode URLs and URL components safely. Everything runs in your browser.">
+
+    <div class="uc">
+        <div class="uc-controls">
+            <!-- Direction -->
+            <div class="t-tabs" role="tablist" aria-label="Direction">
+                <button type="button" class="t-tab" [class.active]="mode() === 'encode'"
+                    (click)="setMode('encode')">Encode</button>
+                <button type="button" class="t-tab" [class.active]="mode() === 'decode'"
+                    (click)="setMode('decode')">Decode</button>
+            </div>
+
+            <!-- Scope -->
+            <div class="uc-radios" role="radiogroup" aria-label="Scope">
+                <label class="t-check">
+                    <input type="radio" name="uc-scope" value="component"
+                        [checked]="scope() === 'component'" (change)="scope.set('component')" />
+                    Component (encodeURIComponent)
+                </label>
+                <label class="t-check">
+                    <input type="radio" name="uc-scope" value="full"
+                        [checked]="scope() === 'full'" (change)="scope.set('full')" />
+                    Full URL (encodeURI)
+                </label>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div>
+            <label class="t-label" for="ucInput">Input</label>
+            <textarea id="ucInput" class="t-textarea" spellcheck="false"
+                placeholder="Paste text or a URL here…"
+                [ngModel]="input()" (ngModelChange)="input.set($event)" (change)="run()"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="run()">
+                <i class="bi" [class]="mode() === 'encode' ? 'bi-lock' : 'bi-unlock'"></i>
+                {{ mode() === 'encode' ? 'Encode' : 'Decode' }}
+            </button>
+            <button type="button" class="t-btn t-btn--ghost" (click)="swap()">
+                <i class="bi bi-arrow-down-up"></i> Swap
+            </button>
+        </div>
+
+        <!-- Output -->
+        <div class="uc-output">
+            <div class="uc-output-head">
+                <label class="t-label" for="ucOutput">Output</label>
+                <button type="button" class="t-btn t-btn--ghost" (click)="copyOutput()" [disabled]="!output()">
+                    <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                    {{ copied() ? 'Copied' : 'Copy' }}
+                </button>
+            </div>
+            <textarea id="ucOutput" class="t-textarea" readonly spellcheck="false" [value]="output()"></textarea>
+        </div>
+    </div>
+</app-tool-page>

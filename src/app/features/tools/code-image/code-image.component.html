@@ -1,0 +1,87 @@
+<app-tool-page title="Code to Image" icon="bi-code-square"
+    [error]="exportError()"
+    blurb="Turn a code snippet into a syntax-highlighted image. Pick a language, set the background and padding, then download a PNG or copy the highlighted HTML.">
+
+    <div class="ci">
+        <div class="ci-grid">
+            <!-- Controls -->
+            <div class="ci-controls">
+                <div>
+                    <label class="t-label" for="ciCode">Code</label>
+                    <textarea id="ciCode" class="t-textarea ci-code-input" spellcheck="false"
+                        placeholder="Paste your code…"
+                        [ngModel]="code()" (ngModelChange)="code.set($event)"></textarea>
+                </div>
+
+                <div class="t-grid-2">
+                    <div>
+                        <label class="t-label" for="ciLang">Language</label>
+                        <select id="ciLang" class="t-field"
+                            [ngModel]="language()" (ngModelChange)="language.set($event)">
+                            @for (l of languages; track l.value) {
+                            <option [value]="l.value">{{ l.label }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="t-label" for="ciBg">Background</label>
+                        <div class="ci-color">
+                            <input id="ciBg" type="color" class="ci-color-input"
+                                [ngModel]="bgColor()" (ngModelChange)="bgColor.set($event)" />
+                            <input type="text" class="t-field" spellcheck="false"
+                                [ngModel]="bgColor()" (ngModelChange)="bgColor.set($event)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="t-grid-2">
+                    <div>
+                        <label class="t-label" for="ciPad">Padding (px)</label>
+                        <input id="ciPad" type="number" class="t-field" min="0" step="1"
+                            [ngModel]="padding()" (ngModelChange)="padding.set($event)" />
+                    </div>
+                    <div>
+                        <label class="t-label" for="ciFont">Font size (px)</label>
+                        <input id="ciFont" type="number" class="t-field" min="8" step="1"
+                            [ngModel]="fontSize()" (ngModelChange)="fontSize.set($event)" />
+                    </div>
+                </div>
+
+                <label class="t-check">
+                    <input type="checkbox" [checked]="showWindowTitle()"
+                        (change)="showWindowTitle.set($any($event.target).checked)" />
+                    Show window bar
+                </label>
+            </div>
+
+            <!-- Preview -->
+            <div class="ci-preview-wrap">
+                <label class="t-label">Preview</label>
+                <div class="ci-preview">
+                    <div #card class="ci-card" [style.background]="bgColor()">
+                        @if (showWindowTitle()) {
+                        <div class="ci-bar">
+                            <span class="ci-dot ci-dot--r"></span>
+                            <span class="ci-dot ci-dot--y"></span>
+                            <span class="ci-dot ci-dot--g"></span>
+                        </div>
+                        }
+                        <pre class="ci-pre" [style.padding.px]="padding()" [style.font-size.px]="fontSize()"><code
+                                [innerHTML]="highlightedHtml()"></code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="downloadPng()" [disabled]="exporting()">
+                <i class="bi" [class]="exporting() ? 'bi-hourglass-split' : 'bi-download'"></i>
+                {{ exporting() ? 'Rendering…' : 'Download PNG' }}
+            </button>
+            <button type="button" class="t-btn t-btn--ghost" (click)="copyHtml()">
+                <i class="bi" [class]="copiedHtml() ? 'bi-check2' : 'bi-clipboard'"></i>
+                {{ copiedHtml() ? 'Copied' : 'Copy highlighted HTML' }}
+            </button>
+        </div>
+    </div>
+</app-tool-page>

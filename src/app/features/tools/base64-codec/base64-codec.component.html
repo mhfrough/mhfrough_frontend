@@ -1,0 +1,61 @@
+<app-tool-page title="Base64 Encoder / Decoder" icon="bi-file-binary" [error]="error()"
+    blurb="Encode text and files to Base64 and back. Unicode-safe and runs entirely in your browser.">
+
+    <div class="b64">
+        <div class="b64-controls">
+            <!-- Direction -->
+            <div class="t-tabs" role="tablist" aria-label="Direction">
+                <button type="button" class="t-tab" [class.active]="mode() === 'encode'"
+                    (click)="setMode('encode')">Encode</button>
+                <button type="button" class="t-tab" [class.active]="mode() === 'decode'"
+                    (click)="setMode('decode')">Decode</button>
+            </div>
+
+            @if (mode() === 'encode') {
+            <label class="t-btn t-btn--ghost b64-file">
+                <i class="bi bi-paperclip"></i> Encode a file…
+                <input type="file" (change)="onFile($event)" hidden />
+            </label>
+            }
+        </div>
+
+        @if (fileName()) {
+        <p class="b64-filename"><i class="bi bi-file-earmark"></i> {{ fileName() }}</p>
+        }
+
+        <!-- Input -->
+        <div>
+            <label class="t-label" for="b64Input">{{ mode() === 'encode' ? 'Text input' : 'Base64 input' }}</label>
+            <textarea id="b64Input" class="t-textarea" spellcheck="false"
+                placeholder="{{ mode() === 'encode' ? 'Type or paste text to encode…' : 'Paste Base64 to decode…' }}"
+                [ngModel]="input()" (ngModelChange)="input.set($event)" (change)="run()"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="run()">
+                <i class="bi" [class]="mode() === 'encode' ? 'bi-lock' : 'bi-unlock'"></i>
+                {{ mode() === 'encode' ? 'Encode' : 'Decode' }}
+            </button>
+            <button type="button" class="t-btn t-btn--ghost" (click)="swap()">
+                <i class="bi bi-arrow-down-up"></i> Swap
+            </button>
+        </div>
+
+        <!-- Output -->
+        <div class="b64-output">
+            <div class="b64-output-head">
+                <label class="t-label" for="b64Output">Output</label>
+                <div class="t-actions">
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copyOutput()" [disabled]="!output()">
+                        <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() ? 'Copied' : 'Copy' }}
+                    </button>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="downloadOutput()" [disabled]="!output()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                </div>
+            </div>
+            <textarea id="b64Output" class="t-textarea" readonly spellcheck="false" [value]="output()"></textarea>
+        </div>
+    </div>
+</app-tool-page>

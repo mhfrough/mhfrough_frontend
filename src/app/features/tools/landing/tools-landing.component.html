@@ -1,0 +1,46 @@
+<section class="landing">
+    <header class="landing-head">
+        <p class="landing-eyebrow">Free · No sign-up</p>
+        <h1 class="landing-title">Dev Tools</h1>
+        <p class="landing-sub">
+            A growing toolbox of fast developer utilities. Lightweight ones run right in your
+            browser; heavier jobs are handled server-side. More on the way.
+        </p>
+    </header>
+
+    <div class="tool-grid">
+        @for (tool of tools(); track tool.id) {
+        @if (tool.status === 'live') {
+        <a class="tool-card" [routerLink]="['/tools', tool.slug]">
+            <div class="tool-card-top">
+                <i class="tool-card-icon bi" [class]="tool.icon"></i>
+                @if (tool.premium) {
+                <span class="tool-chip tool-chip--premium">Premium</span>
+                }
+            </div>
+            <h2 class="tool-card-name">{{ tool.name }}</h2>
+            <p class="tool-card-desc">{{ tool.desc }}</p>
+            <div class="tool-card-foot">
+                <span class="tool-chip">{{ tool.category }}</span>
+                <span class="tool-card-arrow">Open <i class="bi bi-arrow-right"></i></span>
+            </div>
+        </a>
+        } @else {
+        <div class="tool-card is-soon" aria-disabled="true">
+            <div class="tool-card-top">
+                <i class="tool-card-icon bi" [class]="tool.icon"></i>
+                <span class="tool-chip tool-chip--soon">Soon</span>
+            </div>
+            <h2 class="tool-card-name">{{ tool.name }}</h2>
+            <p class="tool-card-desc">{{ tool.desc }}</p>
+            <div class="tool-card-foot">
+                <span class="tool-chip">{{ tool.category }}</span>
+                @if (tool.premium) {
+                <span class="tool-chip tool-chip--premium">Premium</span>
+                }
+            </div>
+        </div>
+        }
+        }
+    </div>
+</section>
