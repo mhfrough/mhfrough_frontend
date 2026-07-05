@@ -1,0 +1,7 @@
+@for (el of elements; track el.id) {
+@if (isImage(el)) {
+<img class="wb-image-el" [src]="el.src" alt="board image" draggable="false"
+    [style.left.px]="el.x" [style.top.px]="el.y" [style.width.px]="el.width" [style.height.px]="el.height"
+    [style.transform]="imageTransform(el)" [style.opacity]="el.style.opacity" />
+}
+}

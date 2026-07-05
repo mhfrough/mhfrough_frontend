@@ -1,6 +1,6 @@
-<app-tool-page title="Image Format Converter" icon="bi-arrow-repeat"
+<app-tool-page title="Image Format & Compression" icon="bi-arrow-repeat"
     [loading]="loading()" [error]="error()"
-    blurb="Convert between JPEG, PNG, WebP, AVIF and GIF. Quality applies to the lossy formats.">
+    blurb="Compress, resize and convert images between JPEG, PNG, WebP, AVIF and GIF in one pass.">
 
     <div class="img">
         <!-- Upload zone -->
@@ -19,12 +19,12 @@
                 <label class="t-label" for="fmtSelect">Target format</label>
                 <select id="fmtSelect" class="t-field" [ngModel]="format()" (ngModelChange)="format.set($event)">
                     @for (f of formats; track f) {
-                    <option [value]="f">{{ f | uppercase }}</option>
+                    <option [value]="f">{{ f === 'original' ? 'Keep original (compress only)' : (f | uppercase) }}</option>
                     }
                 </select>
             </div>
 
-            @if (isLossy()) {
+            @if (showQuality()) {
             <div class="img-control img-control--grow">
                 <label class="t-label" for="fmtQuality">Quality — {{ quality() }}</label>
                 <input type="range" id="fmtQuality" class="img-range" min="1" max="100" step="1"
@@ -33,9 +33,23 @@
             }
         </div>
 
+        <div class="img-controls-row">
+            <div class="img-control">
+                <label class="t-label" for="fmtMaxWidth">Max width (px)</label>
+                <input type="number" id="fmtMaxWidth" class="t-field" min="1" step="1" placeholder="Original width"
+                    [ngModel]="maxWidth()" (ngModelChange)="setMaxWidth($event)" />
+            </div>
+            <div class="img-control">
+                <label class="t-label" for="fmtMaxHeight">Max height (px)</label>
+                <input type="number" id="fmtMaxHeight" class="t-field" min="1" step="1" placeholder="Original height"
+                    [ngModel]="maxHeight()" (ngModelChange)="setMaxHeight($event)" />
+            </div>
+        </div>
+        <p class="img-hint">Leave blank to keep original dimensions.</p>
+
         <div class="t-actions">
             <button type="button" class="t-btn" (click)="run()" [disabled]="loading() || !file()">
-                <i class="bi bi-arrow-repeat"></i> Convert
+                <i class="bi bi-arrow-repeat"></i> {{ isOriginal() ? 'Compress' : 'Convert' }}
             </button>
         </div>
 

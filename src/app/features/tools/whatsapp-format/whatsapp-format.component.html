@@ -16,6 +16,16 @@
             <button type="button" class="t-btn t-btn--ghost wa-tool" (click)="apply('```')" title="Monospace">
                 <i class="bi bi-code"></i> Mono
             </button>
+            <button type="button" class="t-btn t-btn--ghost wa-tool" (click)="quote()" title="Quote">
+                <i class="bi bi-quote"></i> Quote
+            </button>
+        </div>
+
+        <!-- Emoji quick-insert -->
+        <div class="wa-emojis" role="toolbar" aria-label="Insert emoji">
+            @for (e of emojis; track e) {
+            <button type="button" class="wa-emoji-btn" (click)="insertEmoji(e)" [attr.aria-label]="'Insert ' + e">{{ e }}</button>
+            }
         </div>
 
         <div class="t-grid-2">
@@ -25,6 +35,7 @@
                 <textarea #editor id="waInput" class="t-textarea wa-input" spellcheck="false"
                     placeholder="Type your message, select text, then tap a format button…"
                     [ngModel]="text()" (ngModelChange)="text.set($event)"></textarea>
+                <p class="wa-counter">{{ text().length }} characters</p>
             </div>
 
             <!-- Preview -->

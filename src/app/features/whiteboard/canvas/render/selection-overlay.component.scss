@@ -1,0 +1,74 @@
+:host {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+}
+
+.wb-sel-box,
+.wb-group-box {
+    position: absolute;
+    outline: 1.5px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.wb-group-box {
+    outline-style: dashed;
+}
+
+.wb-marquee {
+    position: absolute;
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid var(--primary);
+}
+
+.wb-handle {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    background: #fff;
+    border: 1.5px solid var(--primary);
+    border-radius: var(--radius);
+    pointer-events: auto;
+    transform: translate(-50%, -50%);
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+
+    &.h-nw { left: 0; top: 0; cursor: nwse-resize; }
+    &.h-n { left: 50%; top: 0; cursor: ns-resize; }
+    &.h-ne { left: 100%; top: 0; cursor: nesw-resize; }
+    &.h-e { left: 100%; top: 50%; cursor: ew-resize; }
+    &.h-se { left: 100%; top: 100%; cursor: nwse-resize; }
+    &.h-s { left: 50%; top: 100%; cursor: ns-resize; }
+    &.h-sw { left: 0; top: 100%; cursor: nesw-resize; }
+    &.h-w { left: 0; top: 50%; cursor: ew-resize; }
+}
+
+.wb-rotate-handle {
+    position: absolute;
+    left: 50%;
+    top: -28px;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-50%);
+    background: #fff;
+    color: var(--primary);
+    border: 1.5px solid var(--primary);
+    border-radius: var(--radius-circle);
+    cursor: grab;
+    pointer-events: auto;
+    font-family: var(--font);
+    font-size: 0.7rem;
+    padding: 0;
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}

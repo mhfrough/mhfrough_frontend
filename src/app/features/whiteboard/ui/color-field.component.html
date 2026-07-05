@@ -1,0 +1,13 @@
+<div class="cf-row">
+    @for (c of swatches; track c) {
+    <button type="button" class="cf-swatch" [class.active]="value === c" [class.transparent]="isTransparent(c)"
+        [style.background]="isTransparent(c) ? null : c" [attr.aria-label]="c" (click)="pick(c)">
+        @if (isTransparent(c)) { <i class="bi bi-slash-lg"></i> }
+    </button>
+    }
+    <label class="cf-custom" title="Custom color">
+        <i class="bi bi-eyedropper"></i>
+        <input type="color" [value]="value && value !== 'transparent' ? value : '#000000'"
+            (input)="onCustom($event)" />
+    </label>
+</div>

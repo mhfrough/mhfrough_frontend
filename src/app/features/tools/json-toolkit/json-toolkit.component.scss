@@ -1,0 +1,41 @@
+@use '../shared/tool-controls';
+
+.jt {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.jt-controls {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+}
+
+.jt-indent {
+    .t-field {
+        width: auto;
+        min-width: 8rem;
+    }
+}
+
+.jt-output {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.jt-output-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .t-label {
+        margin: 0;
+    }
+}

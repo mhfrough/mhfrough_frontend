@@ -1,0 +1,145 @@
+@use '../shared/tool-controls';
+
+.ts {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.ts-live-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--success-text);
+    margin-left: 0.35rem;
+    vertical-align: middle;
+}
+
+.ts-now-grid,
+.ts-out-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.ts-now-row,
+.ts-out-row {
+    display: grid;
+    grid-template-columns: 90px 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border);
+
+    &:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    @media (max-width: 480px) {
+        grid-template-columns: 80px 1fr auto;
+        gap: 0.5rem;
+    }
+}
+
+.ts-out-list {
+    margin-top: 1rem;
+}
+
+.ts-now-label {
+    font-family: var(--font);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.ts-mono {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text);
+    word-break: break-all;
+}
+
+.ts-sub-label {
+    margin-top: 1rem;
+}
+
+.ts-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    font-family: var(--font);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--danger);
+    margin: 0.75rem 0 0;
+
+    i {
+        margin-top: 0.1rem;
+        flex-shrink: 0;
+    }
+}
+
+.ts-assumption {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    font-family: var(--font);
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    margin: 0.75rem 0 0;
+
+    i {
+        margin-top: 0.1rem;
+        flex-shrink: 0;
+    }
+
+    strong {
+        color: var(--text);
+    }
+}
+
+.ts-tz-note {
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-weight: 400;
+}
+
+// Wide table scrolls inside its own container on narrow screens.
+.ts-tz-scroll {
+    overflow-x: auto;
+}
+
+.ts-tz-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+        text-align: left;
+        padding: 0.55rem 1rem 0.55rem 0;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+    }
+
+    tr:last-child th,
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    th {
+        font-family: var(--font);
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+}
+
+.ts-tz-zone {
+    font-family: var(--font);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}

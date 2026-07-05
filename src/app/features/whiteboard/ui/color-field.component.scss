@@ -1,0 +1,76 @@
+.cf-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.cf-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-size: 0.7rem;
+    transition: transform var(--dur-fast) var(--ease);
+
+    &:hover {
+        transform: scale(1.12);
+    }
+
+    &.active {
+        outline: 2px solid var(--primary);
+        outline-offset: 1px;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+
+    &.transparent {
+        background:
+            linear-gradient(45deg, var(--bg-alt) 25%, transparent 25%),
+            linear-gradient(-45deg, var(--bg-alt) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, var(--bg-alt) 75%),
+            linear-gradient(-45deg, transparent 75%, var(--bg-alt) 75%);
+        background-size: 8px 8px;
+        background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+        background-color: var(--surface);
+    }
+}
+
+.cf-custom {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: pointer;
+    overflow: hidden;
+    font-family: var(--font);
+    font-size: 0.7rem;
+
+    &:focus-within {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+
+    input[type='color'] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        border: none;
+        padding: 0;
+    }
+}

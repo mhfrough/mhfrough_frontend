@@ -1,0 +1,24 @@
+<div class="wb-collab">
+    @if (avatars().length) {
+    <div class="wb-avatars">
+        @for (a of avatars(); track a.socketId) {
+        <span class="wb-avatar" [style.background]="a.color" [attr.title]="a.name">{{ a.initials }}</span>
+        }
+    </div>
+    }
+
+    <button type="button" class="wb-live-btn" [class.on]="collab.live()" (click)="toggleLive()"
+        [attr.aria-pressed]="collab.live()"
+        [attr.aria-label]="collab.live() ? 'Stop live collaboration' : 'Start live collaboration'"
+        [disabled]="collab.connecting()">
+        <span class="wb-live-dot" [class.pulse]="collab.live()"></span>
+        {{ collab.connecting() ? 'Connecting…' : collab.live() ? 'Live' : 'Go Live' }}
+    </button>
+
+    @if (collab.live()) {
+    <button type="button" class="wb-collab-copy" (click)="copyLink()" title="Copy invite link"
+        aria-label="Copy invite link">
+        <i class="bi" [class.bi-link-45deg]="!copied()" [class.bi-check-lg]="copied()"></i>
+    </button>
+    }
+</div>

@@ -75,6 +75,12 @@
     cursor: pointer;
 }
 
+.img-hint {
+    margin: -0.5rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 .img-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

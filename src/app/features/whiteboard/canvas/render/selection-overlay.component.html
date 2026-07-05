@@ -1,0 +1,26 @@
+@if (singleBox(); as box) {
+<div class="wb-sel-box" [style.left.px]="box.left" [style.top.px]="box.top" [style.width.px]="box.width"
+    [style.height.px]="box.height" [style.transform]="'rotate(' + box.rotation + 'deg)'">
+
+    <button type="button" class="wb-rotate-handle" (pointerdown)="rotatePointerDown($event)"
+        aria-label="Rotate">
+        <i class="bi bi-arrow-repeat"></i>
+    </button>
+
+    @if (box.rotation === 0) {
+    @for (h of handles; track h) {
+    <span class="wb-handle" [class]="'h-' + h" (pointerdown)="handlePointerDown($event, h)"></span>
+    }
+    }
+</div>
+}
+
+@if (groupBox(); as box) {
+<div class="wb-group-box" [style.left.px]="box.left" [style.top.px]="box.top" [style.width.px]="box.width"
+    [style.height.px]="box.height"></div>
+}
+
+@if (marqueeBox(); as box) {
+<div class="wb-marquee" [style.left.px]="box.left" [style.top.px]="box.top" [style.width.px]="box.width"
+    [style.height.px]="box.height"></div>
+}

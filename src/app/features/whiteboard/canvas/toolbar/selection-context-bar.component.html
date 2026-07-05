@@ -1,0 +1,93 @@
+@if (selection.hasSelection()) {
+<div class="wb-ctx-bar" role="toolbar" aria-label="Selection actions">
+    <button type="button" class="wb-ctx-btn" title="Duplicate (Ctrl+D)" aria-label="Duplicate"
+        (click)="selection.duplicateSelected()">
+        <i class="bi bi-copy"></i>
+    </button>
+    @if (selection.hasImageSelected()) {
+    <button type="button" class="wb-ctx-btn" title="Flip horizontal" aria-label="Flip horizontal"
+        (click)="selection.flipSelected('h')">
+        <i class="bi bi-symmetry-vertical"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Flip vertical" aria-label="Flip vertical"
+        (click)="selection.flipSelected('v')">
+        <i class="bi bi-symmetry-horizontal"></i>
+    </button>
+    }
+    <button type="button" class="wb-ctx-btn" title="Lock / Unlock" aria-label="Lock or unlock"
+        (click)="selection.toggleLockSelected()">
+        <i class="bi bi-lock"></i>
+    </button>
+    <span class="wb-ctx-sep"></span>
+    <button type="button" class="wb-ctx-btn" title="Bring to front" aria-label="Bring to front"
+        (click)="selection.bringToFront()">
+        <i class="bi bi-front"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Bring forward" aria-label="Bring forward"
+        (click)="selection.bringForward()">
+        <i class="bi bi-square-half"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Send backward" aria-label="Send backward"
+        (click)="selection.sendBackward()">
+        <i class="bi bi-square"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Send to back" aria-label="Send to back"
+        (click)="selection.sendToBack()">
+        <i class="bi bi-back"></i>
+    </button>
+
+    @if (isMulti()) {
+    <span class="wb-ctx-sep"></span>
+    <button type="button" class="wb-ctx-btn" title="Align left" aria-label="Align left"
+        (click)="selection.align('left')">
+        <i class="bi bi-align-start"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Align center" aria-label="Align center"
+        (click)="selection.align('center-h')">
+        <i class="bi bi-align-center"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Align right" aria-label="Align right"
+        (click)="selection.align('right')">
+        <i class="bi bi-align-end"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Align top" aria-label="Align top"
+        (click)="selection.align('top')">
+        <i class="bi bi-align-top"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Align middle" aria-label="Align middle"
+        (click)="selection.align('center-v')">
+        <i class="bi bi-align-middle"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Align bottom" aria-label="Align bottom"
+        (click)="selection.align('bottom')">
+        <i class="bi bi-align-bottom"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Distribute horizontally" aria-label="Distribute horizontally"
+        (click)="selection.distribute('horizontal')">
+        <i class="bi bi-distribute-horizontal"></i>
+    </button>
+    <button type="button" class="wb-ctx-btn" title="Distribute vertically" aria-label="Distribute vertically"
+        (click)="selection.distribute('vertical')">
+        <i class="bi bi-distribute-vertical"></i>
+    </button>
+    <span class="wb-ctx-sep"></span>
+    @if (isGrouped()) {
+    <button type="button" class="wb-ctx-btn" title="Ungroup" aria-label="Ungroup"
+        (click)="selection.ungroupSelected()">
+        <i class="bi bi-x-square"></i>
+    </button>
+    } @else {
+    <button type="button" class="wb-ctx-btn" title="Group (Ctrl+G)" aria-label="Group"
+        (click)="selection.groupSelected()">
+        <i class="bi bi-bounding-box"></i>
+    </button>
+    }
+    }
+
+    <span class="wb-ctx-sep"></span>
+    <button type="button" class="wb-ctx-btn danger" title="Delete (Del)" aria-label="Delete"
+        (click)="selection.deleteSelected()">
+        <i class="bi bi-trash3"></i>
+    </button>
+</div>
+}

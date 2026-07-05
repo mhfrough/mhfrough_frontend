@@ -1,0 +1,94 @@
+<app-tool-page title="Text Diff Checker" icon="bi-file-diff" [error]="error()"
+    blurb="Compare two texts line by line and see additions, deletions and changes highlighted.">
+
+    <div class="df">
+        <!-- Inputs -->
+        <div class="t-grid-2">
+            <div>
+                <label class="t-label" for="dfOriginal">Original</label>
+                <textarea id="dfOriginal" class="t-textarea" spellcheck="false"
+                    placeholder="Paste the original text…"
+                    [ngModel]="original()" (ngModelChange)="original.set($event)"></textarea>
+            </div>
+            <div>
+                <label class="t-label" for="dfChanged">Changed</label>
+                <textarea id="dfChanged" class="t-textarea" spellcheck="false"
+                    placeholder="Paste the changed text…"
+                    [ngModel]="changed()" (ngModelChange)="changed.set($event)"></textarea>
+            </div>
+        </div>
+
+        <!-- Options + action -->
+        <div class="df-controls">
+            <label class="t-check">
+                <input type="checkbox" [checked]="ignoreCase()"
+                    (change)="ignoreCase.set($any($event.target).checked)" />
+                Ignore case
+            </label>
+            <label class="t-check">
+                <input type="checkbox" [checked]="ignoreTrailingWs()"
+                    (change)="ignoreTrailingWs.set($any($event.target).checked)" />
+                Ignore trailing whitespace
+            </label>
+
+            <button type="button" class="t-btn" (click)="compare()">
+                <i class="bi bi-file-diff"></i> Compare
+            </button>
+        </div>
+
+        <!-- Result -->
+        @if (rows(); as diffRows) {
+        <div class="df-result">
+            <div class="df-result-head">
+                <div class="t-stats">
+                    <div class="t-stat">
+                        <span class="t-stat-num df-num-add">+{{ added() }}</span>
+                        <span class="t-stat-label">Added</span>
+                    </div>
+                    <div class="t-stat">
+                        <span class="t-stat-num df-num-del">−{{ deleted() }}</span>
+                        <span class="t-stat-label">Deleted</span>
+                    </div>
+                    <div class="t-stat">
+                        <span class="t-stat-num">{{ unchanged() }}</span>
+                        <span class="t-stat-label">Unchanged</span>
+                    </div>
+                </div>
+                <div class="t-actions">
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copyDiff()">
+                        <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() ? 'Copied' : 'Copy unified diff' }}
+                    </button>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="downloadDiff()">
+                        <i class="bi bi-download"></i> Download .patch
+                    </button>
+                </div>
+            </div>
+
+            @if (approximate()) {
+            <p class="df-note">
+                <i class="bi bi-info-circle"></i>
+                The inputs were too large for a full line-by-line diff, so the differing
+                middle section is shown as one deleted block and one added block.
+            </p>
+            }
+
+            @if (diffRows.length === 0) {
+            <p class="df-note">Both texts are identical.</p>
+            } @else {
+            <div class="df-rows t-panel" role="table" aria-label="Diff result">
+                @for (row of diffRows; track $index) {
+                <div class="df-row" [class.is-add]="row.type === 'add'" [class.is-del]="row.type === 'del'"
+                    role="row">
+                    <span class="df-lineno">{{ row.aNo ?? '' }}</span>
+                    <span class="df-lineno">{{ row.bNo ?? '' }}</span>
+                    <span class="df-sign">{{ row.type === 'add' ? '+' : row.type === 'del' ? '−' : ' ' }}</span>
+                    <span class="df-text">{{ row.text }}</span>
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
+    </div>
+</app-tool-page>

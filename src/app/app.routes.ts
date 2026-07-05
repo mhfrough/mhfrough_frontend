@@ -131,6 +131,18 @@ export const routes: Routes = [
         ],
     },
 
+    // --- Whiteboard (own layout/chrome, before the catch-all '') --------------
+    {
+        path: 'whiteboard',
+        loadChildren: () => import('./features/whiteboard/whiteboard.routes').then(m => m.WHITEBOARD_ROUTES),
+    },
+
+    // --- Standalone SEO audit suite (own layout/chrome) -----------------------
+    {
+        path: 'seo',
+        loadChildren: () => import('./features/seo/seo.routes').then(m => m.SEO_ROUTES),
+    },
+
     // --- Public dev-tools (own layout/chrome, before the catch-all '') --------
     {
         path: 'tools',
@@ -140,10 +152,7 @@ export const routes: Routes = [
                 path: '',
                 loadComponent: () => import('./features/tools/landing/tools-landing.component').then(m => m.ToolsLandingComponent),
             },
-            {
-                path: 'rem-px',
-                loadComponent: () => import('./features/tools/rem-px/rem-px.component').then(m => m.RemPxComponent),
-            },
+            // --- Live tools (each merges its former near-duplicate siblings) ----
             {
                 path: 'css-units',
                 loadComponent: () => import('./features/tools/unit-converter/unit-converter.component').then(m => m.UnitConverterComponent),
@@ -157,28 +166,12 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/tools/css-scss/css-scss.component').then(m => m.CssScssComponent),
             },
             {
-                path: 'scss-nesting',
-                loadComponent: () => import('./features/tools/scss-nesting/scss-nesting.component').then(m => m.ScssNestingComponent),
-            },
-            {
-                path: 'image-compress',
-                loadComponent: () => import('./features/tools/image-compress/image-compress.component').then(m => m.ImageCompressComponent),
-            },
-            {
                 path: 'image-format',
                 loadComponent: () => import('./features/tools/image-format/image-format.component').then(m => m.ImageFormatComponent),
             },
             {
-                path: 'image-webp',
-                loadComponent: () => import('./features/tools/image-webp/image-webp.component').then(m => m.ImageWebpComponent),
-            },
-            {
                 path: 'image-upscale',
                 loadComponent: () => import('./features/tools/image-upscale/image-upscale.component').then(m => m.ImageUpscaleComponent),
-            },
-            {
-                path: 'image-palette',
-                loadComponent: () => import('./features/tools/image-palette/image-palette.component').then(m => m.ImagePaletteComponent),
             },
             {
                 path: 'favicon',
@@ -189,10 +182,6 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/tools/text-image/text-image.component').then(m => m.TextImageComponent),
             },
             {
-                path: 'code-image',
-                loadComponent: () => import('./features/tools/code-image/code-image.component').then(m => m.CodeImageComponent),
-            },
-            {
                 path: 'whatsapp-format',
                 loadComponent: () => import('./features/tools/whatsapp-format/whatsapp-format.component').then(m => m.WhatsappFormatComponent),
             },
@@ -201,20 +190,8 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/tools/palette-generator/palette-generator.component').then(m => m.PaletteGeneratorComponent),
             },
             {
-                path: 'design-extractor',
-                loadComponent: () => import('./features/tools/design-extractor/design-extractor.component').then(m => m.DesignExtractorComponent),
-            },
-            {
-                path: 'seo-tools',
-                loadComponent: () => import('./features/tools/seo-tools/seo-tools.component').then(m => m.SeoToolsComponent),
-            },
-            {
                 path: 'sitemap',
                 loadComponent: () => import('./features/tools/sitemap-gen/sitemap-gen.component').then(m => m.SitemapGenComponent),
-            },
-            {
-                path: 'robots-txt',
-                loadComponent: () => import('./features/tools/robots-gen/robots-gen.component').then(m => m.RobotsGenComponent),
             },
             {
                 path: 'qr-barcode',
@@ -229,13 +206,45 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/tools/url-codec/url-codec.component').then(m => m.UrlCodecComponent),
             },
             {
-                path: 'base64-codec',
-                loadComponent: () => import('./features/tools/base64-codec/base64-codec.component').then(m => m.Base64CodecComponent),
-            },
-            {
                 path: 'jwt-codec',
                 loadComponent: () => import('./features/tools/jwt-codec/jwt-codec.component').then(m => m.JwtCodecComponent),
             },
+            // --- New utility tools -----------------------------------------------
+            {
+                path: 'json',
+                loadComponent: () => import('./features/tools/json-toolkit/json-toolkit.component').then(m => m.JsonToolkitComponent),
+            },
+            {
+                path: 'diff',
+                loadComponent: () => import('./features/tools/diff-checker/diff-checker.component').then(m => m.DiffCheckerComponent),
+            },
+            {
+                path: 'regex',
+                loadComponent: () => import('./features/tools/regex-tester/regex-tester.component').then(m => m.RegexTesterComponent),
+            },
+            {
+                path: 'timestamp',
+                loadComponent: () => import('./features/tools/timestamp/timestamp.component').then(m => m.TimestampComponent),
+            },
+            {
+                path: 'uuid',
+                loadComponent: () => import('./features/tools/uuid-gen/uuid-gen.component').then(m => m.UuidGenComponent),
+            },
+            {
+                path: 'text-utils',
+                loadComponent: () => import('./features/tools/text-utils/text-utils.component').then(m => m.TextUtilsComponent),
+            },
+            // --- Redirects for tools merged into the ones above ------------------
+            { path: 'seo-tools', redirectTo: '/seo' },
+            { path: 'rem-px', redirectTo: 'css-units', pathMatch: 'full' },
+            { path: 'scss-nesting', redirectTo: 'css-scss', pathMatch: 'full' },
+            { path: 'image-compress', redirectTo: 'image-format', pathMatch: 'full' },
+            { path: 'image-webp', redirectTo: 'image-format', pathMatch: 'full' },
+            { path: 'image-palette', redirectTo: 'palette-generator', pathMatch: 'full' },
+            { path: 'code-image', redirectTo: 'text-image', pathMatch: 'full' },
+            { path: 'design-extractor', redirectTo: '/seo', pathMatch: 'full' },
+            { path: 'robots-txt', redirectTo: 'sitemap', pathMatch: 'full' },
+            { path: 'base64-codec', redirectTo: 'url-codec', pathMatch: 'full' },
             { path: '**', redirectTo: '' },
         ],
     },

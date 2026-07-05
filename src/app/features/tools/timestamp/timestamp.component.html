@@ -1,0 +1,147 @@
+<app-tool-page title="Timestamp Converter" icon="bi-clock-history"
+    blurb="Convert between Unix epochs and human dates with timezone and relative views.">
+
+    <div class="ts">
+        <!-- (a) Live now -->
+        <div class="t-panel">
+            <p class="t-label">Now <span class="ts-live-dot" aria-hidden="true"></span></p>
+            <div class="ts-now-grid">
+                <div class="ts-now-row">
+                    <span class="ts-now-label">Epoch (s)</span>
+                    <span class="ts-mono">{{ nowEpochSec() }}</span>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copy('now-s', nowEpochSec())">
+                        <i class="bi" [class]="copied() === 'now-s' ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() === 'now-s' ? 'Copied' : 'Copy' }}
+                    </button>
+                </div>
+                <div class="ts-now-row">
+                    <span class="ts-now-label">Epoch (ms)</span>
+                    <span class="ts-mono">{{ nowEpochMs() }}</span>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copy('now-ms', nowEpochMs())">
+                        <i class="bi" [class]="copied() === 'now-ms' ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() === 'now-ms' ? 'Copied' : 'Copy' }}
+                    </button>
+                </div>
+                <div class="ts-now-row">
+                    <span class="ts-now-label">ISO 8601</span>
+                    <span class="ts-mono">{{ nowIso() }}</span>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copy('now-iso', nowIso())">
+                        <i class="bi" [class]="copied() === 'now-iso' ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() === 'now-iso' ? 'Copied' : 'Copy' }}
+                    </button>
+                </div>
+                <div class="ts-now-row">
+                    <span class="ts-now-label">Local</span>
+                    <span class="ts-mono">{{ nowLocal() }}</span>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copy('now-local', nowLocal())">
+                        <i class="bi" [class]="copied() === 'now-local' ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() === 'now-local' ? 'Copied' : 'Copy' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="t-grid-2">
+            <!-- (b) Epoch → date -->
+            <div class="t-panel">
+                <label class="t-label" for="tsEpochIn">Epoch → Date</label>
+                <input id="tsEpochIn" class="t-field" type="text" inputmode="numeric" spellcheck="false"
+                    placeholder="e.g. 1751623800 or 1751623800000"
+                    [ngModel]="epochInput()" (ngModelChange)="epochInput.set($event)"
+                    (change)="epochConverted()" />
+
+                @if (epochError(); as err) {
+                <p class="ts-error"><i class="bi bi-exclamation-triangle"></i> {{ err }}</p>
+                }
+
+                @if (epochDate()) {
+                <p class="ts-assumption">
+                    <i class="bi bi-info-circle"></i> Interpreted as <strong>{{ epochUnit() }}</strong> from magnitude.
+                </p>
+                <div class="ts-out-list">
+                    <div class="ts-out-row">
+                        <span class="ts-now-label">ISO UTC</span>
+                        <span class="ts-mono">{{ epochIsoUtc() }}</span>
+                        <button type="button" class="t-btn t-btn--ghost" (click)="copy('epoch-iso', epochIsoUtc())">
+                            <i class="bi" [class]="copied() === 'epoch-iso' ? 'bi-check2' : 'bi-clipboard'"></i>
+                        </button>
+                    </div>
+                    <div class="ts-out-row">
+                        <span class="ts-now-label">Local</span>
+                        <span class="ts-mono">{{ epochLocal() }}</span>
+                        <button type="button" class="t-btn t-btn--ghost" (click)="copy('epoch-local', epochLocal())">
+                            <i class="bi" [class]="copied() === 'epoch-local' ? 'bi-check2' : 'bi-clipboard'"></i>
+                        </button>
+                    </div>
+                    <div class="ts-out-row">
+                        <span class="ts-now-label">Relative</span>
+                        <span class="ts-mono">{{ epochRelative() }}</span>
+                    </div>
+                    <div class="ts-out-row">
+                        <span class="ts-now-label">Weekday</span>
+                        <span class="ts-mono">{{ epochWeekday() }}</span>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <!-- (c) Date → epoch -->
+            <div class="t-panel">
+                <label class="t-label" for="tsPickerIn">Date → Epoch</label>
+                <input id="tsPickerIn" class="t-field" type="datetime-local" step="1"
+                    [ngModel]="pickerInput()" (ngModelChange)="pickerInput.set($event); setDateSource('picker')"
+                    (change)="dateConverted('picker')" />
+
+                <label class="t-label ts-sub-label" for="tsTextIn">…or free text</label>
+                <input id="tsTextIn" class="t-field" type="text" spellcheck="false"
+                    placeholder="e.g. 2026-07-04T12:30:00Z or 4 Jul 2026 12:30"
+                    [ngModel]="textInput()" (ngModelChange)="textInput.set($event); setDateSource('text')"
+                    (change)="dateConverted('text')" />
+
+                @if (dateError(); as err) {
+                <p class="ts-error"><i class="bi bi-exclamation-triangle"></i> {{ err }}</p>
+                }
+
+                @if (dateResult()) {
+                <div class="ts-out-list">
+                    <div class="ts-out-row">
+                        <span class="ts-now-label">Epoch (s)</span>
+                        <span class="ts-mono">{{ dateEpochSec() }}</span>
+                        <button type="button" class="t-btn t-btn--ghost" (click)="copy('date-s', dateEpochSec())">
+                            <i class="bi" [class]="copied() === 'date-s' ? 'bi-check2' : 'bi-clipboard'"></i>
+                        </button>
+                    </div>
+                    <div class="ts-out-row">
+                        <span class="ts-now-label">Epoch (ms)</span>
+                        <span class="ts-mono">{{ dateEpochMs() }}</span>
+                        <button type="button" class="t-btn t-btn--ghost" (click)="copy('date-ms', dateEpochMs())">
+                            <i class="bi" [class]="copied() === 'date-ms' ? 'bi-check2' : 'bi-clipboard'"></i>
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- (d) Timezone table -->
+        <div class="t-panel">
+            <p class="t-label">
+                Timezones
+                <span class="ts-tz-note">— {{ tzIsLive() ? 'live (enter a value above to pin a moment)' : 'converted moment' }}</span>
+            </p>
+            <div class="ts-tz-scroll">
+                <table class="ts-tz-table">
+                    <tbody>
+                        @for (row of tzRows(); track row.zone) {
+                        <tr>
+                            <th scope="row">{{ row.label }}</th>
+                            <td class="ts-tz-zone">{{ row.zone }}</td>
+                            <td class="ts-mono">{{ row.formatted }}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</app-tool-page>

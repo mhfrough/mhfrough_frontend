@@ -11,6 +11,9 @@ interface Strength {
     level: 0 | 1 | 2 | 3 | 4;
 }
 
+type Mode = 'password' | 'passphrase';
+type Separator = '-' | '.' | ' ' | '_';
+
 @Component({
     selector: 'app-password-gen',
     standalone: true,
@@ -23,7 +26,10 @@ export class PasswordGenComponent implements OnInit {
     private readonly api = inject(ToolsApiService);
     private readonly platformId = inject(PLATFORM_ID);
 
-    // --- Generate options --------------------------------------------------
+    // --- Mode ----------------------------------------------------------------
+    readonly mode = signal<Mode>('password');
+
+    // --- Generate options (password mode) ------------------------------------
     readonly length = signal(20);
     readonly useUpper = signal(true);
     readonly useLower = signal(true);
@@ -31,8 +37,61 @@ export class PasswordGenComponent implements OnInit {
     readonly useSymbols = signal(true);
     readonly excludeAmbiguous = signal(false);
 
+    // --- Passphrase options ----------------------------------------------------
+    readonly wordCount = signal(5);
+    readonly separator = signal<Separator>('-');
+    readonly capitalizeWords = signal(false);
+    readonly appendNumber = signal(false);
+
+    readonly separators: { value: Separator; label: string }[] = [
+        { value: '-', label: '-' },
+        { value: '.', label: '.' },
+        { value: ' ', label: 'space' },
+        { value: '_', label: '_' },
+    ];
+
+    // A compact, embedded word list — short, common English words only.
+    private readonly WORDS: readonly string[] = [
+        'able', 'acid', 'aged', 'also', 'area', 'army', 'away', 'baby', 'back', 'ball',
+        'band', 'bank', 'base', 'bath', 'bear', 'beat', 'been', 'beer', 'bell', 'belt',
+        'best', 'bike', 'bird', 'blue', 'boat', 'body', 'bomb', 'bond', 'bone', 'book',
+        'boom', 'born', 'boss', 'both', 'bowl', 'bulk', 'burn', 'bush', 'busy', 'cake',
+        'call', 'calm', 'came', 'camp', 'card', 'care', 'case', 'cash', 'cast', 'cave',
+        'cell', 'chat', 'chip', 'city', 'club', 'coal', 'coat', 'code', 'cold', 'come',
+        'cook', 'cool', 'cope', 'copy', 'core', 'cost', 'crew', 'crop', 'dark', 'data',
+        'date', 'dawn', 'days', 'dead', 'deal', 'dean', 'dear', 'debt', 'deep', 'deny',
+        'desk', 'dial', 'diet', 'disc', 'disk', 'does', 'done', 'door', 'dose', 'down',
+        'draw', 'drop', 'drug', 'dual', 'duke', 'dust', 'duty', 'each', 'earn', 'ease',
+        'east', 'easy', 'edge', 'else', 'even', 'ever', 'evil', 'exit', 'face', 'fact',
+        'fail', 'fair', 'fall', 'farm', 'fast', 'fate', 'fear', 'feed', 'feel', 'file',
+        'fill', 'film', 'find', 'fine', 'fire', 'firm', 'fish', 'five', 'flat', 'flow',
+        'food', 'foot', 'fork', 'form', 'fort', 'four', 'free', 'from', 'fuel', 'full',
+        'fund', 'gain', 'game', 'gate', 'gave', 'gear', 'gene', 'gift', 'girl', 'give',
+        'glad', 'goal', 'goes', 'gold', 'golf', 'gone', 'good', 'gray', 'grew', 'grey',
+        'grid', 'grow', 'gulf', 'hair', 'half', 'hall', 'hand', 'hang', 'hard', 'harm',
+        'hate', 'have', 'head', 'hear', 'heat', 'held', 'hell', 'help', 'here', 'hero',
+        'high', 'hill', 'hire', 'hold', 'hole', 'holy', 'home', 'hope', 'horn', 'host',
+        'hour', 'huge', 'hung', 'hunt', 'hurt', 'idea', 'inch', 'into', 'iron', 'item',
+        'jazz', 'join', 'joke', 'jump', 'jury', 'just', 'keen', 'keep', 'kept', 'kick',
+        'kind', 'king', 'knee', 'knew', 'lack', 'lady', 'lake', 'land', 'lane', 'last',
+        'late', 'lead', 'leaf', 'lean', 'left', 'less', 'life', 'lift', 'like', 'line',
+        'link', 'list', 'live', 'load', 'loan', 'lock', 'logo', 'long', 'look', 'lord',
+        'lose', 'loss', 'lost', 'love', 'luck', 'made', 'mail', 'main', 'make', 'many',
+        'mark', 'mask', 'mass', 'meal', 'mean', 'meat', 'meet', 'menu', 'mere', 'mesh',
+        'mild', 'mile', 'milk', 'mind', 'mine', 'miss', 'mode', 'mood', 'moon', 'more',
+        'most', 'move', 'much', 'must', 'name', 'navy', 'near', 'neck', 'need', 'news',
+        'next', 'nice', 'nine', 'none', 'norm', 'nose', 'note', 'okay', 'once', 'only',
+        'onto', 'open', 'oral', 'over', 'pace', 'pack', 'page', 'paid', 'pain', 'pair',
+        'palm', 'park', 'part', 'pass', 'past', 'path', 'peak', 'pick', 'pile', 'pine',
+        'pink', 'pipe', 'plan', 'play', 'plot', 'plug', 'plus', 'poll', 'pool', 'poor',
+    ];
+
     readonly password = signal('');
     readonly copied = signal(false);
+
+    // --- Batch generate --------------------------------------------------------
+    readonly batchResults = signal<string[]>([]);
+    readonly batchCopiedIndex = signal<number | null>(null);
 
     // --- Hash panel (backend) ----------------------------------------------
     readonly showHash = signal(false);
@@ -113,22 +172,67 @@ export class PasswordGenComponent implements OnInit {
         return pool;
     }
 
-    /** Generate a new password. `report` records explicit user-triggered runs. */
-    regenerate(report = true): void {
+    private generatePassword(): string {
         const pool = this.buildPool();
-        if (!pool) {
-            this.password.set('');
-            return;
-        }
+        if (!pool) return '';
         const len = Math.max(8, Math.min(64, Math.floor(Number(this.length()) || 8)));
         let out = '';
         for (let i = 0; i < len; i++) {
             out += pool[this.randomInt(pool.length)];
         }
+        return out;
+    }
+
+    private generatePassphrase(): string {
+        const count = Math.max(3, Math.min(8, Math.floor(Number(this.wordCount()) || 5)));
+        const words: string[] = [];
+        for (let i = 0; i < count; i++) {
+            let w = this.WORDS[this.randomInt(this.WORDS.length)];
+            if (this.capitalizeWords()) w = w.charAt(0).toUpperCase() + w.slice(1);
+            words.push(w);
+        }
+        let out = words.join(this.separator());
+        if (this.appendNumber()) {
+            out += this.separator() + String(this.randomInt(10000));
+        }
+        return out;
+    }
+
+    /** Generate one value for whichever mode is currently active. */
+    private generateOne(): string {
+        return this.mode() === 'passphrase' ? this.generatePassphrase() : this.generatePassword();
+    }
+
+    setMode(mode: Mode): void {
+        this.mode.set(mode);
+        this.batchResults.set([]);
+        if (isPlatformBrowser(this.platformId)) this.regenerate(false);
+    }
+
+    /** Generate a new password/passphrase. `report` records explicit user-triggered runs. */
+    regenerate(report = true): void {
+        const out = this.generateOne();
         this.password.set(out);
         if (report) {
-            this.api.reportUsage({ toolId: 'password-gen', action: 'generate', metadata: { length: len } });
+            this.api.reportUsage({ toolId: 'password-gen', action: 'generate', metadata: { mode: this.mode() } });
         }
+    }
+
+    /** Generate a batch of 5 values for whichever mode is active. */
+    generateBatch(): void {
+        if (!isPlatformBrowser(this.platformId)) return;
+        const results: string[] = [];
+        for (let i = 0; i < 5; i++) results.push(this.generateOne());
+        this.batchResults.set(results);
+        this.batchCopiedIndex.set(null);
+        this.api.reportUsage({ toolId: 'password-gen', action: 'batch', metadata: { mode: this.mode() } });
+    }
+
+    /** Use a batch entry as the "current" value for hashing. */
+    useForHash(value: string): void {
+        this.password.set(value);
+        this.hashResult.set(null);
+        this.hashError.set(null);
     }
 
     async copyPassword(): Promise<void> {
@@ -138,6 +242,17 @@ export class PasswordGenComponent implements OnInit {
         if (await copyText(pw)) {
             this.copied.set(true);
             setTimeout(() => this.copied.set(false), 1400);
+            this.api.reportUsage({ toolId: 'password-gen', action: 'copy' });
+        }
+    }
+
+    async copyBatchItem(value: string, index: number): Promise<void> {
+        if (!isPlatformBrowser(this.platformId)) return;
+        if (await copyText(value)) {
+            this.batchCopiedIndex.set(index);
+            setTimeout(() => {
+                if (this.batchCopiedIndex() === index) this.batchCopiedIndex.set(null);
+            }, 1400);
             this.api.reportUsage({ toolId: 'password-gen', action: 'copy' });
         }
     }

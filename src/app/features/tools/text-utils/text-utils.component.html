@@ -1,0 +1,126 @@
+<app-tool-page title="Text Utilities" icon="bi-type"
+    blurb="Change case, slugify, count words and characters, and generate lorem ipsum.">
+
+    <div class="tu">
+        <!-- Mode toggle -->
+        <div class="t-tabs" role="tablist" aria-label="Utility">
+            <button type="button" class="t-tab" [class.active]="mode() === 'case'" (click)="setMode('case')">Case</button>
+            <button type="button" class="t-tab" [class.active]="mode() === 'slug'" (click)="setMode('slug')">Slug</button>
+            <button type="button" class="t-tab" [class.active]="mode() === 'counter'" (click)="setMode('counter')">Counter</button>
+            <button type="button" class="t-tab" [class.active]="mode() === 'lorem'" (click)="setMode('lorem')">Lorem</button>
+        </div>
+
+        <!-- Case -->
+        @if (mode() === 'case') {
+        <div class="tu-panel">
+            <label class="t-label" for="tuCaseIn">Input</label>
+            <textarea id="tuCaseIn" class="t-textarea tu-area" spellcheck="false"
+                placeholder="Type or paste text…"
+                [ngModel]="caseInput()" (ngModelChange)="caseInput.set($event)"></textarea>
+
+            <div class="tu-case-btns">
+                @for (b of caseButtons; track b.id) {
+                <button type="button" class="t-btn t-btn--ghost" (click)="applyCase(b.id)">{{ b.label }}</button>
+                }
+            </div>
+
+            @if (caseOutput()) {
+            <div class="tu-out-head">
+                <label class="t-label" for="tuCaseOut">Output</label>
+                <button type="button" class="t-btn t-btn--ghost" (click)="copy('case', caseOutput())">
+                    <i class="bi" [class]="copied() === 'case' ? 'bi-check2' : 'bi-clipboard'"></i>
+                    {{ copied() === 'case' ? 'Copied' : 'Copy' }}
+                </button>
+            </div>
+            <textarea id="tuCaseOut" class="t-textarea tu-area" readonly [value]="caseOutput()"></textarea>
+            }
+        </div>
+        }
+
+        <!-- Slug -->
+        @if (mode() === 'slug') {
+        <div class="tu-panel">
+            <label class="t-label" for="tuSlugIn">Input</label>
+            <input id="tuSlugIn" class="t-field" type="text" spellcheck="false"
+                placeholder="My Great Blog Post — Draft #2!"
+                [ngModel]="slugInput()" (ngModelChange)="slugInput.set($event)" />
+
+            <div class="tu-out-head">
+                <label class="t-label">Slug</label>
+                <button type="button" class="t-btn t-btn--ghost" (click)="copy('slug', slugOutput())" [disabled]="!slugOutput()">
+                    <i class="bi" [class]="copied() === 'slug' ? 'bi-check2' : 'bi-clipboard'"></i>
+                    {{ copied() === 'slug' ? 'Copied' : 'Copy' }}
+                </button>
+            </div>
+            <div class="t-result">
+                <span class="t-result-value tu-slug">{{ slugOutput() || '—' }}</span>
+            </div>
+        </div>
+        }
+
+        <!-- Counter -->
+        @if (mode() === 'counter') {
+        <div class="tu-panel">
+            <label class="t-label" for="tuCountIn">Text</label>
+            <textarea id="tuCountIn" class="t-textarea tu-area" spellcheck="false"
+                placeholder="Paste text to analyse…"
+                [ngModel]="counterInput()" (ngModelChange)="counterInput.set($event)"></textarea>
+
+            @if (counterStats(); as s) {
+            <div class="t-stats">
+                <div class="t-stat"><span class="t-stat-num">{{ s.chars }}</span><span class="t-stat-label">Characters</span></div>
+                <div class="t-stat"><span class="t-stat-num">{{ s.charsNoSpaces }}</span><span class="t-stat-label">No spaces</span></div>
+                <div class="t-stat"><span class="t-stat-num">{{ s.words }}</span><span class="t-stat-label">Words</span></div>
+                <div class="t-stat"><span class="t-stat-num">{{ s.sentences }}</span><span class="t-stat-label">Sentences</span></div>
+                <div class="t-stat"><span class="t-stat-num">{{ s.paragraphs }}</span><span class="t-stat-label">Paragraphs</span></div>
+                <div class="t-stat"><span class="t-stat-num">{{ s.uniqueWords }}</span><span class="t-stat-label">Unique words</span></div>
+                <div class="t-stat"><span class="t-stat-num">{{ s.readingMin }} min</span><span class="t-stat-label">Reading</span></div>
+                <div class="t-stat"><span class="t-stat-num">{{ s.speakingMin }} min</span><span class="t-stat-label">Speaking</span></div>
+            </div>
+            }
+        </div>
+        }
+
+        <!-- Lorem -->
+        @if (mode() === 'lorem') {
+        <div class="tu-panel">
+            <div class="tu-lorem-opts">
+                <div class="tu-opt">
+                    <label class="t-label" for="tuLoremMode">Generate</label>
+                    <select id="tuLoremMode" class="t-field" [ngModel]="loremMode()" (ngModelChange)="loremMode.set($event)">
+                        <option value="paragraphs">Paragraphs</option>
+                        <option value="sentences">Sentences</option>
+                        <option value="words">Words</option>
+                    </select>
+                </div>
+                <div class="tu-opt">
+                    <label class="t-label" for="tuLoremCount">Count (1–50)</label>
+                    <input id="tuLoremCount" class="t-field" type="number" min="1" max="50"
+                        [ngModel]="loremCount()" (ngModelChange)="loremCount.set(+$event)" />
+                </div>
+                <label class="t-check tu-opt-check">
+                    <input type="checkbox" [checked]="loremClassicStart()"
+                        (change)="loremClassicStart.set($any($event.target).checked)" />
+                    Start with "Lorem ipsum"
+                </label>
+            </div>
+
+            <div class="t-actions">
+                <button type="button" class="t-btn" (click)="generateLorem()">
+                    <i class="bi bi-fonts"></i> Generate
+                </button>
+                @if (loremOutput()) {
+                <button type="button" class="t-btn t-btn--ghost" (click)="copy('lorem', loremOutput())">
+                    <i class="bi" [class]="copied() === 'lorem' ? 'bi-check2' : 'bi-clipboard'"></i>
+                    {{ copied() === 'lorem' ? 'Copied' : 'Copy' }}
+                </button>
+                }
+            </div>
+
+            @if (loremOutput()) {
+            <textarea class="t-textarea tu-area tu-lorem-out" readonly [value]="loremOutput()"></textarea>
+            }
+        </div>
+        }
+    </div>
+</app-tool-page>

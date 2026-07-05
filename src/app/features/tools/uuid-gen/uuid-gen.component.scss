@@ -1,0 +1,56 @@
+@use '../shared/tool-controls';
+
+.ug {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.ug-opts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem 1.5rem;
+}
+
+.ug-opt {
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+}
+
+.ug-opt-check {
+    padding-bottom: 0.6rem;
+}
+
+.ug-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.ug-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 0.35rem 0.35rem 0.35rem 0.8rem;
+}
+
+.ug-id {
+    flex: 1;
+    font-family: var(--font);
+    font-size: 0.82rem;
+    color: var(--text);
+    word-break: break-all;
+}
+
+.ug-copy {
+    padding: 0.35rem 0.6rem;
+    flex-shrink: 0;
+}

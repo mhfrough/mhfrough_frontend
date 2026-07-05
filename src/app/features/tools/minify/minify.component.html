@@ -14,6 +14,7 @@
         </div>
 
         <!-- Options -->
+        @if (language() === 'html') {
         <div class="min-options">
             @for (opt of currentOptions(); track opt.key) {
             <label class="t-check">
@@ -23,6 +24,36 @@
             </label>
             }
         </div>
+        }
+
+        @if (language() === 'css') {
+        <div class="min-options">
+            <div class="min-select">
+                <label class="t-label" for="minCssLevel">Optimization level</label>
+                <select id="minCssLevel" class="t-field" [ngModel]="cssLevel()"
+                    (ngModelChange)="setCssLevel($any($event))">
+                    <option [ngValue]="0">0 — None</option>
+                    <option [ngValue]="1">1 — Safe (default)</option>
+                    <option [ngValue]="2">2 — Aggressive</option>
+                </select>
+            </div>
+        </div>
+        }
+
+        @if (language() === 'js') {
+        <div class="min-options">
+            <label class="t-check">
+                <input type="checkbox" [checked]="jsCompress()"
+                    (change)="jsCompress.set($any($event.target).checked)" />
+                Compress
+            </label>
+            <label class="t-check">
+                <input type="checkbox" [checked]="jsMangle()"
+                    (change)="jsMangle.set($any($event.target).checked)" />
+                Mangle names
+            </label>
+        </div>
+        }
 
         <!-- Input -->
         <div>

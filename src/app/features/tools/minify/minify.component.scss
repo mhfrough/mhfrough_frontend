@@ -9,7 +9,13 @@
 .min-options {
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-end;
     gap: 1rem 1.5rem;
+}
+
+.min-select {
+    flex: 0 1 220px;
+    min-width: 180px;
 }
 
 .min-output {

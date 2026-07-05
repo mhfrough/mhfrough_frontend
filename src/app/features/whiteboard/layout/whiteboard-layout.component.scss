@@ -1,0 +1,77 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--bg-alt);
+    color: var(--text);
+}
+
+// --- Header --------------------------------------------------------------
+.wb-header {
+    flex-shrink: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.wb-nav {
+    padding: 0 1.25rem;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.wb-wordmark {
+    font-family: var(--font);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    text-decoration: none;
+    transition: opacity var(--dur) var(--ease);
+
+    &:hover {
+        opacity: 0.7;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}
+
+.wb-tag {
+    color: var(--primary);
+    margin-left: 0.4rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+}
+
+.wb-back {
+    font-family: var(--font);
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
+
+    &:hover {
+        color: var(--text);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}
+
+// --- Board -----------------------------------------------------------------
+.wb-main {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+}

@@ -1,0 +1,74 @@
+<app-tool-page title="UUID / ULID Generator" icon="bi-hash" [error]="error()"
+    blurb="Generate UUID v4s, ULIDs and random IDs in bulk with cryptographically secure randomness.">
+
+    <div class="ug">
+        <!-- Type toggle -->
+        <div class="t-tabs" role="tablist" aria-label="ID type">
+            @for (t of typeTabs; track t.id) {
+            <button type="button" class="t-tab" [class.active]="type() === t.id" (click)="setType(t.id)">{{ t.label }}</button>
+            }
+        </div>
+
+        <div class="ug-opts">
+            <div class="ug-opt">
+                <label class="t-label" for="ugCount">Count (1–100)</label>
+                <input id="ugCount" class="t-field" type="number" min="1" max="100"
+                    [ngModel]="count()" (ngModelChange)="count.set(+$event)" />
+            </div>
+
+            @if (type() === 'hex') {
+            <div class="ug-opt">
+                <label class="t-label" for="ugLen">Length</label>
+                <select id="ugLen" class="t-field" [ngModel]="hexLength()" (ngModelChange)="hexLength.set(+$event)">
+                    @for (l of hexLengths; track l) {
+                    <option [value]="l">{{ l }} chars</option>
+                    }
+                </select>
+            </div>
+            }
+
+            <label class="t-check ug-opt-check">
+                <input type="checkbox" [checked]="uppercase()"
+                    (change)="uppercase.set($any($event.target).checked)" />
+                Uppercase
+            </label>
+
+            @if (type() === 'uuid') {
+            <label class="t-check ug-opt-check">
+                <input type="checkbox" [checked]="noDashes()"
+                    (change)="noDashes.set($any($event.target).checked)" />
+                No dashes
+            </label>
+            }
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="generate()">
+                <i class="bi bi-arrow-repeat"></i> Generate
+            </button>
+            @if (ids().length) {
+            <button type="button" class="t-btn t-btn--ghost" (click)="copyAll()">
+                <i class="bi" [class]="copiedAll() ? 'bi-check2' : 'bi-clipboard'"></i>
+                {{ copiedAll() ? 'Copied' : 'Copy all' }}
+            </button>
+            <button type="button" class="t-btn t-btn--ghost" (click)="download()">
+                <i class="bi bi-download"></i> Download
+            </button>
+            }
+        </div>
+
+        @if (ids().length) {
+        <ul class="ug-list">
+            @for (id of ids(); track $index) {
+            <li class="ug-item">
+                <code class="ug-id">{{ id }}</code>
+                <button type="button" class="t-btn t-btn--ghost ug-copy" (click)="copyOne($index)"
+                    [attr.aria-label]="'Copy ' + id">
+                    <i class="bi" [class]="copiedIndex() === $index ? 'bi-check2' : 'bi-clipboard'"></i>
+                </button>
+            </li>
+            }
+        </ul>
+        }
+    </div>
+</app-tool-page>

@@ -1,0 +1,64 @@
+:host {
+    // Bottom-center (tldraw-style): the top row is taken by the topbar (left)
+    // and collab bar (right), which the centered tool strip overlapped.
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    max-width: calc(100% - 2rem);
+}
+
+.wb-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    font-family: var(--font);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.35rem;
+    overflow-x: auto;
+    max-width: 100%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.wb-tool-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 0.2rem;
+    flex-shrink: 0;
+}
+
+.wb-tool-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius);
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 0.9rem;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+
+    &:hover {
+        background: var(--bg-alt);
+        color: var(--text);
+    }
+
+    &.active {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}

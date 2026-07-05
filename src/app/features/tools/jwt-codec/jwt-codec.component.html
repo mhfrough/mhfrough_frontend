@@ -80,6 +80,43 @@
                             [value]="payload()"></textarea>
                     </div>
                 </div>
+
+                <!-- Opt-in signature verification -->
+                <div class="jwt-verify">
+                    <label class="t-label" for="jwtVerifySecret">Verify signature (optional)</label>
+                    <div class="t-row">
+                        <div class="jwt-field">
+                            <input id="jwtVerifySecret" class="t-field" type="text" autocomplete="off" spellcheck="false"
+                                placeholder="Secret used to sign this token"
+                                [ngModel]="verifySecret()" (ngModelChange)="verifySecret.set($event)" />
+                        </div>
+                        <div class="jwt-field jwt-field--btn">
+                            <button type="button" class="t-btn" (click)="verify()" [disabled]="verifyLoading()">
+                                <i class="bi bi-patch-check"></i> Verify signature
+                            </button>
+                        </div>
+                    </div>
+
+                    @if (verifyError()) {
+                    <div class="jwt-alert" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>{{ verifyError() }}</span>
+                    </div>
+                    }
+
+                    @if (verifyResult(); as v) {
+                    <div class="jwt-verify-banner" [class.is-valid]="v.valid" [class.is-invalid]="!v.valid" role="status">
+                        <i class="bi" [class]="v.valid ? 'bi-shield-check' : 'bi-shield-x'"></i>
+                        <span>
+                            @if (v.valid) {
+                            Signature is valid.
+                            } @else {
+                            Signature is invalid{{ v.error ? ': ' + v.error : '.' }}
+                            }
+                        </span>
+                    </div>
+                    }
+                </div>
             </div>
             }
         </div>

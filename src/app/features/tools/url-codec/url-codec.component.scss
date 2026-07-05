@@ -19,6 +19,21 @@
     gap: 1rem 1.25rem;
 }
 
+.uc-file {
+    position: relative;
+    overflow: hidden;
+}
+
+.uc-filename {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
 .uc-output {
     display: flex;
     flex-direction: column;

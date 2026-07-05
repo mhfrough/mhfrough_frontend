@@ -1,7 +1,21 @@
-<app-tool-page title="URL Encoder / Decoder" icon="bi-link-45deg" [error]="error()"
-    blurb="Encode and decode URLs and URL components safely. Everything runs in your browser.">
+<app-tool-page title="Encode / Decode Toolkit" icon="bi-link-45deg" [error]="activeError()"
+    blurb="Encode and decode URL components, Base64, hex and HTML entities in one place.">
 
     <div class="uc">
+        <!-- Codec mode -->
+        <div class="t-tabs" role="tablist" aria-label="Codec">
+            <button type="button" class="t-tab" [class.active]="codec() === 'url'"
+                (click)="setCodec('url')">URL</button>
+            <button type="button" class="t-tab" [class.active]="codec() === 'base64'"
+                (click)="setCodec('base64')">Base64</button>
+            <button type="button" class="t-tab" [class.active]="codec() === 'hex'"
+                (click)="setCodec('hex')">Hex</button>
+            <button type="button" class="t-tab" [class.active]="codec() === 'html'"
+                (click)="setCodec('html')">HTML Entities</button>
+        </div>
+
+        <!-- ============================= URL ============================= -->
+        @if (codec() === 'url') {
         <div class="uc-controls">
             <!-- Direction -->
             <div class="t-tabs" role="tablist" aria-label="Direction">
@@ -55,5 +69,151 @@
             </div>
             <textarea id="ucOutput" class="t-textarea" readonly spellcheck="false" [value]="output()"></textarea>
         </div>
+        }
+
+        <!-- ============================ Base64 ============================ -->
+        @if (codec() === 'base64') {
+        <div class="uc-controls">
+            <!-- Direction -->
+            <div class="t-tabs" role="tablist" aria-label="Direction">
+                <button type="button" class="t-tab" [class.active]="b64Mode() === 'encode'"
+                    (click)="setB64Mode('encode')">Encode</button>
+                <button type="button" class="t-tab" [class.active]="b64Mode() === 'decode'"
+                    (click)="setB64Mode('decode')">Decode</button>
+            </div>
+
+            @if (b64Mode() === 'encode') {
+            <label class="t-btn t-btn--ghost uc-file">
+                <i class="bi bi-paperclip"></i> Encode a file…
+                <input type="file" (change)="onFile($event)" hidden />
+            </label>
+            }
+        </div>
+
+        @if (b64FileName()) {
+        <p class="uc-filename"><i class="bi bi-file-earmark"></i> {{ b64FileName() }}</p>
+        }
+
+        <!-- Input -->
+        <div>
+            <label class="t-label" for="b64Input">{{ b64Mode() === 'encode' ? 'Text input' : 'Base64 input' }}</label>
+            <textarea id="b64Input" class="t-textarea" spellcheck="false"
+                placeholder="{{ b64Mode() === 'encode' ? 'Type or paste text to encode…' : 'Paste Base64 to decode…' }}"
+                [ngModel]="b64Input()" (ngModelChange)="b64Input.set($event)" (change)="runB64()"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="runB64()">
+                <i class="bi" [class]="b64Mode() === 'encode' ? 'bi-lock' : 'bi-unlock'"></i>
+                {{ b64Mode() === 'encode' ? 'Encode' : 'Decode' }}
+            </button>
+            <button type="button" class="t-btn t-btn--ghost" (click)="swapB64()">
+                <i class="bi bi-arrow-down-up"></i> Swap
+            </button>
+        </div>
+
+        <!-- Output -->
+        <div class="uc-output">
+            <div class="uc-output-head">
+                <label class="t-label" for="b64Output">Output</label>
+                <div class="t-actions">
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copyB64Output()" [disabled]="!b64Output()">
+                        <i class="bi" [class]="b64Copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ b64Copied() ? 'Copied' : 'Copy' }}
+                    </button>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="downloadB64Output()" [disabled]="!b64Output()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                </div>
+            </div>
+            <textarea id="b64Output" class="t-textarea" readonly spellcheck="false" [value]="b64Output()"></textarea>
+        </div>
+        }
+
+        <!-- ============================= Hex ============================= -->
+        @if (codec() === 'hex') {
+        <div class="uc-controls">
+            <!-- Direction -->
+            <div class="t-tabs" role="tablist" aria-label="Direction">
+                <button type="button" class="t-tab" [class.active]="hexMode() === 'encode'"
+                    (click)="setHexMode('encode')">Encode</button>
+                <button type="button" class="t-tab" [class.active]="hexMode() === 'decode'"
+                    (click)="setHexMode('decode')">Decode</button>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div>
+            <label class="t-label" for="hexInput">{{ hexMode() === 'encode' ? 'Text input' : 'Hex input' }}</label>
+            <textarea id="hexInput" class="t-textarea" spellcheck="false"
+                placeholder="{{ hexMode() === 'encode' ? 'Type or paste text to encode…' : 'Paste hex pairs to decode…' }}"
+                [ngModel]="hexInput()" (ngModelChange)="hexInput.set($event)" (change)="runHex()"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="runHex()">
+                <i class="bi" [class]="hexMode() === 'encode' ? 'bi-lock' : 'bi-unlock'"></i>
+                {{ hexMode() === 'encode' ? 'Encode' : 'Decode' }}
+            </button>
+            <button type="button" class="t-btn t-btn--ghost" (click)="swapHex()">
+                <i class="bi bi-arrow-down-up"></i> Swap
+            </button>
+        </div>
+
+        <!-- Output -->
+        <div class="uc-output">
+            <div class="uc-output-head">
+                <label class="t-label" for="hexOutput">Output</label>
+                <button type="button" class="t-btn t-btn--ghost" (click)="copyHexOutput()" [disabled]="!hexOutput()">
+                    <i class="bi" [class]="hexCopied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                    {{ hexCopied() ? 'Copied' : 'Copy' }}
+                </button>
+            </div>
+            <textarea id="hexOutput" class="t-textarea" readonly spellcheck="false" [value]="hexOutput()"></textarea>
+        </div>
+        }
+
+        <!-- =========================== HTML Entities ======================= -->
+        @if (codec() === 'html') {
+        <div class="uc-controls">
+            <!-- Direction -->
+            <div class="t-tabs" role="tablist" aria-label="Direction">
+                <button type="button" class="t-tab" [class.active]="htmlMode() === 'encode'"
+                    (click)="setHtmlMode('encode')">Encode</button>
+                <button type="button" class="t-tab" [class.active]="htmlMode() === 'decode'"
+                    (click)="setHtmlMode('decode')">Decode</button>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div>
+            <label class="t-label" for="htmlInput">{{ htmlMode() === 'encode' ? 'Text input' : 'HTML input' }}</label>
+            <textarea id="htmlInput" class="t-textarea" spellcheck="false"
+                placeholder="{{ htmlMode() === 'encode' ? 'Type or paste text to escape…' : 'Paste HTML entities to decode…' }}"
+                [ngModel]="htmlInput()" (ngModelChange)="htmlInput.set($event)" (change)="runHtml()"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="runHtml()">
+                <i class="bi" [class]="htmlMode() === 'encode' ? 'bi-lock' : 'bi-unlock'"></i>
+                {{ htmlMode() === 'encode' ? 'Encode' : 'Decode' }}
+            </button>
+            <button type="button" class="t-btn t-btn--ghost" (click)="swapHtml()">
+                <i class="bi bi-arrow-down-up"></i> Swap
+            </button>
+        </div>
+
+        <!-- Output -->
+        <div class="uc-output">
+            <div class="uc-output-head">
+                <label class="t-label" for="htmlOutput">Output</label>
+                <button type="button" class="t-btn t-btn--ghost" (click)="copyHtmlOutput()" [disabled]="!htmlOutput()">
+                    <i class="bi" [class]="htmlCopied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                    {{ htmlCopied() ? 'Copied' : 'Copy' }}
+                </button>
+            </div>
+            <textarea id="htmlOutput" class="t-textarea" readonly spellcheck="false" [value]="htmlOutput()"></textarea>
+        </div>
+        }
     </div>
 </app-tool-page>

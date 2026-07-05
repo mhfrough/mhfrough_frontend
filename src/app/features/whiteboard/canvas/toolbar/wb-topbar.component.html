@@ -1,0 +1,99 @@
+<div class="wb-topbar" role="toolbar" aria-label="Board actions" (click)="stop($event)">
+    <!-- Undo / redo -->
+    <button type="button" class="wb-tb-btn" title="Undo (Ctrl+Z)" aria-label="Undo" [disabled]="!history.canUndo()"
+        (click)="history.undo()">
+        <i class="bi bi-arrow-counterclockwise"></i>
+    </button>
+    <button type="button" class="wb-tb-btn" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" [disabled]="!history.canRedo()"
+        (click)="history.redo()">
+        <i class="bi bi-arrow-clockwise"></i>
+    </button>
+
+    <span class="wb-tb-sep"></span>
+
+    <!-- Versions -->
+    <div class="wb-tb-dd">
+        <button #versionsTrigger type="button" class="wb-tb-btn labelled" [class.active]="openMenu() === 'versions'"
+            (click)="toggle('versions')" title="Version history" aria-label="Version history"
+            aria-haspopup="menu" [attr.aria-expanded]="openMenu() === 'versions'">
+            <i class="bi bi-clock-history"></i>
+            <span>Versions</span>
+        </button>
+        @if (openMenu() === 'versions') {
+        <div class="wb-tb-menu" role="menu" aria-label="Version history"
+            (keydown.escape)="closeMenu(versionsTrigger)">
+            <div class="wb-tb-saverow">
+                <input type="text" class="wb-tb-input" placeholder="Snapshot label…" aria-label="Snapshot label"
+                    [value]="versionLabel()" (input)="versionLabel.set($any($event.target).value)"
+                    (keydown.enter)="saveVersion()" />
+                <button type="button" class="wb-tb-save" (click)="saveVersion()">Save</button>
+            </div>
+            @if (persistence.versions().length === 0) {
+            <p class="wb-tb-empty">No snapshots yet.</p>
+            } @else {
+            <ul class="wb-tb-list">
+                @for (v of persistence.versions(); track v.id) {
+                <li class="wb-tb-item" (click)="restore(v.id)">
+                    <div class="wb-tb-item-main">
+                        <span class="wb-tb-item-label">{{ v.label }}</span>
+                        <span class="wb-tb-item-time">{{ v.timestamp | date:'MMM d, HH:mm' }}</span>
+                    </div>
+                    <button type="button" class="wb-tb-del" (click)="deleteVersion(v.id, $event)" aria-label="Delete">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </li>
+                }
+            </ul>
+            }
+        </div>
+        }
+    </div>
+
+    <!-- Export -->
+    <div class="wb-tb-dd">
+        <button #exportTrigger type="button" class="wb-tb-btn labelled" [class.active]="openMenu() === 'export'"
+            (click)="toggle('export')" title="Export" aria-label="Export"
+            aria-haspopup="menu" [attr.aria-expanded]="openMenu() === 'export'">
+            <i class="bi bi-download"></i>
+            <span>Export</span>
+        </button>
+        @if (openMenu() === 'export') {
+        <div class="wb-tb-menu" role="menu" aria-label="Export options"
+            (keydown.escape)="closeMenu(exportTrigger)">
+            <button type="button" class="wb-tb-menuitem" (click)="exportPng()"><i class="bi bi-filetype-png"></i> PNG</button>
+            <button type="button" class="wb-tb-menuitem" (click)="exportPngTransparent()"><i class="bi bi-image"></i> PNG (transparent)</button>
+            <button type="button" class="wb-tb-menuitem" (click)="exportJpeg()"><i class="bi bi-filetype-jpg"></i> JPEG</button>
+            <button type="button" class="wb-tb-menuitem" (click)="exportSvg()"><i class="bi bi-filetype-svg"></i> SVG</button>
+            <button type="button" class="wb-tb-menuitem" (click)="exportJson()"><i class="bi bi-filetype-json"></i> JSON</button>
+            <button type="button" class="wb-tb-menuitem" (click)="copyImage()"><i class="bi bi-clipboard"></i> Copy image</button>
+            <div class="wb-tb-divider"></div>
+
+            <div class="wb-tb-pagerow">
+                <select class="wb-tb-sel" aria-label="Page size" [value]="pageSize()"
+                    (change)="pageSize.set($any($event.target).value)">
+                    @for (p of pageSizes; track p) { <option [value]="p">{{ p }}</option> }
+                </select>
+                <select class="wb-tb-sel" aria-label="Orientation" [value]="orientation()"
+                    (change)="orientation.set($any($event.target).value)">
+                    <option value="landscape">Landscape</option>
+                    <option value="portrait">Portrait</option>
+                </select>
+            </div>
+            <button type="button" class="wb-tb-menuitem" (click)="exportPdf()"><i class="bi bi-filetype-pdf"></i> PDF</button>
+            <button type="button" class="wb-tb-menuitem" (click)="print()"><i class="bi bi-printer"></i> Print / Preview</button>
+        </div>
+        }
+    </div>
+
+    <!-- Import -->
+    <button type="button" class="wb-tb-btn labelled" title="Import JSON" aria-label="Import JSON"
+        (click)="triggerImport()">
+        <i class="bi bi-upload"></i>
+        <span>Import</span>
+    </button>
+    <input #fileInput type="file" accept="application/json,.json" hidden (change)="onImport($event)" />
+
+    @if (persistence.lastSaved(); as ts) {
+    <span class="wb-tb-saved"><i class="bi bi-cloud-check"></i> Saved {{ ts | date:'HH:mm' }}</span>
+    }
+</div>

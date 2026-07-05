@@ -1,0 +1,19 @@
+@for (el of elements; track el.id) {
+@if (isText(el)) {
+<div class="wb-text-el" contenteditable="true" spellcheck="false"
+    [style.left.px]="el.x" [style.top.px]="el.y" [style.width.px]="el.width" [style.min-height.px]="el.height"
+    [style.font-family]="el.fontFamily" [style.font-size.px]="el.fontSize"
+    [style.font-weight]="el.fontWeight" [style.font-style]="el.italic ? 'italic' : 'normal'"
+    [style.text-decoration]="el.underline ? 'underline' : 'none'" [style.text-align]="el.textAlign"
+    [style.color]="el.color" [style.opacity]="el.style.opacity"
+    (pointerdown)="stop($event)" (blur)="commitText(el.id, $event.target)">{{ el.text }}</div>
+}
+@if (isSticky(el)) {
+<div class="wb-sticky-el" [style.left.px]="el.x" [style.top.px]="el.y" [style.width.px]="el.width"
+    [style.height.px]="el.height" [style.background]="el.fill" [style.opacity]="el.style.opacity"
+    (pointerdown)="stop($event)">
+    <div class="wb-sticky-text" contenteditable="true" spellcheck="false" [style.font-size.px]="el.fontSize"
+        (blur)="commitText(el.id, $event.target)">{{ el.text }}</div>
+</div>
+}
+}

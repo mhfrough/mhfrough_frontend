@@ -11,6 +11,8 @@ interface OptionDef {
     label: string;
 }
 
+type CssLevel = 0 | 1 | 2;
+
 @Component({
     selector: 'app-minify',
     standalone: true,
@@ -38,6 +40,10 @@ export class MinifyComponent implements OnInit {
             { key: 'removeComments', label: 'Remove comments' },
             { key: 'minifyCSS', label: 'Minify inline CSS' },
             { key: 'minifyJS', label: 'Minify inline JS' },
+            { key: 'minifyURLs', label: 'Minify URLs' },
+            { key: 'removeAttributeQuotes', label: 'Remove attribute quotes' },
+            { key: 'sortAttributes', label: 'Sort attributes' },
+            { key: 'sortClassName', label: 'Sort class names' },
         ],
         css: [
             { key: 'removeComments', label: 'Remove comments' },
@@ -47,15 +53,26 @@ export class MinifyComponent implements OnInit {
         ],
     };
 
-    // Per-language option state, defaulting everything on.
+    // Per-language option state, defaulting everything on (new toggles default off).
     readonly options = signal<Record<string, boolean>>({
         collapseWhitespace: true,
         removeComments: true,
         minifyCSS: true,
         minifyJS: true,
+        minifyURLs: false,
+        removeAttributeQuotes: false,
+        sortAttributes: false,
+        sortClassName: false,
     });
 
     readonly currentOptions = computed(() => this.optionDefs[this.language()]);
+
+    // CSS: CleanCSS optimization level (0 = none, 1 = safe (default), 2 = aggressive).
+    readonly cssLevel = signal<CssLevel>(1);
+
+    // JS: terser compress / mangle toggles (both default on).
+    readonly jsCompress = signal(true);
+    readonly jsMangle = signal(true);
 
     readonly outputBytes = computed(() => this.result()?.bytesOut ?? 0);
 
@@ -79,28 +96,40 @@ export class MinifyComponent implements OnInit {
         this.options.update(o => ({ ...o, [key]: checked }));
     }
 
+    setCssLevel(level: CssLevel): void {
+        this.cssLevel.set(level);
+    }
+
     minify(): void {
         const code = this.code();
         if (!code.trim()) {
             this.error.set('Paste some code to minify first.');
             return;
         }
-        // Only send options relevant to the active language.
-        const opts: Record<string, boolean> = {};
-        for (const def of this.currentOptions()) opts[def.key] = !!this.options()[def.key];
+        const language = this.language();
+        // Build the options object per-language.
+        let opts: Record<string, unknown>;
+        if (language === 'css') {
+            opts = { level: this.cssLevel() };
+        } else if (language === 'js') {
+            opts = { compress: this.jsCompress(), mangle: this.jsMangle() };
+        } else {
+            opts = {};
+            for (const def of this.currentOptions()) opts[def.key] = !!this.options()[def.key];
+        }
 
         this.loading.set(true);
         this.error.set(null);
         this.result.set(null);
 
-        this.api.minify({ language: this.language(), code, options: opts }).subscribe({
+        this.api.minify({ language, code, options: opts }).subscribe({
             next: (res) => {
                 this.result.set(res);
                 this.loading.set(false);
                 this.api.reportUsage({
                     toolId: 'minify',
                     action: 'minify',
-                    metadata: { language: this.language(), savedPct: res.savedPct },
+                    metadata: { language, savedPct: res.savedPct },
                 });
             },
             error: (err) => {

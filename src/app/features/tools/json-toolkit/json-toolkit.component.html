@@ -1,0 +1,84 @@
+<app-tool-page title="JSON Toolkit" icon="bi-braces" [error]="error()"
+    blurb="Format, validate, minify and sort JSON, or turn it into a TypeScript interface.">
+
+    <div class="jt">
+        <!-- Mode toggle -->
+        <div class="jt-controls">
+            <div class="t-tabs" role="tablist" aria-label="Mode">
+                <button type="button" class="t-tab" [class.active]="mode() === 'format'"
+                    (click)="setMode('format')">Format</button>
+                <button type="button" class="t-tab" [class.active]="mode() === 'minify'"
+                    (click)="setMode('minify')">Minify</button>
+                <button type="button" class="t-tab" [class.active]="mode() === 'sort'"
+                    (click)="setMode('sort')">Sort keys</button>
+                <button type="button" class="t-tab" [class.active]="mode() === 'typescript'"
+                    (click)="setMode('typescript')">To TypeScript</button>
+            </div>
+
+            @if (mode() === 'format') {
+            <div class="jt-indent">
+                <label class="t-label" for="jtIndent">Indent</label>
+                <select id="jtIndent" class="t-field" [ngModel]="indent()" (ngModelChange)="indent.set($event)">
+                    <option value="2">2 spaces</option>
+                    <option value="4">4 spaces</option>
+                    <option value="tab">Tab</option>
+                </select>
+            </div>
+            }
+        </div>
+
+        <!-- Input -->
+        <div>
+            <label class="t-label" for="jtInput">JSON input</label>
+            <textarea id="jtInput" class="t-textarea" spellcheck="false"
+                placeholder='&#123; "paste": "your JSON here" &#125;'
+                [ngModel]="input()" (ngModelChange)="input.set($event)"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="run()">
+                <i class="bi bi-play"></i>
+                @switch (mode()) {
+                @case ('format') { Format }
+                @case ('minify') { Minify }
+                @case ('sort') { Sort keys }
+                @case ('typescript') { Generate types }
+                }
+            </button>
+        </div>
+
+        <!-- Output -->
+        @if (output(); as out) {
+        <div class="jt-output">
+            <div class="jt-output-head">
+                <label class="t-label" for="jtOutput">
+                    {{ mode() === 'typescript' ? 'TypeScript output' : 'JSON output' }}
+                </label>
+                <div class="t-actions">
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copyOutput()">
+                        <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copied() ? 'Copied' : 'Copy' }}
+                    </button>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="downloadOutput()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                </div>
+            </div>
+            <textarea id="jtOutput" class="t-textarea" readonly spellcheck="false" [value]="out"></textarea>
+
+            @if (bytesIn() !== null && bytesOut() !== null) {
+            <div class="t-stats">
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ bytesIn() | number }}</span>
+                    <span class="t-stat-label">Bytes in</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ bytesOut() | number }}</span>
+                    <span class="t-stat-label">Bytes out</span>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+</app-tool-page>

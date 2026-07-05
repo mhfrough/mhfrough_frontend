@@ -2,7 +2,7 @@ import { Component, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SeoService } from '../../../core/services/seo.service';
-import { ToolsApiService } from '../tools-api.service';
+import { ToolsApiService, JwtVerifyResponse } from '../tools-api.service';
 import { ToolPageComponent } from '../shared/tool-page.component';
 import { copyText } from '../shared/clipboard.util';
 
@@ -32,6 +32,12 @@ export class JwtCodecComponent implements OnInit {
     readonly expiresAt = signal<string | null>(null);
     readonly decodeError = signal<string | null>(null);
     readonly copiedDecode = signal(false);
+
+    // --- Verify (backend, opt-in from the Decode tab) -----------------------
+    readonly verifySecret = signal('');
+    readonly verifyLoading = signal(false);
+    readonly verifyResult = signal<JwtVerifyResponse | null>(null);
+    readonly verifyError = signal<string | null>(null);
 
     // --- Encode (backend) --------------------------------------------------
     readonly payloadInput = signal('{\n  "sub": "1234567890",\n  "name": "Jane Doe"\n}');
@@ -83,6 +89,8 @@ export class JwtCodecComponent implements OnInit {
         this.alg.set(null);
         this.issuedAt.set(null);
         this.expiresAt.set(null);
+        this.verifyResult.set(null);
+        this.verifyError.set(null);
 
         const raw = this.token().trim();
         if (!raw) {
@@ -117,6 +125,36 @@ export class JwtCodecComponent implements OnInit {
             setTimeout(() => this.copiedDecode.set(false), 1400);
             this.api.reportUsage({ toolId: 'jwt-codec', action: 'copy-decoded' });
         }
+    }
+
+    // --- Verify (opt-in, from the Decode tab) -------------------------------
+    verify(): void {
+        const token = this.token().trim();
+        const secret = this.verifySecret();
+        if (!token) {
+            this.verifyError.set('Paste a JWT to verify first.');
+            return;
+        }
+        if (!secret) {
+            this.verifyError.set('Enter the secret used to sign this token.');
+            return;
+        }
+        this.verifyLoading.set(true);
+        this.verifyError.set(null);
+        this.verifyResult.set(null);
+
+        const alg = this.alg() ?? undefined;
+        this.api.jwtVerify({ token, secret, algorithm: alg }).subscribe({
+            next: (res) => {
+                this.verifyResult.set(res);
+                this.verifyLoading.set(false);
+                this.api.reportUsage({ toolId: 'jwt-codec', action: 'verify', metadata: { valid: res.valid } });
+            },
+            error: (err) => {
+                this.verifyLoading.set(false);
+                this.verifyError.set(err?.error?.message ?? 'Verification failed. Check the token and secret.');
+            },
+        });
     }
 
     // --- Encode ------------------------------------------------------------

@@ -1,0 +1,79 @@
+<svg class="wb-shapes-svg">
+    <g [attr.transform]="groupTransform">
+    @for (el of elements; track el.id) {
+    <g [attr.transform]="'translate(' + el.x + ',' + el.y + ') rotate(' + el.rotation + ',' + (el.width/2) + ',' + (el.height/2) + ')'"
+        [attr.opacity]="el.style.opacity">
+
+        @switch (el.type) {
+        @case ('rectangle') {
+        <rect [attr.width]="el.width" [attr.height]="el.height" [attr.rx]="el.style.cornerRadius"
+            [attr.fill]="el.style.fillColor" [attr.stroke]="el.style.strokeColor"
+            [attr.stroke-width]="el.style.strokeWidth" [attr.stroke-dasharray]="dash(el.style)" />
+        }
+        @case ('ellipse') {
+        <ellipse [attr.cx]="el.width/2" [attr.cy]="el.height/2" [attr.rx]="el.width/2" [attr.ry]="el.height/2"
+            [attr.fill]="el.style.fillColor" [attr.stroke]="el.style.strokeColor"
+            [attr.stroke-width]="el.style.strokeWidth" [attr.stroke-dasharray]="dash(el.style)" />
+        }
+        @case ('diamond') {
+        <polygon [attr.points]="diamond(el)" [attr.fill]="el.style.fillColor"
+            [attr.stroke]="el.style.strokeColor" [attr.stroke-width]="el.style.strokeWidth"
+            [attr.stroke-dasharray]="dash(el.style)" />
+        }
+        @case ('triangle') {
+        <polygon [attr.points]="triangle(el)" [attr.fill]="el.style.fillColor"
+            [attr.stroke]="el.style.strokeColor" [attr.stroke-width]="el.style.strokeWidth"
+            [attr.stroke-dasharray]="dash(el.style)" />
+        }
+        @case ('star') {
+        <polygon [attr.points]="star(el)" [attr.fill]="el.style.fillColor"
+            [attr.stroke]="el.style.strokeColor" [attr.stroke-width]="el.style.strokeWidth"
+            [attr.stroke-dasharray]="dash(el.style)" />
+        }
+        @case ('polygon') {
+        <polygon [attr.points]="polygon(el, el.sides)" [attr.fill]="el.style.fillColor"
+            [attr.stroke]="el.style.strokeColor" [attr.stroke-width]="el.style.strokeWidth"
+            [attr.stroke-dasharray]="dash(el.style)" />
+        }
+        @case ('line') {
+        <path [attr.d]="localPath(el)" fill="none" [attr.stroke]="el.style.strokeColor"
+            [attr.stroke-width]="el.style.strokeWidth" [attr.stroke-dasharray]="dash(el.style)"
+            stroke-linecap="round" />
+        }
+        @case ('arrow') {
+        <path [attr.d]="localPath(el)" fill="none" [attr.stroke]="el.style.strokeColor"
+            [attr.stroke-width]="el.style.strokeWidth" [attr.stroke-dasharray]="dash(el.style)"
+            stroke-linecap="round" />
+        <polygon [attr.points]="arrowHeadEnd(el)" [attr.fill]="el.style.strokeColor" />
+        }
+        @case ('double-arrow') {
+        <path [attr.d]="localPath(el)" fill="none" [attr.stroke]="el.style.strokeColor"
+            [attr.stroke-width]="el.style.strokeWidth" [attr.stroke-dasharray]="dash(el.style)"
+            stroke-linecap="round" />
+        <polygon [attr.points]="arrowHeadEnd(el)" [attr.fill]="el.style.strokeColor" />
+        <polygon [attr.points]="arrowHeadStart(el)" [attr.fill]="el.style.strokeColor" />
+        }
+        @case ('pencil') {
+        <path [attr.d]="localPath(el)" fill="none" [attr.stroke]="el.style.strokeColor"
+            [attr.stroke-width]="el.style.strokeWidth" stroke-linecap="round" stroke-linejoin="round" />
+        }
+        @case ('brush') {
+        <path [attr.d]="localPath(el)" fill="none" [attr.stroke]="el.style.strokeColor"
+            [attr.stroke-width]="el.style.strokeWidth * 3" stroke-linecap="round" stroke-linejoin="round" />
+        }
+        @case ('highlighter') {
+        <path [attr.d]="localPath(el)" fill="none" [attr.stroke]="el.style.strokeColor"
+            [attr.stroke-width]="el.style.strokeWidth * 8" stroke-linecap="round" stroke-linejoin="round"
+            opacity="0.35" />
+        }
+        @case ('frame') {
+        <!-- Frames have fixed chrome styling; they deliberately ignore the element style. -->
+        <rect [attr.width]="el.width" [attr.height]="el.height" fill="transparent" stroke="#928e87"
+            stroke-width="1.5" stroke-dasharray="6 4" />
+        <text x="0" y="-8" font-size="12" fill="#928e87" font-family="Inconsolata, monospace">{{ el.label }}</text>
+        }
+        }
+    </g>
+    }
+    </g>
+</svg>

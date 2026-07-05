@@ -13,7 +13,6 @@
             <li><a routerLink="/services" routerLinkActive="active">Services</a></li>
             <li><a routerLink="/blog" routerLinkActive="active">Writing</a></li>
             <li><a routerLink="/feedback" routerLinkActive="active">Reviews</a></li>
-            <li><a routerLink="/tools" routerLinkActive="active">Tools</a></li>
             <li><a routerLink="/contact" routerLinkActive="active">Work with me</a></li>
         </ul>
 
@@ -31,8 +30,7 @@
     <span class="mobile-menu-handle"></span>
     @for (item of mainNavItems; track item.label) {
     <a [routerLink]="item.link" [fragment]="item.fragment" routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: item.link === '/' }"
-        (click)="navOpen.set(false)">
+        [routerLinkActiveOptions]="{ exact: item.link === '/' }" (click)="navOpen.set(false)">
         <i class="bi" [class]="item.icon"></i>
         <span>{{ item.label }}</span>
     </a>
@@ -64,6 +62,7 @@
                 <a routerLink="/blog">Writing</a>
                 <a routerLink="/feedback">Reviews</a>
                 <a routerLink="/tools">Tools</a>
+                <a routerLink="/seo">SEO Audit</a>
             </nav>
 
             <nav class="footer-links" aria-label="Company">

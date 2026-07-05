@@ -1,7 +1,56 @@
 <app-tool-page title="CSS Unit Converter" icon="bi-rulers"
-    blurb="Convert between px, rem, em, pt, %, vw and vh. Set the base font-size and viewport for accurate relative units. Runs in your browser.">
+    blurb="Convert px, rem, em, pt, %, vw, vh, ch, vmin and vmax with a live rem ↔ px quick panel.">
 
     <div class="uc">
+        <!-- Quick rem <-> px panel -->
+        <div class="uc-quick">
+            <p class="t-label">Quick rem ↔ px</p>
+
+            <div class="uc-quick-root t-panel">
+                <label class="t-label" for="quickRootSize">Root font-size (px)</label>
+                <input id="quickRootSize" class="t-field" type="number" min="1" step="1"
+                    [ngModel]="quickRootSize()" (ngModelChange)="quickRootSize.set($event)" />
+            </div>
+
+            <div class="t-grid-2">
+                <!-- rem → px -->
+                <div class="t-panel">
+                    <label class="t-label" for="quickRemIn">rem → px</label>
+                    <input id="quickRemIn" class="t-field" type="number" step="any"
+                        [ngModel]="quickRemValue()" (ngModelChange)="quickRemValue.set($event)"
+                        (change)="quickConvert()" />
+                    <div class="t-result uc-quick-out">
+                        <div>
+                            <p class="t-result-label">Result</p>
+                            <span class="t-result-value">{{ quickRemToPx() }}<small>px</small></span>
+                        </div>
+                        <button type="button" class="t-btn t-btn--ghost" (click)="quickCopy('px')">
+                            <i class="bi" [class]="quickCopied() === 'px' ? 'bi-check2' : 'bi-clipboard'"></i>
+                            {{ quickCopied() === 'px' ? 'Copied' : 'Copy' }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- px → rem -->
+                <div class="t-panel">
+                    <label class="t-label" for="quickPxIn">px → rem</label>
+                    <input id="quickPxIn" class="t-field" type="number" step="any"
+                        [ngModel]="quickPxValue()" (ngModelChange)="quickPxValue.set($event)"
+                        (change)="quickConvert()" />
+                    <div class="t-result uc-quick-out">
+                        <div>
+                            <p class="t-result-label">Result</p>
+                            <span class="t-result-value">{{ quickPxToRem() }}<small>rem</small></span>
+                        </div>
+                        <button type="button" class="t-btn t-btn--ghost" (click)="quickCopy('rem')">
+                            <i class="bi" [class]="quickCopied() === 'rem' ? 'bi-check2' : 'bi-clipboard'"></i>
+                            {{ quickCopied() === 'rem' ? 'Copied' : 'Copy' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Input -->
         <div class="t-panel">
             <div class="uc-input-row">
@@ -53,5 +102,10 @@
             </div>
             }
         </div>
+        <p class="uc-hint">
+            <i class="bi bi-info-circle"></i>
+            <code>ch</code> is approximated as 0.5× the base font-size (width of the "0" glyph varies by
+            typeface); <code>vmin</code>/<code>vmax</code> use the smaller/larger of the viewport width and height above.
+        </p>
     </div>
 </app-tool-page>

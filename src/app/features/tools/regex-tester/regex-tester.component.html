@@ -1,0 +1,142 @@
+<app-tool-page title="Regex Tester" icon="bi-asterisk" [error]="regexError()"
+    blurb="Test regular expressions live with match highlighting, groups and a flags panel.">
+
+    <div class="rx">
+        <!-- Pattern + presets -->
+        <div class="rx-pattern-row">
+            <div class="rx-pattern">
+                <label class="t-label" for="rxPattern">Pattern (without delimiters)</label>
+                <input id="rxPattern" class="t-field rx-mono" type="text" spellcheck="false"
+                    placeholder="e.g. (\w+)@(\w+)\.com"
+                    [ngModel]="pattern()" (ngModelChange)="pattern.set($event)" />
+            </div>
+            <div class="rx-preset">
+                <label class="t-label" for="rxPreset">Common patterns</label>
+                <select id="rxPreset" class="t-field" [ngModel]="preset()" (ngModelChange)="applyPreset($event)">
+                    <option value="">Custom…</option>
+                    <option value="email">Email</option>
+                    <option value="url">URL</option>
+                    <option value="ipv4">IPv4 address</option>
+                    <option value="date">Date (YYYY-MM-DD)</option>
+                    <option value="hexColor">Hex color</option>
+                    <option value="uuid">UUID</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Flags -->
+        <div class="rx-flags" role="group" aria-label="Flags">
+            @for (def of flagDefs; track def.flag) {
+            <label class="t-check">
+                <input type="checkbox" [checked]="hasFlag(def.flag)" (change)="toggleFlag(def.flag)" />
+                {{ def.label }}
+            </label>
+            }
+        </div>
+
+        <!-- Test text -->
+        <div>
+            <label class="t-label" for="rxText">Test text</label>
+            <textarea id="rxText" class="t-textarea" spellcheck="false"
+                placeholder="Paste the text to test against…"
+                [ngModel]="testText()" (ngModelChange)="testText.set($event)"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="test()" [disabled]="!pattern()">
+                <i class="bi bi-play"></i> Test
+            </button>
+        </div>
+
+        @if (pattern() && !regexError()) {
+        <div class="rx-results">
+            <div class="t-stats">
+                <div class="t-stat">
+                    <span class="t-stat-num" [class.t-stat-num--good]="matchCount() > 0">{{ matchCount() }}</span>
+                    <span class="t-stat-label">{{ matchCount() === 1 ? 'Match' : 'Matches' }}</span>
+                </div>
+            </div>
+
+            @if (result().truncated) {
+            <p class="rx-note">
+                <i class="bi bi-info-circle"></i>
+                Showing the first 1,000 matches only.
+            </p>
+            }
+
+            <!-- Highlighted text. The bound HTML is built in the component:
+                 user text is escaped first, then our own <mark> tags are added,
+                 so no raw user input ever reaches innerHTML. -->
+            @if (highlighted(); as html) {
+            <div>
+                <p class="t-label">Highlighted text</p>
+                <div class="t-panel rx-highlight" [innerHTML]="html"></div>
+            </div>
+            }
+
+            <!-- Matches table -->
+            @if (result().matches.length > 0) {
+            <div>
+                <p class="t-label">Matches</p>
+                <div class="rx-table-wrap t-panel">
+                    <table class="rx-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Index</th>
+                                <th>Match</th>
+                                <th>Groups</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (row of result().matches; track $index) {
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ row.index }}</td>
+                                <td class="rx-mono">{{ row.match }}</td>
+                                <td>
+                                    @if (row.groups.length === 0) {
+                                    <span class="rx-dim">—</span>
+                                    } @else {
+                                    @for (g of row.groups; track g.name) {
+                                    <span class="rx-group">
+                                        <span class="rx-dim">{{ g.name }}:</span>
+                                        <span class="rx-mono">{{ g.value }}</span>
+                                    </span>
+                                    }
+                                    }
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            }
+
+            <!-- Replace panel -->
+            <div class="rx-replace">
+                <div>
+                    <label class="t-label" for="rxReplacement">Replacement (supports $1, $&lt;name&gt;)</label>
+                    <input id="rxReplacement" class="t-field rx-mono" type="text" spellcheck="false"
+                        placeholder="e.g. $2-$1"
+                        [ngModel]="replacement()" (ngModelChange)="replacement.set($event)" />
+                </div>
+                @if (replaced() !== null) {
+                <div>
+                    <div class="rx-replace-head">
+                        <label class="t-label" for="rxReplaced">Replace output</label>
+                        <button type="button" class="t-btn t-btn--ghost" (click)="copyReplaced()">
+                            <i class="bi" [class]="copied() === 'replace' ? 'bi-check2' : 'bi-clipboard'"></i>
+                            {{ copied() === 'replace' ? 'Copied' : 'Copy' }}
+                        </button>
+                    </div>
+                    <textarea id="rxReplaced" class="t-textarea rx-replaced" readonly spellcheck="false"
+                        [value]="replaced()"></textarea>
+                </div>
+                }
+            </div>
+        </div>
+        }
+    </div>
+</app-tool-page>

@@ -1,0 +1,92 @@
+<div class="wb-board" [class.with-rulers]="vp.rulersEnabled()">
+
+    <!-- Corner + rulers -->
+    @if (vp.rulersEnabled()) {
+    <div class="wb-ruler-corner"></div>
+    <div class="wb-ruler wb-ruler-x">
+        @for (t of rulerTicksX(); track t.pos) {
+        <span class="wb-tick" [class.major]="t.major" [style.left.px]="t.pos">
+            @if (t.major) { <em>{{ t.label }}</em> }
+        </span>
+        }
+    </div>
+    <div class="wb-ruler wb-ruler-y">
+        @for (t of rulerTicksY(); track t.pos) {
+        <span class="wb-tick" [class.major]="t.major" [style.top.px]="t.pos">
+            @if (t.major) { <em>{{ t.label }}</em> }
+        </span>
+        }
+    </div>
+    }
+
+    <!-- Infinite surface -->
+    <div #surface class="wb-surface" tabindex="0" role="application"
+        aria-label="Interactive whiteboard canvas. Use the toolbar to pick a drawing tool, then draw on the canvas. Arrow keys nudge the selection."
+        [class.cursor-grab]="cursorClass() === 'grab'"
+        [class.cursor-grabbing]="cursorClass() === 'grabbing'" (wheel)="onWheel($event)"
+        (pointerdown)="onPointerDown($event)" (pointermove)="onPointerMove($event)" (pointerup)="onPointerUp($event)"
+        (pointercancel)="onPointerUp($event)" (dblclick)="onDoubleClick($event)" (dragover)="onDragOver($event)"
+        (drop)="onDrop($event)">
+
+        <div class="wb-grid" [class.hidden]="!vp.gridEnabled()" [ngStyle]="gridStyle()"></div>
+
+        <app-shape-layer [elements]="shapeElements()" [viewport]="vp.viewport()" />
+        <app-shape-layer [elements]="draftShape()" [viewport]="vp.viewport()" />
+
+        <div class="wb-scene" [style.transform]="vp.transform()">
+            <app-image-layer [elements]="imageElements()" />
+            <app-text-layer [elements]="textElements()" />
+        </div>
+
+        <app-selection-overlay [elements]="selection.selectedElements()" />
+        <app-guides-overlay />
+        <app-cursor-overlay />
+    </div>
+
+    <app-wb-minimap [surfaceWidth]="surfaceSize().w" [surfaceHeight]="surfaceSize().h" />
+    <input #imageInput type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden
+        (change)="onImageFilePicked($event)" />
+
+    <app-wb-toolbar />
+    <app-wb-topbar />
+    <app-style-panel />
+    <app-collab-bar />
+    <app-selection-context-bar />
+
+    <!-- Zoom controls -->
+    <div class="wb-zoom-hud">
+        <button type="button" class="wb-hud-btn" (click)="zoomOut()" aria-label="Zoom out">
+            <i class="bi bi-dash"></i>
+        </button>
+        <span class="wb-zoom-value">{{ vp.zoomPercent() }}%</span>
+        <button type="button" class="wb-hud-btn" (click)="zoomIn()" aria-label="Zoom in">
+            <i class="bi bi-plus"></i>
+        </button>
+        <span class="wb-hud-sep"></span>
+        <button type="button" class="wb-hud-btn" (click)="vp.resetView()" aria-label="Reset view">
+            <i class="bi bi-aspect-ratio"></i>
+        </button>
+    </div>
+
+    <!-- View toggles -->
+    <div class="wb-view-hud">
+        <button type="button" class="wb-hud-btn" [class.active]="vp.gridEnabled()" (click)="vp.toggleGrid()"
+            aria-label="Toggle grid">
+            <i class="bi bi-grid-3x3"></i>
+        </button>
+        <button type="button" class="wb-hud-btn" [class.active]="vp.snapEnabled()" (click)="vp.toggleSnap()"
+            aria-label="Toggle snap to grid">
+            <i class="bi bi-magnet"></i>
+        </button>
+        <button type="button" class="wb-hud-btn" [class.active]="vp.rulersEnabled()" (click)="vp.toggleRulers()"
+            aria-label="Toggle rulers">
+            <i class="bi bi-rulers"></i>
+        </button>
+    </div>
+
+    <!-- Screen-reader announcements for tool / selection / zoom changes -->
+    <div aria-live="polite" aria-atomic="true"
+        style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">
+        {{ announce() }}
+    </div>
+</div>

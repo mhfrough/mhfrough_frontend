@@ -26,6 +26,10 @@
     }
 }
 
+.sm-field--narrow {
+    max-width: 220px;
+}
+
 .sm-range {
     width: 100%;
     accent-color: var(--primary);
@@ -41,6 +45,38 @@
     color: var(--text-muted);
 }
 
+// --- robots.txt groups ---------------------------------------------------------
+.sm-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sm-group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    .t-label {
+        margin: 0;
+    }
+}
+
+.sm-remove {
+    color: var(--danger-text);
+
+    i {
+        font-size: 0.8rem;
+    }
+}
+
+.sm-paths {
+    min-height: 120px;
+    white-space: pre;
+}
+
+// --- Output ---------------------------------------------------------------------
 .sm-output {
     display: flex;
     flex-direction: column;

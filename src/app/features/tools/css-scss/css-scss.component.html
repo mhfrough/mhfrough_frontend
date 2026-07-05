@@ -1,8 +1,17 @@
 <app-tool-page title="CSS ↔ SCSS" icon="bi-filetype-scss"
     [loading]="loading()" [error]="error()"
-    blurb="Convert between plain CSS and SCSS in either direction. Optionally minify the result.">
+    blurb="Convert between CSS and SCSS, or auto-nest flat selectors into clean SCSS blocks.">
 
     <div class="cs">
+        <!-- Mode toggle -->
+        <div class="t-tabs" role="tablist" aria-label="Mode">
+            <button type="button" class="t-tab" [class.active]="mode() === 'convert'"
+                (click)="setMode('convert')">Convert</button>
+            <button type="button" class="t-tab" [class.active]="mode() === 'nest'"
+                (click)="setMode('nest')">Auto-nest</button>
+        </div>
+
+        @if (mode() === 'convert') {
         <div class="cs-controls">
             <!-- Direction toggle -->
             <div class="t-tabs" role="tablist" aria-label="Direction">
@@ -32,12 +41,27 @@
                 <i class="bi bi-arrow-left-right"></i> Convert
             </button>
         </div>
+        } @else {
+        <!-- Auto-nest input -->
+        <div>
+            <label class="t-label" for="csNestInput">Flat CSS</label>
+            <textarea id="csNestInput" class="t-textarea" spellcheck="false"
+                placeholder="Paste your flat CSS here…"
+                [ngModel]="nestCode()" (ngModelChange)="nestCode.set($event)"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="nest()" [disabled]="loading()">
+                <i class="bi bi-diagram-3"></i> Nest
+            </button>
+        </div>
+        }
 
         <!-- Output -->
         @if (output(); as out) {
         <div class="cs-output">
             <div class="cs-output-head">
-                <label class="t-label" for="csOutput">{{ to() | uppercase }} output
+                <label class="t-label" for="csOutput">{{ mode() === 'nest' ? 'Nested SCSS' : (to() | uppercase) + ' output' }}
                     @if (durationMs() !== null) {
                     <span class="cs-time">· {{ durationMs() }} ms</span>
                     }

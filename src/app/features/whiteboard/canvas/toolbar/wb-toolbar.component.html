@@ -1,0 +1,16 @@
+<div class="wb-toolbar" role="toolbar" aria-label="Drawing tools">
+    @for (tool of tools; track tool.id) {
+    <button type="button" class="wb-tool-btn" [class.active]="toolService.activeTool() === tool.id"
+        [attr.title]="tool.label + ' (' + tool.shortcut + ')'" [attr.aria-label]="tool.label + ' tool'"
+        [attr.aria-pressed]="toolService.activeTool() === tool.id"
+        [attr.tabindex]="toolService.activeTool() === tool.id ? 0 : -1" (click)="toolService.setTool(tool.id)">
+        <i class="bi" [class]="tool.icon"></i>
+    </button>
+    }
+    <span class="wb-tool-sep"></span>
+    <button type="button" class="wb-tool-btn" [class.active]="toolService.keepToolActive()"
+        title="Keep tool active after drawing" aria-label="Keep tool active"
+        (click)="toolService.keepToolActive.set(!toolService.keepToolActive())">
+        <i class="bi bi-pin-angle"></i>
+    </button>
+</div>

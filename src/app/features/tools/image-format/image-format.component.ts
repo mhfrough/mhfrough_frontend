@@ -6,7 +6,7 @@ import { ToolsApiService, ImageResult } from '../tools-api.service';
 import { ToolPageComponent } from '../shared/tool-page.component';
 import { downloadDataUrl } from '../shared/clipboard.util';
 
-type TargetFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'gif';
+type TargetFormat = 'original' | 'jpeg' | 'png' | 'webp' | 'avif' | 'gif';
 
 @Component({
     selector: 'app-image-format',
@@ -20,28 +20,33 @@ export class ImageFormatComponent implements OnInit, OnDestroy {
     private readonly api = inject(ToolsApiService);
     private readonly platformId = inject(PLATFORM_ID);
 
-    readonly formats: TargetFormat[] = ['jpeg', 'png', 'webp', 'avif', 'gif'];
+    readonly formats: TargetFormat[] = ['original', 'jpeg', 'png', 'webp', 'avif', 'gif'];
     readonly lossy = new Set<TargetFormat>(['jpeg', 'webp', 'avif']);
 
     readonly file = signal<File | null>(null);
     readonly previewUrl = signal<string | null>(null);
     readonly format = signal<TargetFormat>('webp');
     readonly quality = signal(80);
+    readonly maxWidth = signal<number | null>(null);
+    readonly maxHeight = signal<number | null>(null);
     readonly dragOver = signal(false);
 
     readonly loading = signal(false);
     readonly error = signal<string | null>(null);
     readonly result = signal<ImageResult | null>(null);
 
+    readonly isOriginal = computed(() => this.format() === 'original');
     readonly isLossy = computed(() => this.lossy.has(this.format()));
+    /** Quality applies whenever we're compressing in place or converting to a lossy format. */
+    readonly showQuality = computed(() => this.isOriginal() || this.isLossy());
 
     ngOnInit(): void {
         this.seo.update({
-            title: 'Image Format Converter | Dev Tools',
+            title: 'Image Format & Compression | Dev Tools',
             description:
-                'Convert images between JPEG, PNG, WebP, AVIF and GIF. Adjust quality for lossy formats. Free online image format converter.',
+                'Compress, resize and convert images between JPEG, PNG, WebP, AVIF and GIF in one pass. Free online image format converter and compressor.',
             url: '/tools/image-format',
-            keywords: 'image converter, convert image format, jpg to png, png to webp, avif converter',
+            keywords: 'image converter, compress image, convert image format, jpg to png, png to webp, avif converter',
         });
     }
 
@@ -89,6 +94,16 @@ export class ImageFormatComponent implements OnInit, OnDestroy {
         }
     }
 
+    setMaxWidth(value: string): void {
+        const n = value === '' ? null : Math.round(Number(value));
+        this.maxWidth.set(n != null && isFinite(n) && n > 0 ? n : null);
+    }
+
+    setMaxHeight(value: string): void {
+        const n = value === '' ? null : Math.round(Number(value));
+        this.maxHeight.set(n != null && isFinite(n) && n > 0 ? n : null);
+    }
+
     run(): void {
         const file = this.file();
         if (!file) {
@@ -99,15 +114,38 @@ export class ImageFormatComponent implements OnInit, OnDestroy {
         this.error.set(null);
         this.result.set(null);
 
+        const maxWidth = this.maxWidth() ?? undefined;
+        const maxHeight = this.maxHeight() ?? undefined;
+
+        if (this.isOriginal()) {
+            this.api.compressImage(file, this.quality(), maxWidth, maxHeight).subscribe({
+                next: (res) => {
+                    this.result.set(res);
+                    this.loading.set(false);
+                    this.api.reportUsage({
+                        toolId: 'image-format',
+                        action: 'compress',
+                        metadata: { quality: this.quality(), maxWidth, maxHeight },
+                    });
+                },
+                error: (err) => {
+                    this.loading.set(false);
+                    this.error.set(err?.error?.message ?? 'Compression failed. Try a different image.');
+                },
+            });
+            return;
+        }
+
+        const format = this.format();
         const quality = this.isLossy() ? this.quality() : undefined;
-        this.api.convertImage(file, this.format(), quality).subscribe({
+        this.api.convertImage(file, format, quality, maxWidth, maxHeight).subscribe({
             next: (res) => {
                 this.result.set(res);
                 this.loading.set(false);
                 this.api.reportUsage({
                     toolId: 'image-format',
-                    action: 'run',
-                    metadata: { format: this.format(), quality },
+                    action: `convert-${format}`,
+                    metadata: { format, quality, maxWidth, maxHeight },
                 });
             },
             error: (err) => {
@@ -129,6 +167,10 @@ export class ImageFormatComponent implements OnInit, OnDestroy {
     private downloadName(original: string): string {
         const dot = original.lastIndexOf('.');
         const base = dot > 0 ? original.slice(0, dot) : original;
+        if (this.isOriginal()) {
+            const ext = dot > 0 ? original.slice(dot) : '';
+            return `${base}-compressed${ext}`;
+        }
         const ext = this.format() === 'jpeg' ? 'jpg' : this.format();
         return `${base}.${ext}`;
     }

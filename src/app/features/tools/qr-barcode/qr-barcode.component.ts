@@ -35,6 +35,8 @@ export class QrBarcodeComponent implements OnInit {
     readonly ecLevel = signal<'L' | 'M' | 'Q' | 'H'>('M');
     readonly format = signal<'png' | 'svg'>('png');
 
+    readonly sizePresets = [128, 256, 512, 1024];
+
     // Barcode options
     readonly barcodeType = signal('code128');
     readonly scale = signal(3);
@@ -58,6 +60,14 @@ export class QrBarcodeComponent implements OnInit {
     readonly error = signal<string | null>(null);
     readonly result = signal<GenImageResponse | null>(null);
     readonly copied = signal(false);
+    readonly copiedImage = signal(false);
+
+    /** Feature-detect Clipboard API image support (browser-only). */
+    readonly canCopyImage = computed(() => {
+        if (!isPlatformBrowser(this.platformId)) return false;
+        return typeof navigator !== 'undefined' && !!navigator.clipboard && typeof navigator.clipboard.write === 'function'
+            && typeof ClipboardItem !== 'undefined';
+    });
 
     readonly isSvg = computed(() => this.result()?.format === 'svg');
     readonly safeSvg = computed<SafeHtml | null>(() => {
@@ -80,6 +90,11 @@ export class QrBarcodeComponent implements OnInit {
         this.mode.set(m);
         this.result.set(null);
         this.error.set(null);
+    }
+
+    setSizePreset(size: number): void {
+        this.size.set(size);
+        this.api.reportUsage({ toolId: 'qr-barcode', action: 'preset-size', metadata: { size } });
     }
 
     generate(): void {
@@ -141,6 +156,21 @@ export class QrBarcodeComponent implements OnInit {
         if (await copyText(r.output)) {
             this.copied.set(true);
             setTimeout(() => this.copied.set(false), 1400);
+        }
+    }
+
+    /** Copy the generated PNG to the clipboard as an image. */
+    async copyImage(): Promise<void> {
+        const r = this.result();
+        if (!r || r.format === 'svg' || !isPlatformBrowser(this.platformId) || !this.canCopyImage()) return;
+        try {
+            const blob = await fetch(r.output).then(res => res.blob());
+            await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+            this.copiedImage.set(true);
+            setTimeout(() => this.copiedImage.set(false), 1400);
+            this.api.reportUsage({ toolId: 'qr-barcode', action: 'copy-image' });
+        } catch {
+            this.error.set('Could not copy the image to your clipboard.');
         }
     }
 }

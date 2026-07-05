@@ -8,6 +8,39 @@
         </p>
     </header>
 
+    <!-- SEO Audit promo -->
+    <a class="landing-promo" routerLink="/seo">
+        <i class="bi bi-search landing-promo-icon"></i>
+        <div class="landing-promo-text">
+            <span class="landing-promo-title">SEO Audit Suite</span>
+            <span class="landing-promo-desc">Full 16-section technical SEO, performance, accessibility &amp; security audit — now its own section.</span>
+        </div>
+        <i class="bi bi-arrow-right landing-promo-arrow"></i>
+    </a>
+
+    <!-- Search + category filter -->
+    <div class="landing-filters">
+        <div class="landing-search">
+            <i class="bi bi-search"></i>
+            <input type="search" placeholder="Search tools…" spellcheck="false"
+                [value]="search()" (input)="search.set($any($event.target).value)" />
+            @if (search()) {
+            <button type="button" class="landing-search-clear" (click)="search.set('')" aria-label="Clear search">
+                <i class="bi bi-x"></i>
+            </button>
+            }
+        </div>
+        <span class="landing-count">{{ tools().length }} of {{ totalCount }} tools</span>
+    </div>
+
+    <div class="landing-cats">
+        @for (cat of categories; track cat) {
+        <button type="button" class="landing-cat" [class.active]="category() === cat" (click)="category.set(cat)">
+            {{ cat }}
+        </button>
+        }
+    </div>
+
     <div class="tool-grid">
         @for (tool of tools(); track tool.id) {
         @if (tool.status === 'live') {
@@ -41,6 +74,8 @@
             </div>
         </div>
         }
+        } @empty {
+        <p class="landing-empty">No tools match "{{ search() }}"@if (category() !== 'All') { in {{ category() }}}.</p>
         }
     </div>
 </section>

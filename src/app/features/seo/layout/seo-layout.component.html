@@ -1,0 +1,40 @@
+<!-- ─── SEO Header (distinct chrome) ────────────────────────────────────────── -->
+<header class="seo-header">
+    <nav class="seo-nav">
+        <a class="seo-wordmark" routerLink="/seo">
+            MHFrough<span class="seo-tag">/ seo</span>
+        </a>
+
+        <a class="seo-back seo-tools-link" routerLink="/tools">Dev Tools</a>
+        <a class="seo-back" routerLink="/">← Back to site</a>
+    </nav>
+</header>
+
+<!-- ─── Page Content ────────────────────────────────────────────────────────── -->
+<main class="seo-main">
+    <router-outlet />
+</main>
+
+<!-- ─── SEO Footer (credits) ───────────────────────────────────────────────── -->
+<footer class="seo-footer">
+    <div class="seo-footer-inner">
+        <div class="seo-footer-credits">
+            <span class="seo-footer-label">Built with</span>
+            <div class="seo-footer-pills">
+                @for (pkg of builtWith; track pkg.label) {
+                <a class="seo-pill" [href]="pkg.href" target="_blank" rel="noopener">{{ pkg.label }}</a>
+                }
+            </div>
+        </div>
+
+        <div class="seo-footer-meta">
+            <span class="seo-footer-crafted">Crafted by Mohammad Hamza</span>
+            <nav class="seo-footer-links" aria-label="SEO footer">
+                <a routerLink="/">Home</a>
+                <a routerLink="/tools">Tools</a>
+                <a routerLink="/brand">Brand</a>
+            </nav>
+            <span class="seo-footer-copy">© {{ year }}</span>
+        </div>
+    </div>
+</footer>

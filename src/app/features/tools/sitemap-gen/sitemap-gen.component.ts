@@ -7,6 +7,14 @@ import { ToolPageComponent } from '../shared/tool-page.component';
 import { copyText, downloadText } from '../shared/clipboard.util';
 
 type ChangeFreq = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
+type Mode = 'sitemap' | 'robots';
+
+interface RobotsGroup {
+    userAgent: string;
+    allow: string;
+    disallow: string;
+    crawlDelay: string;
+}
 
 @Component({
     selector: 'app-sitemap-gen',
@@ -20,6 +28,9 @@ export class SitemapGenComponent implements OnInit {
     private readonly api = inject(ToolsApiService);
     private readonly platformId = inject(PLATFORM_ID);
 
+    readonly mode = signal<Mode>('sitemap');
+
+    // --- sitemap.xml ------------------------------------------------------------
     readonly urls = signal('');
     readonly changefreq = signal<ChangeFreq>('weekly');
     readonly priority = signal(0.5);
@@ -34,7 +45,7 @@ export class SitemapGenComponent implements OnInit {
 
     readonly urlCount = computed(() => this.parseUrls().length);
 
-    readonly output = computed(() => {
+    readonly sitemapOutput = computed(() => {
         const list = this.parseUrls();
         if (!list.length) return '';
         const freq = this.changefreq();
@@ -57,18 +68,57 @@ export class SitemapGenComponent implements OnInit {
         return lines.join('\n');
     });
 
+    // --- robots.txt ---------------------------------------------------------------
+    readonly groups = signal<RobotsGroup[]>([
+        { userAgent: '*', allow: '', disallow: '', crawlDelay: '' },
+    ]);
+    readonly sitemaps = signal('');
+
+    readonly robotsOutput = computed(() => {
+        const blocks: string[] = [];
+        for (const g of this.groups()) {
+            const ua = g.userAgent.trim() || '*';
+            const lines: string[] = [`User-agent: ${ua}`];
+            for (const path of this.splitLines(g.allow)) lines.push(`Allow: ${path}`);
+            for (const path of this.splitLines(g.disallow)) lines.push(`Disallow: ${path}`);
+            const delay = g.crawlDelay.trim();
+            if (delay) lines.push(`Crawl-delay: ${delay}`);
+            blocks.push(lines.join('\n'));
+        }
+        let out = blocks.join('\n\n');
+        const maps = this.splitLines(this.sitemaps());
+        if (maps.length) {
+            out += (out ? '\n\n' : '') + maps.map(m => `Sitemap: ${m}`).join('\n');
+        }
+        return out;
+    });
+
+    /** Output for whichever mode is active — used by the shared copy/download actions. */
+    readonly output = computed(() => this.mode() === 'sitemap' ? this.sitemapOutput() : this.robotsOutput());
+
     ngOnInit(): void {
         this.seo.update({
-            title: 'Sitemap Generator | Dev Tools',
+            title: 'Sitemap & robots.txt Generator | Dev Tools',
             description:
-                'Generate a valid sitemap.xml from a list of URLs with changefreq, priority and lastmod. Free, runs in your browser.',
+                'Generate a valid sitemap.xml from a list of URLs, and compose a matching robots.txt with user-agent groups, allow/disallow rules, crawl-delay and sitemap lines. Free, runs in your browser.',
             url: '/tools/sitemap',
-            keywords: 'sitemap generator, sitemap.xml, xml sitemap, seo sitemap',
+            keywords: 'sitemap generator, sitemap.xml, xml sitemap, robots.txt generator, robots txt, seo sitemap',
         });
+    }
+
+    setMode(mode: Mode): void {
+        this.mode.set(mode);
     }
 
     private parseUrls(): string[] {
         return this.urls()
+            .split('\n')
+            .map(l => l.trim())
+            .filter(l => l.length > 0);
+    }
+
+    private splitLines(value: string): string[] {
+        return value
             .split('\n')
             .map(l => l.trim())
             .filter(l => l.length > 0);
@@ -83,14 +133,37 @@ export class SitemapGenComponent implements OnInit {
             .replace(/'/g, '&apos;');
     }
 
+    addGroup(): void {
+        this.groups.update(g => [...g, { userAgent: '*', allow: '', disallow: '', crawlDelay: '' }]);
+    }
+
+    removeGroup(index: number): void {
+        this.groups.update(g => g.filter((_, i) => i !== index));
+    }
+
+    updateGroup(index: number, key: keyof RobotsGroup, value: string): void {
+        this.groups.update(groups =>
+            groups.map((g, i) => (i === index ? { ...g, [key]: value } : g)),
+        );
+    }
+
     generate(): void {
         // Output recomputes live; this records the explicit action.
-        if (!this.urlCount()) return;
-        this.api.reportUsage({
-            toolId: 'sitemap-gen',
-            action: 'generate',
-            metadata: { count: this.urlCount() },
-        });
+        if (this.mode() === 'sitemap') {
+            if (!this.urlCount()) return;
+            this.api.reportUsage({
+                toolId: 'sitemap-gen',
+                action: 'generate',
+                metadata: { mode: 'sitemap', count: this.urlCount() },
+            });
+        } else {
+            if (!this.robotsOutput()) return;
+            this.api.reportUsage({
+                toolId: 'sitemap-gen',
+                action: 'generate',
+                metadata: { mode: 'robots', groups: this.groups().length },
+            });
+        }
     }
 
     async copyOutput(): Promise<void> {
@@ -108,7 +181,11 @@ export class SitemapGenComponent implements OnInit {
         if (!isPlatformBrowser(this.platformId)) return;
         const out = this.output();
         if (!out) return;
-        downloadText(out, 'sitemap.xml', 'application/xml');
+        if (this.mode() === 'sitemap') {
+            downloadText(out, 'sitemap.xml', 'application/xml');
+        } else {
+            downloadText(out, 'robots.txt', 'text/plain');
+        }
         this.api.reportUsage({ toolId: 'sitemap-gen', action: 'download' });
     }
 }

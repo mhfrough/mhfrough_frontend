@@ -18,6 +18,23 @@
     flex-direction: column;
 }
 
+.qb-size-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+}
+
+.qb-size-preset {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.66rem;
+
+    &.active {
+        background: var(--surface-hover);
+        border-color: var(--text-muted);
+    }
+}
+
 .qb-opt-check {
     align-self: center;
     margin-top: 1.4rem;

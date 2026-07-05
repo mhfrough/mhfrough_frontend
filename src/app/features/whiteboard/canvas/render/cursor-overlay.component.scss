@@ -1,0 +1,28 @@
+:host {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 6;
+    overflow: hidden;
+}
+
+.wb-cursor {
+    position: absolute;
+    transform: translate(-2px, -2px);
+    transition: left 0.06s linear, top 0.06s linear;
+    will-change: left, top;
+}
+
+.wb-cursor-label {
+    position: absolute;
+    left: 14px;
+    top: 12px;
+    padding: 1px 6px;
+    border-radius: var(--radius);
+    font-family: var(--font);
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: #fff;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}

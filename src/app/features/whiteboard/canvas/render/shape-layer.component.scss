@@ -1,0 +1,14 @@
+:host {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.wb-shapes-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+}

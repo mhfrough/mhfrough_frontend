@@ -1,8 +1,18 @@
-<app-tool-page title="Palette Generator" icon="bi-palette"
-    [loading]="loading()" [error]="error()"
-    blurb="Generate a harmonious palette from any base colour. Pick a scheme, choose how many swatches, then click a swatch to copy its hex.">
+<app-tool-page title="Color Palette Studio" icon="bi-palette"
+    [loading]="mode() === 'seed' ? loading() : imageLoading()"
+    [error]="mode() === 'seed' ? error() : imageError()"
+    blurb="Generate a harmonious palette from a seed colour, or extract one from any image.">
 
     <div class="pal">
+        <!-- Mode toggle -->
+        <div class="t-tabs" role="tablist" aria-label="Palette source">
+            <button type="button" class="t-tab" [class.active]="mode() === 'seed'"
+                (click)="setMode('seed')">From Seed</button>
+            <button type="button" class="t-tab" [class.active]="mode() === 'image'"
+                (click)="setMode('image')">From Image</button>
+        </div>
+
+        @if (mode() === 'seed') {
         <div class="pal-controls">
             <!-- Base colour -->
             <div class="pal-field">
@@ -56,6 +66,59 @@
                 }
             </div>
         </div>
+        }
+        } @else {
+        <!-- Upload zone -->
+        <div class="img-drop" [class.over]="dragOver()"
+            (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+            <input type="file" id="palImgFile" class="img-drop-input" accept="image/*" (change)="onFileInput($event)" />
+            <label for="palImgFile" class="img-drop-label">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span>Drop an image here or <strong>browse</strong></span>
+            </label>
+        </div>
+
+        <!-- Count control -->
+        <div class="img-control">
+            <label class="t-label" for="palImgCount">Colors — {{ imageCount() }}</label>
+            <input type="range" id="palImgCount" class="img-range" min="3" max="12" step="1"
+                [ngModel]="imageCount()" (ngModelChange)="imageCount.set(+$event)" />
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="runImage()" [disabled]="imageLoading() || !file()">
+                <i class="bi bi-palette"></i> Extract palette
+            </button>
+        </div>
+
+        <!-- Original preview -->
+        @if (previewUrl(); as src) {
+        <figure class="img-card img-card--single">
+            <figcaption class="t-label">Source</figcaption>
+            <img class="img-preview" [src]="src" alt="Source image preview" />
+            @if (file(); as f) {
+            <p class="img-meta">{{ f.name }}</p>
+            }
+        </figure>
+        }
+
+        <!-- Swatches -->
+        @if (imageColors(); as cols) {
+        <div class="pal-grid">
+            @for (c of cols; track c.hex) {
+            <button type="button" class="pal-swatch pal-swatch--image" [style.background]="c.hex" [style.color]="textOn(c)"
+                (click)="copyImageHex(c.hex)" [attr.aria-label]="'Copy ' + c.hex">
+                <span class="pal-swatch-label">
+                    <i class="bi" [class]="imageCopiedHex() === c.hex ? 'bi-check2' : 'bi-clipboard'"></i>
+                    {{ imageCopiedHex() === c.hex ? 'Copied' : c.hex }}
+                </span>
+                <span class="pal-bar-track" [style.color]="textOn(c)">
+                    <span class="pal-bar-fill" [style.width.%]="populationPct(c)"></span>
+                </span>
+            </button>
+            }
+        </div>
+        }
         }
     </div>
 </app-tool-page>

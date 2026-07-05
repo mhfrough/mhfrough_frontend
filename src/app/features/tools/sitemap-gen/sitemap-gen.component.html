@@ -1,7 +1,16 @@
-<app-tool-page title="Sitemap Generator" icon="bi-diagram-2"
-    blurb="Build a valid sitemap.xml from your list of URLs. Everything runs in your browser.">
+<app-tool-page title="Sitemap & robots.txt Generator" icon="bi-diagram-2"
+    blurb="Build a valid sitemap.xml from your URLs and compose matching robots.txt rules.">
 
     <div class="sm">
+        <!-- Mode toggle -->
+        <div class="t-tabs" role="tablist" aria-label="Mode">
+            <button type="button" class="t-tab" [class.active]="mode() === 'sitemap'"
+                (click)="setMode('sitemap')">sitemap.xml</button>
+            <button type="button" class="t-tab" [class.active]="mode() === 'robots'"
+                (click)="setMode('robots')">robots.txt</button>
+        </div>
+
+        @if (mode() === 'sitemap') {
         <!-- URLs -->
         <div>
             <label class="t-label" for="smUrls">URLs (one per line)</label>
@@ -47,12 +56,76 @@
             </button>
             <span class="sm-count">{{ urlCount() }} URL{{ urlCount() === 1 ? '' : 's' }}</span>
         </div>
+        } @else {
+        <!-- Groups -->
+        @for (group of groups(); track $index) {
+        <div class="t-panel sm-group">
+            <div class="sm-group-head">
+                <label class="t-label">Group {{ $index + 1 }}</label>
+                @if (groups().length > 1) {
+                <button type="button" class="t-btn t-btn--ghost sm-remove" (click)="removeGroup($index)">
+                    <i class="bi bi-trash"></i> Remove
+                </button>
+                }
+            </div>
+
+            <div class="sm-field">
+                <label class="t-label" [attr.for]="'smUa' + $index">User-agent</label>
+                <input [id]="'smUa' + $index" class="t-field" type="text" spellcheck="false"
+                    placeholder="*"
+                    [ngModel]="group.userAgent" (ngModelChange)="updateGroup($index, 'userAgent', $event)" />
+            </div>
+
+            <div class="t-grid-2">
+                <div class="sm-field">
+                    <label class="t-label" [attr.for]="'smAllow' + $index">Allow (one path per line)</label>
+                    <textarea [id]="'smAllow' + $index" class="t-textarea sm-paths" spellcheck="false"
+                        placeholder="/public/"
+                        [ngModel]="group.allow" (ngModelChange)="updateGroup($index, 'allow', $event)"></textarea>
+                </div>
+                <div class="sm-field">
+                    <label class="t-label" [attr.for]="'smDisallow' + $index">Disallow (one path per line)</label>
+                    <textarea [id]="'smDisallow' + $index" class="t-textarea sm-paths" spellcheck="false"
+                        placeholder="/admin/&#10;/private/"
+                        [ngModel]="group.disallow" (ngModelChange)="updateGroup($index, 'disallow', $event)"></textarea>
+                </div>
+            </div>
+
+            <div class="sm-field sm-field--narrow">
+                <label class="t-label" [attr.for]="'smDelay' + $index">Crawl-delay (optional)</label>
+                <input [id]="'smDelay' + $index" class="t-field" type="number" min="0" step="1"
+                    placeholder="e.g. 10"
+                    [ngModel]="group.crawlDelay" (ngModelChange)="updateGroup($index, 'crawlDelay', $event)" />
+            </div>
+        </div>
+        }
+
+        <div class="t-actions">
+            <button type="button" class="t-btn t-btn--ghost" (click)="addGroup()">
+                <i class="bi bi-plus-lg"></i> Add group
+            </button>
+        </div>
+
+        <!-- Sitemaps -->
+        <div>
+            <label class="t-label" for="smSitemaps">Sitemap URL(s) — one per line</label>
+            <textarea id="smSitemaps" class="t-textarea sm-paths" spellcheck="false"
+                placeholder="https://example.com/sitemap.xml"
+                [ngModel]="sitemaps()" (ngModelChange)="sitemaps.set($event)"></textarea>
+        </div>
+
+        <div class="t-actions">
+            <button type="button" class="t-btn" (click)="generate()" [disabled]="!robotsOutput()">
+                <i class="bi bi-robot"></i> Generate
+            </button>
+        </div>
+        }
 
         <!-- Output -->
         @if (output(); as out) {
         <div class="sm-output">
             <div class="sm-output-head">
-                <label class="t-label" for="smOut">sitemap.xml</label>
+                <label class="t-label" for="smOut">{{ mode() === 'sitemap' ? 'sitemap.xml' : 'robots.txt' }}</label>
                 <div class="t-actions">
                     <button type="button" class="t-btn t-btn--ghost" (click)="copyOutput()">
                         <i class="bi" [class]="copied() ? 'bi-check2' : 'bi-clipboard'"></i>

@@ -110,6 +110,18 @@ export interface JwtEncodeResponse {
     token: string;
 }
 
+export interface JwtVerifyRequest {
+    token: string;
+    secret: string;
+    algorithm?: string;
+}
+
+export interface JwtVerifyResponse {
+    valid: boolean;
+    payload?: unknown;
+    error?: string;
+}
+
 export type HashAlgorithm = 'bcrypt' | 'md5' | 'sha1' | 'sha256' | 'sha512';
 
 export interface PasswordHashRequest {
@@ -186,18 +198,22 @@ export class ToolsApiService {
     }
 
     // --- Images (multipart/form-data) --------------------------------------
-    compressImage(file: File, quality: number): Observable<ImageResult> {
+    compressImage(file: File, quality: number, maxWidth?: number, maxHeight?: number): Observable<ImageResult> {
         const fd = new FormData();
         fd.append('file', file);
         fd.append('quality', String(quality));
+        if (maxWidth) fd.append('maxWidth', String(maxWidth));
+        if (maxHeight) fd.append('maxHeight', String(maxHeight));
         return this.http.post<ImageResult>(`${this.base}/image/compress`, fd);
     }
 
-    convertImage(file: File, format: string, quality?: number): Observable<ImageResult> {
+    convertImage(file: File, format: string, quality?: number, maxWidth?: number, maxHeight?: number): Observable<ImageResult> {
         const fd = new FormData();
         fd.append('file', file);
         fd.append('format', format);
         if (quality != null) fd.append('quality', String(quality));
+        if (maxWidth) fd.append('maxWidth', String(maxWidth));
+        if (maxHeight) fd.append('maxHeight', String(maxHeight));
         return this.http.post<ImageResult>(`${this.base}/image/convert`, fd);
     }
 
@@ -232,6 +248,10 @@ export class ToolsApiService {
 
     jwtEncode(body: JwtEncodeRequest): Observable<JwtEncodeResponse> {
         return this.http.post<JwtEncodeResponse>(`${this.base}/jwt/encode`, body);
+    }
+
+    jwtVerify(body: JwtVerifyRequest): Observable<JwtVerifyResponse> {
+        return this.http.post<JwtVerifyResponse>(`${this.base}/jwt/verify`, body);
     }
 
     passwordHash(body: PasswordHashRequest): Observable<PasswordHashResponse> {

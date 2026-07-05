@@ -1,0 +1,26 @@
+<div class="wb-minimap">
+    <div class="wb-minimap-head">
+        <span class="wb-minimap-label">map</span>
+        <button type="button" class="wb-minimap-toggle" (click)="toggleOpen()" [attr.aria-expanded]="open()"
+            aria-label="Toggle minimap">
+            <i class="bi" [class.bi-chevron-down]="open()" [class.bi-chevron-up]="!open()" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    @if (open()) {
+    <div class="wb-minimap-body" tabindex="0" aria-label="Board minimap" (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)" (pointerup)="onPointerUp($event)">
+        <svg role="img" aria-label="Board minimap" [attr.width]="mapWidth" [attr.height]="mapHeight"
+            [attr.viewBox]="'0 0 ' + mapWidth + ' ' + mapHeight">
+            @for (r of elementRects(); track $index) {
+            <rect [attr.x]="r.x" [attr.y]="r.y" [attr.width]="r.width" [attr.height]="r.height"
+                [attr.fill]="r.selected ? '#6366f1' : '#928e87'" opacity="0.5" />
+            }
+            @if (viewportRect(); as v) {
+            <rect [attr.x]="v.x" [attr.y]="v.y" [attr.width]="v.width" [attr.height]="v.height"
+                fill="rgba(99,102,241,.08)" stroke="#6366f1" stroke-width="1" />
+            }
+        </svg>
+    </div>
+    }
+</div>

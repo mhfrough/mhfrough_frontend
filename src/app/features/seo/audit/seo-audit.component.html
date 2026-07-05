@@ -1,0 +1,467 @@
+<div class="sa">
+    <!-- ─── Hero ──────────────────────────────────────────────────────────── -->
+    <div class="sa-hero">
+        <h1 class="sa-title">SEO Audit Suite</h1>
+        <p class="sa-blurb">
+            One URL in — a full report out: technical SEO, meta &amp; headings, images, links,
+            performance, accessibility, structured data, social previews, content quality,
+            security headers, mobile readiness, design tokens and tech detection, with scored
+            results and prioritised fixes.
+        </p>
+
+        <div class="sa-form">
+            <input class="sa-url" type="url" spellcheck="false" autocomplete="off"
+                placeholder="https://example.com"
+                [ngModel]="url()" (ngModelChange)="url.set($event)"
+                (keyup.enter)="run()" />
+            <button type="button" class="sa-run" (click)="run()" [disabled]="loading()">
+                <i class="bi bi-search"></i> {{ loading() ? 'Auditing…' : 'Run audit' }}
+            </button>
+        </div>
+
+        @if (loading()) {
+        <p class="sa-note">Fetching, parsing and checking resources — this can take 10–20 seconds.</p>
+        }
+        @if (error(); as err) {
+        <p class="sa-error"><i class="bi bi-x-circle"></i> {{ err }}</p>
+        }
+    </div>
+
+    @if (report(); as r) {
+    <!-- ─── Meta strip + exports ─────────────────────────────────────────── -->
+    <div class="sa-meta">
+        <span class="sa-meta-item">{{ r.finalUrl }}</span>
+        <span class="sa-meta-item">HTTP {{ r.technical.httpStatus }}</span>
+        <span class="sa-meta-item">{{ r.durationMs }} ms</span>
+        <div class="sa-exports">
+            <button type="button" class="sa-btn" (click)="exportJson()"><i class="bi bi-filetype-json"></i> JSON</button>
+            <button type="button" class="sa-btn" (click)="exportCsv()"><i class="bi bi-filetype-csv"></i> CSV</button>
+            <button type="button" class="sa-btn" (click)="exportHtml()"><i class="bi bi-filetype-html"></i> HTML</button>
+            <button type="button" class="sa-btn" (click)="print()"><i class="bi bi-printer"></i> Print</button>
+        </div>
+    </div>
+
+    <!-- ─── Scores ────────────────────────────────────────────────────────── -->
+    <div class="sa-scores">
+        @for (t of scoreTiles(); track t.label) {
+        <div class="sa-score" [class]="scoreClass(t.value)" [class.sa-score--overall]="t.label === 'Overall'">
+            <span class="sa-score-num">{{ t.value }}</span>
+            <span class="sa-score-label">{{ t.label }}</span>
+            <span class="sa-score-meter"><span class="sa-score-fill" [style.width.%]="t.value"></span></span>
+        </div>
+        }
+    </div>
+
+    <!-- ─── Sections ──────────────────────────────────────────────────────── -->
+    @for (s of sections; track s.key) {
+    <section class="sa-section">
+        <button type="button" class="sa-section-head" (click)="toggle(s.key)" [attr.aria-expanded]="isOpen(s.key)">
+            <i class="bi" [class]="s.icon"></i>
+            <span class="sa-section-title">{{ s.label }}</span>
+            @if (issueCounts(sectionIssues(s.key)); as c) {
+            <span class="sa-chips">
+                @if (c.good) {<span class="sa-chip sa-chip--good">{{ c.good }}</span>}
+                @if (c.warn) {<span class="sa-chip sa-chip--warn">{{ c.warn }}</span>}
+                @if (c.error) {<span class="sa-chip sa-chip--error">{{ c.error }}</span>}
+            </span>
+            }
+            <i class="bi bi-chevron-down sa-chev" [class.open]="isOpen(s.key)"></i>
+        </button>
+
+        @if (isOpen(s.key)) {
+        <div class="sa-section-body">
+            @switch (s.key) {
+
+            @case ('technical') {
+            <div class="sa-kv">
+                <div><dt>Status</dt><dd>HTTP {{ r.technical.httpStatus }} · {{ r.technical.https ? 'HTTPS' : 'HTTP (insecure)' }}</dd></div>
+                @if (r.technical.ssl; as ssl) {
+                <div><dt>SSL</dt><dd>{{ ssl.valid ? 'Valid' : 'Invalid' }}@if (ssl.issuer) { · {{ ssl.issuer }}}@if (ssl.daysRemaining !== undefined) { · expires in {{ ssl.daysRemaining }} days}@if (ssl.error) { · {{ ssl.error }}}</dd></div>
+                }
+                <div><dt>Canonical</dt><dd>{{ r.technical.canonical || '— none —' }}@if (r.technical.canonical) { ({{ r.technical.canonicalMatchesUrl ? 'matches URL' : 'differs from URL' }})}</dd></div>
+                <div><dt>Indexable</dt><dd>{{ r.technical.indexable ? 'Yes' : 'No' }} · noindex: {{ r.technical.noindex ? 'yes' : 'no' }} · nofollow: {{ r.technical.nofollow ? 'yes' : 'no' }}</dd></div>
+                <div><dt>robots.txt</dt><dd>{{ r.technical.robotsTxt.exists ? 'Found' : 'Not found' }}@if (r.technical.robotsTxt.disallowsPath) { · disallows this path}</dd></div>
+                <div><dt>sitemap.xml</dt><dd>{{ r.technical.sitemapXml.exists ? (r.technical.sitemapXml.url || 'Found') : 'Not found' }}</dd></div>
+                <div><dt>Timing</dt><dd>TTFB {{ r.technical.ttfbMs }} ms · total {{ r.technical.responseTimeMs }} ms@if (r.technical.dnsMs !== null) { · DNS {{ r.technical.dnsMs }} ms}</dd></div>
+                <div><dt>Server</dt><dd>{{ r.technical.server || '—' }} · encoding: {{ r.technical.contentEncoding || 'none' }} · cache: {{ r.technical.cacheControl || '—' }}</dd></div>
+                @if (r.technical.amp.isAmp || r.technical.amp.ampUrl) {
+                <div><dt>AMP</dt><dd>{{ r.technical.amp.isAmp ? 'This is an AMP page' : ('AMP version: ' + r.technical.amp.ampUrl) }}</dd></div>
+                }
+                @if (r.technical.pagination.prev || r.technical.pagination.next) {
+                <div><dt>Pagination</dt><dd>prev: {{ r.technical.pagination.prev || '—' }} · next: {{ r.technical.pagination.next || '—' }}</dd></div>
+                }
+            </div>
+            @if (r.technical.redirectChain.length) {
+            <p class="sa-sub">Redirect chain</p>
+            <ul class="sa-list">
+                @for (hop of r.technical.redirectChain; track $index) {
+                <li>{{ hop.status }} → {{ hop.url }}</li>
+                }
+            </ul>
+            }
+            @if (r.technical.hreflang.length) {
+            <p class="sa-sub">hreflang</p>
+            <div class="sa-scroll"><table class="sa-table"><tbody>
+                @for (h of r.technical.hreflang; track $index) {
+                <tr><th>{{ h.lang }}</th><td>{{ h.href }}</td></tr>
+                }
+            </tbody></table></div>
+            }
+            @if (r.technical.mixedContent.length) {
+            <p class="sa-sub">Mixed content ({{ r.technical.mixedContent.length }})</p>
+            <ul class="sa-list sa-list--bad">
+                @for (m of r.technical.mixedContent; track $index) {<li>{{ m }}</li>}
+            </ul>
+            }
+            }
+
+            @case ('html') {
+            <div class="sa-kv">
+                <div><dt>Title</dt><dd>{{ r.html.title || '— none —' }} <span class="sa-dim">({{ r.html.titleLength }} chars · ~{{ r.html.titlePixelWidth }}px)</span></dd></div>
+                <div><dt>Description</dt><dd>{{ r.html.description || '— none —' }} <span class="sa-dim">({{ r.html.descriptionLength }} chars · ~{{ r.html.descriptionPixelWidth }}px)</span></dd></div>
+                <div><dt>Viewport</dt><dd>{{ r.html.viewport || '— none —' }}</dd></div>
+                <div><dt>Charset</dt><dd>{{ r.html.charset || '— none —' }}</dd></div>
+                <div><dt>Lang</dt><dd>{{ r.html.lang || '— none —' }}</dd></div>
+                <div><dt>Meta robots</dt><dd>{{ r.html.metaRobots || '— none —' }}</dd></div>
+                <div><dt>Author</dt><dd>{{ r.html.author || '—' }}</dd></div>
+                <div><dt>Generator</dt><dd>{{ r.html.generator || '—' }}</dd></div>
+                <div><dt>Favicon</dt><dd>{{ r.html.favicon || '— none —' }}</dd></div>
+            </div>
+            @if (r.html.duplicateTags.length) {
+            <p class="sa-sub">Duplicate tags</p>
+            <div class="sa-tagrow">@for (t of r.html.duplicateTags; track $index) {<span class="sa-chip sa-chip--warn">{{ t }}</span>}</div>
+            }
+            @if (r.html.missingTags.length) {
+            <p class="sa-sub">Missing tags</p>
+            <div class="sa-tagrow">@for (t of r.html.missingTags; track $index) {<span class="sa-chip sa-chip--error">{{ t }}</span>}</div>
+            }
+            }
+
+            @case ('headings') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.headings.h1Count }}</span><span class="sa-stat-label">H1 tags</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.headings.all.length }}</span><span class="sa-stat-label">Total headings</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="!r.headings.hierarchyOk">{{ r.headings.hierarchyOk ? 'OK' : 'Broken' }}</span><span class="sa-stat-label">Hierarchy</span></div>
+            </div>
+            @if (r.headings.skippedLevels.length) {
+            <p class="sa-sub">Skipped level(s): {{ r.headings.skippedLevels.join(', ') }}</p>
+            }
+            <p class="sa-sub">Outline</p>
+            <ul class="sa-outline">
+                @for (h of r.headings.all; track $index) {
+                <li [style.padding-left.rem]="(h.level - 1) * 1.1"><span class="sa-hlevel">H{{ h.level }}</span> {{ h.text || '(empty)' }}</li>
+                }
+            </ul>
+            }
+
+            @case ('images') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.images.total }}</span><span class="sa-stat-label">Total</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.images.missingAlt > 0">{{ r.images.missingAlt }}</span><span class="sa-stat-label">Missing alt</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.images.emptyAlt }}</span><span class="sa-stat-label">Empty alt</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.images.withoutDimensions }}</span><span class="sa-stat-label">No dimensions</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.images.lazyLoadedCount }}</span><span class="sa-stat-label">Lazy loaded</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.images.modernFormatCount }}</span><span class="sa-stat-label">WebP / AVIF</span></div>
+            </div>
+            @if (r.images.duplicateAlt.length) {
+            <p class="sa-sub">Repeated alt text</p>
+            <ul class="sa-list">@for (d of r.images.duplicateAlt; track $index) {<li>"{{ d.alt }}" × {{ d.count }}</li>}</ul>
+            }
+            @if (r.images.large.length) {
+            <p class="sa-sub">Large images (of {{ r.images.checkedCount }} checked)</p>
+            <ul class="sa-list sa-list--bad">@for (img of r.images.large; track $index) {<li>{{ kb(img.bytes) }} — {{ img.src }}</li>}</ul>
+            }
+            @if (r.images.broken.length) {
+            <p class="sa-sub">Broken images</p>
+            <ul class="sa-list sa-list--bad">@for (img of r.images.broken; track $index) {<li>{{ img.status ?? 'unreachable' }} — {{ img.src }}</li>}</ul>
+            }
+            }
+
+            @case ('links') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.links.internalCount }}</span><span class="sa-stat-label">Internal</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.links.externalCount }}</span><span class="sa-stat-label">External</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.links.nofollowCount }}</span><span class="sa-stat-label">nofollow</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.links.sponsoredCount }}</span><span class="sa-stat-label">sponsored</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.links.ugcCount }}</span><span class="sa-stat-label">ugc</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.links.emptyAnchorCount > 0">{{ r.links.emptyAnchorCount }}</span><span class="sa-stat-label">Empty anchors</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.links.genericAnchorCount > 0">{{ r.links.genericAnchorCount }}</span><span class="sa-stat-label">Generic anchors</span></div>
+            </div>
+            @if (r.links.broken.length) {
+            <p class="sa-sub">Broken links (of {{ r.links.checkedCount }} checked)</p>
+            <ul class="sa-list sa-list--bad">@for (l of r.links.broken; track $index) {<li>{{ l.status ?? 'unreachable' }} — {{ l.href }}</li>}</ul>
+            }
+            @if (r.links.redirects.length) {
+            <p class="sa-sub">Redirecting links</p>
+            <ul class="sa-list">@for (l of r.links.redirects; track $index) {<li>{{ l.status }} — {{ l.href }}</li>}</ul>
+            }
+            }
+
+            @case ('performance') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num">{{ kb(r.performance.pageWeightBytes) }}</span><span class="sa-stat-label">HTML weight</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.performance.ttfbMs }} ms</span><span class="sa-stat-label">TTFB</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.performance.responseTimeMs }} ms</span><span class="sa-stat-label">Response</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.performance.renderBlockingScripts > 3">{{ r.performance.renderBlockingScripts }}</span><span class="sa-stat-label">Blocking scripts</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.performance.renderBlockingStyles }}</span><span class="sa-stat-label">Blocking styles</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.performance.totalScripts }}</span><span class="sa-stat-label">Scripts</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.performance.totalStylesheets }}</span><span class="sa-stat-label">Stylesheets</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.performance.compressed ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Compressed</span></div>
+            </div>
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> {{ r.performance.note }}</p>
+            }
+
+            @case ('accessibility') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.accessibility.imagesMissingAlt > 0">{{ r.accessibility.imagesMissingAlt }}</span><span class="sa-stat-label">Images w/o alt</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.accessibility.inputsMissingLabel > 0">{{ r.accessibility.inputsMissingLabel }}</span><span class="sa-stat-label">Unlabelled inputs</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.accessibility.buttonsMissingText > 0">{{ r.accessibility.buttonsMissingText }}</span><span class="sa-stat-label">Unnamed buttons</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.accessibility.langPresent ? 'Yes' : 'No' }}</span><span class="sa-stat-label">html lang</span></div>
+            </div>
+            <p class="sa-sub">Landmarks</p>
+            <div class="sa-tagrow">
+                <span class="sa-chip" [class]="r.accessibility.landmarks.header ? 'sa-chip--good' : 'sa-chip--warn'">header</span>
+                <span class="sa-chip" [class]="r.accessibility.landmarks.nav ? 'sa-chip--good' : 'sa-chip--warn'">nav</span>
+                <span class="sa-chip" [class]="r.accessibility.landmarks.main ? 'sa-chip--good' : 'sa-chip--warn'">main</span>
+                <span class="sa-chip" [class]="r.accessibility.landmarks.footer ? 'sa-chip--good' : 'sa-chip--warn'">footer</span>
+            </div>
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> {{ r.accessibility.note }}</p>
+            }
+
+            @case ('structuredData') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.structuredData.jsonLd.length }}</span><span class="sa-stat-label">JSON-LD blocks</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.structuredData.microdataItemCount }}</span><span class="sa-stat-label">Microdata items</span></div>
+            </div>
+            @if (r.structuredData.jsonLd.length) {
+            <ul class="sa-list">
+                @for (j of r.structuredData.jsonLd; track $index) {
+                <li>{{ j.type }} — {{ j.valid ? 'valid JSON' : ('invalid: ' + (j.error || 'parse error')) }}</li>
+                }
+            </ul>
+            }
+            @if (r.structuredData.typesFound.length) {
+            <p class="sa-sub">Types found</p>
+            <div class="sa-tagrow">@for (t of r.structuredData.typesFound; track $index) {<span class="sa-chip">{{ t }}</span>}</div>
+            }
+            }
+
+            @case ('social') {
+            <div class="sa-preview">
+                @if (r.social.previewImage && !previewImgFailed()) {
+                <img class="sa-preview-img" [src]="r.social.previewImage" alt="" (error)="previewImgFailed.set(true)" />
+                }
+                <div class="sa-preview-text">
+                    <span class="sa-preview-domain">{{ r.social.previewDomain }}</span>
+                    <span class="sa-preview-title">{{ r.social.previewTitle || 'No title' }}</span>
+                    <span class="sa-preview-desc">{{ r.social.previewDescription || 'No description' }}</span>
+                </div>
+            </div>
+            @if (ogRows().length) {
+            <p class="sa-sub">Open Graph</p>
+            <div class="sa-scroll"><table class="sa-table"><tbody>
+                @for (row of ogRows(); track row.key) {<tr><th>{{ row.key }}</th><td>{{ row.value }}</td></tr>}
+            </tbody></table></div>
+            }
+            @if (twitterRows().length) {
+            <p class="sa-sub">Twitter Card</p>
+            <div class="sa-scroll"><table class="sa-table"><tbody>
+                @for (row of twitterRows(); track row.key) {<tr><th>{{ row.key }}</th><td>{{ row.value }}</td></tr>}
+            </tbody></table></div>
+            }
+            }
+
+            @case ('content') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.content.wordCount }}</span><span class="sa-stat-label">Words</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.content.readingTimeMinutes }} min</span><span class="sa-stat-label">Reading time</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.content.fleschReadingEase }}</span><span class="sa-stat-label">Flesch ease</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.content.fleschKincaidGrade }}</span><span class="sa-stat-label">FK grade</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.content.avgSentenceLength }}</span><span class="sa-stat-label">Avg sentence</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.content.passiveVoiceCount }}</span><span class="sa-stat-label">Passive voice</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.content.listCount }}</span><span class="sa-stat-label">Lists</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.content.tableCount }}</span><span class="sa-stat-label">Tables</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.content.videoCount }}</span><span class="sa-stat-label">Videos</span></div>
+            </div>
+            @if (r.content.topKeywords.length) {
+            <p class="sa-sub">Top keywords</p>
+            <div class="sa-scroll"><table class="sa-table"><tbody>
+                @for (k of r.content.topKeywords; track k.word) {
+                <tr><th>{{ k.word }}</th><td>{{ k.count }}×</td><td>{{ (k.density * 100).toFixed(2) }}%</td></tr>
+                }
+            </tbody></table></div>
+            }
+            @if (r.content.bigrams.length) {
+            <p class="sa-sub">Common phrases</p>
+            <div class="sa-tagrow">
+                @for (p of r.content.bigrams; track p.phrase) {<span class="sa-chip">{{ p.phrase }} ({{ p.count }})</span>}
+                @for (p of r.content.trigrams; track p.phrase) {<span class="sa-chip">{{ p.phrase }} ({{ p.count }})</span>}
+            </div>
+            }
+            }
+
+            @case ('security') {
+            <div class="sa-scroll"><table class="sa-table"><tbody>
+                <tr><th>HTTPS</th><td>{{ r.security.https ? 'Yes' : 'No' }}</td></tr>
+                <tr><th>Strict-Transport-Security</th><td>{{ r.security.hsts || '— missing —' }}</td></tr>
+                <tr><th>Content-Security-Policy</th><td>{{ r.security.csp || '— missing —' }}</td></tr>
+                <tr><th>X-Frame-Options</th><td>{{ r.security.xFrameOptions || '— missing —' }}</td></tr>
+                <tr><th>X-XSS-Protection</th><td>{{ r.security.xXssProtection || '— missing —' }}</td></tr>
+                <tr><th>Referrer-Policy</th><td>{{ r.security.referrerPolicy || '— missing —' }}</td></tr>
+                <tr><th>Permissions-Policy</th><td>{{ r.security.permissionsPolicy || '— missing —' }}</td></tr>
+            </tbody></table></div>
+            @if (r.security.cookies.length) {
+            <p class="sa-sub">Cookies</p>
+            <div class="sa-scroll"><table class="sa-table"><tbody>
+                @for (c of r.security.cookies; track $index) {
+                <tr><th>{{ c.name }}</th><td>Secure: {{ c.secure ? 'yes' : 'no' }} · HttpOnly: {{ c.httpOnly ? 'yes' : 'no' }} · SameSite: {{ c.sameSite || '—' }}</td></tr>
+                }
+            </tbody></table></div>
+            }
+            }
+
+            @case ('mobile') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="!r.mobile.viewportPresent">{{ r.mobile.viewportPresent ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Viewport meta</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.mobile.responsiveHeuristic ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Responsive</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.mobile.mediaQueryCount }}</span><span class="sa-stat-label">Media queries</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.mobile.smallBaseFont">{{ r.mobile.smallBaseFont ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Small base font</span></div>
+            </div>
+            @if (r.mobile.viewportContent) {
+            <p class="sa-sub">viewport: {{ r.mobile.viewportContent }}</p>
+            }
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> {{ r.mobile.note }}</p>
+            }
+
+            @case ('design') {
+            @if (r.design.colors.length) {
+            <p class="sa-sub">Colours</p>
+            <div class="sa-swatches">
+                @for (c of r.design.colors; track $index) {
+                <span class="sa-swatch" [style.background]="c" [title]="c"></span>
+                }
+            </div>
+            }
+            @if (r.design.fonts.length) {
+            <p class="sa-sub">Font families</p>
+            <div class="sa-tagrow">@for (f of r.design.fonts; track $index) {<span class="sa-chip">{{ f }}</span>}</div>
+            }
+            @if (r.design.googleFonts.length) {
+            <p class="sa-sub">Google Fonts</p>
+            <ul class="sa-list">@for (g of r.design.googleFonts; track $index) {<li>{{ g }}</li>}</ul>
+            }
+            @if (r.design.cssVariables.length) {
+            <p class="sa-sub">CSS variables (design tokens)</p>
+            <div class="sa-tagrow">@for (v of r.design.cssVariables; track $index) {<span class="sa-chip">{{ v }}</span>}</div>
+            }
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.design.darkModeSupport ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Dark mode</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.design.animationCount }}</span><span class="sa-stat-label">Animations</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.design.borderRadiusValues.length }}</span><span class="sa-stat-label">Radius values</span></div>
+            </div>
+            @if (r.design.iconLibraries.length) {
+            <p class="sa-sub">Icon libraries</p>
+            <div class="sa-tagrow">@for (i of r.design.iconLibraries; track $index) {<span class="sa-chip">{{ i }}</span>}</div>
+            }
+            }
+
+            @case ('technologies') {
+            @if (r.technologies.all.length === 0) {
+            <p class="sa-sub">No known frameworks or services detected.</p>
+            } @else {
+            @if (r.technologies.frameworks.length) {
+            <p class="sa-sub">Frameworks</p>
+            <div class="sa-tagrow">@for (t of r.technologies.frameworks; track $index) {<span class="sa-chip sa-chip--good">{{ t }}</span>}</div>
+            }
+            @if (r.technologies.cssFrameworks.length) {
+            <p class="sa-sub">CSS</p>
+            <div class="sa-tagrow">@for (t of r.technologies.cssFrameworks; track $index) {<span class="sa-chip">{{ t }}</span>}</div>
+            }
+            @if (r.technologies.cms.length) {
+            <p class="sa-sub">CMS</p>
+            <div class="sa-tagrow">@for (t of r.technologies.cms; track $index) {<span class="sa-chip">{{ t }}</span>}</div>
+            }
+            @if (r.technologies.analytics.length) {
+            <p class="sa-sub">Analytics</p>
+            <div class="sa-tagrow">@for (t of r.technologies.analytics; track $index) {<span class="sa-chip">{{ t }}</span>}</div>
+            }
+            @if (r.technologies.infra.length) {
+            <p class="sa-sub">Infrastructure</p>
+            <div class="sa-tagrow">@for (t of r.technologies.infra; track $index) {<span class="sa-chip">{{ t }}</span>}</div>
+            }
+            }
+            }
+
+            }
+
+            <!-- Section issues -->
+            @if (sectionIssues(s.key).length) {
+            <ul class="sa-issues">
+                @for (issue of sectionIssues(s.key); track $index) {
+                <li class="sa-issue" [class]="'sa-issue--' + issue.level">
+                    <i class="bi"
+                        [class.bi-check-circle]="issue.level === 'good'"
+                        [class.bi-exclamation-triangle]="issue.level === 'warn'"
+                        [class.bi-x-circle]="issue.level === 'error'"></i>
+                    <span>{{ issue.msg }}</span>
+                </li>
+                }
+            </ul>
+            }
+        </div>
+        }
+    </section>
+    }
+
+    <!-- ─── Recommendations ──────────────────────────────────────────────── -->
+    <section class="sa-section">
+        <button type="button" class="sa-section-head" (click)="toggle('recommendations')" [attr.aria-expanded]="isOpen('recommendations')">
+            <i class="bi bi-lightbulb"></i>
+            <span class="sa-section-title">Recommendations ({{ r.recommendations.length }})</span>
+            <i class="bi bi-chevron-down sa-chev" [class.open]="isOpen('recommendations')"></i>
+        </button>
+        @if (isOpen('recommendations')) {
+        <div class="sa-section-body">
+            @if (!r.recommendations.length) {
+            <p class="sa-sub">Nothing to fix — clean audit.</p>
+            }
+            @for (rec of r.recommendations; track rec.id) {
+            <article class="sa-rec" [class]="'sa-rec--' + rec.level">
+                <header class="sa-rec-head">
+                    <span class="sa-rec-priority">P{{ rec.priority }}</span>
+                    <h3 class="sa-rec-title">{{ rec.title }}</h3>
+                    <span class="sa-chip">{{ rec.category }}</span>
+                </header>
+                <div class="sa-rec-meta">
+                    <span class="sa-chip">impact: {{ rec.seoImpact }}</span>
+                    <span class="sa-chip">difficulty: {{ rec.difficulty }}</span>
+                    <span class="sa-chip">est. {{ rec.estimatedFixTime }}</span>
+                </div>
+                <p class="sa-rec-text">{{ rec.explanation }}</p>
+                <p class="sa-rec-why">{{ rec.whyItMatters }}</p>
+                @if (rec.codeBefore || rec.codeAfter) {
+                <div class="sa-rec-code">
+                    @if (rec.codeBefore) {
+                    <div><p class="sa-sub">Before</p><pre class="sa-pre">{{ rec.codeBefore }}</pre></div>
+                    }
+                    @if (rec.codeAfter) {
+                    <div><p class="sa-sub">After</p><pre class="sa-pre">{{ rec.codeAfter }}</pre></div>
+                    }
+                </div>
+                }
+            </article>
+            }
+        </div>
+        }
+    </section>
+    }
+
+    @if (!report() && !loading()) {
+    <div class="sa-empty">
+        <p>Runs 16 checks in one pass: HTTP &amp; redirects, SSL, robots &amp; sitemap, meta tags,
+            headings, images, links, performance proxies, accessibility, structured data,
+            social previews, readability &amp; keywords, security headers, mobile readiness,
+            design tokens and technology detection.</p>
+    </div>
+    }
+</div>

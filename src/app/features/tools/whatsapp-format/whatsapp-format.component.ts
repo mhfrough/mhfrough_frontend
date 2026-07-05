@@ -25,6 +25,8 @@ export class WhatsappFormatComponent implements OnInit {
     readonly text = signal('');
     readonly copied = signal(false);
 
+    readonly emojis: string[] = ['😀', '👍', '❤️', '🔥', '🎉', '✅', '⚠️', '📌', '🙏', '😂'];
+
     /** Rendered WhatsApp markup → safe HTML for the preview pane. */
     readonly previewHtml = computed(() => this.render(this.text()));
 
@@ -68,6 +70,66 @@ export class WhatsappFormatComponent implements OnInit {
             });
         }
         this.api.reportUsage({ toolId: 'whatsapp-format', action: 'format', metadata: { marker } });
+    }
+
+    /** Prefix each selected line (or every line if no selection) with WhatsApp quote syntax "> ". */
+    quote(): void {
+        if (!isPlatformBrowser(this.platformId)) return;
+        const el = this.editor?.nativeElement;
+        const value = this.text();
+        let start = 0;
+        let end = value.length;
+        if (el) {
+            start = el.selectionStart ?? 0;
+            end = el.selectionEnd ?? 0;
+            if (start === end) {
+                start = 0;
+                end = value.length;
+            }
+        }
+        // Expand the selection to whole lines so prefixing doesn't split a line.
+        const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+        let lineEnd = value.indexOf('\n', end);
+        if (lineEnd === -1) lineEnd = value.length;
+
+        const block = value.slice(lineStart, lineEnd);
+        const quoted = block
+            .split('\n')
+            .map(line => `> ${line}`)
+            .join('\n');
+        const next = value.slice(0, lineStart) + quoted + value.slice(lineEnd);
+        this.text.set(next);
+
+        if (el) {
+            const newEnd = lineStart + quoted.length;
+            setTimeout(() => {
+                el.focus();
+                el.setSelectionRange(lineStart, newEnd);
+            });
+        }
+        this.api.reportUsage({ toolId: 'whatsapp-format', action: 'quote' });
+    }
+
+    /** Insert an emoji at the current cursor position. */
+    insertEmoji(emoji: string): void {
+        if (!isPlatformBrowser(this.platformId)) return;
+        const el = this.editor?.nativeElement;
+        const value = this.text();
+        let pos = value.length;
+        if (el) {
+            pos = el.selectionStart ?? value.length;
+        }
+        const next = value.slice(0, pos) + emoji + value.slice(pos);
+        this.text.set(next);
+
+        if (el) {
+            const newPos = pos + emoji.length;
+            setTimeout(() => {
+                el.focus();
+                el.setSelectionRange(newPos, newPos);
+            });
+        }
+        this.api.reportUsage({ toolId: 'whatsapp-format', action: 'emoji', metadata: { emoji } });
     }
 
     private escapeHtml(s: string): string {

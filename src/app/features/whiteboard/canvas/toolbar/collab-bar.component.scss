@@ -1,0 +1,120 @@
+:host {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 11;
+}
+
+.wb-collab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.35rem 0.45rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.wb-avatars {
+    display: flex;
+}
+
+.wb-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #fff;
+    border: 2px solid var(--bg);
+    margin-left: -8px;
+
+    &:first-child {
+        margin-left: 0;
+    }
+}
+
+.wb-live-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 30px;
+    padding: 0 0.7rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 0.76rem;
+    transition: all var(--dur-fast) var(--ease);
+
+    &:hover:not(:disabled) {
+        border-color: var(--text-muted);
+    }
+
+    &.on {
+        background: var(--success);
+        border-color: var(--success);
+        color: #1a1917;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: default;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}
+
+.wb-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+
+    &.pulse {
+        background: #1a1917;
+        animation: wb-pulse 1.4s ease-in-out infinite;
+    }
+}
+
+@keyframes wb-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.wb-collab-copy {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: var(--font);
+
+    &:hover {
+        color: var(--text);
+        border-color: var(--text-muted);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wb-live-dot.pulse {
+        animation: none;
+    }
+}

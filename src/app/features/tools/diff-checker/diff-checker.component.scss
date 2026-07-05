@@ -1,0 +1,92 @@
+@use '../shared/tool-controls';
+
+.df {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.df-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+}
+
+.df-result {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.df-result-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.df-num-add {
+    color: var(--success-text);
+}
+
+.df-num-del {
+    color: var(--danger-text);
+}
+
+.df-note {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.df-rows {
+    padding: 0.4rem 0;
+    overflow-x: auto;
+    max-height: 520px;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+
+.df-row {
+    display: flex;
+    align-items: baseline;
+    white-space: pre;
+    min-width: max-content;
+    padding: 0 0.9rem 0 0;
+
+    &.is-add {
+        background: rgba(var(--success-text-rgb), 0.12);
+    }
+
+    &.is-del {
+        background: rgba(var(--danger-text-rgb), 0.12);
+    }
+}
+
+.df-lineno {
+    flex: 0 0 3.2em;
+    text-align: right;
+    padding-right: 0.7em;
+    color: var(--text-muted);
+    user-select: none;
+}
+
+.df-sign {
+    flex: 0 0 1.2em;
+    text-align: center;
+    color: var(--text-muted);
+    user-select: none;
+}
+
+.df-text {
+    color: var(--text);
+}

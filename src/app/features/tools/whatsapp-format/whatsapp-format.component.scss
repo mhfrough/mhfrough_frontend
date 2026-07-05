@@ -18,10 +18,42 @@
     }
 }
 
+.wa-emojis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.wa-emoji-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1.1rem;
+    line-height: 1;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    cursor: pointer;
+    transition: background var(--dur) var(--ease);
+
+    &:hover {
+        background: var(--surface-hover);
+    }
+}
+
 .wa-input {
     min-height: 240px;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+.wa-counter {
+    font-family: var(--font);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin: 0.5rem 0 0;
 }
 
 .wa-preview {
