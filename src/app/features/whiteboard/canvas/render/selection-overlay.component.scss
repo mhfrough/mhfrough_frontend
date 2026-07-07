@@ -18,7 +18,7 @@
 
 .wb-marquee {
     position: absolute;
-    background: rgba(99, 102, 241, 0.12);
+    background: rgba(var(--primary-rgb), 0.12);
     border: 1px solid var(--primary);
 }
 

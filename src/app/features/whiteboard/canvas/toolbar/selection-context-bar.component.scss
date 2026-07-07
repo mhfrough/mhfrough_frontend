@@ -14,16 +14,16 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 0.35rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow-panel);
     max-width: 60vw;
     overflow-x: auto;
 }
 
 .wb-ctx-sep {
     width: 1px;
-    height: 20px;
+    height: 16px;
     background: var(--border);
-    margin: 0 0.2rem;
+    margin: 0 4px;
     flex-shrink: 0;
 }
 
@@ -32,8 +32,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius);
     border: none;
     background: transparent;

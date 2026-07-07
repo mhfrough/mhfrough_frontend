@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../../core/services/seo.service';
+import { CODE_BLOCK_FILL, CODE_BLOCK_FONT, FONT_WEIGHTS } from '../../whiteboard/core/models/palette.model';
 
 interface Swatch {
     name: string;
@@ -76,6 +77,7 @@ export class BrandComponent implements OnInit {
         { num: '16', id: 'icons', label: 'Iconography' },
         { num: '17', id: 'layout', label: 'Layout & Grid' },
         { num: '18', id: 'a11y', label: 'Accessibility' },
+        { num: '19', id: 'whiteboard', label: 'Whiteboard' },
     ];
 
     // --- Showcase data for the expanded component sections -------------------
@@ -221,6 +223,11 @@ export class BrandComponent implements OnInit {
         { label: 'Desktop', range: '900 – 1139', cols: '12 col' },
         { label: 'Wide', range: '1140+', cols: 'container' },
     ];
+
+    // --- Whiteboard (reuses the whiteboard's own token-driven constants, not a copy) --------
+    readonly wbFontWeights = FONT_WEIGHTS;
+    readonly wbCodeFont = CODE_BLOCK_FONT;
+    readonly wbCodeFill = CODE_BLOCK_FILL;
 
     ngOnInit(): void {
         this.seo.update({

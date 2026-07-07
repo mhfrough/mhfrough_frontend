@@ -28,6 +28,11 @@
     --radius-pill: 999px; // status pills / toggles / scrollbar thumb only
     --radius-circle: 50%; // avatars / icon dots only
 
+    // Elevation — floating UI chrome (panels, toolbars, bars) vs. transient overlays
+    // (menus, dropdowns, popovers) that sit a level above them.
+    --shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-popover: 0 12px 28px rgba(0, 0, 0, 0.45);
+
     // Dark palette (warm charcoal)
     --bg: #1a1917;
     --bg-rgb: 26, 25, 23;

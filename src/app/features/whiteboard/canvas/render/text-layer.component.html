@@ -1,7 +1,7 @@
 @for (el of elements; track el.id) {
 @if (isText(el)) {
 <div class="wb-text-el" [class.editing]="isEditing(el.id)" [class.wb-text-el--fixed]="el.sizing === 'fixed'"
-    [attr.data-edit-id]="el.id"
+    [class.wb-text-el--filled]="el.style.fillColor !== 'transparent'" [attr.data-edit-id]="el.id"
     [attr.contenteditable]="isEditing(el.id)" spellcheck="false"
     [style.left.px]="el.x" [style.top.px]="el.y" [style.width.px]="el.width" [style.min-height.px]="el.height"
     [style.font-family]="el.fontFamily" [style.font-size.px]="el.fontSize" [style.font-weight]="el.fontWeight"
@@ -10,7 +10,7 @@
     (pointerdown)="onPointerDown(el.id, $event)" (pointerup)="onPointerUp(el.id, $event)"
     (dblclick)="onDoubleClick(el.id, $event)"
     (input)="onInput(el.id, $event)" (keydown)="onKeyDown(el.id, $event)"
-    (blur)="commitText(el.id, $event.target)" [innerHTML]="el.text"></div>
+    (blur)="commitText(el.id, $event)" [innerHTML]="el.text"></div>
 }
 @if (isSticky(el)) {
 <div class="wb-sticky-el" [class.editing]="isEditing(el.id)" [style.left.px]="el.x" [style.top.px]="el.y"
@@ -21,7 +21,7 @@
     <div class="wb-sticky-text" [class.editing]="isEditing(el.id)" [attr.data-edit-id]="el.id"
         [attr.contenteditable]="isEditing(el.id)" spellcheck="false"
         [style.font-family]="el.fontFamily" [style.font-size.px]="el.fontSize" [style.font-weight]="el.fontWeight"
-        (keydown)="onKeyDown(el.id, $event)" (blur)="commitText(el.id, $event.target)" [innerHTML]="el.text"></div>
+        (keydown)="onKeyDown(el.id, $event)" (blur)="commitText(el.id, $event)" [innerHTML]="el.text"></div>
 </div>
 }
 }

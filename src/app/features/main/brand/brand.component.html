@@ -315,7 +315,9 @@
     </div>
     <p class="sec-lede">Two input treatments share one theme: a <strong>bordered</strong> box on public pages and a
       <strong>underline</strong> field in the admin. Focus darkens the border to <code>--text</code>; invalid turns
-      it <code>--danger</code>.</p>
+      it <code>--danger</code>. Every <code>&lt;select&gt;</code> on the site — public forms, admin, the
+      <a routerLink="/tools">tools</a> pages' <code>.t-field</code>, the whiteboard's <code>.wb-select</code> — swaps
+      the native arrow for the same custom chevron, so a dropdown never looks like a different theme mid-site.</p>
 
     <div class="form-grid">
       <!-- Bordered (public) -->
@@ -688,6 +690,54 @@
       <li><i class="bi bi-check2"></i> <code>prefers-reduced-motion</code> is honoured for transitions and reveals.</li>
       <li><i class="bi bi-check2"></i> Colour never carries meaning alone — pair it with text or an icon.</li>
     </ul>
+  </section>
+
+  <!-- ─── 19 · Whiteboard ───────────────────────────────────────────────── -->
+  <section id="whiteboard" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">19</span>
+      <h2 class="sec-title">Whiteboard</h2>
+    </div>
+    <p class="sec-lede">The whiteboard's text tools sit on the same tokens as everything above — <code>--radius</code>,
+      <code>--border</code>, <code>--surface</code> — plus a few patterns specific to a freeform canvas.</p>
+
+    <div class="comp-block">
+      <p class="comp-label">Form fields — <code>.wb-select</code></p>
+      <div class="comp-demo">
+        <select class="wb-demo-select">
+          <option>Theme</option>
+          <option>Sans</option>
+          <option>Serif</option>
+        </select>
+        <span class="wb-mode-chip">Same custom chevron as <code>.admin-form-select</code> — no native arrow</span>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Font weight — 100 – 900</p>
+      <div class="comp-demo comp-demo--wrap">
+        @for (w of wbFontWeights; track w.value) {
+        <span class="wb-weight-sample" [style.font-weight]="w.value">{{ w.label }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Code Block tool</p>
+      <div class="comp-demo">
+        <pre class="wb-code-sample" [style.background]="wbCodeFill"
+          [style.font-family]="wbCodeFont">const hamza = 'ء';
+console.log(hamza);</pre>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Sizing — Auto / Fixed</p>
+      <div class="comp-demo">
+        <span class="wb-mode-chip"><i class="bi bi-arrows-expand"></i> Auto — hugs content, no wrap</span>
+        <span class="wb-mode-chip"><i class="bi bi-lock"></i> Fixed — wraps and clips at a set size</span>
+      </div>
+    </div>
   </section>
 
   <!-- ─── Footer / golden rule ──────────────────────────────────────────── -->

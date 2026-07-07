@@ -14,7 +14,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 0.35rem 0.45rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow-panel);
 }
 
 .wb-avatars {
@@ -22,9 +22,9 @@
 }
 
 .wb-avatar {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-circle);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -43,7 +43,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    height: 30px;
+    height: 32px;
     padding: 0 0.7rem;
     border: 1px solid var(--border);
     background: var(--surface);
@@ -61,7 +61,7 @@
     &.on {
         background: var(--success);
         border-color: var(--success);
-        color: #1a1917;
+        color: var(--bg);
     }
 
     &:disabled {
@@ -78,11 +78,11 @@
 .wb-live-dot {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
+    border-radius: var(--radius-circle);
     background: var(--text-muted);
 
     &.pulse {
-        background: #1a1917;
+        background: var(--bg);
         animation: wb-pulse 1.4s ease-in-out infinite;
     }
 }
@@ -93,8 +93,8 @@
 }
 
 .wb-collab-copy {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text-muted);

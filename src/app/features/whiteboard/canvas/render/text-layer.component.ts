@@ -8,6 +8,7 @@ import { TextEditingService } from '../../core/services/text-editing.service';
 import { findLineContainer, firstTextNode, glyphMarkerLength, isChecklistLine } from '../../core/utils/checklist.util';
 
 const MIN_TEXT_HEIGHT = 40;
+const MIN_TEXT_WIDTH = 40;
 
 /**
  * Renders text & sticky-note elements as HTML overlays.
@@ -124,21 +125,33 @@ export class TextLayerComponent {
     }
 
     /**
-     * Live auto-grow: keep the element's stored height in sync with its actual wrapped content.
-     * Skipped for text boxes explicitly set to 'fixed' sizing — those keep whatever size the
-     * user dragged them to, clipping overflow instead of growing (sticky notes always scroll
-     * within their own fixed card size already, via CSS, so they don't need this at all).
+     * Live auto-fit: keep the element's stored size in sync with its actual content. Skipped
+     * for text boxes explicitly set to 'fixed' sizing — those keep whatever size the user
+     * dragged them to, clipping overflow instead of resizing.
      */
     onInput(id: string, e: Event): void {
         const node = e.target as HTMLElement;
-        const el = this.scene.getById(id);
-        if (el?.type !== 'text' || el.sizing !== 'fixed') {
-            const next = Math.max(MIN_TEXT_HEIGHT, node.scrollHeight);
-            this.scene.updateElement(id, { height: next } as Partial<WhiteboardElement>);
-        }
+        const patch = this.autoFitPatch(this.scene.getById(id), node);
+        if (patch) this.scene.updateElement(id, patch);
         // Native keyboard shortcuts (Ctrl+B etc.) format without moving the selection, so
         // selectionchange alone won't catch them — re-sync the toolbar's active state here too.
         this.textEditing.refreshActiveFormats();
+    }
+
+    /**
+     * Auto-fit height for any text-like element (sticky notes always scroll within their own
+     * fixed card size via CSS, so this is a no-op there today, but the check stays generic).
+     * Width only auto-fits for plain text boxes, and only matters in 'auto' sizing mode — see
+     * the nowrap/pre-wrap split in text-layer.component.scss: a box can't both wrap text to a
+     * width AND hug that same width to the text, so 'auto' doesn't wrap at all (grows sideways
+     * until Enter), while 'fixed' wraps within — and never resizes — the box's set width.
+     */
+    private autoFitPatch(el: WhiteboardElement | undefined, node: HTMLElement): Partial<WhiteboardElement> | null {
+        if (el?.type === 'text' && el.sizing === 'fixed') return null;
+        if (el?.type !== 'text' && el?.type !== 'sticky') return null;
+        const patch: Partial<WhiteboardElement> = { height: Math.max(MIN_TEXT_HEIGHT, node.scrollHeight) };
+        if (el.type === 'text') patch.width = Math.max(MIN_TEXT_WIDTH, node.scrollWidth);
+        return patch;
     }
 
     /**
@@ -182,16 +195,23 @@ export class TextLayerComponent {
         }
     }
 
-    commitText(id: string, target: EventTarget | null): void {
-        const div = target as HTMLDivElement;
+    commitText(id: string, e: FocusEvent): void {
+        // Font/Weight/Size, the Sizing and Align buttons, and the color pickers all need real
+        // DOM focus to work (unlike Bold/Italic/etc, which dodge this with a mousedown
+        // preventDefault trick — impossible for a <select> or <input>, which need focus to be
+        // usable at all). Clicking any of them blurs the contenteditable first, which used to
+        // exit edit mode and drop the selection right as the user tried to apply a style —
+        // exactly backwards. Only actually commit when focus is headed somewhere outside the
+        // style panel, i.e. the user is genuinely done editing this box.
+        const related = e.relatedTarget as HTMLElement | null;
+        if (related?.closest('.wb-panel')) return;
+
+        const div = e.target as HTMLDivElement;
         const el = this.scene.getById(id);
-        const patch: Partial<WhiteboardElement> = { text: div.innerHTML };
-        // Same 'fixed' exemption as onInput — otherwise a fixed-size box snaps back to
-        // fit-content height the instant you finish editing, undoing the whole point of
-        // fixed sizing right when you'd actually see the result.
-        if (el?.type !== 'text' || el.sizing !== 'fixed') {
-            patch.height = Math.max(MIN_TEXT_HEIGHT, div.scrollHeight);
-        }
+        // Same auto-fit as onInput — otherwise a fixed-size box snaps back to fit-content size
+        // the instant you finish editing, undoing the whole point of fixed sizing right when
+        // you'd actually see the result.
+        const patch: Partial<WhiteboardElement> = { text: div.innerHTML, ...this.autoFitPatch(el, div) };
         this.scene.updateElement(id, patch);
         this.history.commit();
         this.textEditing.clear(id);

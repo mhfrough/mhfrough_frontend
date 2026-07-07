@@ -65,7 +65,7 @@
     ::ng-deep mark {
         background: rgba(var(--warn-text-rgb), 0.28);
         color: var(--text);
-        border-radius: 2px;
+        border-radius: var(--radius);
         padding: 0 1px;
     }
 }

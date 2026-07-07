@@ -10,7 +10,7 @@
     display: inline-block;
     width: 7px;
     height: 7px;
-    border-radius: 50%;
+    border-radius: var(--radius-circle);
     background: var(--success-text);
     margin-left: 0.35rem;
     vertical-align: middle;

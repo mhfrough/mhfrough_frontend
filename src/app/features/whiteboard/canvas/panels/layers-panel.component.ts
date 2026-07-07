@@ -59,6 +59,13 @@ export class LayersPanelComponent {
         this.selection.setElementLocked(el.id, !el.locked);
     }
 
+    /**
+     * Set right before an Escape-triggered `editingId.set(null)` below. Removing the focused
+     * rename `<input>` from the DOM fires a native blur, which would otherwise still run
+     * `commitRename` and save whatever was typed — silently turning "cancel" into "save".
+     */
+    private cancellingRename = false;
+
     startRename(el: WhiteboardElement, e: Event): void {
         e.stopPropagation();
         this.editingId.set(el.id);
@@ -70,8 +77,17 @@ export class LayersPanelComponent {
     }
 
     commitRename(id: string, e: Event): void {
+        if (this.cancellingRename) {
+            this.cancellingRename = false;
+            return;
+        }
         const value = (e.target as HTMLInputElement).value;
         this.selection.renameElement(id, value);
+        this.editingId.set(null);
+    }
+
+    cancelRename(): void {
+        this.cancellingRename = true;
         this.editingId.set(null);
     }
 

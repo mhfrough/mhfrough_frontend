@@ -14,7 +14,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 0.85rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow-panel);
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
@@ -212,7 +212,7 @@
         -webkit-appearance: none;
         width: 10px;
         height: 10px;
-        border-radius: 50%;
+        border-radius: var(--radius-circle);
         background: var(--primary);
         cursor: pointer;
     }
@@ -220,7 +220,7 @@
     &::-moz-range-thumb {
         width: 10px;
         height: 10px;
-        border-radius: 50%;
+        border-radius: var(--radius-circle);
         background: var(--primary);
         border: none;
         cursor: pointer;
@@ -262,8 +262,8 @@
 .wb-select {
     width: 100%;
     height: 30px;
-    padding: 0 0.5rem;
-    background: var(--surface);
+    padding: 0 1.75rem 0 0.5rem;
+    background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
@@ -272,6 +272,19 @@
     cursor: pointer;
     overflow: hidden;
     text-overflow: ellipsis;
+    // Same treatment as every other <select> on the site (.admin-form-select /
+    // .contact-select in styles.scss) — without this it falls back to the browser's native
+    // arrow, which doesn't match the theme (and can render nearly invisible in dark mode).
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23918e87' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+
+    option {
+        background: var(--bg);
+        color: var(--text);
+    }
 
     &:focus-visible {
         outline: 2px solid var(--primary);
@@ -290,7 +303,8 @@
     .wb-select {
         flex: 1;
         min-width: 0;
-        padding: 0 0.35rem;
+        padding: 0 1.35rem 0 0.35rem;
+        background-position: right 0.3rem center;
         font-size: 0.7rem;
     }
 

@@ -8,13 +8,17 @@
 .wb-text-el {
     position: absolute;
     outline: none;
-    white-space: pre-wrap;
-    word-break: break-word;
+    // Auto sizing (default, Adobe-XD-"Auto-Width"-style): the box hugs its content in both
+    // directions, so there's nothing to wrap into — it grows sideways as you type and only
+    // breaks to a new line on an explicit Enter. Wrapping and auto-sizing are mutually
+    // exclusive (wrapping needs a fixed width to wrap against), so Fixed mode below flips both.
+    white-space: nowrap;
     pointer-events: auto;
     cursor: move;
     // Padding so a non-transparent background (see style panel) doesn't crowd the text;
     // border-box keeps the box's rendered size matching the stored width/height exactly.
-    padding: 2px 6px;
+    // 2px/4px steps on the site's 8px spacing rhythm (see brand.component.ts spacing scale).
+    padding: 2px 4px;
     box-sizing: border-box;
     border-radius: var(--radius);
     // Not editing yet: a click-drag should move the box, not highlight its text — a stray
@@ -28,20 +32,32 @@
         user-select: text;
         outline: 1.5px solid var(--primary);
         outline-offset: 4px;
-        border-radius: 2px;
+        border-radius: var(--radius);
     }
 
-    // Fixed-size mode: the box keeps whatever height it was dragged to instead of growing to
-    // fit content — overflow is clipped silently rather than spilling past the box's bounds.
+    // Fixed-size mode: the box keeps whatever size it was dragged to instead of growing to fit
+    // content — text wraps within that fixed width, and overflow is clipped silently rather
+    // than spilling past the box's bounds.
     &--fixed {
+        white-space: pre-wrap;
+        word-break: break-word;
         overflow: hidden;
+    }
+
+    // A non-transparent background (Background color picker, or the Code Block tool's preset)
+    // needs a border to actually read as a card — the theme's own near-black surfaces sit only
+    // a few RGB units apart (see CODE_BLOCK_FILL comment in palette.model.ts), so the fill alone
+    // can be nearly invisible against the canvas. "Borders carry hierarchy" is the site's own
+    // stated principle (brand.component.html, Elevation section) — this just applies it here too.
+    &--filled {
+        border: 1px solid var(--border);
     }
 }
 
 .wb-sticky-el {
     position: absolute;
     border-radius: var(--radius);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow-panel);
     padding: 0.75rem;
     pointer-events: auto;
     display: flex;

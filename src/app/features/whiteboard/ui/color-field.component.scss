@@ -78,7 +78,7 @@
     font-size: 0.45rem;
     color: #fff;
     background: rgba(0, 0, 0, 0.55);
-    border-top-left-radius: 3px;
+    border-top-left-radius: var(--radius);
 }
 
 .cf-divider {
@@ -110,7 +110,7 @@
     width: 16px;
     height: 16px;
     flex-shrink: 0;
-    border-radius: 4px;
+    border-radius: var(--radius);
     border: 1px solid rgba(255, 255, 255, 0.14);
     padding: 0;
     cursor: pointer;
@@ -166,7 +166,7 @@
     position: absolute;
     width: 12px;
     height: 12px;
-    border-radius: 50%;
+    border-radius: var(--radius-circle);
     border: 2px solid #fff;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
     transform: translate(-50%, -50%);
@@ -177,7 +177,7 @@
     position: relative;
     width: 100%;
     height: 12px;
-    border-radius: 6px;
+    border-radius: var(--radius);
     cursor: pointer;
     touch-action: none;
 }
@@ -193,7 +193,7 @@
 .cf-alpha-fill {
     position: absolute;
     inset: 0;
-    border-radius: 6px;
+    border-radius: var(--radius);
 }
 
 .cf-slider-thumb {
@@ -201,7 +201,7 @@
     top: 50%;
     width: 14px;
     height: 14px;
-    border-radius: 50%;
+    border-radius: var(--radius-circle);
     border: 2px solid #fff;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
     transform: translate(-50%, -50%);

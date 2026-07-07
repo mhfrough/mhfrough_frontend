@@ -82,6 +82,25 @@
     }
 }
 
+// .t-field is shared by <input>/<textarea>/<select> alike, but only a <select> needs the
+// native-arrow override — same treatment as every other select on the site
+// (.admin-form-select / .contact-select in styles.scss, .wb-select in the whiteboard).
+// Without it, every tool page's dropdown falls back to the browser's own arrow.
+select.t-field {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding-right: 1.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23918e87' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+
+    option {
+        background: var(--bg);
+        color: var(--text);
+    }
+}
+
 .t-textarea {
     @extend .t-field;
     min-height: 220px;
@@ -329,7 +348,7 @@
         width: 28px;
         height: 28px;
         object-fit: cover;
-        border-radius: 4px;
+        border-radius: var(--radius);
         background: var(--surface-alt);
     }
 

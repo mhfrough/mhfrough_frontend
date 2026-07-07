@@ -24,7 +24,7 @@
             @if (editingId() === el.id) {
             <input type="text" class="wb-layer-rename" [attr.data-rename]="el.id" [value]="name(el)"
                 (click)="$event.stopPropagation()" (blur)="commitRename(el.id, $event)"
-                (keydown.enter)="commitRename(el.id, $event)" (keydown.escape)="editingId.set(null)" />
+                (keydown.enter)="commitRename(el.id, $event)" (keydown.escape)="cancelRename()" />
             } @else {
             <span class="wb-layer-name" (dblclick)="startRename(el, $event)">{{ name(el) }}</span>
             }

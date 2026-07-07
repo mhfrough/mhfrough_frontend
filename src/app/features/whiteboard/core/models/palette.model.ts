@@ -23,9 +23,16 @@ export const FONT_FAMILIES: readonly { label: string; value: string }[] = [
     { label: 'Hand', value: '"Comic Sans MS", cursive' },
 ];
 
-/** Default look for the Code Block tool: a monospace font on a shaded card, like a markdown code fence. */
+/**
+ * Default look for the Code Block tool: a monospace font on a shaded card, like a markdown
+ * code fence. Deliberately `--bg` (#1a1917), not `--bg-alt`/`--surface` (#242220) — the
+ * canvas surface itself renders at `--bg-alt` (.wb-surface in canvas-board.component.scss),
+ * so a fill matching that token is literally invisible against it, not just low-contrast.
+ * `--bg` reads as a slightly recessed "well" instead, with a hairline border for definition
+ * (see .wb-text-el--filled) — matching the theme's own "borders carry hierarchy" principle.
+ */
 export const CODE_BLOCK_FONT = 'ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace';
-export const CODE_BLOCK_FILL = '#242220';
+export const CODE_BLOCK_FILL = '#1a1917';
 
 /** Standard 9-step type-scale weights (Figma/Adobe XD convention), not just a Bold on/off toggle. */
 export const FONT_WEIGHTS: readonly { label: string; value: number }[] = [
