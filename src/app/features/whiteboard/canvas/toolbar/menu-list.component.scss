@@ -1,0 +1,135 @@
+:host {
+    position: relative;
+    display: block;
+    width: 208px;
+    font-family: var(--font);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    padding: 0.3rem 0;
+}
+
+.wb-menu-list {
+    max-height: min(70vh, 420px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    padding: 0 0.3rem;
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+    }
+}
+
+.wb-menu-scroll {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 18px;
+    border: none;
+    background: var(--bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.7rem;
+
+    &:hover {
+        color: var(--text);
+        background: var(--bg-alt);
+    }
+
+    &--up {
+        border-bottom: 1px solid var(--border);
+    }
+
+    &--down {
+        border-top: 1px solid var(--border);
+    }
+}
+
+.wb-ctxmenu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 0.78rem;
+    text-align: left;
+
+    i:not(.wb-ctxmenu-caret) {
+        color: var(--text-muted);
+        width: 16px;
+        flex-shrink: 0;
+    }
+
+    &:hover,
+    &.focused {
+        background: var(--bg-alt);
+    }
+
+    &.danger:hover {
+        background: var(--danger);
+        color: #fff;
+
+        i {
+            color: #fff;
+        }
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: -2px;
+    }
+}
+
+.wb-ctxmenu-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wb-ctxmenu-key {
+    color: var(--text-muted);
+    font-size: 0.66rem;
+    flex-shrink: 0;
+}
+
+.wb-ctxmenu-caret {
+    color: var(--text-muted) !important;
+    font-size: 0.65rem;
+    width: auto !important;
+    flex-shrink: 0;
+}
+
+.wb-ctxmenu-sep {
+    height: 1px;
+    background: var(--border);
+    margin: 0.25rem 0.3rem;
+}
+
+.wb-submenu-anchor {
+    position: fixed;
+    z-index: 1;
+}

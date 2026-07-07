@@ -1,7 +1,7 @@
 /* Global form theme: standardize inputs, selects, textareas, checkboxes */
 
 /* Base form control appearance */
-input,
+input:not([type="range"]),
 textarea,
 select,
 .form-control,
@@ -14,6 +14,8 @@ select,
     font-family: var(--font);
     font-size: 0.95rem;
 }
+
+
 
 input::placeholder,
 textarea::placeholder {

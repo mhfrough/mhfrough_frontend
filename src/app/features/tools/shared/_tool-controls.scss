@@ -8,6 +8,52 @@
     padding: 1.25rem;
 }
 
+// --- File drop zone (shared by every image-upload tool) ----------------------
+.img-drop {
+    position: relative;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+
+    &.over {
+        border-color: var(--text-muted);
+        background: var(--surface-hover);
+    }
+}
+
+.img-drop-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.img-drop-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 2.5rem 1.25rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    pointer-events: none;
+
+    i {
+        font-size: 1.8rem;
+        color: var(--text-muted);
+    }
+
+    strong {
+        color: var(--text);
+        font-weight: 600;
+    }
+}
+
 .t-label {
     display: block;
     font-family: var(--font);
@@ -44,6 +90,31 @@
     white-space: pre;
     overflow: auto;
     tab-size: 2;
+}
+
+// --- Control rows / fields (shared by every tool with a settings form) -------
+.img-controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1.25rem;
+}
+
+.img-control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 160px;
+}
+
+.img-control--grow {
+    flex: 1 1 240px;
+}
+
+.img-hint {
+    margin: -0.5rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
 }
 
 .t-row {
@@ -229,5 +300,136 @@
 
     @media (max-width: 720px) {
         grid-template-columns: 1fr;
+    }
+}
+
+// --- Batch thumbnail strip (multi-file tools) --------------------------------
+.t-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.t-thumb {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    cursor: pointer;
+    max-width: 180px;
+
+    img {
+        flex: none;
+        width: 28px;
+        height: 28px;
+        object-fit: cover;
+        border-radius: 4px;
+        background: var(--surface-alt);
+    }
+
+    span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &.active {
+        border-color: var(--text);
+        color: var(--text);
+    }
+
+    &:hover {
+        background: var(--surface-hover);
+    }
+}
+
+.t-thumb-status {
+    flex: none;
+    font-size: 0.85rem;
+
+    &.is-loading { color: var(--text-muted); }
+    &.is-done { color: var(--success-text); }
+    &.is-error { color: var(--danger-text); }
+}
+
+.t-thumb-clear {
+    margin-left: auto;
+}
+
+// --- Before / after compare slider (reused across image tools) ---------------
+.t-compare {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.t-ba {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-alt);
+    overflow: hidden;
+}
+
+.t-ba-after,
+.t-ba-before {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+// Full-size overlay, cropped with clip-path so the image itself never rescales
+// (a width-based clip would shrink the <img> along with its shrinking container).
+.t-ba-clip {
+    position: absolute;
+    inset: 0;
+}
+
+.t-ba-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--text);
+    transform: translateX(-0.5px);
+}
+
+.t-ba-range {
+    width: 100%;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+// --- History log --------------------------------------------------------------
+.t-history {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+
+    li {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    time {
+        flex: none;
+        color: var(--text-muted);
+        opacity: 0.7;
     }
 }

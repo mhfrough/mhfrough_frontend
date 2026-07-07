@@ -1,0 +1,190 @@
+:host {
+    // Sits on the right, below the collab bar + selection context bar, above the minimap.
+    position: absolute;
+    top: 7rem;
+    right: 1rem;
+    z-index: 8;
+    pointer-events: auto;
+}
+
+.wb-layers {
+    width: 232px;
+    max-height: calc(100dvh - 16rem);
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+}
+
+.wb-layers-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.wb-layers-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text);
+}
+
+.wb-layers-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    cursor: pointer;
+
+    &:hover { color: var(--text); background: var(--bg-alt); }
+}
+
+.wb-layers-empty {
+    padding: 1rem 0.7rem;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+
+.wb-layers-list {
+    list-style: none;
+    margin: 0;
+    padding: 0.3rem;
+    overflow-y: auto;
+}
+
+.wb-layer {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.4rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: var(--text-muted);
+    position: relative;
+
+    &:hover { background: var(--bg-alt); }
+
+    &.selected {
+        background: color-mix(in srgb, var(--primary) 22%, transparent);
+        color: var(--text);
+    }
+
+    &.dim { opacity: 0.5; }
+
+    &.dragging { opacity: 0.4; }
+
+    // Insertion indicator lines while dragging.
+    &.drop-above::before,
+    &.drop-below::after {
+        content: '';
+        position: absolute;
+        left: 0.3rem;
+        right: 0.3rem;
+        height: 2px;
+        background: var(--primary);
+        border-radius: 2px;
+    }
+
+    &.drop-above::before { top: -1px; }
+    &.drop-below::after { bottom: -1px; }
+}
+
+.wb-layer-grip {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    opacity: 0;
+    cursor: grab;
+    margin-right: -0.15rem;
+
+    .wb-layer:hover & { opacity: 0.6; }
+}
+
+.wb-layer-icon {
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    width: 1rem;
+    text-align: center;
+}
+
+.wb-layer-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.74rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: inherit;
+}
+
+.wb-layer-rename {
+    flex: 1;
+    min-width: 0;
+    height: 22px;
+    border: 1px solid var(--primary);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.74rem;
+    padding: 0 0.35rem;
+
+    &:focus { outline: none; }
+}
+
+.wb-layer-actions {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease);
+
+    .wb-layer:hover &,
+    .wb-layer.selected & {
+        opacity: 1;
+    }
+}
+
+// Keep the visibility / lock toggles visible when they are "on" even without hover.
+.wb-layer-btn.on {
+    opacity: 1;
+    color: var(--primary);
+}
+
+.wb-layer-actions:has(.on) {
+    opacity: 1;
+}
+
+.wb-layer-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.72rem;
+
+    &:hover { color: var(--text); background: var(--bg); }
+
+    &.on { color: var(--primary); }
+}

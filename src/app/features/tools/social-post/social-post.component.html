@@ -1,0 +1,189 @@
+<app-tool-page title="Social Media Post Mockup Designer" icon="bi-phone"
+    [loading]="loading()" [error]="error()"
+    blurb="Design a post once — image, caption, hashtags and an optional poll — then see exactly how it looks on Instagram, X, Facebook, LinkedIn and YouTube.">
+
+    <div class="sp-layout">
+        <!-- Editor -->
+        <div class="t-panel sp-editor">
+            <!-- Identity -->
+            <section class="sp-section">
+                <label class="t-label">Profile</label>
+                <div class="sp-identity-row">
+                    <div class="sp-avatar-drop" [class.over]="avatarDragOver()"
+                        (dragover)="onAvatarDragOver($event)" (dragleave)="onAvatarDragLeave($event)" (drop)="onAvatarDrop($event)">
+                        @if (avatarUrl(); as a) {
+                        <img [src]="a" alt="Avatar preview" />
+                        <button type="button" class="sp-avatar-remove" (click)="removeAvatar()" aria-label="Remove avatar">
+                            <i class="bi bi-x"></i>
+                        </button>
+                        } @else {
+                        <input type="file" id="spAvatar" class="sp-avatar-input" accept="image/*" (change)="onAvatarInput($event)" />
+                        <label for="spAvatar" class="sp-avatar-label"><i class="bi bi-person-circle"></i></label>
+                        }
+                    </div>
+                    <div class="sp-identity-fields">
+                        <input type="text" class="t-field" placeholder="Display name"
+                            [ngModel]="displayName()" (ngModelChange)="displayName.set($event)" />
+                        <input type="text" class="t-field" placeholder="handle"
+                            [ngModel]="handle()" (ngModelChange)="handle.set($event)" />
+                        <input type="text" class="t-field" placeholder="Timestamp, e.g. 2h"
+                            [ngModel]="timestamp()" (ngModelChange)="timestamp.set($event)" />
+                    </div>
+                </div>
+            </section>
+
+            <!-- Image -->
+            <section class="sp-section">
+                <label class="t-label">Post image</label>
+                <div class="img-drop sp-image-drop" [class.over]="imageDragOver()"
+                    (dragover)="onImageDragOver($event)" (dragleave)="onImageDragLeave($event)" (drop)="onImageDrop($event)">
+                    @if (imageUrl(); as img) {
+                    <img [src]="img" class="sp-image-preview" alt="Post image preview" />
+                    <button type="button" class="t-btn t-btn--ghost sp-image-remove" (click)="removeImage()">
+                        <i class="bi bi-trash3"></i> Remove
+                    </button>
+                    } @else {
+                    <input type="file" id="spImage" class="img-drop-input" accept="image/*" (change)="onImageInput($event)" />
+                    <label for="spImage" class="img-drop-label">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <span>Drop an image here or <strong>browse</strong></span>
+                    </label>
+                    }
+                </div>
+            </section>
+
+            <!-- Caption -->
+            <section class="sp-section">
+                <label class="t-label" for="spCaption">Caption</label>
+                <textarea id="spCaption" class="t-textarea sp-caption-input" rows="4"
+                    placeholder="Write your caption…" [ngModel]="caption()" (ngModelChange)="caption.set($event)"></textarea>
+            </section>
+
+            <!-- Hashtags -->
+            <section class="sp-section">
+                <label class="t-label" for="spTags">Hashtags</label>
+                <input type="text" id="spTags" class="t-field" placeholder="Type a tag and press Enter"
+                    [ngModel]="tagInput()" (ngModelChange)="tagInput.set($event)" (keydown)="onTagKeydown($event)" />
+                @if (hashtags().length) {
+                <div class="sp-tag-list">
+                    @for (t of hashtags(); track t) {
+                    <button type="button" class="sp-tag-chip" (click)="removeTag(t)">#{{ t }} <i class="bi bi-x"></i></button>
+                    }
+                </div>
+                }
+            </section>
+
+            <!-- Fake engagement -->
+            <section class="sp-section">
+                <label class="t-label">Engagement (for the mockup)</label>
+                <div class="sp-stat-inputs">
+                    <div class="img-control">
+                        <label class="t-label" for="spLikes">Likes</label>
+                        <input type="number" id="spLikes" class="t-field" min="0" [ngModel]="likes()" (ngModelChange)="likes.set(+$event)" />
+                    </div>
+                    <div class="img-control">
+                        <label class="t-label" for="spComments">Comments</label>
+                        <input type="number" id="spComments" class="t-field" min="0" [ngModel]="comments()" (ngModelChange)="comments.set(+$event)" />
+                    </div>
+                    <div class="img-control">
+                        <label class="t-label" for="spShares">Shares</label>
+                        <input type="number" id="spShares" class="t-field" min="0" [ngModel]="shares()" (ngModelChange)="shares.set(+$event)" />
+                    </div>
+                </div>
+            </section>
+
+            <!-- Poll -->
+            <section class="sp-section">
+                <label class="t-check">
+                    <input type="checkbox" [ngModel]="pollEnabled()" (ngModelChange)="togglePoll($event)" />
+                    Add a poll
+                </label>
+
+                @if (pollEnabled()) {
+                <div class="sp-poll-editor">
+                    <input type="text" class="t-field" placeholder="Poll question"
+                        [ngModel]="pollQuestion()" (ngModelChange)="pollQuestion.set($event)" />
+
+                    @for (opt of pollOptions(); track opt.id; let i = $index) {
+                    <div class="sp-poll-option-row">
+                        <input type="text" class="t-field" [placeholder]="'Option ' + (i + 1)"
+                            [ngModel]="opt.text" (ngModelChange)="setPollOptionText(opt.id, $event)" />
+                        <input type="number" class="t-field sp-poll-votes" min="0" placeholder="Votes"
+                            [ngModel]="opt.votes" (ngModelChange)="setPollOptionVotes(opt.id, $event)" />
+                        @if (canRemovePollOption()) {
+                        <button type="button" class="t-btn t-btn--ghost" (click)="removePollOption(opt.id)" aria-label="Remove option">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                        }
+                    </div>
+                    }
+
+                    @if (canAddPollOption()) {
+                    <button type="button" class="t-btn t-btn--ghost sp-add-option" (click)="addPollOption()">
+                        <i class="bi bi-plus-lg"></i> Add option
+                    </button>
+                    }
+                </div>
+                }
+            </section>
+
+            <!-- Platforms -->
+            <section class="sp-section">
+                <label class="t-label">Platforms to preview</label>
+                <div class="sp-platform-list">
+                    @for (meta of platforms; track meta.id) {
+                    <button type="button" class="sp-platform-chip" [class.active]="isPlatformSelected(meta.id)"
+                        (click)="togglePlatform(meta.id)">
+                        <i class="bi" [class]="meta.icon"></i> {{ meta.label }}
+                    </button>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <!-- Preview + export -->
+        <div class="sp-preview-col">
+            <div class="t-actions sp-export-actions">
+                <button type="button" class="t-btn" (click)="downloadZip()" [disabled]="exporting() || !selectedPlatformMetas().length">
+                    <i class="bi bi-file-zip"></i> {{ exporting() ? 'Working…' : 'Download all (.zip)' }}
+                </button>
+                <button type="button" class="t-btn t-btn--ghost" (click)="downloadPdf()" [disabled]="exporting() || !selectedPlatformMetas().length">
+                    <i class="bi bi-file-earmark-pdf"></i> PDF report
+                </button>
+                <button type="button" class="t-btn t-btn--ghost" (click)="print()">
+                    <i class="bi bi-printer"></i> Print
+                </button>
+            </div>
+
+            @if (!selectedPlatformMetas().length) {
+            <p class="img-hint">Select at least one platform to preview.</p>
+            }
+
+            <div class="sp-preview-grid" #previewGrid>
+                @for (meta of selectedPlatformMetas(); track meta.id) {
+                <div class="sp-preview-item" [attr.data-platform]="meta.id">
+                    <div class="sp-preview-item-head">
+                        <span><i class="bi" [class]="meta.icon"></i> {{ meta.label }}</span>
+                        <button type="button" class="t-btn t-btn--ghost sp-preview-download" (click)="downloadPng(meta.id)" [disabled]="exporting()">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
+                    <app-social-post-card [platform]="meta.id" [data]="postData()" />
+                </div>
+                }
+            </div>
+
+            <!-- History -->
+            @if (exportHistory().length) {
+            <div class="t-panel sp-history-panel">
+                <label class="t-label">Recent activity</label>
+                <ul class="t-history">
+                    @for (h of exportHistory(); track h.time + h.label) {
+                    <li><span>{{ h.label }}</span><time>{{ h.time }}</time></li>
+                    }
+                </ul>
+            </div>
+            }
+        </div>
+    </div>
+</app-tool-page>

@@ -1,6 +1,8 @@
 :host {
     position: absolute;
     inset: 0;
+    // Empty areas fall through to the board surface; only the elements are interactive.
+    pointer-events: none;
 }
 
 .wb-text-el {
@@ -8,8 +10,32 @@
     outline: none;
     white-space: pre-wrap;
     word-break: break-word;
-    cursor: text;
     pointer-events: auto;
+    cursor: move;
+    // Padding so a non-transparent background (see style panel) doesn't crowd the text;
+    // border-box keeps the box's rendered size matching the stored width/height exactly.
+    padding: 2px 6px;
+    box-sizing: border-box;
+    border-radius: var(--radius);
+    // Not editing yet: a click-drag should move the box, not highlight its text — a stray
+    // native text-selection here (while not actually editable) is what looked like "selected
+    // text" that the Format buttons then couldn't act on.
+    user-select: none;
+
+    // Visible edit-mode indicator (outline doesn't affect layout, unlike border).
+    &.editing {
+        cursor: text;
+        user-select: text;
+        outline: 1.5px solid var(--primary);
+        outline-offset: 4px;
+        border-radius: 2px;
+    }
+
+    // Fixed-size mode: the box keeps whatever height it was dragged to instead of growing to
+    // fit content — overflow is clipped silently rather than spilling past the box's bounds.
+    &--fixed {
+        overflow: hidden;
+    }
 }
 
 .wb-sticky-el {
@@ -19,14 +45,29 @@
     padding: 0.75rem;
     pointer-events: auto;
     display: flex;
+    cursor: move;
+
+    &.editing {
+        outline: 1.5px solid var(--primary);
+        outline-offset: 2px;
+    }
 }
 
 .wb-sticky-text {
     outline: none;
     width: 100%;
+    // Fixed card size: overflowing content scrolls inside the note instead of spilling out.
+    height: 100%;
+    overflow-y: auto;
     color: #1a1917;
     white-space: pre-wrap;
     word-break: break-word;
-    cursor: text;
     font-family: var(--font);
+    cursor: inherit;
+    user-select: none;
+
+    &.editing {
+        cursor: text;
+        user-select: text;
+    }
 }

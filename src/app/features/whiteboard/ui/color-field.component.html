@@ -1,13 +1,90 @@
-<div class="cf-row">
-    @for (c of swatches; track c) {
-    <button type="button" class="cf-swatch" [class.active]="value === c" [class.transparent]="isTransparent(c)"
-        [style.background]="isTransparent(c) ? null : c" [attr.aria-label]="c" (click)="pick(c)">
-        @if (isTransparent(c)) { <i class="bi bi-slash-lg"></i> }
+<!-- Collapsed trigger: current color swatch (opens the full picker) + hex readout, then one line of recent colors -->
+<div class="cf-bar">
+    <button type="button" class="cf-current cf-checker" [class.cf-none]="isNone()" (click)="toggle($event)"
+        [attr.title]="'Edit color, current ' + currentCss()" [attr.aria-label]="'Edit color, current ' + currentCss()"
+        aria-haspopup="dialog">
+        <span class="cf-current-fill" [style.background]="previewCss()"></span>
+        @if (isNone()) { <i class="bi bi-slash-lg"></i> }
+        <i class="bi bi-chevron-down cf-current-caret"></i>
     </button>
-    }
-    <label class="cf-custom" title="Custom color">
-        <i class="bi bi-eyedropper"></i>
-        <input type="color" [value]="value && value !== 'transparent' ? value : '#000000'"
-            (input)="onCustom($event)" />
-    </label>
+
+    <span class="cf-divider"></span>
+
+    <div class="cf-recent-row">
+        @if (recent().length === 0) {
+        <span class="cf-recent-empty">No recent colors</span>
+        } @else {
+        @for (c of recent(); track c) {
+        <button type="button" class="cf-mini cf-checker" [class.active]="c === value" [style.background]="swatchBg(c)"
+            [attr.title]="c" [attr.aria-label]="c" (click)="applyColor(c)"></button>
+        }
+        }
+        @if (allowTransparent) {
+        <button type="button" class="cf-mini cf-checker cf-none-mini" [class.active]="isNone()"
+            title="Transparent / none" aria-label="Transparent / none" (click)="applyColor('transparent')"><i class="bi bi-slash-lg"></i></button>
+        }
+    </div>
 </div>
+
+<!-- Full picker popover -->
+@if (open()) {
+<div class="cf-pop" role="dialog" aria-label="Color picker" [style.top.px]="popPos().top" [style.left.px]="popPos().left"
+    (pointerdown)="$event.stopPropagation()">
+
+    <!-- Saturation / value area -->
+    <div class="cf-sv" [style.background]="svBg()" (pointerdown)="pointerDown($event, 'sv')"
+        (pointermove)="pointerMove($event)" (pointerup)="pointerUp($event)">
+        <span class="cf-sv-thumb" [style.left.%]="svThumb().left" [style.top.%]="svThumb().top"
+            [style.background]="rgbCss()"></span>
+    </div>
+
+    <!-- Hue slider -->
+    <div class="cf-slider cf-hue" (pointerdown)="pointerDown($event, 'hue')" (pointermove)="pointerMove($event)"
+        (pointerup)="pointerUp($event)">
+        <span class="cf-slider-thumb" [style.left.%]="hsv().h / 3.6" [style.background]="hueCss()"></span>
+    </div>
+
+    <!-- Alpha slider -->
+    <div class="cf-slider cf-alpha cf-checker" (pointerdown)="pointerDown($event, 'alpha')"
+        (pointermove)="pointerMove($event)" (pointerup)="pointerUp($event)">
+        <span class="cf-alpha-fill" [style.background]="alphaBg()"></span>
+        <span class="cf-slider-thumb" [style.left.%]="alpha() * 100" [style.background]="previewCss()"></span>
+    </div>
+
+    <!-- HEX + alpha -->
+    <div class="cf-fields">
+        <label class="cf-field cf-field--hex">
+            <span class="cf-hash">#</span>
+            <input type="text" class="cf-input" [value]="hexValue()" (change)="onHex($event)" spellcheck="false"
+                aria-label="Hex" maxlength="8" />
+        </label>
+        <label class="cf-field cf-field--a">
+            <input type="number" class="cf-input" [value]="alphaPercent()" (change)="onAlphaInput($event)" min="0"
+                max="100" aria-label="Alpha percent" />
+            <span class="cf-unit">%</span>
+        </label>
+    </div>
+
+    <!-- RGB -->
+    <div class="cf-rgb">
+        <label class="cf-field"><span class="cf-key">R</span><input type="number" class="cf-input" [value]="rgb().r"
+                (change)="onRgbInput('r', $event)" min="0" max="255" aria-label="Red" /></label>
+        <label class="cf-field"><span class="cf-key">G</span><input type="number" class="cf-input" [value]="rgb().g"
+                (change)="onRgbInput('g', $event)" min="0" max="255" aria-label="Green" /></label>
+        <label class="cf-field"><span class="cf-key">B</span><input type="number" class="cf-input" [value]="rgb().b"
+                (change)="onRgbInput('b', $event)" min="0" max="255" aria-label="Blue" /></label>
+    </div>
+
+    <!-- Preset swatches -->
+    @if (swatches.length) {
+    <div class="cf-presets">
+        @for (c of swatches; track c) {
+        <button type="button" class="cf-mini cf-checker" [class.cf-none-mini]="c === 'transparent'"
+            [style.background]="swatchBg(c)" [attr.title]="c" [attr.aria-label]="c" (click)="applyColor(c)">
+            @if (c === 'transparent') { <i class="bi bi-slash-lg"></i> }
+        </button>
+        }
+    </div>
+    }
+</div>
+}

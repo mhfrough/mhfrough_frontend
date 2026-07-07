@@ -1,0 +1,115 @@
+<div class="sp-head">
+    <div class="sp-avatar">
+        @if (data.avatarUrl) {
+        <img [src]="data.avatarUrl" alt="" />
+        } @else {
+        <span>{{ initials() }}</span>
+        }
+    </div>
+    <div class="sp-identity">
+        <div class="sp-name-row">
+            <span class="sp-name">{{ data.displayName || 'Your Name' }}</span>
+            @if (platform === 'youtube') {
+            <i class="bi bi-patch-check-fill sp-verified"></i>
+            }
+        </div>
+        <div class="sp-meta">
+            @switch (platform) {
+            @case ('instagram') { <span>{{ data.timestamp }}</span> }
+            @case ('twitter') { <span>&#64;{{ data.handle || 'handle' }} · {{ data.timestamp }}</span> }
+            @case ('facebook') { <span>{{ data.timestamp }} · <i class="bi bi-globe-americas"></i></span> }
+            @case ('linkedin') { <span>{{ data.timestamp }} · <i class="bi bi-globe-americas"></i></span> }
+            @case ('youtube') { <span>&#64;{{ data.handle || 'handle' }} · {{ data.timestamp }}</span> }
+            }
+        </div>
+    </div>
+    <i class="bi bi-three-dots sp-menu"></i>
+</div>
+
+@if (data.imageUrl) {
+<div class="sp-media">
+    <img [src]="data.imageUrl" alt="Post image" />
+</div>
+}
+
+<div class="sp-body">
+    @if (data.caption) {
+    <p class="sp-caption">{{ data.caption }}</p>
+    }
+
+    @if (data.hashtags.length) {
+    <p class="sp-tags">
+        @for (t of data.hashtags; track t) {
+        <span class="sp-tag">#{{ t }}</span>
+        }
+    </p>
+    }
+
+    @if (data.pollEnabled && data.pollOptions.length) {
+    <div class="sp-poll">
+        <p class="sp-poll-question">{{ data.pollQuestion || 'Poll question' }}</p>
+        @for (opt of data.pollOptions; track trackOption($index, opt)) {
+        <div class="sp-poll-option" [class.leading]="opt.id === winningId()">
+            <div class="sp-poll-bar" [style.width.%]="percentFor(opt)"></div>
+            <span class="sp-poll-text">{{ opt.text || 'Option' }}</span>
+            <span class="sp-poll-pct">{{ percentFor(opt) }}%</span>
+        </div>
+        }
+        <p class="sp-poll-footer">{{ totalVotes() > 0 ? (formatCount(totalVotes()) + ' votes') : 'Be the first to vote' }}</p>
+    </div>
+    }
+</div>
+
+<div class="sp-footer">
+    @switch (platform) {
+    @case ('instagram') {
+    <div class="sp-actions">
+        <i class="bi bi-heart"></i>
+        <i class="bi bi-chat"></i>
+        <i class="bi bi-send"></i>
+        <i class="bi bi-bookmark sp-push"></i>
+    </div>
+    <p class="sp-likes">{{ formatCount(data.likes) }} likes</p>
+    <p class="sp-comment-link">View all {{ formatCount(data.comments) }} comments</p>
+    }
+    @case ('twitter') {
+    <div class="sp-actions sp-actions--stats">
+        <span><i class="bi bi-chat"></i> {{ formatCount(data.comments) }}</span>
+        <span><i class="bi bi-arrow-repeat"></i> {{ formatCount(data.shares) }}</span>
+        <span><i class="bi bi-heart"></i> {{ formatCount(data.likes) }}</span>
+        <span><i class="bi bi-bar-chart-line"></i></span>
+    </div>
+    }
+    @case ('facebook') {
+    <div class="sp-stat-row">
+        <span><i class="bi bi-hand-thumbs-up-fill"></i> {{ formatCount(data.likes) }}</span>
+        <span>{{ formatCount(data.comments) }} comments · {{ formatCount(data.shares) }} shares</span>
+    </div>
+    <div class="sp-actions sp-actions--labeled">
+        <span><i class="bi bi-hand-thumbs-up"></i> Like</span>
+        <span><i class="bi bi-chat"></i> Comment</span>
+        <span><i class="bi bi-share"></i> Share</span>
+    </div>
+    }
+    @case ('linkedin') {
+    <div class="sp-stat-row">
+        <span><i class="bi bi-hand-thumbs-up-fill"></i> {{ formatCount(data.likes) }}</span>
+        <span>{{ formatCount(data.comments) }} comments</span>
+    </div>
+    <div class="sp-actions sp-actions--labeled">
+        <span><i class="bi bi-hand-thumbs-up"></i> Like</span>
+        <span><i class="bi bi-chat"></i> Comment</span>
+        <span><i class="bi bi-arrow-repeat"></i> Repost</span>
+        <span><i class="bi bi-send"></i> Send</span>
+    </div>
+    }
+    @case ('youtube') {
+    <div class="sp-actions sp-actions--stats">
+        <span><i class="bi bi-hand-thumbs-up"></i> {{ formatCount(data.likes) }}</span>
+        <span><i class="bi bi-hand-thumbs-down"></i></span>
+        <span><i class="bi bi-chat"></i> {{ formatCount(data.comments) }}</span>
+        <span><i class="bi bi-share"></i></span>
+    </div>
+    }
+    }
+</div>

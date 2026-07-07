@@ -85,7 +85,7 @@ export class SelectionInteractionService {
             const rect = this.marqueeRect();
             if (rect) {
                 const ids = this.scene.elements()
-                    .filter(el => !el.locked && rectIntersectsElement(rect, el))
+                    .filter(el => !el.locked && !el.hidden && rectIntersectsElement(rect, el))
                     .map(el => el.id);
                 this.selection.selectMany(ids, additiveSelect);
             }

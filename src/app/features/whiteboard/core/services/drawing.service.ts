@@ -17,7 +17,7 @@ import { SceneService } from './scene.service';
 import { ToolService } from './tool.service';
 import { HistoryService } from './history.service';
 import { STICKY_DEFAULT_FILL } from '../models/style.model';
-import { THEME_FONT } from '../models/palette.model';
+import { CODE_BLOCK_FILL, CODE_BLOCK_FONT, THEME_FONT } from '../models/palette.model';
 
 const SHAPE_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>(['rectangle', 'rounded-rectangle', 'ellipse', 'circle', 'diamond', 'triangle', 'star']);
 const PATH_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>(['line', 'arrow', 'double-arrow', 'pencil', 'brush', 'highlighter']);
@@ -48,6 +48,8 @@ const MIN_FREEHAND_SPACING = 3;
 @Injectable()
 export class DrawingService {
     readonly draft = signal<WhiteboardElement | null>(null);
+    /** Id of a text/sticky element that was just created and should open in edit mode. */
+    readonly editRequest = signal<string | null>(null);
     private origin: Point = { x: 0, y: 0 };
     private activeToolId: ToolId = 'selection';
 
@@ -67,11 +69,26 @@ export class DrawingService {
             const el: TextElement = {
                 id: generateElementId(), type: 'text', x: point.x, y: point.y,
                 width: 220, height: 40, rotation: 0, locked: false, groupId: null, createdAt: now, updatedAt: now,
-                style, text: '', fontFamily: THEME_FONT, fontSize: 20, fontWeight: 400,
-                italic: false, underline: false, textAlign: 'left', color: style.strokeColor,
+                style, text: '', fontFamily: THEME_FONT, fontSize: 12, fontWeight: 400,
+                textAlign: 'left', color: style.strokeColor, sizing: 'auto',
             };
             this.scene.addElement(el);
             this.history.commit();
+            this.editRequest.set(el.id);
+            this.tools.finishDraw();
+            return;
+        }
+
+        if (tool === 'code') {
+            const el: TextElement = {
+                id: generateElementId(), type: 'text', x: point.x, y: point.y,
+                width: 320, height: 40, rotation: 0, locked: false, groupId: null, createdAt: now, updatedAt: now,
+                style: { ...style, fillColor: CODE_BLOCK_FILL }, text: '', fontFamily: CODE_BLOCK_FONT, fontSize: 12,
+                fontWeight: 400, textAlign: 'left', color: style.strokeColor, sizing: 'auto',
+            };
+            this.scene.addElement(el);
+            this.history.commit();
+            this.editRequest.set(el.id);
             this.tools.finishDraw();
             return;
         }
@@ -80,16 +97,11 @@ export class DrawingService {
             const el: StickyElement = {
                 id: generateElementId(), type: 'sticky', x: point.x - 100, y: point.y - 100,
                 width: 200, height: 200, rotation: 0, locked: false, groupId: null, createdAt: now, updatedAt: now,
-                style, text: '', fontSize: 16, fill: STICKY_DEFAULT_FILL,
+                style, text: '', fontFamily: THEME_FONT, fontSize: 16, fontWeight: 400, fill: STICKY_DEFAULT_FILL,
             };
             this.scene.addElement(el);
             this.history.commit();
-            this.tools.finishDraw();
-            return;
-        }
-
-        if (tool === 'image') {
-            // The board opens a file picker for this tool; nothing is drafted here.
+            this.editRequest.set(el.id);
             this.tools.finishDraw();
             return;
         }

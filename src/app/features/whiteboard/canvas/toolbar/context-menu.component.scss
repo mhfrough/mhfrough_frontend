@@ -1,0 +1,11 @@
+:host {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    pointer-events: none;
+}
+
+.wb-ctxmenu-root {
+    position: fixed;
+    pointer-events: auto;
+}

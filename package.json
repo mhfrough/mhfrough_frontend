@@ -29,7 +29,10 @@
     "bootstrap-icons": "1.11",
     "firebase": "^12.13.0",
     "highlight.js": "^11.11.1",
+    "html2canvas": "^1.4.1",
     "idb": "^8.0.3",
+    "jspdf": "^4.2.1",
+    "jszip": "^3.10.1",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.3",
     "tslib": "^2.3.0"

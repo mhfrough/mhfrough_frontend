@@ -107,6 +107,14 @@
     &.cursor-grabbing {
         cursor: grabbing;
     }
+
+    &.cursor-crosshair {
+        cursor: crosshair;
+    }
+
+    &.cursor-text {
+        cursor: text;
+    }
 }
 
 .wb-board:not(.with-rulers) .wb-surface {

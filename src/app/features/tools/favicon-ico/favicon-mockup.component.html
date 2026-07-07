@@ -1,0 +1,67 @@
+<div class="mockup" [attr.data-kind]="kind" role="img" [attr.aria-label]="siteName + ' preview: ' + kind">
+
+    @switch (kind) {
+    @case ('browser-tab') {
+    <div class="mockup-browser">
+        <div class="mockup-browser-dots">
+            <span></span><span></span><span></span>
+        </div>
+        <div class="mockup-tab">
+            @if (iconUrl) { <img [src]="iconUrl" alt="" width="16" height="16" /> }
+            <span class="mockup-tab-title">{{ siteName }}</span>
+            <span class="mockup-tab-close">&times;</span>
+        </div>
+    </div>
+    }
+
+    @case ('bookmark') {
+    <div class="mockup-bookmarks">
+        <div class="mockup-bookmark-chip">
+            @if (iconUrl) { <img [src]="iconUrl" alt="" width="16" height="16" /> }
+            <span>{{ siteName }}</span>
+        </div>
+    </div>
+    }
+
+    @case ('windows-shortcut') {
+    <div class="mockup-desktop">
+        <div class="mockup-shortcut">
+            <div class="mockup-shortcut-icon">
+                @if (iconUrl) { <img [src]="iconUrl" alt="" /> }
+                <span class="mockup-shortcut-arrow">&#8599;</span>
+            </div>
+            <span class="mockup-shortcut-label">{{ siteName }}</span>
+        </div>
+    </div>
+    }
+
+    @case ('macos-dock') {
+    <div class="mockup-dock-wrap">
+        <div class="mockup-dock">
+            <div class="mockup-dock-icon">
+                @if (iconUrl) { <img [src]="iconUrl" alt="" /> }
+            </div>
+            <span class="mockup-dock-dot"></span>
+        </div>
+    </div>
+    }
+
+    @case ('android-home') {
+    <div class="mockup-home android">
+        <div class="mockup-home-icon round">
+            @if (iconUrl) { <img [src]="iconUrl" alt="" /> }
+        </div>
+        <span class="mockup-home-label">{{ siteName }}</span>
+    </div>
+    }
+
+    @case ('iphone-home') {
+    <div class="mockup-home ios">
+        <div class="mockup-home-icon squircle">
+            @if (iconUrl) { <img [src]="iconUrl" alt="" /> }
+        </div>
+        <span class="mockup-home-label">{{ siteName }}</span>
+    </div>
+    }
+    }
+</div>

@@ -52,6 +52,20 @@ export class SceneService {
         });
     }
 
+    /** Move `id` to sit directly in front of (`after`) or behind (`before`) `targetId` in z-order. */
+    moveElementRelativeTo(id: string, targetId: string, place: 'before' | 'after'): void {
+        if (id === targetId) return;
+        this.elementsState.update(list => {
+            const el = list.find(e => e.id === id);
+            if (!el) return list;
+            const without = list.filter(e => e.id !== id);
+            const targetIdx = without.findIndex(e => e.id === targetId);
+            if (targetIdx < 0) return list;
+            const insertAt = place === 'after' ? targetIdx + 1 : targetIdx;
+            return [...without.slice(0, insertAt), el, ...without.slice(insertAt)];
+        });
+    }
+
     replaceAll(elements: WhiteboardElement[]): void {
         this.elementsState.set(elements);
     }

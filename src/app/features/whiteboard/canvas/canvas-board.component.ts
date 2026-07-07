@@ -22,6 +22,8 @@ import { PersistenceService } from '../core/services/persistence.service';
 import { ExportService } from '../core/services/export.service';
 import { CollaborationService } from '../core/services/collaboration.service';
 import { ImageService } from '../core/services/image.service';
+import { ImageOpsService } from '../core/services/image-ops.service';
+import { TextEditingService } from '../core/services/text-editing.service';
 import { Point } from '../core/models/viewport.model';
 import { isImageElement, isTextLike } from '../core/models/element.model';
 import { hitTestTopmost } from '../core/utils/hit-test.util';
@@ -34,10 +36,13 @@ import { WbTopbarComponent } from './toolbar/wb-topbar.component';
 import { SelectionContextBarComponent } from './toolbar/selection-context-bar.component';
 import { CollabBarComponent } from './toolbar/collab-bar.component';
 import { StylePanelComponent } from './panels/style-panel.component';
+import { LayersPanelComponent } from './panels/layers-panel.component';
 import { ShapeLayerComponent } from './render/shape-layer.component';
 import { TextLayerComponent } from './render/text-layer.component';
 import { SelectionOverlayComponent } from './render/selection-overlay.component';
 import { CursorOverlayComponent } from './render/cursor-overlay.component';
+import { ImageCropOverlayComponent } from './render/image-crop-overlay.component';
+import { ContextMenuComponent } from './toolbar/context-menu.component';
 import { TOOL_DEFS, ToolId } from '../core/models/tool.model';
 
 interface ActivePointer {
@@ -55,12 +60,12 @@ const RULER_SIZE = 24;
         NgStyle, WbToolbarComponent, WbTopbarComponent, ShapeLayerComponent, TextLayerComponent,
         SelectionOverlayComponent, SelectionContextBarComponent, StylePanelComponent,
         CollabBarComponent, CursorOverlayComponent, MinimapComponent, GuidesOverlayComponent,
-        ImageLayerComponent,
+        ImageLayerComponent, ImageCropOverlayComponent, LayersPanelComponent, ContextMenuComponent,
     ],
     providers: [
         ViewportService, SceneService, ToolService, DrawingService, SelectionService,
         SelectionInteractionService, HistoryService, PersistenceService, ExportService,
-        CollaborationService, GuidesService, ImageService,
+        CollaborationService, GuidesService, ImageService, ImageOpsService, TextEditingService,
     ],
     templateUrl: './canvas-board.component.html',
     styleUrl: './canvas-board.component.scss',
@@ -69,6 +74,7 @@ const RULER_SIZE = 24;
 export class CanvasBoardComponent implements OnInit, OnDestroy {
     @ViewChild('surface', { static: true }) surfaceRef!: ElementRef<HTMLDivElement>;
     @ViewChild('imageInput', { static: true }) imageInputRef!: ElementRef<HTMLInputElement>;
+    @ViewChild(ContextMenuComponent) contextMenu!: ContextMenuComponent;
 
     /** World point where the next picked image should land (set when the image tool is used). */
     private pendingImagePoint: Point | null = null;
@@ -84,6 +90,7 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
         private readonly persistence: PersistenceService,
         private readonly collab: CollaborationService,
         private readonly images: ImageService,
+        readonly imageOps: ImageOpsService,
     ) {
         // Announce meaningful state changes to assistive tech via the polite live region.
         effect(() => {
@@ -106,9 +113,11 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
     /** Visually-hidden aria-live announcement text (tool / selection / zoom changes). */
     readonly announce = signal('');
 
-    readonly shapeElements = computed(() => this.scene.elements().filter(el => !isTextLike(el) && !isImageElement(el)));
-    readonly textElements = computed(() => this.scene.elements().filter(isTextLike));
-    readonly imageElements = computed(() => this.scene.elements().filter(isImageElement));
+    /** Elements the user can see and interact with (hidden layers are excluded). */
+    readonly visibleElements = computed(() => this.scene.elements().filter(el => !el.hidden));
+    readonly shapeElements = computed(() => this.visibleElements().filter(el => !isTextLike(el) && !isImageElement(el)));
+    readonly textElements = computed(() => this.visibleElements().filter(isTextLike));
+    readonly imageElements = computed(() => this.visibleElements().filter(isImageElement));
     readonly draftShape = computed(() => {
         const d = this.drawing.draft();
         return d && !isTextLike(d) ? [d] : [];
@@ -127,10 +136,16 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
 
     readonly spaceHeld = signal(false);
     readonly isPanning = signal(false);
+    /** Layers panel is hidden by default; toggled from the view HUD. */
+    readonly layersOpen = signal(false);
 
     readonly cursorClass = computed(() => {
         if (this.isPanning()) return 'grabbing';
         if (this.spaceHeld()) return 'grab';
+        if (this.imageOps.cropping()) return 'default';
+        const tool = this.tools.activeTool();
+        if (tool === 'text' || tool === 'sticky') return 'text';
+        if (tool !== 'selection') return 'crosshair';
         return 'default';
     });
 
@@ -169,13 +184,27 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
             e.preventDefault();
             this.vp.resetView();
         }
-        if (e.code === 'Escape') {
+        const target = e.target as HTMLElement;
+
+        // Escape typed into an unrelated <input>/<textarea> elsewhere in the UI (e.g. the
+        // layers-panel rename box) shouldn't blow away the canvas selection — that field
+        // already has its own local Escape handler to cancel just itself. Whiteboard text/
+        // sticky editing uses a contenteditable div, not INPUT/TEXTAREA, so it's unaffected
+        // by this guard and Escape still exits it below, per the original intent.
+        if (e.code === 'Escape' && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+            if (this.imageOps.cropping()) {
+                this.imageOps.cancelCrop();
+                return;
+            }
+            // Exit any active text edit first — otherwise editingId stays set after Escape and
+            // every later click/drag on that box gets swallowed by the "still editing" check.
+            const focused = document.activeElement as HTMLElement | null;
+            if (focused?.isContentEditable) focused.blur();
             this.drawing.cancel();
             this.tools.setTool('selection');
             this.selection.clear();
         }
 
-        const target = e.target as HTMLElement;
         if (target.isContentEditable || target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
 
         if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) {
@@ -228,6 +257,12 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
 
         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
             const tool = this.shortcutTool(e.key, e.shiftKey);
+            if (tool === 'image') {
+                // Image isn't a persistent tool mode — open the picker immediately (see openImagePicker).
+                e.preventDefault();
+                this.openImagePicker();
+                return;
+            }
             if (tool) {
                 e.preventDefault();
                 this.selection.clear();
@@ -265,6 +300,8 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
     }
 
     onPointerDown(e: PointerEvent): void {
+        // The crop overlay owns all input while active.
+        if (this.imageOps.cropping()) return;
         const rect = this.surfaceRef.nativeElement.getBoundingClientRect();
         this.pointers.set(e.pointerId, { x: e.clientX - rect.left, y: e.clientY - rect.top });
         (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -293,13 +330,6 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
         const local = this.pointers.get(e.pointerId)!;
         const world = this.snap(this.vp.screenToWorld(local));
 
-        if (this.tools.activeTool() === 'image') {
-            this.pendingImagePoint = world;
-            this.tools.setTool('selection');
-            this.imageInputRef.nativeElement.click();
-            return;
-        }
-
         if (this.tools.activeTool() !== 'selection') {
             this.drawPointerId = e.pointerId;
             this.drawing.begin(this.tools.activeTool(), world);
@@ -307,7 +337,7 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
         }
 
         this.selectPointerId = e.pointerId;
-        const hit = hitTestTopmost(world, this.scene.elements(), this.vp.viewport().zoom);
+        const hit = hitTestTopmost(world, this.visibleElements(), this.vp.viewport().zoom);
         if (hit) {
             if (!e.shiftKey && !this.selection.isSelected(hit.id)) {
                 this.selection.select(hit.id, false);
@@ -392,13 +422,28 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
         return { w: el?.clientWidth ?? 0, h: el?.clientHeight ?? 0 };
     });
 
+    /**
+     * Opens the native file picker immediately (synchronously, within the originating click/keydown
+     * handler) so the browser's user-activation requirement for showing a file dialog is preserved —
+     * deferring this through an async effect or a second canvas click was the cause of the picker
+     * sometimes not opening, or only opening after an extra click.
+     */
+    openImagePicker(): void {
+        this.pendingImagePoint = this.centerWorldPoint();
+        this.imageInputRef.nativeElement.click();
+    }
+
     async onImageFilePicked(event: Event): Promise<void> {
         const input = event.target as HTMLInputElement;
-        const file = input.files?.[0];
+        const files = Array.from(input.files ?? []);
         const point = this.pendingImagePoint ?? this.centerWorldPoint();
         this.pendingImagePoint = null;
         input.value = '';
-        if (file) await this.images.addImageFromFile(file, point);
+        // Cascade multiple images so they don't land stacked exactly on top of each other.
+        const OFFSET = 28;
+        for (let i = 0; i < files.length; i++) {
+            await this.images.addImageFromFile(files[i], { x: point.x + i * OFFSET, y: point.y + i * OFFSET });
+        }
     }
 
     onDragOver(e: DragEvent): void {
@@ -435,18 +480,6 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
         };
     }
 
-    onDoubleClick(e: MouseEvent): void {
-        if (this.tools.activeTool() !== 'selection') return;
-        const rect = this.surfaceRef.nativeElement.getBoundingClientRect();
-        const world = this.vp.screenToWorld({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-        const hit = hitTestTopmost(world, this.scene.elements(), this.vp.viewport().zoom);
-        if (!hit) {
-            // Excalidraw behavior: double-click on empty canvas drops a text element.
-            this.selection.clear();
-            this.drawing.begin('text', world);
-        }
-    }
-
     onPointerUp(e: PointerEvent): void {
         // Ensure the final move before release is applied (don't drop it to the dropped frame).
         this.flushPendingMove();
@@ -469,6 +502,19 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
         if (this.pointers.size < 2) {
             this.pinchStartDistance = 0;
         }
+    }
+
+    onContextMenu(e: MouseEvent): void {
+        e.preventDefault();
+        const rect = this.surfaceRef.nativeElement.getBoundingClientRect();
+        const world = this.vp.screenToWorld({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+        const hit = hitTestTopmost(world, this.visibleElements(), this.vp.viewport().zoom);
+        if (hit) {
+            if (!this.selection.isSelected(hit.id)) this.selection.select(hit.id, false);
+        } else {
+            this.selection.clear();
+        }
+        this.contextMenu.openAt(e.clientX, e.clientY);
     }
 
     zoomIn(): void {

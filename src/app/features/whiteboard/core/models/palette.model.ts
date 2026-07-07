@@ -22,3 +22,20 @@ export const FONT_FAMILIES: readonly { label: string; value: string }[] = [
     { label: 'Mono', value: 'ui-monospace, monospace' },
     { label: 'Hand', value: '"Comic Sans MS", cursive' },
 ];
+
+/** Default look for the Code Block tool: a monospace font on a shaded card, like a markdown code fence. */
+export const CODE_BLOCK_FONT = 'ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace';
+export const CODE_BLOCK_FILL = '#242220';
+
+/** Standard 9-step type-scale weights (Figma/Adobe XD convention), not just a Bold on/off toggle. */
+export const FONT_WEIGHTS: readonly { label: string; value: number }[] = [
+    { label: 'Thin', value: 100 },
+    { label: 'Extra Light', value: 200 },
+    { label: 'Light', value: 300 },
+    { label: 'Regular', value: 400 },
+    { label: 'Medium', value: 500 },
+    { label: 'Semi Bold', value: 600 },
+    { label: 'Bold', value: 700 },
+    { label: 'Extra Bold', value: 800 },
+    { label: 'Black', value: 900 },
+];

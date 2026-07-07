@@ -6,57 +6,6 @@
     gap: 1.25rem;
 }
 
-.img-drop {
-    position: relative;
-    border: 1px dashed var(--border);
-    border-radius: var(--radius);
-    background: var(--bg);
-    transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
-
-    &.over {
-        border-color: var(--text-muted);
-        background: var(--surface-hover);
-    }
-}
-
-.img-drop-input {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.img-drop-label {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    padding: 2.5rem 1.25rem;
-    text-align: center;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    pointer-events: none;
-
-    i {
-        font-size: 1.8rem;
-        color: var(--text-muted);
-    }
-
-    strong {
-        color: var(--text);
-        font-weight: 600;
-    }
-}
-
-.img-control {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
 .img-range {
     width: 100%;
     accent-color: var(--primary);
@@ -102,4 +51,13 @@
 
 .img-result-actions {
     margin-top: 1rem;
+}
+
+.img-item-error {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--danger-text);
 }

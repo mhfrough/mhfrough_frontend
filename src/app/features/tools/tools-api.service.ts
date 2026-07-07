@@ -74,6 +74,52 @@ export interface ImagePaletteResponse {
     colors: PaletteColor[];
 }
 
+export type ResizeFit = 'cover' | 'contain' | 'inside' | 'outside' | 'fill';
+
+/** Advanced encode/resize knobs shared by compress + convert. Every field is optional. */
+export interface ImageEncodeOptions {
+    quality?: number;
+    maxWidth?: number;
+    maxHeight?: number;
+    fit?: ResizeFit;
+    background?: string;
+    progressive?: boolean;
+    chromaSubsampling?: '4:4:4' | '4:2:0';
+    lossless?: boolean;
+    effort?: number;
+    pngPalette?: boolean;
+    stripMetadata?: boolean;
+    grayscale?: boolean;
+    rotate?: number;
+    targetSizeKB?: number;
+}
+
+export type UpscaleKernel = 'nearest' | 'cubic' | 'mitchell' | 'lanczos2' | 'lanczos3';
+
+export interface UpscaleOptions {
+    kernel?: UpscaleKernel;
+    sharpen?: boolean;
+    /** Explicit output width in px; overrides `scale`. */
+    targetWidth?: number;
+}
+
+function appendEncodeOptions(fd: FormData, opts: ImageEncodeOptions): void {
+    if (opts.quality != null) fd.append('quality', String(opts.quality));
+    if (opts.maxWidth) fd.append('maxWidth', String(opts.maxWidth));
+    if (opts.maxHeight) fd.append('maxHeight', String(opts.maxHeight));
+    if (opts.fit) fd.append('fit', opts.fit);
+    if (opts.background) fd.append('background', opts.background);
+    if (opts.progressive != null) fd.append('progressive', String(opts.progressive));
+    if (opts.chromaSubsampling) fd.append('chromaSubsampling', opts.chromaSubsampling);
+    if (opts.lossless != null) fd.append('lossless', String(opts.lossless));
+    if (opts.effort != null) fd.append('effort', String(opts.effort));
+    if (opts.pngPalette != null) fd.append('pngPalette', String(opts.pngPalette));
+    if (opts.stripMetadata != null) fd.append('stripMetadata', String(opts.stripMetadata));
+    if (opts.grayscale != null) fd.append('grayscale', String(opts.grayscale));
+    if (opts.rotate != null) fd.append('rotate', String(opts.rotate));
+    if (opts.targetSizeKB != null) fd.append('targetSizeKB', String(opts.targetSizeKB));
+}
+
 // --- Generators / codecs -----------------------------------------------------
 export interface QrRequest {
     text: string;
@@ -198,29 +244,28 @@ export class ToolsApiService {
     }
 
     // --- Images (multipart/form-data) --------------------------------------
-    compressImage(file: File, quality: number, maxWidth?: number, maxHeight?: number): Observable<ImageResult> {
+    compressImage(file: File | Blob, opts: ImageEncodeOptions = {}): Observable<ImageResult> {
         const fd = new FormData();
-        fd.append('file', file);
-        fd.append('quality', String(quality));
-        if (maxWidth) fd.append('maxWidth', String(maxWidth));
-        if (maxHeight) fd.append('maxHeight', String(maxHeight));
+        fd.append('file', file, file instanceof File ? file.name : 'image.png');
+        appendEncodeOptions(fd, { quality: 80, ...opts });
         return this.http.post<ImageResult>(`${this.base}/image/compress`, fd);
     }
 
-    convertImage(file: File, format: string, quality?: number, maxWidth?: number, maxHeight?: number): Observable<ImageResult> {
+    convertImage(file: File | Blob, format: string, opts: ImageEncodeOptions = {}): Observable<ImageResult> {
         const fd = new FormData();
-        fd.append('file', file);
+        fd.append('file', file, file instanceof File ? file.name : 'image.png');
         fd.append('format', format);
-        if (quality != null) fd.append('quality', String(quality));
-        if (maxWidth) fd.append('maxWidth', String(maxWidth));
-        if (maxHeight) fd.append('maxHeight', String(maxHeight));
+        appendEncodeOptions(fd, { quality: 80, ...opts });
         return this.http.post<ImageResult>(`${this.base}/image/convert`, fd);
     }
 
-    upscaleImage(file: File, scale: number): Observable<ImageResult> {
+    upscaleImage(file: File | Blob, scale: number, opts: UpscaleOptions = {}): Observable<ImageResult> {
         const fd = new FormData();
-        fd.append('file', file);
+        fd.append('file', file, 'upscale-source.png');
         fd.append('scale', String(scale));
+        if (opts.kernel) fd.append('kernel', opts.kernel);
+        if (opts.sharpen != null) fd.append('sharpen', String(opts.sharpen));
+        if (opts.targetWidth) fd.append('targetWidth', String(opts.targetWidth));
         return this.http.post<ImageResult>(`${this.base}/image/upscale`, fd);
     }
 
@@ -231,10 +276,14 @@ export class ToolsApiService {
         return this.http.post<ImagePaletteResponse>(`${this.base}/image/palette`, fd);
     }
 
-    faviconIco(file: File): Observable<ImageResult> {
+    faviconIco(file: File | Blob): Observable<ImageResult> {
         const fd = new FormData();
-        fd.append('file', file);
+        fd.append('file', file, 'favicon-source.png');
         return this.http.post<ImageResult>(`${this.base}/image/favicon`, fd);
+    }
+
+    faviconFromUrl(url: string): Observable<ImageResult> {
+        return this.http.post<ImageResult>(`${this.base}/image/favicon-from-url`, { url });
     }
 
     // --- Generators / codecs ----------------------------------------------

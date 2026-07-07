@@ -1,6 +1,39 @@
 @if (visible()) {
 <div class="wb-panel" role="region" aria-label="Style properties">
 
+    <!-- Position / size / rotation inspector (single selection) -->
+    @if (single(); as el) {
+    <section class="wb-panel-sec">
+        <label class="wb-panel-label">Position &amp; size</label>
+        <div class="wb-xy-grid">
+            <label class="wb-xy-field">
+                <span class="wb-xy-key">X</span>
+                <input type="number" class="wb-xy-input" [value]="round(el.x)" (change)="setGeometry('x', $event)" />
+            </label>
+            <label class="wb-xy-field">
+                <span class="wb-xy-key">Y</span>
+                <input type="number" class="wb-xy-input" [value]="round(el.y)" (change)="setGeometry('y', $event)" />
+            </label>
+            <label class="wb-xy-field">
+                <span class="wb-xy-key">W</span>
+                <input type="number" class="wb-xy-input" [value]="round(el.width)" (change)="setGeometry('width', $event)" />
+            </label>
+            <label class="wb-xy-field">
+                <span class="wb-xy-key">H</span>
+                <input type="number" class="wb-xy-input" [value]="round(el.height)" (change)="setGeometry('height', $event)" />
+            </label>
+            <label class="wb-xy-field wb-xy-field--wide">
+                <span class="wb-xy-key"><i class="bi bi-arrow-repeat"></i></span>
+                <input type="number" class="wb-xy-input" [value]="round(el.rotation)" (change)="setGeometry('rotation', $event)" />
+                <span class="wb-xy-unit">°</span>
+            </label>
+        </div>
+    </section>
+    <div class="wb-panel-divider"></div>
+    }
+
+    <!-- Shape controls — hidden while a text / sticky / image element is selected -->
+    @if (!isTextSelected() && !isImageSelected()) {
     <!-- Stroke -->
     <section class="wb-panel-sec">
         <label class="wb-panel-label">Stroke</label>
@@ -21,7 +54,7 @@
         <div class="wb-seg">
             @for (w of strokeWidths; track w) {
             <button type="button" class="wb-seg-btn" [class.active]="style().strokeWidth === w"
-                (click)="setStrokeWidth(w)" [attr.aria-label]="w + 'px'">
+                (click)="setStrokeWidth(w)" [title]="w + 'px'" [attr.aria-label]="w + 'px'">
                 <span class="wb-width-preview" [style.height.px]="w"></span>
             </button>
             }
@@ -34,7 +67,7 @@
         <div class="wb-seg">
             @for (d of dashOptions; track d.id) {
             <button type="button" class="wb-seg-btn" [class.active]="style().dash === d.id" (click)="setDash(d.id)"
-                [attr.aria-label]="d.id">
+                [title]="d.id" [attr.aria-label]="d.id">
                 <i class="bi" [class]="d.icon"></i>
             </button>
             }
@@ -49,56 +82,93 @@
             (input)="setCornerRadius($event)" (change)="commit()" />
     </section>
     }
+    }
 
-    <!-- Opacity -->
-    <section class="wb-panel-sec">
-        <label class="wb-panel-label">Opacity · {{ opacityPercent() }}%</label>
-        <input type="range" class="wb-range" min="10" max="100" [value]="opacityPercent()"
-            (input)="setOpacity($event)" (change)="commit()" />
-    </section>
-
-    <!-- Text controls -->
+    <!-- Typography controls — shown while a text / sticky element is selected -->
     @if (textEl(); as t) {
-    <div class="wb-panel-divider"></div>
-
     <section class="wb-panel-sec">
         <label class="wb-panel-label">Font</label>
-        <select class="wb-select" [value]="t.type === 'text' ? t.fontFamily : themeFont"
-            (change)="setFont($event)">
-            @for (f of fonts; track f.value) {
-            <option [value]="f.value">{{ f.label }}</option>
-            }
-        </select>
-    </section>
-
-    <section class="wb-panel-sec">
-        <label class="wb-panel-label">Size · {{ t.fontSize }}px</label>
-        <input type="range" class="wb-range" min="8" max="96" [value]="t.fontSize" (input)="setFontSize($event)"
-            (change)="commit()" />
-    </section>
-
-    @if (asText(t); as tt) {
-    <section class="wb-panel-sec">
-        <label class="wb-panel-label">Format</label>
-        <div class="wb-seg">
-            <button type="button" class="wb-seg-btn" [class.active]="tt.fontWeight === 700" (click)="toggleBold()"
-                aria-label="Bold"><i class="bi bi-type-bold"></i></button>
-            <button type="button" class="wb-seg-btn" [class.active]="tt.italic" (click)="toggleItalic()"
-                aria-label="Italic"><i class="bi bi-type-italic"></i></button>
-            <button type="button" class="wb-seg-btn" [class.active]="tt.underline" (click)="toggleUnderline()"
-                aria-label="Underline"><i class="bi bi-type-underline"></i></button>
+        <div class="wb-font-row">
+            <select class="wb-select" [value]="t.fontFamily" (change)="setFont($event)" title="Font family"
+                aria-label="Font family">
+                @for (f of fonts; track f.value) {
+                <option [value]="f.value">{{ f.label }}</option>
+                }
+            </select>
+            <select class="wb-select" [value]="t.fontWeight" (change)="setFontWeight($event)" title="Font weight"
+                aria-label="Font weight">
+                @for (w of fontWeights; track w.value) {
+                <option [value]="w.value">{{ w.label }}</option>
+                }
+            </select>
+            <input type="number" class="wb-size-input" min="1" max="500" [value]="t.fontSize"
+                (change)="setFontSize($event); commit()" title="Font size" aria-label="Font size" />
         </div>
     </section>
 
+    <!-- Rich formatting acts on the current text selection, so it only applies while
+         actively editing (double-click the box, or select text inside it first). -->
+    <section class="wb-panel-sec">
+        <label class="wb-panel-label">Format</label>
+        @if (isActivelyEditingSelected()) {
+        <!-- mousedown preventDefault: a normal button click first steals focus from the
+             contenteditable box (native browser behavior), which blurs it and loses the
+             text selection before the click handler ever runs. Blocking that default
+             keeps focus/selection in the box so the format command has something to act on. -->
+        <div class="wb-seg">
+            <button type="button" class="wb-seg-btn" [class.active]="textEditing.activeFormats().bold"
+                (mousedown)="$event.preventDefault()" (click)="toggleBold()" title="Bold (Ctrl+B)" aria-label="Bold">
+                <i class="bi bi-type-bold"></i></button>
+            <button type="button" class="wb-seg-btn" [class.active]="textEditing.activeFormats().italic"
+                (mousedown)="$event.preventDefault()" (click)="toggleItalic()" title="Italic (Ctrl+I)" aria-label="Italic">
+                <i class="bi bi-type-italic"></i></button>
+            <button type="button" class="wb-seg-btn" [class.active]="textEditing.activeFormats().underline"
+                (mousedown)="$event.preventDefault()" (click)="toggleUnderline()" title="Underline (Ctrl+U)" aria-label="Underline">
+                <i class="bi bi-type-underline"></i></button>
+            <button type="button" class="wb-seg-btn" [class.active]="textEditing.activeFormats().strikeThrough"
+                (mousedown)="$event.preventDefault()" (click)="toggleStrike()" title="Strikethrough" aria-label="Strikethrough">
+                <i class="bi bi-type-strikethrough"></i></button>
+            <button type="button" class="wb-seg-btn" (mousedown)="$event.preventDefault()" (click)="insertChecklist()"
+                title="Checklist item" aria-label="Checklist">
+                <i class="bi bi-check2-square"></i></button>
+        </div>
+        } @else {
+        <p class="wb-panel-hint">Double-click the box (or click it again) to edit, then select text to format</p>
+        }
+    </section>
+
+    @if (isActivelyEditingSelected()) {
+    <section class="wb-panel-sec">
+        <label class="wb-panel-label">Case</label>
+        <div class="wb-seg">
+            <button type="button" class="wb-seg-btn" [class.active]="textEditing.activeFormats().superscript"
+                (mousedown)="$event.preventDefault()" (click)="toggleSuperscript()" title="Superscript" aria-label="Superscript">
+                <i class="bi bi-superscript"></i></button>
+            <button type="button" class="wb-seg-btn" [class.active]="textEditing.activeFormats().subscript"
+                (mousedown)="$event.preventDefault()" (click)="toggleSubscript()" title="Subscript" aria-label="Subscript">
+                <i class="bi bi-subscript"></i></button>
+            <button type="button" class="wb-seg-btn" (mousedown)="$event.preventDefault()" (click)="applyCase('upper')"
+                title="UPPERCASE" aria-label="UPPERCASE">AA</button>
+            <button type="button" class="wb-seg-btn" (mousedown)="$event.preventDefault()" (click)="applyCase('lower')"
+                title="lowercase" aria-label="lowercase">aa</button>
+            <button type="button" class="wb-seg-btn" (mousedown)="$event.preventDefault()" (click)="applyCase('title')"
+                title="Title Case" aria-label="Title Case">Aa</button>
+        </div>
+    </section>
+    }
+
+    @if (asText(t); as tt) {
     <section class="wb-panel-sec">
         <label class="wb-panel-label">Align</label>
         <div class="wb-seg">
             <button type="button" class="wb-seg-btn" [class.active]="tt.textAlign === 'left'"
-                (click)="setAlign('left')" aria-label="Align left"><i class="bi bi-text-left"></i></button>
+                (click)="setAlign('left')" title="Align left" aria-label="Align left"><i class="bi bi-text-left"></i></button>
             <button type="button" class="wb-seg-btn" [class.active]="tt.textAlign === 'center'"
-                (click)="setAlign('center')" aria-label="Align center"><i class="bi bi-text-center"></i></button>
+                (click)="setAlign('center')" title="Align center" aria-label="Align center"><i class="bi bi-text-center"></i></button>
             <button type="button" class="wb-seg-btn" [class.active]="tt.textAlign === 'right'"
-                (click)="setAlign('right')" aria-label="Align right"><i class="bi bi-text-right"></i></button>
+                (click)="setAlign('right')" title="Align right" aria-label="Align right"><i class="bi bi-text-right"></i></button>
+            <button type="button" class="wb-seg-btn" [class.active]="tt.textAlign === 'justify'"
+                (click)="setAlign('justify')" title="Justify" aria-label="Justify"><i class="bi bi-justify"></i></button>
         </div>
     </section>
 
@@ -106,7 +176,85 @@
         <label class="wb-panel-label">Text color</label>
         <app-color-field [swatches]="strokePalette" [value]="tt.color" (colorChange)="setTextColor($event)" />
     </section>
+
+    <section class="wb-panel-sec">
+        <label class="wb-panel-label">Background color</label>
+        <app-color-field [swatches]="fillPalette" [value]="style().fillColor" [allowTransparent]="true"
+            (colorChange)="setFill($event)" />
+    </section>
+
+    <section class="wb-panel-sec">
+        <label class="wb-panel-label">Sizing</label>
+        <div class="wb-seg">
+            <button type="button" class="wb-seg-btn wb-seg-btn--wide" [class.active]="tt.sizing === 'auto'"
+                (click)="setSizing('auto')" title="Auto height — box grows to fit content" aria-label="Auto height">
+                <i class="bi bi-arrows-expand"></i> Auto</button>
+            <button type="button" class="wb-seg-btn wb-seg-btn--wide" [class.active]="tt.sizing === 'fixed'"
+                (click)="setSizing('fixed')" title="Fixed size — overflow is clipped" aria-label="Fixed size">
+                <i class="bi bi-lock"></i> Fixed</button>
+        </div>
+    </section>
+    }
+
+    @if (stickyEl(); as s) {
+    <section class="wb-panel-sec">
+        <label class="wb-panel-label">Note color</label>
+        <app-color-field [swatches]="stickyPalette" [value]="s.fill" (colorChange)="setStickyFill($event)" />
+    </section>
     }
     }
+
+    <!-- Image controls — crop, mask and boolean compose -->
+    @if (isImageSelected()) {
+    @if (imageEl(); as img) {
+    <section class="wb-panel-sec">
+        <label class="wb-panel-label">Crop to ratio</label>
+        <div class="wb-chip-row">
+            @for (r of cropRatios; track r.label) {
+            <button type="button" class="wb-chip" (click)="cropTo(r.value)">{{ r.label }}</button>
+            }
+        </div>
+    </section>
+
+    <section class="wb-panel-sec">
+        <label class="wb-panel-label">Crop &amp; adjust</label>
+        <div class="wb-seg">
+            <button type="button" class="wb-seg-btn wb-seg-btn--wide" (click)="startCrop()" title="Crop image"
+                aria-label="Crop image">
+                <i class="bi bi-crop"></i> Crop
+            </button>
+            @if (img.originalSrc) {
+            <button type="button" class="wb-seg-btn wb-seg-btn--wide" (click)="resetImage()" title="Reset image"
+                aria-label="Reset image">
+                <i class="bi bi-arrow-counterclockwise"></i> Reset
+            </button>
+            }
+        </div>
+    </section>
+    }
+    }
+
+    <!-- Combine — any two selected objects (shapes, text, images): boolean ops + mask -->
+    @if (canCombine()) {
+    <section class="wb-panel-sec">
+        <label class="wb-panel-label">Combine objects</label>
+        <div class="wb-seg wb-seg--wrap">
+            @for (op of combineOps; track op.id) {
+            <button type="button" class="wb-seg-btn wb-combine-btn" [title]="op.label" [attr.aria-label]="op.label"
+                (click)="combine(op.id)">
+                <i class="bi" [class]="op.icon"></i>
+                <span>{{ op.label }}</span>
+            </button>
+            }
+        </div>
+    </section>
+    }
+
+    <!-- Opacity — applies to every element type -->
+    <section class="wb-panel-sec">
+        <label class="wb-panel-label">Opacity · {{ opacityPercent() }}%</label>
+        <input type="range" class="wb-range" min="0" max="100" [value]="opacityPercent()"
+            (input)="setOpacity($event)" (change)="commit()" />
+    </section>
 </div>
 }

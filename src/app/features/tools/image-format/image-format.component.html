@@ -1,17 +1,39 @@
-<app-tool-page title="Image Format & Compression" icon="bi-arrow-repeat"
+<app-tool-page title="Image Compressor & Format Converter" icon="bi-arrow-repeat"
     [loading]="loading()" [error]="error()"
-    blurb="Compress, resize and convert images between JPEG, PNG, WebP, AVIF and GIF in one pass.">
+    blurb="Batch compress, resize and convert images between JPEG, PNG, WebP, AVIF, GIF and TIFF — with progressive JPEG, lossless WebP/AVIF, PNG palettes, target file size and more.">
 
     <div class="img">
         <!-- Upload zone -->
         <div class="img-drop" [class.over]="dragOver()"
             (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
-            <input type="file" id="fmtFile" class="img-drop-input" accept="image/*" (change)="onFileInput($event)" />
+            <input type="file" id="fmtFile" class="img-drop-input" accept="image/*" multiple
+                (change)="onFileInput($event)" aria-label="Upload one or more images" />
             <label for="fmtFile" class="img-drop-label">
                 <i class="bi bi-cloud-arrow-up"></i>
-                <span>Drop an image here or <strong>browse</strong></span>
+                <span>Drop image(s) here, <strong>browse</strong>, or paste with Ctrl+V</span>
             </label>
         </div>
+
+        <!-- Batch thumbnails -->
+        @if (items().length) {
+        <div class="t-thumbs" role="tablist" aria-label="Uploaded images">
+            @for (item of items(); track item.id) {
+            <button type="button" class="t-thumb" [class.active]="item.id === selectedId()"
+                (click)="selectItem(item.id)" [attr.aria-label]="'Select ' + item.name" [attr.aria-selected]="item.id === selectedId()">
+                <img [src]="item.previewUrl" alt="" width="28" height="28" />
+                <span>{{ item.name }}</span>
+                @switch (item.status) {
+                    @case ('loading') { <i class="bi bi-hourglass-split t-thumb-status is-loading"></i> }
+                    @case ('done') { <i class="bi bi-check-circle-fill t-thumb-status is-done"></i> }
+                    @case ('error') { <i class="bi bi-exclamation-circle-fill t-thumb-status is-error"></i> }
+                }
+            </button>
+            }
+            <button type="button" class="t-btn t-btn--ghost t-thumb-clear" (click)="clearAll()">
+                <i class="bi bi-trash3"></i> Clear all
+            </button>
+        </div>
+        }
 
         <!-- Controls -->
         <div class="img-controls-row">
@@ -24,7 +46,7 @@
                 </select>
             </div>
 
-            @if (showQuality()) {
+            @if (showQuality() && !useTargetSize()) {
             <div class="img-control img-control--grow">
                 <label class="t-label" for="fmtQuality">Quality — {{ quality() }}</label>
                 <input type="range" id="fmtQuality" class="img-range" min="1" max="100" step="1"
@@ -32,6 +54,22 @@
             </div>
             }
         </div>
+
+        @if (showQuality()) {
+        <div class="img-controls-row">
+            <label class="t-check">
+                <input type="checkbox" [ngModel]="useTargetSize()" (ngModelChange)="useTargetSize.set($event)" />
+                Target a specific file size instead of a quality slider
+            </label>
+            @if (useTargetSize()) {
+            <div class="img-control">
+                <label class="t-label" for="fmtTargetSize">Target size (KB)</label>
+                <input type="number" id="fmtTargetSize" class="t-field" min="1" step="1"
+                    [ngModel]="targetSizeKB()" (ngModelChange)="targetSizeKB.set(+$event)" />
+            </div>
+            }
+        </div>
+        }
 
         <div class="img-controls-row">
             <div class="img-control">
@@ -44,39 +82,133 @@
                 <input type="number" id="fmtMaxHeight" class="t-field" min="1" step="1" placeholder="Original height"
                     [ngModel]="maxHeight()" (ngModelChange)="setMaxHeight($event)" />
             </div>
+            <div class="img-control">
+                <label class="t-label" for="fmtFit">Resize fit</label>
+                <select id="fmtFit" class="t-field" [ngModel]="fit()" (ngModelChange)="fit.set($event)">
+                    @for (fm of fits; track fm) {
+                    <option [value]="fm">{{ fm }}</option>
+                    }
+                </select>
+            </div>
+            @if (showFitBackground()) {
+            <div class="img-control">
+                <label class="t-label" for="fmtBackground">Letterbox color</label>
+                <input type="color" id="fmtBackground" class="t-field img-color-field"
+                    [ngModel]="background()" (ngModelChange)="background.set($event)" />
+            </div>
+            }
         </div>
-        <p class="img-hint">Leave blank to keep original dimensions.</p>
+        <p class="img-hint">Leave width/height blank to keep original dimensions. Fit only matters once both are set.</p>
+
+        <!-- Advanced options -->
+        <button type="button" class="t-btn t-btn--ghost img-advanced-toggle" (click)="toggleAdvanced()">
+            <i class="bi" [class]="advancedOpen() ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+            Advanced options
+        </button>
+
+        @if (advancedOpen()) {
+        <div class="t-panel img-advanced-panel">
+            <div class="img-controls-row">
+                <label class="t-check">
+                    <input type="checkbox" [ngModel]="progressive()" (ngModelChange)="progressive.set($event)" />
+                    Progressive JPEG
+                </label>
+                <div class="img-control">
+                    <label class="t-label" for="fmtChroma">JPEG chroma subsampling</label>
+                    <select id="fmtChroma" class="t-field" [ngModel]="chromaSubsampling()" (ngModelChange)="chromaSubsampling.set($event)">
+                        <option value="4:2:0">4:2:0 (smaller)</option>
+                        <option value="4:4:4">4:4:4 (sharper color)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="img-controls-row">
+                <label class="t-check">
+                    <input type="checkbox" [ngModel]="lossless()" (ngModelChange)="lossless.set($event)" />
+                    Lossless (WebP / AVIF)
+                </label>
+                <div class="img-control img-control--grow">
+                    <label class="t-label" for="fmtEffort">WebP/AVIF effort — {{ effort() }}</label>
+                    <input type="range" id="fmtEffort" class="img-range" min="0" max="6" step="1"
+                        [ngModel]="effort()" (ngModelChange)="effort.set(+$event)" />
+                </div>
+            </div>
+
+            <div class="img-controls-row">
+                <label class="t-check">
+                    <input type="checkbox" [ngModel]="pngPalette()" (ngModelChange)="pngPalette.set($event)" />
+                    PNG palette (quantize, much smaller)
+                </label>
+                <label class="t-check">
+                    <input type="checkbox" [ngModel]="grayscale()" (ngModelChange)="grayscale.set($event)" />
+                    Grayscale
+                </label>
+                <label class="t-check">
+                    <input type="checkbox" [ngModel]="keepMetadata()" (ngModelChange)="keepMetadata.set($event)" />
+                    Keep EXIF / metadata
+                </label>
+            </div>
+
+            <div class="img-controls-row">
+                <div class="img-control">
+                    <label class="t-label" for="fmtRotate">Rotation</label>
+                    <select id="fmtRotate" class="t-field" [ngModel]="rotate()" (ngModelChange)="rotate.set($event)">
+                        <option value="auto">Auto (respect EXIF)</option>
+                        <option value="0">0°</option>
+                        <option value="90">90°</option>
+                        <option value="180">180°</option>
+                        <option value="270">270°</option>
+                    </select>
+                </div>
+            </div>
+            <p class="img-hint">Format-specific options are ignored automatically when they don't apply to the chosen output.</p>
+        </div>
+        }
 
         <div class="t-actions">
-            <button type="button" class="t-btn" (click)="run()" [disabled]="loading() || !file()">
-                <i class="bi bi-arrow-repeat"></i> {{ isOriginal() ? 'Compress' : 'Convert' }}
+            <button type="button" class="t-btn" (click)="runAll()" [disabled]="processingAll() || !items().length">
+                <i class="bi" [class]="processingAll() ? 'bi-hourglass-split' : 'bi-arrow-repeat'"></i>
+                {{ processingAll() ? 'Processing…' : (isOriginal() ? 'Compress' : 'Convert') }}{{ isBatch() ? ' all' : '' }}
             </button>
+            @if (doneItems().length > 1) {
+            <button type="button" class="t-btn t-btn--ghost" (click)="downloadZip()" [disabled]="exporting()">
+                <i class="bi bi-file-zip"></i> {{ exporting() ? 'Zipping…' : 'Download all (.zip)' }}
+            </button>
+            }
         </div>
 
-        <!-- Previews -->
-        @if (previewUrl(); as src) {
+        <!-- Selected item preview -->
+        @if (selectedItem(); as item) {
+
+        @if (item.error) {
+        <p class="img-item-error"><i class="bi bi-exclamation-triangle"></i> {{ item.error }}</p>
+        }
+
+        @if (item.result; as res) {
+        <div class="t-panel t-compare">
+            <label class="t-label">Before / after — {{ item.name }}</label>
+            <div class="t-ba">
+                <img class="t-ba-after" [src]="res.output" alt="Processed image" />
+                <div class="t-ba-clip" [style.clipPath]="'inset(0 ' + (100 - compareSplit()) + '% 0 0)'">
+                    <img class="t-ba-before" [src]="item.previewUrl" alt="Original image" />
+                </div>
+                <div class="t-ba-divider" [style.left.%]="compareSplit()"></div>
+            </div>
+            <input type="range" min="0" max="100" class="t-ba-range" [ngModel]="compareSplit()" (ngModelChange)="compareSplit.set($event)"
+                aria-label="Before/after comparison split" />
+        </div>
+        } @else {
         <div class="img-grid">
             <figure class="img-card">
                 <figcaption class="t-label">Original</figcaption>
-                <img class="img-preview" [src]="src" alt="Original image preview" />
-                @if (file(); as f) {
-                <p class="img-meta">{{ formatBytes(f.size) }}</p>
-                }
+                <img class="img-preview" [src]="item.previewUrl" alt="Original image preview" />
+                <p class="img-meta">{{ formatBytes(item.bytesIn) }}</p>
             </figure>
-
-            @if (result(); as res) {
-            <figure class="img-card">
-                <figcaption class="t-label">{{ res.format | uppercase }}</figcaption>
-                <img class="img-preview" [src]="res.output" alt="Converted image preview" />
-                <p class="img-meta">{{ res.format | uppercase }} · {{ formatBytes(res.bytesOut) }}
-                    · {{ res.width }}×{{ res.height }}</p>
-            </figure>
-            }
         </div>
         }
 
         <!-- Stats -->
-        @if (result(); as res) {
+        @if (item.result; as res) {
         <div class="t-result">
             <div class="t-stats">
                 <div class="t-stat">
@@ -97,10 +229,48 @@
                 </div>
             </div>
             <div class="t-actions img-result-actions">
-                <button type="button" class="t-btn" (click)="download()">
+                <button type="button" class="t-btn" (click)="download(item)">
                     <i class="bi bi-download"></i> Download
                 </button>
             </div>
+        </div>
+        }
+        }
+
+        <!-- Batch totals -->
+        @if (doneItems().length > 1) {
+        <div class="t-result">
+            <label class="t-label">Batch totals</label>
+            <div class="t-stats">
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ doneItems().length }} / {{ items().length }}</span>
+                    <span class="t-stat-label">Processed</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ formatBytes(totalBytesIn()) }}</span>
+                    <span class="t-stat-label">Total before</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num">{{ formatBytes(totalBytesOut()) }}</span>
+                    <span class="t-stat-label">Total after</span>
+                </div>
+                <div class="t-stat">
+                    <span class="t-stat-num" [class.t-stat-num--good]="totalSavedPct() > 0">{{ totalSavedPct() }}%</span>
+                    <span class="t-stat-label">Total saved</span>
+                </div>
+            </div>
+        </div>
+        }
+
+        <!-- History -->
+        @if (exportHistory().length) {
+        <div class="t-panel">
+            <label class="t-label">Recent activity</label>
+            <ul class="t-history">
+                @for (h of exportHistory(); track h.time + h.label) {
+                <li><span>{{ h.label }}</span><time>{{ h.time }}</time></li>
+                }
+            </ul>
         </div>
         }
     </div>

@@ -4,6 +4,7 @@ import { boundingBoxOfElements } from './hit-test.util';
 import {
     arrowHeadPoints, diamondPoints, pathD, polygonPoints, starPoints, trianglePoints,
 } from './shape-geometry.util';
+import { stripHtml } from './text.util';
 
 const PADDING = 40;
 
@@ -95,19 +96,20 @@ function renderText(el: Extract<WhiteboardElement, { type: 'text' }>): string {
     const lineHeight = el.fontSize * 1.3;
     const anchor = el.textAlign === 'center' ? 'middle' : el.textAlign === 'right' ? 'end' : 'start';
     const anchorX = el.textAlign === 'center' ? el.width / 2 : el.textAlign === 'right' ? el.width : 0;
-    const tspans = el.text.split('\n')
+    // Plain-text approximation: per-run bold/italic/underline from the live rich editor isn't reproduced here.
+    const tspans = stripHtml(el.text).split('\n')
         .map((line, i) => `<tspan x="${anchorX}" dy="${i === 0 ? el.fontSize : lineHeight}">${escapeXml(line)}</tspan>`)
         .join('');
-    const style = `font-family:${el.fontFamily};font-size:${el.fontSize}px;font-weight:${el.fontWeight};${el.italic ? 'font-style:italic;' : ''}${el.underline ? 'text-decoration:underline;' : ''}`;
+    const style = `font-family:${el.fontFamily};font-size:${el.fontSize}px;font-weight:${el.fontWeight};`;
     return `<g transform="translate(${el.x},${el.y}) rotate(${el.rotation},${el.width / 2},${el.height / 2})"><text fill="${el.color}" text-anchor="${anchor}" style="${style}" opacity="${el.style.opacity}">${tspans}</text></g>`;
 }
 
 function renderSticky(el: Extract<WhiteboardElement, { type: 'sticky' }>): string {
     const lineHeight = el.fontSize * 1.35;
-    const tspans = el.text.split('\n')
+    const tspans = stripHtml(el.text).split('\n')
         .map((line, i) => `<tspan x="12" dy="${i === 0 ? el.fontSize : lineHeight}">${escapeXml(line)}</tspan>`)
         .join('');
-    return `<g transform="translate(${el.x},${el.y}) rotate(${el.rotation},${el.width / 2},${el.height / 2})"><rect width="${el.width}" height="${el.height}" rx="4" fill="${el.fill}" opacity="${el.style.opacity}"/><text x="12" y="12" fill="#1a1917" style="font-family:Inconsolata,'Courier New',monospace;font-size:${el.fontSize}px">${tspans}</text></g>`;
+    return `<g transform="translate(${el.x},${el.y}) rotate(${el.rotation},${el.width / 2},${el.height / 2})"><rect width="${el.width}" height="${el.height}" rx="4" fill="${el.fill}" opacity="${el.style.opacity}"/><text x="12" y="12" fill="#1a1917" style="font-family:${el.fontFamily || `Inconsolata,'Courier New',monospace`};font-size:${el.fontSize}px;font-weight:${el.fontWeight}">${tspans}</text></g>`;
 }
 
 function renderImage(el: Extract<WhiteboardElement, { type: 'image' }>): string {
@@ -120,7 +122,7 @@ function renderImage(el: Extract<WhiteboardElement, { type: 'image' }>): string 
 
 function renderFrame(el: Extract<WhiteboardElement, { type: 'frame' }>): string {
     // Fixed chrome look: frames ignore the element style.
-    return `<g transform="translate(${el.x},${el.y}) rotate(${el.rotation},${el.width / 2},${el.height / 2})"><rect width="${el.width}" height="${el.height}" fill="transparent" stroke="#928e87" stroke-width="1.5" stroke-dasharray="6 4"/><text x="0" y="-8" fill="#928e87" font-size="12" font-family="Inconsolata, monospace">${escapeXml(el.label)}</text></g>`;
+    return `<g transform="translate(${el.x},${el.y}) rotate(${el.rotation},${el.width / 2},${el.height / 2})"><rect width="${el.width}" height="${el.height}" fill="transparent" stroke="#928e87" stroke-width="1.5" stroke-dasharray="6 4"/><text x="0" y="-8" fill="#928e87" font-size="12" font-family="Inconsolata, monospace">${escapeXml(el.name || el.label)}</text></g>`;
 }
 
 function escapeXml(str: string): string {

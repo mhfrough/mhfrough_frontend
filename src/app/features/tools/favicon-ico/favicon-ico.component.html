@@ -1,79 +1,277 @@
 <app-tool-page title="Favicon Generator" icon="bi-window"
     [loading]="loading()" [error]="error()"
-    blurb="Turn any image into a multi-size favicon.ico packing 16, 32, 48 and 64 px icons in a single file.">
+    blurb="Crop, pad, recolor and preview a favicon across browsers and devices, then export a complete favicon.ico + PNG + manifest package.">
 
-    <div class="img">
+    <div class="fav">
         <!-- Upload zone -->
         <div class="img-drop" [class.over]="dragOver()"
             (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
-            <input type="file" id="icoFile" class="img-drop-input" accept="image/*" (change)="onFileInput($event)" />
-            <label for="icoFile" class="img-drop-label">
+            <input type="file" id="favFile" class="img-drop-input" accept="image/*,.svg" multiple
+                (change)="onFileInput($event)" aria-label="Upload one or more images" />
+            <label for="favFile" class="img-drop-label">
                 <i class="bi bi-cloud-arrow-up"></i>
-                <span>Drop an image here or <strong>browse</strong></span>
+                <span>Drop image(s) here, <strong>browse</strong>, or paste with Ctrl+V</span>
             </label>
         </div>
 
-        <div class="t-actions">
-            <button type="button" class="t-btn" (click)="run()" [disabled]="loading() || !file()">
-                <i class="bi bi-window"></i> Generate favicon
+        <div class="t-row fav-url-row">
+            <div class="fav-url-field">
+                <label class="t-label" for="favUrl">Or extract a favicon from a website</label>
+                <input id="favUrl" type="url" class="t-field" placeholder="https://example.com"
+                    [ngModel]="urlInput()" (ngModelChange)="urlInput.set($event)"
+                    (keydown.enter)="loadFromUrl()" />
+            </div>
+            <button type="button" class="t-btn t-btn--ghost" (click)="loadFromUrl()"
+                [disabled]="urlLoading() || !urlInput().trim()">
+                <i class="bi" [class]="urlLoading() ? 'bi-hourglass-split' : 'bi-globe2'"></i>
+                {{ urlLoading() ? 'Fetching…' : 'Extract' }}
             </button>
         </div>
 
-        <!-- Source preview -->
-        @if (previewUrl(); as src) {
-        <figure class="img-card img-card--single">
-            <figcaption class="t-label">Source</figcaption>
-            <img class="img-preview" [src]="src" alt="Source image preview" />
-            @if (file(); as f) {
-            <p class="img-meta">{{ formatBytes(f.size) }}</p>
+        @if (items().length) {
+        <div class="fav-thumbs" role="tablist" aria-label="Uploaded images">
+            @for (item of items(); track item.id) {
+            <button type="button" class="fav-thumb" [class.active]="item.id === selectedId()"
+                (click)="selectItem(item.id)" [attr.aria-label]="'Select ' + item.name" [attr.aria-selected]="item.id === selectedId()">
+                <img [src]="item.thumbUrl" alt="" width="32" height="32" />
+                <span>{{ item.name }}</span>
+            </button>
             }
-        </figure>
+            <button type="button" class="fav-thumb-remove t-btn t-btn--ghost" (click)="removeSelected()"
+                [disabled]="!selectedId()" aria-label="Remove selected image (Delete)">
+                <i class="bi bi-trash3"></i>
+            </button>
+        </div>
         }
 
-        <!-- Result -->
-        @if (result(); as res) {
-        <div class="t-result">
-            <p class="t-label">Favicon preview</p>
-            <div class="ico-sizes">
-                <figure class="ico-chip">
-                    <img class="ico-img" [src]="res.output" alt="Favicon at 16 pixels" width="16" height="16" />
-                    <figcaption>16</figcaption>
-                </figure>
-                <figure class="ico-chip">
-                    <img class="ico-img" [src]="res.output" alt="Favicon at 32 pixels" width="32" height="32" />
-                    <figcaption>32</figcaption>
-                </figure>
-                <figure class="ico-chip">
-                    <img class="ico-img" [src]="res.output" alt="Favicon at 48 pixels" width="48" height="48" />
-                    <figcaption>48</figcaption>
-                </figure>
-                <figure class="ico-chip">
-                    <img class="ico-img" [src]="res.output" alt="Favicon at 64 pixels" width="64" height="64" />
-                    <figcaption>64</figcaption>
-                </figure>
+        @if (selectedItem(); as item) {
+
+        @if (warningMessages().length) {
+        <ul class="fav-warnings" aria-label="Quality suggestions">
+            @for (msg of warningMessages(); track msg) {
+            <li><i class="bi bi-exclamation-triangle"></i> {{ msg }}</li>
+            }
+        </ul>
+        }
+
+        <div class="t-actions fav-upscale-row">
+            <span class="fav-hint">Upscale the source image (sharper large icons):</span>
+            @for (scale of upscaleScales; track scale) {
+            <button type="button" class="t-btn t-btn--ghost" (click)="upscaleSelected(scale)" [disabled]="upscaling()">
+                <i class="bi" [class]="upscaling() ? 'bi-hourglass-split' : 'bi-arrows-angle-expand'"></i> {{ scale }}x
+            </button>
+            }
+        </div>
+
+        <div class="t-tabs" role="tablist" aria-label="Editor section">
+            <button type="button" class="t-tab" [class.active]="tab() === 'edit'" (click)="setTab('edit')">Edit</button>
+            <button type="button" class="t-tab" [class.active]="tab() === 'preview'" (click)="setTab('preview')">Preview</button>
+            <button type="button" class="t-tab" [class.active]="tab() === 'export'" (click)="setTab('export')">Export</button>
+        </div>
+
+        @if (tab() === 'edit') {
+        <div class="fav-grid">
+            <div class="t-panel fav-controls">
+                <div>
+                    <label class="t-label">Cropping</label>
+                    <div class="t-tabs">
+                        <button type="button" class="t-tab" [class.active]="cropMode() === 'auto'" (click)="setCropMode('auto')">Auto crop</button>
+                        <button type="button" class="t-tab" [class.active]="cropMode() === 'original'" (click)="setCropMode('original')">Keep original</button>
+                        @if (!isBatch()) {
+                        <button type="button" class="t-tab" [class.active]="cropMode() === 'manual'" (click)="setCropMode('manual')">Manual crop</button>
+                        }
+                    </div>
+                </div>
+
+                @if (cropMode() === 'manual' && !isBatch()) {
+                <div class="fav-crop-box" #cropBox
+                    (pointerdown)="onCropPointerDown($event, cropBox)"
+                    (pointermove)="onCropPointerMove($event, cropBox)"
+                    (pointerup)="onCropPointerUp()" (pointerleave)="onCropPointerUp()">
+                    <img [src]="selectedSourceDataUrl()" alt="Drag to select a crop region" draggable="false" />
+                    @if (manualRectStyle(); as s) {
+                    <div class="fav-crop-rect" [ngStyle]="s"></div>
+                    }
+                </div>
+                }
+
+                <label class="t-check">
+                    <input type="checkbox" [checked]="autoCenter()" (change)="autoCenter.set($any($event.target).checked)" />
+                    Auto-center artwork
+                </label>
+
+                <div>
+                    <label class="t-label" for="favPad">Padding — {{ paddingPct() }}%</label>
+                    <input id="favPad" type="range" min="0" max="40" step="1" class="fav-range"
+                        [ngModel]="paddingPct()" (ngModelChange)="paddingPct.set($event)" />
+                </div>
+
+                <div>
+                    <label class="t-label">Background</label>
+                    <div class="t-tabs fav-bg-tabs">
+                        <button type="button" class="t-tab" [class.active]="background() === 'transparent'" (click)="background.set('transparent')">Transparent</button>
+                        <button type="button" class="t-tab" [class.active]="background() === 'white'" (click)="background.set('white')">White</button>
+                        <button type="button" class="t-tab" [class.active]="background() === 'black'" (click)="background.set('black')">Black</button>
+                        <button type="button" class="t-tab" [class.active]="background() === 'auto'" (click)="background.set('auto')">Auto</button>
+                        <button type="button" class="t-tab" [class.active]="background() === 'custom'" (click)="background.set('custom')">Custom</button>
+                    </div>
+                    @if (background() === 'custom') {
+                    <div class="ti-color fav-color-row">
+                        <input type="color" class="ti-color-input" [ngModel]="customColor()" (ngModelChange)="setCustomColor($event)" />
+                        <input type="text" class="t-field" spellcheck="false" [ngModel]="customColor()" (ngModelChange)="setCustomColor($event)" />
+                    </div>
+                    @if (recentColors().length) {
+                    <div class="fav-recent-colors">
+                        @for (c of recentColors(); track c) {
+                        <button type="button" class="fav-swatch" [style.background]="c" (click)="setCustomColor(c)" [attr.aria-label]="'Use colour ' + c"></button>
+                        }
+                    </div>
+                    }
+                    }
+                </div>
+
+                <div>
+                    <label class="t-label">Corner shape</label>
+                    <div class="t-tabs fav-bg-tabs">
+                        <button type="button" class="t-tab" [class.active]="cornerShape() === 'square'" (click)="cornerShape.set('square')">Square</button>
+                        <button type="button" class="t-tab" [class.active]="cornerShape() === 'rounded'" (click)="cornerShape.set('rounded')">Rounded</button>
+                        <button type="button" class="t-tab" [class.active]="cornerShape() === 'circle'" (click)="cornerShape.set('circle')">Circle</button>
+                        <button type="button" class="t-tab" [class.active]="cornerShape() === 'squircle'" (click)="cornerShape.set('squircle')">Squircle</button>
+                    </div>
+                </div>
+
+                <div class="fav-dark-panel">
+                    <label class="t-label">Dark-mode variant (optional)</label>
+                    @if (isBatch()) {
+                    <p class="fav-hint">Not available in batch mode.</p>
+                    } @else if (darkItem()) {
+                    <div class="fav-dark-preview">
+                        <img [src]="darkMasterDataUrl()" alt="Dark-mode favicon preview" width="32" height="32" />
+                        <button type="button" class="t-btn t-btn--ghost" (click)="clearDark()">Remove</button>
+                    </div>
+                    } @else {
+                    <input type="file" id="favDarkFile" accept="image/*" (change)="onDarkFileInput($event)" />
+                    }
+                </div>
             </div>
 
-            <div class="t-stats ico-stats">
-                <div class="t-stat">
-                    <span class="t-stat-num">ICO</span>
-                    <span class="t-stat-label">Format</span>
+            <div class="t-panel fav-compare">
+                <label class="t-label">Before / after</label>
+                <div class="fav-ba">
+                    <img class="fav-ba-after" [src]="masterDataUrl()" alt="Edited favicon" />
+                    <div class="fav-ba-clip" [style.clipPath]="'inset(0 ' + (100 - compareSplit()) + '% 0 0)'">
+                        <img class="fav-ba-before" [src]="selectedSourceDataUrl()" alt="Original image" />
+                    </div>
+                    <div class="fav-ba-divider" [style.left.%]="compareSplit()"></div>
                 </div>
-                <div class="t-stat">
-                    <span class="t-stat-num">{{ formatBytes(res.bytesOut) }}</span>
-                    <span class="t-stat-label">Size</span>
-                </div>
-                <div class="t-stat">
-                    <span class="t-stat-num">16/32/48/64</span>
-                    <span class="t-stat-label">Bundled px</span>
-                </div>
-            </div>
-
-            <div class="t-actions img-result-actions">
-                <button type="button" class="t-btn" (click)="download()">
-                    <i class="bi bi-download"></i> Download favicon.ico
-                </button>
+                <input type="range" min="0" max="100" class="fav-range" [ngModel]="compareSplit()" (ngModelChange)="compareSplit.set($event)"
+                    aria-label="Before/after comparison split" />
             </div>
         </div>
+        }
+
+        @if (tab() === 'preview') {
+        <div class="fav-grid">
+            <div class="t-panel">
+                <label class="t-label">Sizes</label>
+                <div class="ico-sizes">
+                    @for (chip of previewChips(); track chip.size) {
+                    <figure class="ico-chip">
+                        <img class="ico-img" [src]="chip.url" [alt]="'Favicon at ' + chip.size + ' pixels'"
+                            [width]="chip.size > 96 ? 96 : chip.size" [height]="chip.size > 96 ? 96 : chip.size" />
+                        <figcaption>{{ chip.size }}</figcaption>
+                    </figure>
+                    }
+                </div>
+
+                <label class="t-label">Zoom inspector</label>
+                <div class="t-row">
+                    <select class="t-field fav-zoom-select" [ngModel]="zoomSize()" (ngModelChange)="setZoomSize($event)" aria-label="Size to inspect">
+                        @for (size of previewSizes; track size) {
+                        <option [value]="size">{{ size }}px</option>
+                        }
+                    </select>
+                    <div class="t-tabs">
+                        @for (level of zoomLevels; track level) {
+                        <button type="button" class="t-tab" [class.active]="zoomLevel() === level" (click)="setZoomLevel(level)">{{ level * 100 }}%</button>
+                        }
+                    </div>
+                    <label class="t-check">
+                        <input type="checkbox" [checked]="showPixelGrid()" (change)="showPixelGrid.set($any($event.target).checked)" />
+                        Pixel grid
+                    </label>
+                </div>
+                <div class="fav-zoom-box">
+                    <img [src]="zoomDataUrl()" alt="Zoomed favicon preview" class="fav-zoom-img" [class.fav-pixel-grid]="showPixelGrid()"
+                        [style.width.px]="zoomSize() * zoomLevel()" [style.height.px]="zoomSize() * zoomLevel()" />
+                </div>
+            </div>
+
+            <div class="t-panel">
+                <label class="t-label">Preview as</label>
+                <select class="t-field" [ngModel]="previewKind()" (ngModelChange)="previewKind.set($event)" aria-label="Mockup context">
+                    @for (m of mockups; track m.kind) {
+                    <option [value]="m.kind">{{ m.label }}</option>
+                    }
+                </select>
+                <div class="fav-mockup-wrap">
+                    <app-favicon-mockup [iconUrl]="masterDataUrl()" [kind]="previewKind()" [siteName]="siteName()"></app-favicon-mockup>
+                </div>
+            </div>
+        </div>
+        }
+
+        @if (tab() === 'export') {
+        <div class="fav-grid">
+            <div class="t-panel">
+                <div class="t-grid-2">
+                    <div>
+                        <label class="t-label" for="favSiteName">Site name</label>
+                        <input id="favSiteName" type="text" class="t-field" [ngModel]="siteName()" (ngModelChange)="siteName.set($event)" />
+                    </div>
+                    <div>
+                        <label class="t-label" for="favTheme">Theme colour</label>
+                        <div class="ti-color">
+                            <input id="favTheme" type="color" class="ti-color-input" [ngModel]="themeColor()" (ngModelChange)="themeColor.set($event)" />
+                            <input type="text" class="t-field" spellcheck="false" [ngModel]="themeColor()" (ngModelChange)="themeColor.set($event)" />
+                        </div>
+                    </div>
+                </div>
+
+                <label class="t-label fav-snippet-label">HTML snippet</label>
+                <pre class="t-textarea fav-snippet">{{ htmlSnippet() }}</pre>
+
+                <div class="t-actions">
+                    <button type="button" class="t-btn t-btn--ghost" (click)="copySnippet()">
+                        <i class="bi" [class]="copiedHtml() ? 'bi-check2' : 'bi-clipboard'"></i>
+                        {{ copiedHtml() ? 'Copied' : 'Copy HTML' }}
+                    </button>
+                    <button type="button" class="t-btn t-btn--ghost" (click)="quickDownloadIco()" [disabled]="loading()">
+                        <i class="bi bi-download"></i> favicon.ico only
+                    </button>
+                    <button type="button" class="t-btn" (click)="downloadZip()" [disabled]="exporting()">
+                        <i class="bi" [class]="exporting() ? 'bi-hourglass-split' : 'bi-file-earmark-zip'"></i>
+                        {{ exporting() ? 'Building…' : (isBatch() ? 'Download all packs (.zip)' : 'Download package (.zip)') }}
+                    </button>
+                </div>
+                <p class="fav-hint">Keyboard: Ctrl/Cmd+S downloads the zip, Delete removes the selected image.</p>
+
+                @if (exportHistory().length) {
+                <div class="fav-history">
+                    <label class="t-label">Export history (this session)</label>
+                    <ul>
+                        @for (h of exportHistory(); track h.time + h.label) {
+                        <li><span>{{ h.time }}</span> {{ h.label }}</li>
+                        }
+                    </ul>
+                </div>
+                }
+            </div>
+        </div>
+        }
+
+        } @else {
+        <p class="fav-hint">Upload an image, paste one from your clipboard, or extract one from a website to get started.</p>
         }
     </div>
 </app-tool-page>

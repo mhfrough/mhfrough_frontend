@@ -38,7 +38,7 @@
                         <span class="wb-tb-item-label">{{ v.label }}</span>
                         <span class="wb-tb-item-time">{{ v.timestamp | date:'MMM d, HH:mm' }}</span>
                     </div>
-                    <button type="button" class="wb-tb-del" (click)="deleteVersion(v.id, $event)" aria-label="Delete">
+                    <button type="button" class="wb-tb-del" (click)="deleteVersion(v.id, $event)" title="Delete version" aria-label="Delete">
                         <i class="bi bi-x"></i>
                     </button>
                 </li>
@@ -66,6 +66,18 @@
             <button type="button" class="wb-tb-menuitem" (click)="exportSvg()"><i class="bi bi-filetype-svg"></i> SVG</button>
             <button type="button" class="wb-tb-menuitem" (click)="exportJson()"><i class="bi bi-filetype-json"></i> JSON</button>
             <button type="button" class="wb-tb-menuitem" (click)="copyImage()"><i class="bi bi-clipboard"></i> Copy image</button>
+
+            @if (selection.hasSelection()) {
+            <div class="wb-tb-divider"></div>
+            <p class="wb-tb-menuhead">Selected object</p>
+            <button type="button" class="wb-tb-menuitem" (click)="exportSelectionPng()"><i class="bi bi-filetype-png"></i> PNG (transparent)</button>
+            <button type="button" class="wb-tb-menuitem" (click)="exportSelectionSvg()"><i class="bi bi-filetype-svg"></i> SVG</button>
+            <button type="button" class="wb-tb-menuitem" (click)="exportSelectionJson()"><i class="bi bi-box"></i> Object (.json)</button>
+            @if (selection.selectedElements().length > 1) {
+            <button type="button" class="wb-tb-menuitem" (click)="exportEachPng()"><i class="bi bi-collection"></i> Each as PNG</button>
+            <button type="button" class="wb-tb-menuitem" (click)="exportEachSvg()"><i class="bi bi-collection"></i> Each as SVG</button>
+            }
+            }
             <div class="wb-tb-divider"></div>
 
             <div class="wb-tb-pagerow">
@@ -86,11 +98,24 @@
     </div>
 
     <!-- Import -->
-    <button type="button" class="wb-tb-btn labelled" title="Import JSON" aria-label="Import JSON"
-        (click)="triggerImport()">
-        <i class="bi bi-upload"></i>
-        <span>Import</span>
-    </button>
+    <div class="wb-tb-dd">
+        <button #importTrigger type="button" class="wb-tb-btn labelled" [class.active]="openMenu() === 'import'"
+            (click)="toggle('import')" title="Import" aria-label="Import"
+            aria-haspopup="menu" [attr.aria-expanded]="openMenu() === 'import'">
+            <i class="bi bi-upload"></i>
+            <span>Import</span>
+        </button>
+        @if (openMenu() === 'import') {
+        <div class="wb-tb-menu" role="menu" aria-label="Import options" (keydown.escape)="closeMenu(importTrigger)">
+            <button type="button" class="wb-tb-menuitem" (click)="triggerImport('object')">
+                <i class="bi bi-box"></i> Place object (add)
+            </button>
+            <button type="button" class="wb-tb-menuitem" (click)="triggerImport('replace')">
+                <i class="bi bi-file-earmark-arrow-up"></i> Open board (replace)
+            </button>
+        </div>
+        }
+    </div>
     <input #fileInput type="file" accept="application/json,.json" hidden (change)="onImport($event)" />
 
     @if (persistence.lastSaved(); as ts) {

@@ -1,0 +1,6 @@
+@if (open()) {
+<div class="wb-ctxmenu-root" [style.left.px]="pos().x" [style.top.px]="pos().y"
+    (contextmenu)="$event.preventDefault()">
+    <app-menu-list [items]="items()" (closeAll)="close()" />
+</div>
+}

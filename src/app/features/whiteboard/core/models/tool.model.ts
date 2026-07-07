@@ -16,6 +16,7 @@ export type ToolId =
     | 'highlighter'
     | 'text'
     | 'sticky'
+    | 'code'
     | 'image'
     | 'frame';
 
@@ -44,6 +45,7 @@ export const TOOL_DEFS: ToolDef[] = [
     { id: 'highlighter', label: 'Highlighter', icon: 'bi-highlighter', shortcut: 'H' },
     { id: 'text', label: 'Text', icon: 'bi-fonts', shortcut: 'X' },
     { id: 'sticky', label: 'Sticky Note', icon: 'bi-sticky', shortcut: 'K' },
+    { id: 'code', label: 'Code Block', icon: 'bi-code-square', shortcut: 'C' },
     { id: 'image', label: 'Image', icon: 'bi-image', shortcut: 'I' },
     { id: 'frame', label: 'Frame', icon: 'bi-aspect-ratio', shortcut: 'F' },
 ];

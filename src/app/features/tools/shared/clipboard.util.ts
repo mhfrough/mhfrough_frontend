@@ -38,3 +38,16 @@ export function downloadDataUrl(dataUrl: string, filename: string): void {
     a.click();
     document.body.removeChild(a);
 }
+
+/** Trigger a client-side download of a Blob (e.g. a generated ZIP archive). */
+export function downloadBlob(blob: Blob, filename: string): void {
+    if (typeof document === 'undefined' || typeof URL === 'undefined') return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}

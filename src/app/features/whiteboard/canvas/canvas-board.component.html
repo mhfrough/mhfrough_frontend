@@ -23,10 +23,12 @@
     <div #surface class="wb-surface" tabindex="0" role="application"
         aria-label="Interactive whiteboard canvas. Use the toolbar to pick a drawing tool, then draw on the canvas. Arrow keys nudge the selection."
         [class.cursor-grab]="cursorClass() === 'grab'"
-        [class.cursor-grabbing]="cursorClass() === 'grabbing'" (wheel)="onWheel($event)"
+        [class.cursor-grabbing]="cursorClass() === 'grabbing'"
+        [class.cursor-crosshair]="cursorClass() === 'crosshair'"
+        [class.cursor-text]="cursorClass() === 'text'" (wheel)="onWheel($event)"
         (pointerdown)="onPointerDown($event)" (pointermove)="onPointerMove($event)" (pointerup)="onPointerUp($event)"
-        (pointercancel)="onPointerUp($event)" (dblclick)="onDoubleClick($event)" (dragover)="onDragOver($event)"
-        (drop)="onDrop($event)">
+        (pointercancel)="onPointerUp($event)" (dragover)="onDragOver($event)"
+        (drop)="onDrop($event)" (contextmenu)="onContextMenu($event)">
 
         <div class="wb-grid" [class.hidden]="!vp.gridEnabled()" [ngStyle]="gridStyle()"></div>
 
@@ -41,29 +43,37 @@
         <app-selection-overlay [elements]="selection.selectedElements()" />
         <app-guides-overlay />
         <app-cursor-overlay />
+        <app-image-crop-overlay />
     </div>
 
     <app-wb-minimap [surfaceWidth]="surfaceSize().w" [surfaceHeight]="surfaceSize().h" />
-    <input #imageInput type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden
+    <input #imageInput type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" multiple hidden
         (change)="onImageFilePicked($event)" />
 
-    <app-wb-toolbar />
+    <app-wb-toolbar (imageTool)="openImagePicker()" />
     <app-wb-topbar />
     <app-style-panel />
     <app-collab-bar />
     <app-selection-context-bar />
 
+    @if (layersOpen()) {
+    <app-layers-panel (closePanel)="layersOpen.set(false)" />
+    }
+
+    <app-context-menu />
+
     <!-- Zoom controls -->
     <div class="wb-zoom-hud">
-        <button type="button" class="wb-hud-btn" (click)="zoomOut()" aria-label="Zoom out">
+        <button type="button" class="wb-hud-btn" (click)="zoomOut()" title="Zoom out" aria-label="Zoom out">
             <i class="bi bi-dash"></i>
         </button>
         <span class="wb-zoom-value">{{ vp.zoomPercent() }}%</span>
-        <button type="button" class="wb-hud-btn" (click)="zoomIn()" aria-label="Zoom in">
+        <button type="button" class="wb-hud-btn" (click)="zoomIn()" title="Zoom in" aria-label="Zoom in">
             <i class="bi bi-plus"></i>
         </button>
         <span class="wb-hud-sep"></span>
-        <button type="button" class="wb-hud-btn" (click)="vp.resetView()" aria-label="Reset view">
+        <button type="button" class="wb-hud-btn" (click)="vp.resetView()" title="Reset view (Ctrl+0)"
+            aria-label="Reset view">
             <i class="bi bi-aspect-ratio"></i>
         </button>
     </div>
@@ -71,16 +81,21 @@
     <!-- View toggles -->
     <div class="wb-view-hud">
         <button type="button" class="wb-hud-btn" [class.active]="vp.gridEnabled()" (click)="vp.toggleGrid()"
-            aria-label="Toggle grid">
+            title="Toggle grid" aria-label="Toggle grid">
             <i class="bi bi-grid-3x3"></i>
         </button>
         <button type="button" class="wb-hud-btn" [class.active]="vp.snapEnabled()" (click)="vp.toggleSnap()"
-            aria-label="Toggle snap to grid">
+            title="Toggle snap to grid" aria-label="Toggle snap to grid">
             <i class="bi bi-magnet"></i>
         </button>
         <button type="button" class="wb-hud-btn" [class.active]="vp.rulersEnabled()" (click)="vp.toggleRulers()"
-            aria-label="Toggle rulers">
+            title="Toggle rulers" aria-label="Toggle rulers">
             <i class="bi bi-rulers"></i>
+        </button>
+        <span class="wb-hud-sep"></span>
+        <button type="button" class="wb-hud-btn" [class.active]="layersOpen()" (click)="layersOpen.set(!layersOpen())"
+            aria-label="Toggle layers panel" title="Layers">
+            <i class="bi bi-stack"></i>
         </button>
     </div>
 

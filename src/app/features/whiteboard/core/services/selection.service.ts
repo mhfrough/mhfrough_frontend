@@ -1,6 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { SceneService } from './scene.service';
-import { WhiteboardElement, generateElementId, isImageElement, isTextLike } from '../models/element.model';
+import { StickyElement, WhiteboardElement, generateElementId, isImageElement, isTextLike } from '../models/element.model';
 import { ElementStyle } from '../models/style.model';
 import { HistoryService } from './history.service';
 
@@ -113,6 +113,42 @@ export class SelectionService {
         this.history.commit();
     }
 
+    /** Set position/size/rotation on the single selected element (scales path points with the box). */
+    setElementGeometry(patch: { x?: number; y?: number; width?: number; height?: number; rotation?: number }): void {
+        const el = this.selectedElements()[0];
+        if (!el) return;
+        const x = patch.x ?? el.x;
+        const y = patch.y ?? el.y;
+        const width = Math.max(1, patch.width ?? el.width);
+        const height = Math.max(1, patch.height ?? el.height);
+        const rotation = patch.rotation ?? el.rotation;
+
+        let points: { x: number; y: number }[] | undefined;
+        if ('points' in el) {
+            const sx = el.width ? width / el.width : 1;
+            const sy = el.height ? height / el.height : 1;
+            points = el.points.map(p => ({ x: x + (p.x - el.x) * sx, y: y + (p.y - el.y) * sy }));
+        }
+        this.scene.updateElement(el.id, { x, y, width, height, rotation, ...(points ? { points } : {}) } as Partial<WhiteboardElement>);
+        this.history.commit();
+    }
+
+    /** Rename / show-hide a specific element (used by the layers panel). */
+    renameElement(id: string, name: string): void {
+        this.scene.updateElement(id, { name: name.trim() || undefined } as Partial<WhiteboardElement>);
+        this.history.commit();
+    }
+
+    setElementHidden(id: string, hidden: boolean): void {
+        this.scene.updateElement(id, { hidden } as Partial<WhiteboardElement>);
+        this.history.commit();
+    }
+
+    setElementLocked(id: string, locked: boolean): void {
+        this.scene.updateElement(id, { locked } as Partial<WhiteboardElement>);
+        this.history.commit();
+    }
+
     updateStyle(patch: Partial<ElementStyle>): void {
         this.selectedElements().forEach(el =>
             this.scene.updateElement(el.id, { style: { ...el.style, ...patch } } as Partial<WhiteboardElement>),
@@ -122,6 +158,12 @@ export class SelectionService {
     updateTextProps(patch: Partial<Extract<WhiteboardElement, { type: 'text' }>>): void {
         this.selectedElements()
             .filter(isTextLike)
+            .forEach(el => this.scene.updateElement(el.id, patch as Partial<WhiteboardElement>));
+    }
+
+    updateStickyProps(patch: Partial<StickyElement>): void {
+        this.selectedElements()
+            .filter((el): el is StickyElement => el.type === 'sticky')
             .forEach(el => this.scene.updateElement(el.id, patch as Partial<WhiteboardElement>));
     }
 

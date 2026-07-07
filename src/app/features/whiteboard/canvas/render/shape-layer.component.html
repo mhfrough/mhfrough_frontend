@@ -70,7 +70,7 @@
         <!-- Frames have fixed chrome styling; they deliberately ignore the element style. -->
         <rect [attr.width]="el.width" [attr.height]="el.height" fill="transparent" stroke="#928e87"
             stroke-width="1.5" stroke-dasharray="6 4" />
-        <text x="0" y="-8" font-size="12" fill="#928e87" font-family="Inconsolata, monospace">{{ el.label }}</text>
+        <text x="0" y="-8" font-size="12" fill="#928e87" font-family="Inconsolata, monospace">{{ el.name || el.label }}</text>
         }
         }
     </g>

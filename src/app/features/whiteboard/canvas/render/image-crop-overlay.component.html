@@ -1,0 +1,25 @@
+@if (cropBox(); as box) {
+<div class="wb-crop-root" (pointermove)="onPointerMove($event)" (pointerup)="onPointerUp()"
+    (pointercancel)="onPointerUp()">
+
+    <div class="wb-crop-frame" [style.left.px]="box.left" [style.top.px]="box.top" [style.width.px]="box.width"
+        [style.height.px]="box.height" (pointerdown)="onPointerDown($event, 'move')">
+        <span class="wb-crop-thirds"></span>
+        @for (h of handles; track h) {
+        <span class="wb-crop-handle" [class]="'h-' + h" (pointerdown)="onPointerDown($event, h)"></span>
+        }
+    </div>
+
+    <div class="wb-crop-bar" [style.left.px]="box.left" [style.top.px]="box.top + box.height + 10">
+        @for (r of ratios; track r.label) {
+        <button type="button" class="wb-crop-chip" [class.active]="activeRatio() === r.value"
+            (pointerdown)="$event.stopPropagation()" (click)="selectRatio(r.value)">{{ r.label }}</button>
+        }
+        <span class="wb-crop-bar-sep"></span>
+        <button type="button" class="wb-crop-chip wb-crop-cancel" (pointerdown)="$event.stopPropagation()"
+            (click)="cancel()" title="Cancel crop (Esc)" aria-label="Cancel crop"><i class="bi bi-x-lg"></i></button>
+        <button type="button" class="wb-crop-chip wb-crop-apply" (pointerdown)="$event.stopPropagation()"
+            (click)="apply()" title="Apply crop" aria-label="Apply crop"><i class="bi bi-check-lg"></i> Apply</button>
+    </div>
+</div>
+}

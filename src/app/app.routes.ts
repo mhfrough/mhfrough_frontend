@@ -178,6 +178,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/tools/favicon-ico/favicon-ico.component').then(m => m.FaviconIcoComponent),
             },
             {
+                path: 'social-post',
+                loadComponent: () => import('./features/tools/social-post/social-post.component').then(m => m.SocialPostComponent),
+            },
+            {
                 path: 'text-image',
                 loadComponent: () => import('./features/tools/text-image/text-image.component').then(m => m.TextImageComponent),
             },

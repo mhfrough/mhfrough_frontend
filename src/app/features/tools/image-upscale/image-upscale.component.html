@@ -1,58 +1,138 @@
 <app-tool-page title="Image Upscaler" icon="bi-arrows-fullscreen"
     [loading]="loading()" [error]="error()"
-    blurb="Enlarge an image 2×, 3× or 4× using high-quality Lanczos resampling — sharp resizing, not AI super-resolution.">
+    blurb="Enlarge images up to 8× with a choice of resampling kernels, optional sharpening and an exact target width — sharp resizing, not AI super-resolution.">
 
     <div class="img">
         <!-- Upload zone -->
         <div class="img-drop" [class.over]="dragOver()"
             (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
-            <input type="file" id="upFile" class="img-drop-input" accept="image/*" (change)="onFileInput($event)" />
+            <input type="file" id="upFile" class="img-drop-input" accept="image/*" multiple
+                (change)="onFileInput($event)" aria-label="Upload one or more images" />
             <label for="upFile" class="img-drop-label">
                 <i class="bi bi-cloud-arrow-up"></i>
-                <span>Drop an image here or <strong>browse</strong></span>
+                <span>Drop image(s) here, <strong>browse</strong>, or paste with Ctrl+V</span>
             </label>
         </div>
 
-        <!-- Scale control -->
-        <div class="img-control">
-            <label class="t-label">Scale factor</label>
-            <div class="t-tabs" role="tablist" aria-label="Scale factor">
-                @for (s of scales; track s) {
-                <button type="button" class="t-tab" [class.active]="scale() === s" (click)="scale.set(s)">{{ s }}×</button>
+        <!-- Batch thumbnails -->
+        @if (items().length) {
+        <div class="t-thumbs" role="tablist" aria-label="Uploaded images">
+            @for (item of items(); track item.id) {
+            <button type="button" class="t-thumb" [class.active]="item.id === selectedId()"
+                (click)="selectItem(item.id)" [attr.aria-label]="'Select ' + item.name" [attr.aria-selected]="item.id === selectedId()">
+                <img [src]="item.previewUrl" alt="" width="28" height="28" />
+                <span>{{ item.name }}</span>
+                @switch (item.status) {
+                    @case ('loading') { <i class="bi bi-hourglass-split t-thumb-status is-loading"></i> }
+                    @case ('done') { <i class="bi bi-check-circle-fill t-thumb-status is-done"></i> }
+                    @case ('error') { <i class="bi bi-exclamation-circle-fill t-thumb-status is-error"></i> }
                 }
+            </button>
+            }
+            <button type="button" class="t-btn t-btn--ghost t-thumb-clear" (click)="clearAll()">
+                <i class="bi bi-trash3"></i> Clear all
+            </button>
+        </div>
+        }
+
+        <!-- Scale control -->
+        <div class="img-controls-row">
+            <div class="img-control">
+                <label class="t-label">Scale factor</label>
+                <div class="t-tabs" role="tablist" aria-label="Scale factor">
+                    @for (s of scales; track s) {
+                    <button type="button" class="t-tab" [class.active]="!customScaleEnabled() && !useTargetWidth() && scale() === s"
+                        (click)="selectPresetScale(s)">{{ s }}×</button>
+                    }
+                </div>
             </div>
+
+            <label class="t-check">
+                <input type="checkbox" [ngModel]="customScaleEnabled()" (ngModelChange)="setCustomScaleEnabled($event)" />
+                Custom scale
+            </label>
+            @if (customScaleEnabled()) {
+            <div class="img-control img-control--grow">
+                <label class="t-label" for="upCustomScale">{{ customScale() }}×</label>
+                <input type="range" id="upCustomScale" class="img-range" min="1.05" max="8" step="0.05"
+                    [ngModel]="customScale()" (ngModelChange)="customScale.set(+$event)" />
+            </div>
+            }
+        </div>
+
+        <div class="img-controls-row">
+            <label class="t-check">
+                <input type="checkbox" [ngModel]="useTargetWidth()" (ngModelChange)="setUseTargetWidth($event)" />
+                Resize to an exact width instead
+            </label>
+            @if (useTargetWidth()) {
+            <div class="img-control">
+                <label class="t-label" for="upTargetWidth">Target width (px)</label>
+                <input type="number" id="upTargetWidth" class="t-field" min="1" step="1" placeholder="e.g. 2000"
+                    [ngModel]="targetWidth()" (ngModelChange)="setTargetWidth($event)" />
+            </div>
+            }
+        </div>
+
+        <div class="img-controls-row">
+            <div class="img-control img-control--grow">
+                <label class="t-label" for="upKernel">Resampling kernel</label>
+                <select id="upKernel" class="t-field" [ngModel]="kernel()" (ngModelChange)="kernel.set($event)">
+                    @for (k of kernels; track k.value) {
+                    <option [value]="k.value">{{ k.label }}</option>
+                    }
+                </select>
+            </div>
+            <label class="t-check">
+                <input type="checkbox" [ngModel]="sharpen()" (ngModelChange)="sharpen.set($event)" />
+                Sharpen after upscaling
+            </label>
         </div>
 
         <div class="t-actions">
-            <button type="button" class="t-btn" (click)="run()" [disabled]="loading() || !file()">
-                <i class="bi bi-arrows-fullscreen"></i> Upscale
+            <button type="button" class="t-btn" (click)="runAll()" [disabled]="processingAll() || !items().length">
+                <i class="bi" [class]="processingAll() ? 'bi-hourglass-split' : 'bi-arrows-fullscreen'"></i>
+                {{ processingAll() ? 'Upscaling…' : 'Upscale' }}{{ isBatch() ? ' all' : '' }}
             </button>
+            @if (doneItems().length > 1) {
+            <button type="button" class="t-btn t-btn--ghost" (click)="downloadZip()" [disabled]="exporting()">
+                <i class="bi bi-file-zip"></i> {{ exporting() ? 'Zipping…' : 'Download all (.zip)' }}
+            </button>
+            }
         </div>
 
-        <!-- Previews -->
-        @if (previewUrl(); as src) {
+        <!-- Selected item preview -->
+        @if (selectedItem(); as item) {
+
+        @if (item.error) {
+        <p class="img-item-error"><i class="bi bi-exclamation-triangle"></i> {{ item.error }}</p>
+        }
+
+        @if (item.result; as res) {
+        <div class="t-panel t-compare">
+            <label class="t-label">Before / after — {{ item.name }}</label>
+            <div class="t-ba">
+                <img class="t-ba-after" [src]="res.output" alt="Upscaled image" />
+                <div class="t-ba-clip" [style.clipPath]="'inset(0 ' + (100 - compareSplit()) + '% 0 0)'">
+                    <img class="t-ba-before" [src]="item.previewUrl" alt="Original image" />
+                </div>
+                <div class="t-ba-divider" [style.left.%]="compareSplit()"></div>
+            </div>
+            <input type="range" min="0" max="100" class="t-ba-range" [ngModel]="compareSplit()" (ngModelChange)="compareSplit.set($event)"
+                aria-label="Before/after comparison split" />
+        </div>
+        } @else {
         <div class="img-grid">
             <figure class="img-card">
                 <figcaption class="t-label">Original</figcaption>
-                <img class="img-preview" [src]="src" alt="Original image preview" />
-                @if (file(); as f) {
-                <p class="img-meta">{{ formatBytes(f.size) }}</p>
-                }
+                <img class="img-preview" [src]="item.previewUrl" alt="Original image preview" />
+                <p class="img-meta">{{ formatBytes(item.bytesIn) }}</p>
             </figure>
-
-            @if (result(); as res) {
-            <figure class="img-card">
-                <figcaption class="t-label">Upscaled {{ scale() }}×</figcaption>
-                <img class="img-preview" [src]="res.output" alt="Upscaled image preview" />
-                <p class="img-meta">{{ res.format | uppercase }} · {{ formatBytes(res.bytesOut) }}
-                    · {{ res.width }}×{{ res.height }}</p>
-            </figure>
-            }
         </div>
         }
 
         <!-- Stats -->
-        @if (result(); as res) {
+        @if (item.result; as res) {
         <div class="t-result">
             <div class="t-stats">
                 <div class="t-stat">
@@ -60,7 +140,7 @@
                     <span class="t-stat-label">New dimensions</span>
                 </div>
                 <div class="t-stat">
-                    <span class="t-stat-num">{{ scale() }}×</span>
+                    <span class="t-stat-num">{{ useTargetWidth() && targetWidth() ? (targetWidth() + 'px') : (effectiveScale() + '×') }}</span>
                     <span class="t-stat-label">Scale</span>
                 </div>
                 <div class="t-stat">
@@ -69,10 +149,23 @@
                 </div>
             </div>
             <div class="t-actions img-result-actions">
-                <button type="button" class="t-btn" (click)="download()">
+                <button type="button" class="t-btn" (click)="download(item)">
                     <i class="bi bi-download"></i> Download
                 </button>
             </div>
+        </div>
+        }
+        }
+
+        <!-- History -->
+        @if (exportHistory().length) {
+        <div class="t-panel">
+            <label class="t-label">Recent activity</label>
+            <ul class="t-history">
+                @for (h of exportHistory(); track h.time + h.label) {
+                <li><span>{{ h.label }}</span><time>{{ h.time }}</time></li>
+                }
+            </ul>
         </div>
         }
     </div>

@@ -124,3 +124,10 @@
     display: flex;
     flex-direction: column;
 }
+
+@media print {
+    .tool-breadcrumb,
+    .tool-head {
+        display: none;
+    }
+}

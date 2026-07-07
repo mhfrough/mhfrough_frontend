@@ -3,7 +3,7 @@
     <button type="button" class="wb-tool-btn" [class.active]="toolService.activeTool() === tool.id"
         [attr.title]="tool.label + ' (' + tool.shortcut + ')'" [attr.aria-label]="tool.label + ' tool'"
         [attr.aria-pressed]="toolService.activeTool() === tool.id"
-        [attr.tabindex]="toolService.activeTool() === tool.id ? 0 : -1" (click)="toolService.setTool(tool.id)">
+        [attr.tabindex]="toolService.activeTool() === tool.id ? 0 : -1" (click)="pick(tool)">
         <i class="bi" [class]="tool.icon"></i>
     </button>
     }

@@ -2,7 +2,7 @@
     <div class="wb-minimap-head">
         <span class="wb-minimap-label">map</span>
         <button type="button" class="wb-minimap-toggle" (click)="toggleOpen()" [attr.aria-expanded]="open()"
-            aria-label="Toggle minimap">
+            title="Toggle minimap" aria-label="Toggle minimap">
             <i class="bi" [class.bi-chevron-down]="open()" [class.bi-chevron-up]="!open()" aria-hidden="true"></i>
         </button>
     </div>

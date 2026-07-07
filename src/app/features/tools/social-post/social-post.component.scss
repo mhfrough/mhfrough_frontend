@@ -1,0 +1,292 @@
+@use '../shared/tool-controls';
+
+.sp-layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sp-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    position: sticky;
+    top: 1rem;
+
+    @media (max-width: 900px) {
+        position: static;
+    }
+}
+
+.sp-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+// --- Identity ------------------------------------------------------------------
+.sp-identity-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.sp-identity-fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sp-avatar-drop {
+    position: relative;
+    flex: none;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 1px dashed var(--border);
+    background: var(--bg);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+
+    &.over {
+        border-color: var(--text-muted);
+        background: var(--surface-hover);
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.sp-avatar-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.sp-avatar-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--text-muted);
+    font-size: 1.6rem;
+    pointer-events: none;
+}
+
+.sp-avatar-remove {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+// --- Post image ------------------------------------------------------------------
+.sp-image-drop {
+    position: relative;
+}
+
+.sp-image-preview {
+    display: block;
+    width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+}
+
+.sp-image-remove {
+    margin-top: 0.5rem;
+}
+
+.sp-caption-input {
+    resize: vertical;
+}
+
+// --- Hashtags ----------------------------------------------------------------
+.sp-tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.sp-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+
+    &:hover {
+        background: var(--surface-hover);
+    }
+}
+
+// --- Engagement ------------------------------------------------------------------
+.sp-stat-inputs {
+    display: flex;
+    gap: 0.75rem;
+
+    .img-control {
+        min-width: 0;
+        flex: 1;
+    }
+}
+
+// --- Poll -----------------------------------------------------------------------
+.sp-poll-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+}
+
+.sp-poll-option-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    .t-field {
+        flex: 1;
+    }
+
+    .sp-poll-votes {
+        flex: none;
+        max-width: 90px;
+    }
+}
+
+.sp-add-option {
+    align-self: flex-start;
+}
+
+// --- Platform toggles --------------------------------------------------------
+.sp-platform-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.sp-platform-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.76rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+
+    &:hover {
+        color: var(--text);
+    }
+
+    &.active {
+        border-color: var(--text);
+        background: var(--text);
+        color: var(--bg);
+    }
+}
+
+// --- Preview column --------------------------------------------------------------
+.sp-preview-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.sp-export-actions {
+    flex-wrap: wrap;
+}
+
+.sp-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.sp-preview-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.sp-preview-item-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.sp-preview-download {
+    padding: 0.3rem 0.5rem;
+}
+
+.sp-history-panel {
+    margin-top: 0.25rem;
+}
+
+// --- Print ------------------------------------------------------------------------
+// Only the rendered mockups belong on a printed page / PDF — the editor and
+// export controls are interactive chrome with nothing to print.
+@media print {
+    .sp-editor,
+    .sp-export-actions,
+    .sp-history-panel,
+    .sp-preview-download {
+        display: none !important;
+    }
+
+    .sp-layout {
+        display: block;
+    }
+
+    .sp-preview-grid {
+        display: block;
+    }
+
+    .sp-preview-item {
+        break-inside: avoid;
+        margin-bottom: 1.5rem;
+    }
+}

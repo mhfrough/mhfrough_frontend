@@ -2,6 +2,7 @@ import { WhiteboardElement, isImageElement } from '../models/element.model';
 import { dashArrayFor } from '../models/style.model';
 import { boundingBoxOfElements } from './hit-test.util';
 import { polygonPoints, starPoints } from './shape-geometry.util';
+import { stripHtml } from './text.util';
 
 export interface RenderOptions {
     padding?: number;
@@ -171,11 +172,16 @@ function drawText(ctx: CanvasRenderingContext2D, el: Extract<WhiteboardElement, 
     ctx.setLineDash([]);
     ctx.fillStyle = el.color;
     ctx.textBaseline = 'top';
-    ctx.font = `${el.italic ? 'italic ' : ''}${el.fontWeight} ${el.fontSize}px ${el.fontFamily}`;
-    ctx.textAlign = el.textAlign;
+    // Raster export renders a plain-text approximation; per-run bold/italic/underline formatting
+    // from the live rich editor isn't reproduced here.
+    ctx.font = `${el.fontWeight} ${el.fontSize}px ${el.fontFamily}`;
+    // Canvas2D's textAlign has no 'justify' value — this raster export is already a plain-text
+    // approximation (see above), so treat justify as left rather than passing an invalid enum
+    // value straight through (which Canvas2D silently ignores, leaking the previous draw's align).
+    ctx.textAlign = el.textAlign === 'justify' ? 'left' : el.textAlign;
     const lineHeight = el.fontSize * 1.3;
     const anchorX = el.textAlign === 'center' ? el.width / 2 : el.textAlign === 'right' ? el.width : 0;
-    el.text.split('\n').forEach((line, i) => ctx.fillText(line, anchorX, i * lineHeight));
+    stripHtml(el.text).split('\n').forEach((line, i) => ctx.fillText(line, anchorX, i * lineHeight));
 }
 
 function drawImage(
@@ -200,7 +206,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, el: Extract<WhiteboardElement,
     ctx.font = '12px Inconsolata, monospace';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText(el.label, 0, -8);
+    ctx.fillText(el.name || el.label, 0, -8);
 }
 
 function drawSticky(ctx: CanvasRenderingContext2D, el: Extract<WhiteboardElement, { type: 'sticky' }>): void {
@@ -211,9 +217,9 @@ function drawSticky(ctx: CanvasRenderingContext2D, el: Extract<WhiteboardElement
     ctx.fill();
     ctx.fillStyle = '#1a1917';
     ctx.textBaseline = 'top';
-    ctx.font = `${el.fontSize}px "Inconsolata", "Courier New", monospace`;
+    ctx.font = `${el.fontWeight} ${el.fontSize}px ${el.fontFamily || '"Inconsolata", "Courier New", monospace'}`;
     ctx.textAlign = 'left';
     const lineHeight = el.fontSize * 1.35;
     const pad = 12;
-    el.text.split('\n').forEach((line, i) => ctx.fillText(line, pad, pad + i * lineHeight, el.width - pad * 2));
+    stripHtml(el.text).split('\n').forEach((line, i) => ctx.fillText(line, pad, pad + i * lineHeight, el.width - pad * 2));
 }

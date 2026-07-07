@@ -120,6 +120,16 @@
     margin: 0.3rem 0;
 }
 
+.wb-tb-menuhead {
+    padding: 0.15rem 0.6rem 0.3rem;
+    margin: 0;
+    font-family: var(--font);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text-muted);
+}
+
 .wb-tb-pagerow,
 .wb-tb-saverow {
     display: flex;

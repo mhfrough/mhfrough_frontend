@@ -1,0 +1,190 @@
+.mockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 96px;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-alt);
+    overflow: hidden;
+}
+
+// --- Browser tab -------------------------------------------------------------
+.mockup-browser {
+    width: 100%;
+}
+
+.mockup-browser-dots {
+    display: flex;
+    gap: 0.3rem;
+    margin-bottom: 0.5rem;
+
+    span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--border);
+    }
+}
+
+.mockup-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    max-width: 160px;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px 8px 0 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    font-size: 0.72rem;
+    color: var(--text);
+
+    img { flex: none; }
+}
+
+.mockup-tab-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mockup-tab-close {
+    margin-left: auto;
+    color: var(--text-muted);
+}
+
+// --- Bookmark bar -------------------------------------------------------------
+.mockup-bookmarks {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.mockup-bookmark-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.55rem;
+    border-radius: 6px;
+    background: var(--surface-hover);
+    font-size: 0.72rem;
+    color: var(--text);
+}
+
+// --- Windows shortcut ---------------------------------------------------------
+.mockup-desktop {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.mockup-shortcut {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.mockup-shortcut-icon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+
+    img { width: 100%; height: 100%; object-fit: contain; }
+}
+
+.mockup-shortcut-arrow {
+    position: absolute;
+    left: -4px;
+    bottom: -4px;
+    font-size: 0.7rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0 2px;
+    line-height: 1.2;
+}
+
+.mockup-shortcut-label {
+    font-size: 0.68rem;
+    color: var(--text);
+    text-align: center;
+}
+
+// --- macOS dock ----------------------------------------------------------------
+.mockup-dock-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.mockup-dock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--surface-hover) 70%, transparent);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--border);
+}
+
+.mockup-dock-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 22%;
+    overflow: hidden;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img { width: 100%; height: 100%; object-fit: contain; }
+}
+
+.mockup-dock-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-muted);
+}
+
+// --- Home screens (Android / iPhone) --------------------------------------------
+.mockup-home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 1rem;
+    border-radius: 12px;
+    width: 100%;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--text) 12%, var(--surface-alt)), var(--surface-alt));
+}
+
+.mockup-home-icon {
+    width: 52px;
+    height: 52px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    img { width: 100%; height: 100%; object-fit: contain; }
+
+    &.round { border-radius: 50%; }
+    &.squircle { border-radius: 28%; }
+}
+
+.mockup-home-label {
+    font-size: 0.68rem;
+    color: var(--text);
+    text-align: center;
+}

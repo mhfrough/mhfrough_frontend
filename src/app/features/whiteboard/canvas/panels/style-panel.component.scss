@@ -35,6 +35,14 @@
     font-weight: 500;
 }
 
+.wb-panel-hint {
+    margin: 0;
+    font-family: var(--font);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
 .wb-panel-divider {
     height: 1px;
     background: var(--border);
@@ -78,6 +86,112 @@
     }
 }
 
+.wb-xy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+}
+
+.wb-xy-field {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 0.45rem;
+    height: 28px;
+    background: var(--surface);
+
+    &:focus-within {
+        border-color: var(--text-muted);
+    }
+
+    &--wide {
+        grid-column: 1 / -1;
+    }
+}
+
+.wb-xy-key {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    min-width: 0.9rem;
+    text-align: center;
+}
+
+.wb-xy-unit {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+}
+
+.wb-xy-input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.74rem;
+    padding: 0;
+
+    &:focus {
+        outline: none;
+    }
+
+    // Hide the native number spinners for a cleaner Figma-like field.
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.wb-seg-btn--wide {
+    flex: 1;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+}
+
+.wb-seg--wrap {
+    flex-wrap: wrap;
+}
+
+.wb-combine-btn {
+    flex: 1 1 calc(50% - 4px);
+    gap: 0.35rem;
+    font-size: 0.7rem;
+}
+
+.wb-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.wb-chip {
+    padding: 0 0.5rem;
+    height: 26px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 0.72rem;
+    transition: all var(--dur-fast) var(--ease);
+
+    &:hover {
+        color: var(--text);
+        border-color: var(--text-muted);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}
+
 .wb-width-preview {
     width: 60%;
     background: currentColor;
@@ -90,10 +204,59 @@
     accent-color: var(--primary);
     cursor: pointer;
 
+    // The native thumb (~16-18px in Chrome) is inset from each end of the track by half its
+    // own width, so the slider visibly never reaches full travel even at the max value. A
+    // smaller thumb shrinks that inset to something barely noticeable (matches the scrubber
+    // thumb style already used in chat-widget.component.scss).
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary);
+        cursor: pointer;
+    }
+
+    &::-moz-range-thumb {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary);
+        border: none;
+        cursor: pointer;
+    }
+
     &:focus-visible {
         outline: 2px solid var(--primary);
         outline-offset: 2px;
     }
+}
+
+.wb-size-input {
+    flex-shrink: 0;
+    width: 44px;
+    height: 28px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.74rem;
+    text-align: center;
+    padding: 0;
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 1px;
+    }
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .wb-select {
@@ -107,9 +270,31 @@
     font-family: var(--font);
     font-size: 0.78rem;
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     &:focus-visible {
         outline: 2px solid var(--primary);
         outline-offset: 2px;
+    }
+}
+
+.wb-font-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    // Flex items default to a min-width that fits their content (a long option like "Extra
+    // Light") which would blow out the row's single-line layout — min-width: 0 lets them
+    // actually shrink to the flex-basis and ellipsize instead.
+    .wb-select {
+        flex: 1;
+        min-width: 0;
+        padding: 0 0.35rem;
+        font-size: 0.7rem;
+    }
+
+    .wb-size-input {
+        flex-shrink: 0;
     }
 }

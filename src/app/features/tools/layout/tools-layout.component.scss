@@ -289,3 +289,13 @@
 .tools-footer-copy {
     color: var(--text-muted);
 }
+
+// --- Print --------------------------------------------------------------------
+// Individual tools (e.g. the social post mockup) opt into a clean print/PDF
+// layout; the surrounding nav/footer chrome never belongs on a printed page.
+@media print {
+    .tools-header,
+    .tools-footer {
+        display: none;
+    }
+}

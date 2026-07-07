@@ -1,0 +1,109 @@
+:host {
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    pointer-events: none;
+}
+
+.wb-crop-root {
+    position: absolute;
+    inset: 0;
+    // Capture all pointer input so the board underneath is frozen while cropping.
+    pointer-events: auto;
+}
+
+.wb-crop-frame {
+    position: absolute;
+    outline: 1.5px solid #fff;
+    // Darken everything outside the crop frame.
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.55);
+    cursor: move;
+}
+
+.wb-crop-thirds {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(to right, transparent calc(33.33% - 0.5px), rgba(255, 255, 255, 0.35) 33.33%, transparent calc(33.33% + 0.5px)),
+        linear-gradient(to right, transparent calc(66.66% - 0.5px), rgba(255, 255, 255, 0.35) 66.66%, transparent calc(66.66% + 0.5px)),
+        linear-gradient(to bottom, transparent calc(33.33% - 0.5px), rgba(255, 255, 255, 0.35) 33.33%, transparent calc(33.33% + 0.5px)),
+        linear-gradient(to bottom, transparent calc(66.66% - 0.5px), rgba(255, 255, 255, 0.35) 66.66%, transparent calc(66.66% + 0.5px));
+}
+
+.wb-crop-handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+
+    &.h-nw { left: 0; top: 0; cursor: nwse-resize; }
+    &.h-n { left: 50%; top: 0; cursor: ns-resize; }
+    &.h-ne { left: 100%; top: 0; cursor: nesw-resize; }
+    &.h-e { left: 100%; top: 50%; cursor: ew-resize; }
+    &.h-se { left: 100%; top: 100%; cursor: nwse-resize; }
+    &.h-s { left: 50%; top: 100%; cursor: ns-resize; }
+    &.h-sw { left: 0; top: 100%; cursor: nesw-resize; }
+    &.h-w { left: 0; top: 50%; cursor: ew-resize; }
+}
+
+.wb-crop-bar {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.3rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    font-family: var(--font);
+    white-space: nowrap;
+}
+
+.wb-crop-bar-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 0.15rem;
+}
+
+.wb-crop-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    height: 26px;
+    padding: 0 0.55rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 0.72rem;
+
+    &:hover {
+        color: var(--text);
+        border-color: var(--text-muted);
+    }
+
+    &.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+}
+
+.wb-crop-apply {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.wb-crop-cancel:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+}

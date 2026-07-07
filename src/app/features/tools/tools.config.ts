@@ -58,8 +58,8 @@ export const TOOLS: ToolMeta[] = [
     {
         id: 'image-format',
         slug: 'image-format',
-        name: 'Image Format & Compression',
-        desc: 'Compress, resize and convert images between JPEG, PNG, WebP, AVIF and GIF in one pass.',
+        name: 'Image Compressor & Format Converter',
+        desc: 'Batch compress, resize and convert images between JPEG, PNG, WebP, AVIF, GIF and TIFF, with progressive JPEG, lossless WebP/AVIF, PNG palettes, target file size and more.',
         icon: 'bi-arrow-repeat',
         category: 'Image',
         status: 'live',
@@ -69,7 +69,7 @@ export const TOOLS: ToolMeta[] = [
         id: 'image-upscale',
         slug: 'image-upscale',
         name: 'Image Upscale',
-        desc: 'Upscale images up to 4× with high-quality Lanczos resampling.',
+        desc: 'Batch-upscale images up to 8× with a choice of resampling kernels, optional sharpening, an exact target width and ZIP export.',
         icon: 'bi-aspect-ratio',
         category: 'Image',
         status: 'live',
@@ -82,6 +82,18 @@ export const TOOLS: ToolMeta[] = [
         desc: 'Turn any image into a multi-size .ico favicon.',
         icon: 'bi-star',
         category: 'Image',
+        status: 'live',
+        premium: false,
+    },
+
+    // --- Social ---------------------------------------------------------------
+    {
+        id: 'social-post',
+        slug: 'social-post',
+        name: 'Social Media Post Mockup Designer',
+        desc: 'Design a post once — image, caption, hashtags and an optional poll — then preview it on Instagram, X, Facebook, LinkedIn and YouTube, and export as PNG, ZIP, PDF or print.',
+        icon: 'bi-phone',
+        category: 'Social',
         status: 'live',
         premium: false,
     },

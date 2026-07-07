@@ -1,0 +1,38 @@
+@if (canScrollUp()) {
+<button type="button" class="wb-menu-scroll wb-menu-scroll--up" (click)="scrollByChunk(-120)" aria-label="Scroll up" tabindex="-1">
+    <i class="bi bi-chevron-up"></i>
+</button>
+}
+
+<div #list class="wb-menu-list" role="menu" (scroll)="onScroll()">
+    @for (item of items; track trackByIndex($index)) {
+    @if (isSep(item)) {
+    <div class="wb-ctxmenu-sep"></div>
+    } @else {
+    <button type="button" class="wb-ctxmenu-item" [class.danger]="isAction(item) && item.danger"
+        [class.focused]="focusIndex() === $index" [disabled]="isAction(item) && item.disabled"
+        [attr.data-idx]="$index" [attr.aria-haspopup]="isSubmenu(item) ? 'menu' : null"
+        [attr.aria-expanded]="isSubmenu(item) ? openIndex() === $index : null"
+        (pointerenter)="onItemPointerEnter($index, $event)" (click)="onItemClick($index, $event)"
+        (focus)="focusIndex.set($index)">
+        @if (item.icon) { <i class="bi" [class]="item.icon"></i> }
+        <span class="wb-ctxmenu-label">{{ item.label }}</span>
+        @if (isAction(item) && item.shortcut) { <span class="wb-ctxmenu-key">{{ item.shortcut }}</span> }
+        @if (isSubmenu(item)) { <i class="bi bi-chevron-right wb-ctxmenu-caret"></i> }
+    </button>
+    }
+    }
+</div>
+
+@if (canScrollDown()) {
+<button type="button" class="wb-menu-scroll wb-menu-scroll--down" (click)="scrollByChunk(120)" aria-label="Scroll down" tabindex="-1">
+    <i class="bi bi-chevron-down"></i>
+</button>
+}
+
+@if (openIndex() !== null) {
+<div class="wb-submenu-anchor" [style.left.px]="subPos().x" [style.top.px]="subPos().y"
+    (mouseenter)="cancelPendingClose()">
+    <app-menu-list [items]="submenuItems(openIndex()!)" (closeAll)="onChildCloseAll()" />
+</div>
+}

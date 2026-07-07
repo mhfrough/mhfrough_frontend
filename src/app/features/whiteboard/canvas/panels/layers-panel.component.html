@@ -1,0 +1,50 @@
+<div class="wb-layers" role="region" aria-label="Layers">
+    <header class="wb-layers-head">
+        <span class="wb-layers-title"><i class="bi bi-stack"></i> Layers</span>
+        <button type="button" class="wb-layers-close" (click)="close()" title="Close layers" aria-label="Close layers">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </header>
+
+    @if (rows().length === 0) {
+    <p class="wb-layers-empty">No objects yet.</p>
+    } @else {
+    <ul class="wb-layers-list">
+        @for (el of rows(); track el.id) {
+        <li class="wb-layer" [class.selected]="isSelected(el.id)" [class.dim]="el.hidden"
+            [class.dragging]="dragId() === el.id"
+            [class.drop-above]="dropTarget()?.id === el.id && dropTarget()?.place === 'above'"
+            [class.drop-below]="dropTarget()?.id === el.id && dropTarget()?.place === 'below'"
+            [draggable]="editingId() !== el.id" (dragstart)="onDragStart(el.id, $event)"
+            (dragover)="onDragOver(el.id, $event)" (drop)="onDrop(el.id, $event)" (dragend)="onDragEnd()"
+            (click)="select(el.id, $event)">
+            <i class="bi wb-layer-grip bi-grip-vertical"></i>
+            <i class="bi wb-layer-icon" [class]="icon(el)"></i>
+
+            @if (editingId() === el.id) {
+            <input type="text" class="wb-layer-rename" [attr.data-rename]="el.id" [value]="name(el)"
+                (click)="$event.stopPropagation()" (blur)="commitRename(el.id, $event)"
+                (keydown.enter)="commitRename(el.id, $event)" (keydown.escape)="editingId.set(null)" />
+            } @else {
+            <span class="wb-layer-name" (dblclick)="startRename(el, $event)">{{ name(el) }}</span>
+            }
+
+            <div class="wb-layer-actions">
+                <button type="button" class="wb-layer-btn" (click)="moveUp(el.id, $event)" title="Bring forward"
+                    aria-label="Bring forward"><i class="bi bi-chevron-up"></i></button>
+                <button type="button" class="wb-layer-btn" (click)="moveDown(el.id, $event)" title="Send backward"
+                    aria-label="Send backward"><i class="bi bi-chevron-down"></i></button>
+                <button type="button" class="wb-layer-btn" [class.on]="el.locked" (click)="toggleLock(el, $event)"
+                    [title]="el.locked ? 'Unlock' : 'Lock'" aria-label="Toggle lock">
+                    <i class="bi" [class]="el.locked ? 'bi-lock-fill' : 'bi-unlock'"></i>
+                </button>
+                <button type="button" class="wb-layer-btn" [class.on]="el.hidden" (click)="toggleHidden(el, $event)"
+                    [title]="el.hidden ? 'Show' : 'Hide'" aria-label="Toggle visibility">
+                    <i class="bi" [class]="el.hidden ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+            </div>
+        </li>
+        }
+    </ul>
+    }
+</div>

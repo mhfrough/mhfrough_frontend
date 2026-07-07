@@ -3,9 +3,11 @@ import { DatePipe } from '@angular/common';
 import { HistoryService } from '../../core/services/history.service';
 import { PersistenceService } from '../../core/services/persistence.service';
 import { ExportService } from '../../core/services/export.service';
+import { SelectionService } from '../../core/services/selection.service';
 import { Orientation, PageSize } from '../../core/utils/pdf-export.util';
 
-type Menu = 'export' | 'versions' | null;
+type Menu = 'export' | 'versions' | 'import' | null;
+type ImportMode = 'replace' | 'object';
 
 /** Top-left board actions: undo/redo, version history, export/import. */
 @Component({
@@ -24,10 +26,12 @@ export class WbTopbarComponent {
     readonly pageSize = signal<PageSize>('A4');
     readonly orientation = signal<Orientation>('landscape');
     readonly pageSizes: PageSize[] = ['A4', 'A3', 'Letter'];
+    private importMode: ImportMode = 'replace';
 
     constructor(
         readonly history: HistoryService,
         readonly persistence: PersistenceService,
+        readonly selection: SelectionService,
         private readonly exporter: ExportService,
     ) {}
 
@@ -60,7 +64,17 @@ export class WbTopbarComponent {
     copyImage(): void { void this.exporter.copyPngToClipboard(); this.openMenu.set(null); }
     print(): void { void this.exporter.print(this.pageSize(), this.orientation()); this.openMenu.set(null); }
 
-    triggerImport(): void {
+    // Selection-only ("single object") exports.
+    exportSelectionPng(): void { void this.exporter.exportPng(true, true); this.openMenu.set(null); }
+    exportSelectionSvg(): void { this.exporter.exportSvg(true); this.openMenu.set(null); }
+    exportSelectionJson(): void { this.exporter.exportJson(true); this.openMenu.set(null); }
+    exportEachPng(): void { void this.exporter.exportSelectionPngEach(); this.openMenu.set(null); }
+    exportEachSvg(): void { this.exporter.exportSelectionSvgEach(); this.openMenu.set(null); }
+
+    // --- import ------------------------------------------------------------
+    triggerImport(mode: ImportMode): void {
+        this.importMode = mode;
+        this.openMenu.set(null);
         this.fileInput().nativeElement.click();
     }
 
@@ -69,7 +83,8 @@ export class WbTopbarComponent {
         const file = input.files?.[0];
         if (!file) return;
         try {
-            await this.exporter.importJson(file);
+            if (this.importMode === 'object') await this.exporter.importObject(file);
+            else await this.exporter.importJson(file);
         } finally {
             input.value = '';
         }
