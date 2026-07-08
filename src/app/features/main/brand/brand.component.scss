@@ -3,6 +3,10 @@
 //  Everything here is built from the global tokens it documents.
 // ═══════════════════════════════════════════════════════════════════════════
 
+// Shared primitives from the /tools pages (.t-panel, .t-tabs, .t-btn, .t-field,
+// .t-result, .t-check…) so section 20 renders the real, live classes.
+@use '../../tools/shared/tool-controls';
+
 :host {
   display: block;
 }
@@ -394,7 +398,7 @@ code {
 
   // chips with a light fill need dark ink on the token label
   &--ink-dark .swatch-token {
-    color: #1a1917;
+    color: var(--bg);
   }
 }
 

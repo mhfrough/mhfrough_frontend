@@ -52,6 +52,24 @@ export class SeoService {
         this.setTag('name', 'twitter:image', image);
 
         this.setCanonical(url);
+
+        // Every /tools/<slug> page is a free, client-side dev utility — give it
+        // WebApplication structured data automatically so tool pages are eligible
+        // for rich results without every tool component repeating this JSON-LD.
+        if (data.url && data.url.startsWith('/tools/') && data.url !== '/tools/') {
+            this.setJsonLd({
+                '@context': 'https://schema.org',
+                '@type': 'WebApplication',
+                name: data.title.split('|')[0].trim(),
+                description: data.description,
+                url,
+                applicationCategory: 'DeveloperApplication',
+                operatingSystem: 'Any',
+                offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+            });
+        } else {
+            this.removeJsonLd();
+        }
     }
 
     /** Injects/replaces a JSON-LD <script> block scoped to the current route. */

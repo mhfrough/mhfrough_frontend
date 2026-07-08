@@ -1,12 +1,14 @@
 <div class="sa">
     <!-- ─── Hero ──────────────────────────────────────────────────────────── -->
     <div class="sa-hero">
+        <span class="sa-eyebrow">Free · No signup · {{ sections.length }} checks</span>
         <h1 class="sa-title">SEO Audit Suite</h1>
         <p class="sa-blurb">
             One URL in — a full report out: technical SEO, meta &amp; headings, images, links,
             performance, accessibility, structured data, social previews, content quality,
-            security headers, mobile readiness, design tokens and tech detection, with scored
-            results and prioritised fixes.
+            security headers, mobile readiness, design tokens, tech detection, domain &amp; network
+            health, PWA readiness, rendering and library vulnerabilities — with scored results and
+            prioritised fixes.
         </p>
 
         <div class="sa-form">
@@ -80,8 +82,8 @@
                 }
                 <div><dt>Canonical</dt><dd>{{ r.technical.canonical || '— none —' }}@if (r.technical.canonical) { ({{ r.technical.canonicalMatchesUrl ? 'matches URL' : 'differs from URL' }})}</dd></div>
                 <div><dt>Indexable</dt><dd>{{ r.technical.indexable ? 'Yes' : 'No' }} · noindex: {{ r.technical.noindex ? 'yes' : 'no' }} · nofollow: {{ r.technical.nofollow ? 'yes' : 'no' }}</dd></div>
-                <div><dt>robots.txt</dt><dd>{{ r.technical.robotsTxt.exists ? 'Found' : 'Not found' }}@if (r.technical.robotsTxt.disallowsPath) { · disallows this path}</dd></div>
-                <div><dt>sitemap.xml</dt><dd>{{ r.technical.sitemapXml.exists ? (r.technical.sitemapXml.url || 'Found') : 'Not found' }}</dd></div>
+                <div><dt>robots.txt</dt><dd>{{ r.technical.robotsTxt.exists ? 'Found' : 'Not found' }}@if (r.technical.robotsTxt.disallowsPath) { · disallows this path}@if (!r.technical.robotsTxt.exists) { <a class="sa-cta" routerLink="/tools/sitemap">Generate one in Tools →</a>}</dd></div>
+                <div><dt>sitemap.xml</dt><dd>{{ r.technical.sitemapXml.exists ? (r.technical.sitemapXml.url || 'Found') : 'Not found' }}@if (!r.technical.sitemapXml.exists) { <a class="sa-cta" routerLink="/tools/sitemap">Generate one in Tools →</a>}</dd></div>
                 <div><dt>Timing</dt><dd>TTFB {{ r.technical.ttfbMs }} ms · total {{ r.technical.responseTimeMs }} ms@if (r.technical.dnsMs !== null) { · DNS {{ r.technical.dnsMs }} ms}</dd></div>
                 <div><dt>Server</dt><dd>{{ r.technical.server || '—' }} · encoding: {{ r.technical.contentEncoding || 'none' }} · cache: {{ r.technical.cacheControl || '—' }}</dd></div>
                 @if (r.technical.amp.isAmp || r.technical.amp.ampUrl) {
@@ -125,7 +127,7 @@
                 <div><dt>Meta robots</dt><dd>{{ r.html.metaRobots || '— none —' }}</dd></div>
                 <div><dt>Author</dt><dd>{{ r.html.author || '—' }}</dd></div>
                 <div><dt>Generator</dt><dd>{{ r.html.generator || '—' }}</dd></div>
-                <div><dt>Favicon</dt><dd>{{ r.html.favicon || '— none —' }}</dd></div>
+                <div><dt>Favicon</dt><dd>{{ r.html.favicon || '— none —' }}@if (!r.html.favicon) { <a class="sa-cta" routerLink="/tools/favicon">Create one in Tools →</a>}</dd></div>
             </div>
             @if (r.html.duplicateTags.length) {
             <p class="sa-sub">Duplicate tags</p>
@@ -163,6 +165,9 @@
                 <div class="sa-stat"><span class="sa-stat-num">{{ r.images.lazyLoadedCount }}</span><span class="sa-stat-label">Lazy loaded</span></div>
                 <div class="sa-stat"><span class="sa-stat-num">{{ r.images.modernFormatCount }}</span><span class="sa-stat-label">WebP / AVIF</span></div>
             </div>
+            @if (r.images.large.length > 0 || (r.images.modernFormatCount === 0 && r.images.total > 0)) {
+            <a class="sa-cta" routerLink="/tools/image-format">Compress / convert images in Tools →</a>
+            }
             @if (r.images.duplicateAlt.length) {
             <p class="sa-sub">Repeated alt text</p>
             <ul class="sa-list">@for (d of r.images.duplicateAlt; track $index) {<li>"{{ d.alt }}" × {{ d.count }}</li>}</ul>
@@ -392,6 +397,101 @@
             }
             }
 
+            @case ('network') {
+            <div class="sa-kv">
+                <div><dt>IP address</dt><dd>{{ r.network.ip || '— unresolved —' }}</dd></div>
+                <div><dt>Blacklist</dt><dd>{{ r.network.blacklistedCount }} of {{ r.network.blacklist.length }} zone(s) listed</dd></div>
+                @if (r.network.whois; as w) {
+                <div><dt>Registrar</dt><dd>{{ w.registrar || '— unknown —' }}</dd></div>
+                <div><dt>Domain expiry</dt><dd>@if (w.error) { {{ w.error }} } @else if (w.expiryDate) { {{ w.expiryDate | date:'mediumDate' }}@if (w.daysRemaining !== null) { ({{ w.daysRemaining }} days)} } @else { — unknown — }</dd></div>
+                }
+            </div>
+            @if (r.network.blacklist.length) {
+            <p class="sa-sub">Blacklist zones checked</p>
+            <div class="sa-tagrow">
+                @for (b of r.network.blacklist; track b.zone) {
+                <span class="sa-chip" [class]="b.listed ? 'sa-chip--error' : 'sa-chip--good'">{{ b.zone }}</span>
+                }
+            </div>
+            }
+            <p class="sa-sub">DNS records</p>
+            <div class="sa-scroll"><table class="sa-table"><tbody>
+                @for (ip of r.network.dns.a; track ip) {<tr><th>A</th><td>{{ ip }}</td></tr>}
+                @for (ip of r.network.dns.aaaa; track ip) {<tr><th>AAAA</th><td>{{ ip }}</td></tr>}
+                @for (mx of r.network.dns.mx; track mx.exchange) {<tr><th>MX</th><td>{{ mx.priority }} {{ mx.exchange }}</td></tr>}
+                @for (ns of r.network.dns.ns; track ns) {<tr><th>NS</th><td>{{ ns }}</td></tr>}
+                @for (cname of r.network.dns.cname; track cname) {<tr><th>CNAME</th><td>{{ cname }}</td></tr>}
+                @for (txt of r.network.dns.txt; track $index) {<tr><th>TXT</th><td>{{ txt }}</td></tr>}
+            </tbody></table></div>
+            }
+
+            @case ('buildHygiene') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.buildHygiene.sourceMapsExposed.length > 0">{{ r.buildHygiene.sourceMapsExposed.length }}</span><span class="sa-stat-label">Exposed source maps</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="exposedCount(r.buildHygiene.exposedFiles) > 0">{{ exposedCount(r.buildHygiene.exposedFiles) }}</span><span class="sa-stat-label">Exposed files</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.buildHygiene.debugIndicators.length > 0">{{ r.buildHygiene.debugIndicators.length }}</span><span class="sa-stat-label">Debug leftovers</span></div>
+            </div>
+            @if (r.buildHygiene.sourceMapsExposed.length) {
+            <p class="sa-sub">Exposed source maps</p>
+            <ul class="sa-list sa-list--bad">@for (u of r.buildHygiene.sourceMapsExposed; track u) {<li>{{ u }}</li>}</ul>
+            }
+            @if (exposedCount(r.buildHygiene.exposedFiles) > 0) {
+            <p class="sa-sub">Exposed files</p>
+            <ul class="sa-list sa-list--bad">
+                @for (f of r.buildHygiene.exposedFiles; track f.path) {
+                @if (f.exposed) {<li>{{ f.path }}</li>}
+                }
+            </ul>
+            }
+            }
+
+            @case ('pwa') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="!r.pwa.manifestFound">{{ r.pwa.manifestFound ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Manifest found</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.pwa.appleTouchIcon ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Apple touch icon</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.pwa.themeColorMeta ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Theme color</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="!r.pwa.serviceWorkerScriptDetected">{{ r.pwa.serviceWorkerScriptDetected ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Service worker (static)</span></div>
+            </div>
+            @if (r.pwa.manifestFound) {
+            <p class="sa-sub">Manifest fields</p>
+            <div class="sa-tagrow">
+                @for (f of pwaFieldRows(r.pwa.manifestFields); track f.key) {
+                <span class="sa-chip" [class]="f.ok ? 'sa-chip--good' : 'sa-chip--warn'">{{ f.key }}</span>
+                }
+            </div>
+            }
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> {{ r.pwa.note }}</p>
+            }
+
+            @case ('rendering') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.rendering.renderMode === 'csr-shell'">{{ renderModeLabel(r.rendering.renderMode) }}</span><span class="sa-stat-label">Render mode</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.rendering.ssrFramework || '—' }}</span><span class="sa-stat-label">SSR framework</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.rendering.initialContentChars }}</span><span class="sa-stat-label">Initial content chars</span></div>
+            </div>
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> {{ r.rendering.note }}</p>
+            }
+
+            @case ('libraries') {
+            @if (r.libraries.detected.length) {
+            <p class="sa-sub">Detected libraries</p>
+            <div class="sa-tagrow">@for (d of r.libraries.detected; track d.name) {<span class="sa-chip">{{ d.name }} {{ d.version }}</span>}</div>
+            } @else {
+            <p class="sa-sub">No CDN-loaded libraries with a fingerprintable version were found.</p>
+            }
+            @if (r.libraries.vulnerabilities.length) {
+            <p class="sa-sub">Vulnerabilities</p>
+            <ul class="sa-issues">
+                @for (v of r.libraries.vulnerabilities; track $index) {
+                <li class="sa-issue" [class]="'sa-issue--' + v.severity">
+                    <i class="bi" [class.bi-exclamation-triangle]="v.severity === 'warn'" [class.bi-x-circle]="v.severity === 'error'"></i>
+                    <span><strong>{{ v.name }} {{ v.version }}</strong> — {{ v.advisory }}</span>
+                </li>
+                }
+            </ul>
+            }
+            }
+
             }
 
             <!-- Section issues -->
@@ -458,10 +558,12 @@
 
     @if (!report() && !loading()) {
     <div class="sa-empty">
-        <p>Runs 16 checks in one pass: HTTP &amp; redirects, SSL, robots &amp; sitemap, meta tags,
+        <p>Runs {{ sections.length }} checks in one pass: HTTP &amp; redirects, SSL, robots &amp; sitemap, meta tags,
             headings, images, links, performance proxies, accessibility, structured data,
             social previews, readability &amp; keywords, security headers, mobile readiness,
-            design tokens and technology detection.</p>
+            design tokens, technology detection, domain &amp; network health (DNS, IP blacklist,
+            WHOIS), build/deploy hygiene, PWA readiness, rendering (SSR/hydration) and client
+            library vulnerabilities.</p>
     </div>
     }
 </div>

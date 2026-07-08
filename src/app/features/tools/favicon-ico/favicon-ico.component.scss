@@ -183,8 +183,8 @@
 
 .fav-crop-rect {
     position: absolute;
-    border: 2px dashed var(--primary, #c9a96e);
-    background: color-mix(in srgb, var(--primary, #c9a96e) 15%, transparent);
+    border: 2px dashed var(--primary);
+    background: color-mix(in srgb, var(--primary) 15%, transparent);
     pointer-events: none;
 }
 
@@ -231,7 +231,7 @@
     img {
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        background: #111;
+        background: var(--bg);
     }
 }
 
@@ -335,8 +335,8 @@
 
 .fav-pixel-grid {
     background-image:
-        repeating-linear-gradient(to right, rgba(128, 128, 128, 0.35) 0 1px, transparent 1px 100%),
-        repeating-linear-gradient(to bottom, rgba(128, 128, 128, 0.35) 0 1px, transparent 1px 100%);
+        repeating-linear-gradient(to right, rgba(var(--text-rgb), 0.35) 0 1px, transparent 1px 100%),
+        repeating-linear-gradient(to bottom, rgba(var(--text-rgb), 0.35) 0 1px, transparent 1px 100%);
 }
 
 // --- Mockups ---------------------------------------------------------------------

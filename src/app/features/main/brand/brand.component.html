@@ -187,7 +187,7 @@
 
     <div class="radius-grid">
       <div class="radius-cell">
-        <div class="radius-demo" style="border-radius:0"></div>
+        <div class="radius-demo" style="border-radius: var(--radius)"></div>
         <span class="radius-token">--radius</span>
         <span class="radius-val">0 · cards, inputs, buttons</span>
       </div>
@@ -736,6 +736,66 @@ console.log(hamza);</pre>
       <div class="comp-demo">
         <span class="wb-mode-chip"><i class="bi bi-arrows-expand"></i> Auto — hugs content, no wrap</span>
         <span class="wb-mode-chip"><i class="bi bi-lock"></i> Fixed — wraps and clips at a set size</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 20 · Dev Tools ────────────────────────────────────────────────── -->
+  <section id="tools" class="brand-section">
+    <div class="sec-head">
+      <span class="sec-num">20</span>
+      <h2 class="sec-title">Dev Tools</h2>
+    </div>
+    <p class="sec-lede">The <a routerLink="/tools">/tools</a> shell wraps every one of its 20 pages in the same
+      breadcrumb + icon + title header, then reuses one set of primitives — <code>.t-panel</code>,
+      <code>.t-tabs</code>, <code>.t-field</code>, <code>.t-btn</code>, <code>.t-result</code> — for every
+      converter, generator and codec. Same tokens as the rest of the site: <code>--radius: 0</code>,
+      hairline <code>--border</code>, <code>--text</code> for the active state.</p>
+
+    <div class="comp-block">
+      <p class="comp-label">Segmented tabs — <code>.t-tabs</code> / <code>.t-tab</code></p>
+      <div class="comp-demo">
+        <div class="t-tabs">
+          <button class="t-tab active" type="button">Format</button>
+          <button class="t-tab" type="button">Minify</button>
+          <button class="t-tab" type="button">Sort keys</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Field + label — <code>.t-label</code> / <code>.t-field</code></p>
+      <div class="comp-demo">
+        <div class="fld" style="max-width: 260px">
+          <span class="t-label">Indent</span>
+          <select class="t-field">
+            <option>2 spaces</option>
+            <option>4 spaces</option>
+            <option>Tab</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Buttons &amp; checkbox — <code>.t-btn</code> / <code>.t-btn--ghost</code> /
+        <code>.t-check</code></p>
+      <div class="comp-demo">
+        <button class="t-btn" type="button"><i class="bi bi-play-fill"></i> Format</button>
+        <button class="t-btn t-btn--ghost" type="button">Copy</button>
+        <label class="t-check"><input type="checkbox" checked /> Minify output</label>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <p class="comp-label">Result card — <code>.t-panel</code> / <code>.t-result</code></p>
+      <div class="comp-demo">
+        <div class="t-panel" style="max-width: 320px">
+          <div class="t-result">
+            <p class="t-result-label">Output</p>
+            <p class="t-result-value">2f8a-91c-4e</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>

@@ -272,6 +272,101 @@ export interface TechnologiesAudit {
     all: string[];
 }
 
+// --- 15b. Domain & network -----------------------------------------------------------
+export interface DnsRecords {
+    a: string[];
+    aaaa: string[];
+    mx: { priority: number; exchange: string }[];
+    txt: string[];
+    ns: string[];
+    cname: string[];
+}
+
+export interface BlacklistResult {
+    zone: string;
+    listed: boolean;
+}
+
+export interface WhoisInfo {
+    registrar: string | null;
+    createdDate: string | null;
+    expiryDate: string | null;
+    daysRemaining: number | null;
+    nameServers: string[];
+    error?: string;
+}
+
+export interface NetworkAudit {
+    ip: string | null;
+    dns: DnsRecords;
+    blacklist: BlacklistResult[];
+    blacklistedCount: number;
+    whois: WhoisInfo | null;
+    issues: Issue[];
+}
+
+// --- 15c. Build & deploy hygiene -------------------------------------------------------
+export interface ExposedFile {
+    path: string;
+    exposed: boolean;
+}
+
+export interface BuildHygieneAudit {
+    sourceMapsExposed: string[];
+    exposedFiles: ExposedFile[];
+    debugIndicators: string[];
+    issues: Issue[];
+}
+
+// --- 15d. PWA readiness (static detection only) -----------------------------------------
+export interface PwaAudit {
+    manifestUrl: string | null;
+    manifestFound: boolean;
+    manifestFields: {
+        name: boolean;
+        icons: boolean;
+        startUrl: boolean;
+        display: boolean;
+        themeColor: boolean;
+    };
+    themeColorMeta: string | null;
+    appleTouchIcon: boolean;
+    serviceWorkerScriptDetected: boolean;
+    note: string;
+    issues: Issue[];
+}
+
+// --- 15e. Rendering (SSR / hydration heuristic) ------------------------------------------
+export type RenderMode = 'ssr' | 'csr-shell' | 'static' | 'unknown';
+
+export interface RenderingAudit {
+    renderMode: RenderMode;
+    ssrFramework: string | null;
+    initialContentChars: number;
+    note: string;
+    issues: Issue[];
+}
+
+// --- 15f. Library vulnerabilities --------------------------------------------------------
+export interface DetectedLibrary {
+    name: string;
+    version: string | null;
+    source: string;
+}
+
+export interface LibraryVulnerability {
+    name: string;
+    version: string;
+    severity: IssueLevel;
+    advisory: string;
+}
+
+export interface LibrariesAudit {
+    detected: DetectedLibrary[];
+    vulnerabilities: LibraryVulnerability[];
+    issues: Issue[];
+}
+
 // --- 15. Recommendations (deterministic rules engine, not a live LLM call) -----------
 export type SeoImpact = 'high' | 'medium' | 'low';
 export type Difficulty = 'easy' | 'medium' | 'hard';
@@ -325,6 +420,11 @@ export interface SeoAuditReport {
     mobile: MobileAudit;
     design: DesignAudit;
     technologies: TechnologiesAudit;
+    network: NetworkAudit;
+    buildHygiene: BuildHygieneAudit;
+    pwa: PwaAudit;
+    rendering: RenderingAudit;
+    libraries: LibrariesAudit;
     recommendations: Recommendation[];
     scores: Scores;
 }

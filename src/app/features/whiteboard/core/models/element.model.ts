@@ -50,6 +50,12 @@ export interface TextElement extends BaseElement {
     color: string;
     /** 'auto' grows the box to fit content (default); 'fixed' keeps the manually-set size and clips overflow. */
     sizing: 'auto' | 'fixed';
+    /**
+     * 'code' (the Code Block tool preset) opts out of auto-linking — a URL inside a snippet is
+     * meant to stay literal text, not become a styled hyperlink. Optional so pre-existing
+     * elements (no field at all) fall through to the 'text' behavior, same as `undefined`.
+     */
+    kind?: 'text' | 'code';
 }
 
 export interface StickyElement extends BaseElement {

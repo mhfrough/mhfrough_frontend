@@ -1,6 +1,7 @@
 import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { SeoService } from '../../../core/services/seo.service';
 import { SeoApiService } from '../seo-api.service';
 import { SeoAuditReport, Issue } from '../seo-report.types';
@@ -20,7 +21,7 @@ interface ScoreTile {
 @Component({
     selector: 'app-seo-audit',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterLink],
     templateUrl: './seo-audit.component.html',
     styleUrl: './seo-audit.component.scss',
 })
@@ -52,6 +53,11 @@ export class SeoAuditComponent implements OnInit {
         { key: 'mobile', label: 'Mobile', icon: 'bi-phone' },
         { key: 'design', label: 'Fonts & Design', icon: 'bi-palette' },
         { key: 'technologies', label: 'Technologies', icon: 'bi-cpu' },
+        { key: 'network', label: 'Domain & Network', icon: 'bi-hdd-network' },
+        { key: 'buildHygiene', label: 'Build & Deploy Hygiene', icon: 'bi-box-seam' },
+        { key: 'pwa', label: 'PWA Readiness', icon: 'bi-phone-vibrate' },
+        { key: 'rendering', label: 'Rendering (SSR/Hydration)', icon: 'bi-braces-asterisk' },
+        { key: 'libraries', label: 'Library Vulnerabilities', icon: 'bi-bug' },
     ];
 
     readonly scoreTiles = computed<ScoreTile[]>(() => {
@@ -153,6 +159,23 @@ export class SeoAuditComponent implements OnInit {
 
     kb(bytes: number): string {
         return `${Math.round(bytes / 1024)} KB`;
+    }
+
+    exposedCount(files: { exposed: boolean }[]): number {
+        return files.filter((f) => f.exposed).length;
+    }
+
+    pwaFieldRows(fields: Record<string, boolean>): { key: string; ok: boolean }[] {
+        return Object.entries(fields).map(([key, ok]) => ({ key, ok }));
+    }
+
+    renderModeLabel(mode: string): string {
+        switch (mode) {
+            case 'ssr': return 'SSR';
+            case 'csr-shell': return 'CSR shell';
+            case 'static': return 'Static';
+            default: return 'Unknown';
+        }
     }
 
     // --- Exports ---------------------------------------------------------------

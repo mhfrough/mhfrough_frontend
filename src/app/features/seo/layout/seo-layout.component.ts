@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -24,6 +24,7 @@ export class SeoLayoutComponent implements OnInit, OnDestroy {
     private trackingSub = new Subscription();
 
     readonly year = new Date().getFullYear();
+    readonly scrolled = signal(false);
 
     readonly builtWith: CreditPill[] = [
         { label: 'cheerio', href: 'https://www.npmjs.com/package/cheerio' },
@@ -50,6 +51,9 @@ export class SeoLayoutComponent implements OnInit, OnDestroy {
 
     @HostListener('window:beforeunload')
     onBeforeUnload() { this.tracker.sendLeave(); }
+
+    @HostListener('window:scroll')
+    onScroll() { this.scrolled.set(window.scrollY > 8); }
 
     private readonly onVisibilityChange = () => {
         if (document.visibilityState === 'hidden') this.tracker.sendLeave();

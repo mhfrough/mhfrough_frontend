@@ -101,7 +101,7 @@
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow-popover);
     padding: 0.35rem;
     z-index: 200;
     animation: tools-dd-in var(--dur) var(--ease);
@@ -168,7 +168,6 @@
 }
 
 .tools-back {
-    margin-left: auto;
     font-family: var(--font);
     font-size: 0.7rem;
     font-weight: 500;
@@ -182,6 +181,10 @@
     &:hover {
         color: var(--text);
     }
+}
+
+.tools-seo-link {
+    margin-left: auto;
 }
 
 // --- Main --------------------------------------------------------------------

@@ -78,6 +78,7 @@ export class BrandComponent implements OnInit {
         { num: '17', id: 'layout', label: 'Layout & Grid' },
         { num: '18', id: 'a11y', label: 'Accessibility' },
         { num: '19', id: 'whiteboard', label: 'Whiteboard' },
+        { num: '20', id: 'tools', label: 'Dev Tools' },
     ];
 
     // --- Showcase data for the expanded component sections -------------------

@@ -6,8 +6,19 @@
 }
 
 // --- Hero ----------------------------------------------------------------------
+.sa-eyebrow {
+    display: block;
+    font-family: var(--font);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin: 0 0 0.75rem;
+}
+
 .sa-title {
-    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-size: clamp(1.8rem, 5vw, 3rem);
     font-weight: 700;
     letter-spacing: -0.02em;
     margin: 0 0 0.5rem;
@@ -41,7 +52,7 @@
 
     &:focus {
         outline: none;
-        border-color: var(--text-muted);
+        border-color: var(--primary);
     }
 }
 
@@ -55,20 +66,35 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     padding: 0.7rem 1.4rem;
-    border: 1px solid var(--text);
-    background: var(--text);
-    color: var(--bg);
+    border: 1px solid var(--primary);
+    background: var(--primary);
+    color: #fff;
     border-radius: var(--radius);
     cursor: pointer;
-    transition: opacity var(--dur) var(--ease);
+    transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
 
     &:hover:not(:disabled) {
         opacity: 0.85;
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
     }
 
     &:disabled {
         opacity: 0.45;
         cursor: not-allowed;
+        transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: opacity var(--dur) var(--ease);
+
+        &:hover:not(:disabled) {
+            transform: none;
+        }
     }
 }
 
@@ -153,6 +179,8 @@
 
     &--overall {
         grid-column: span 2;
+        border-color: rgba(var(--primary-rgb), 0.35);
+        background: rgba(var(--primary-rgb), 0.08);
 
         .sa-score-num {
             font-size: 2rem;
@@ -215,9 +243,19 @@
     padding: 0.9rem 1.1rem;
     cursor: pointer;
     text-align: left;
+    transition: background var(--dur) var(--ease);
 
     > i:first-child {
         color: var(--text-muted);
+    }
+
+    &:hover {
+        background: var(--bg-alt);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: -2px;
     }
 }
 
@@ -468,6 +506,35 @@
 
     i {
         margin-top: 0.1rem;
+    }
+}
+
+// --- Redirect CTA chip (links out to /tools/*) --------------------------------------------------
+.sa-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--primary);
+    background: transparent;
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.75rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+
+    &:hover {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
     }
 }
 

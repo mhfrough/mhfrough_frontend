@@ -15,6 +15,12 @@
     z-index: 100;
     background: var(--bg);
     border-bottom: 1px solid var(--border);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    transition: box-shadow var(--dur) var(--ease);
+
+    &.scrolled {
+        box-shadow: var(--shadow-panel);
+    }
 }
 
 .seo-nav {
@@ -45,6 +51,11 @@
     &:hover {
         opacity: 0.7;
     }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
 }
 
 .seo-tag {
@@ -67,6 +78,11 @@
 
     &:hover {
         color: var(--text);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
     }
 }
 

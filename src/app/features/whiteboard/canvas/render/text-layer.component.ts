@@ -6,6 +6,7 @@ import { SelectionService } from '../../core/services/selection.service';
 import { DrawingService } from '../../core/services/drawing.service';
 import { TextEditingService } from '../../core/services/text-editing.service';
 import { findLineContainer, firstTextNode, glyphMarkerLength, isChecklistLine } from '../../core/utils/checklist.util';
+import { linkifyPastedUrl, linkifyTokenBeforeCaret } from '../../core/utils/autolink.util';
 
 const MIN_TEXT_HEIGHT = 40;
 const MIN_TEXT_WIDTH = 40;
@@ -78,6 +79,22 @@ export class TextLayerComponent {
         return this.editingId() === id;
     }
 
+    /**
+     * A real `<a href>`'s native click-navigates behavior is unpredictable here — whether it
+     * even fires depends on the box's current contenteditable state, and relying on the
+     * browser's own "Ctrl/Cmd+click opens a new tab" gesture isn't reliable across every
+     * context this runs in either. Handle both outcomes explicitly instead: always prevent the
+     * native default, and open the link ourselves only when the modifier is actually held.
+     */
+    onLinkClick(e: MouseEvent): void {
+        const anchor = (e.target as HTMLElement).closest?.('a');
+        if (!(anchor instanceof HTMLAnchorElement)) return;
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey) {
+            window.open(anchor.href, '_blank', 'noopener,noreferrer');
+        }
+    }
+
     /** While editing, keep pointer events on the field so the caret works and the board ignores them. */
     onPointerDown(id: string, e: PointerEvent): void {
         // Clicking a checklist glyph toggles it whether or not the box is being edited
@@ -139,6 +156,31 @@ export class TextLayerComponent {
     }
 
     /**
+     * If the clipboard is *purely* a URL, paste it as a link instead of plain text. Mixed
+     * content ("check this out: https://...") falls through to the browser's normal paste —
+     * only the boundary-key path (onKeyDown) auto-links URLs embedded in longer text.
+     */
+    onPaste(id: string, e: ClipboardEvent): void {
+        const el = this.scene.getById(id);
+        if (el?.type === 'text' && el.kind === 'code') return;
+        const text = e.clipboardData?.getData('text/plain');
+        if (!text) return;
+        const anchor = linkifyPastedUrl(text);
+        if (!anchor) return;
+        e.preventDefault();
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(anchor);
+        const after = document.createRange();
+        after.setStartAfter(anchor);
+        after.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(after);
+    }
+
+    /**
      * Auto-fit height for any text-like element (sticky notes always scroll within their own
      * fixed card size via CSS, so this is a no-op there today, but the check stays generic).
      * Width only auto-fits for plain text boxes, and only matters in 'auto' sizing mode — see
@@ -155,10 +197,21 @@ export class TextLayerComponent {
     }
 
     /**
-     * Continues (or exits) a checklist on Enter, and lets Backspace right after an empty
-     * checklist marker remove the marker in one step instead of eating it character-by-character.
+     * Continues (or exits) a checklist on Enter, lets Backspace right after an empty checklist
+     * marker remove the marker in one step, and auto-links a URL the moment you finish typing
+     * it (space/Enter right after — same trigger Notion/Slack use).
      */
     onKeyDown(id: string, e: KeyboardEvent): void {
+        if (e.key === ' ' || e.key === 'Enter') {
+            const el = this.scene.getById(id);
+            // Code Block opts out — a URL in a snippet should stay literal text.
+            const skipLink = el?.type === 'text' && el.kind === 'code';
+            if (!skipLink) {
+                const root = this.host.nativeElement.querySelector<HTMLElement>(`[data-edit-id="${id}"]`);
+                if (root) linkifyTokenBeforeCaret(root);
+            }
+        }
+
         if (e.key !== 'Enter' && e.key !== 'Backspace') return;
         const sel = window.getSelection();
         if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return;

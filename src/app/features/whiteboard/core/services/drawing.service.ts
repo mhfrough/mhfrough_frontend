@@ -84,7 +84,7 @@ export class DrawingService {
                 id: generateElementId(), type: 'text', x: point.x, y: point.y,
                 width: 320, height: 40, rotation: 0, locked: false, groupId: null, createdAt: now, updatedAt: now,
                 style: { ...style, fillColor: CODE_BLOCK_FILL }, text: '', fontFamily: CODE_BLOCK_FONT, fontSize: 12,
-                fontWeight: 400, textAlign: 'left', color: style.strokeColor, sizing: 'auto',
+                fontWeight: 400, textAlign: 'left', color: style.strokeColor, sizing: 'auto', kind: 'code',
             };
             this.scene.addElement(el);
             this.history.commit();
