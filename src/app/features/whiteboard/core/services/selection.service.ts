@@ -114,7 +114,7 @@ export class SelectionService {
     }
 
     /** Set position/size/rotation on the single selected element (scales path points with the box). */
-    setElementGeometry(patch: { x?: number; y?: number; width?: number; height?: number; rotation?: number }): void {
+    setElementGeometry(patch: { x?: number; y?: number; width?: number; height?: number; rotation?: number; rotationX?: number; rotationY?: number }): void {
         const el = this.selectedElements()[0];
         if (!el) return;
         const x = patch.x ?? el.x;
@@ -122,6 +122,8 @@ export class SelectionService {
         const width = Math.max(1, patch.width ?? el.width);
         const height = Math.max(1, patch.height ?? el.height);
         const rotation = patch.rotation ?? el.rotation;
+        const rotationX = patch.rotationX ?? el.rotationX ?? 0;
+        const rotationY = patch.rotationY ?? el.rotationY ?? 0;
 
         let points: { x: number; y: number }[] | undefined;
         if ('points' in el) {
@@ -129,7 +131,7 @@ export class SelectionService {
             const sy = el.height ? height / el.height : 1;
             points = el.points.map(p => ({ x: x + (p.x - el.x) * sx, y: y + (p.y - el.y) * sy }));
         }
-        this.scene.updateElement(el.id, { x, y, width, height, rotation, ...(points ? { points } : {}) } as Partial<WhiteboardElement>);
+        this.scene.updateElement(el.id, { x, y, width, height, rotation, rotationX, rotationY, ...(points ? { points } : {}) } as Partial<WhiteboardElement>);
         this.history.commit();
     }
 

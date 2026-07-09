@@ -25,6 +25,12 @@
     gap: 1rem;
 }
 
+.wb-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
 .wb-wordmark {
     font-family: var(--font);
     font-size: 0.82rem;
@@ -49,6 +55,85 @@
     margin-left: 0.4rem;
     font-weight: 500;
     letter-spacing: 0.04em;
+}
+
+// Site-section switcher — same structure/behavior as .tools-dropdown in
+// tools-layout.component.scss, just under a wb- prefix for this header's own file.
+.wb-nav-dd {
+    position: relative;
+}
+
+.wb-nav-dd-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: var(--font);
+
+    .chev {
+        font-size: 0.6rem;
+        color: var(--text-muted);
+        transition: transform var(--dur) var(--ease);
+    }
+
+    .wb-nav-dd.open & .chev {
+        transform: rotate(180deg);
+    }
+}
+
+.wb-nav-dd-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 180px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-popover);
+    padding: 0.35rem;
+    z-index: 200;
+    animation: wb-nav-dd-in var(--dur) var(--ease);
+}
+
+@keyframes wb-nav-dd-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wb-nav-dd-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.6rem;
+    font-family: var(--font);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+
+    i {
+        font-size: 0.9rem;
+        width: 1.1rem;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    &:hover,
+    &.active {
+        background: var(--surface-hover);
+        color: var(--text);
+    }
 }
 
 .wb-back {

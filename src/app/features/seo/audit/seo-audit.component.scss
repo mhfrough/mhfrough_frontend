@@ -10,15 +10,15 @@
     display: block;
     font-family: var(--font);
     font-size: 0.68rem;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--primary);
+    color: var(--text-muted);
     margin: 0 0 0.75rem;
 }
 
 .sa-title {
-    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 700;
     letter-spacing: -0.02em;
     margin: 0 0 0.5rem;
@@ -52,7 +52,7 @@
 
     &:focus {
         outline: none;
-        border-color: var(--primary);
+        border-color: var(--text-muted);
     }
 }
 
@@ -66,16 +66,16 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     padding: 0.7rem 1.4rem;
-    border: 1px solid var(--primary);
-    background: var(--primary);
-    color: #fff;
+    border: none;
+    background: var(--text);
+    color: var(--bg);
     border-radius: var(--radius);
     cursor: pointer;
     transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
 
     &:hover:not(:disabled) {
-        opacity: 0.85;
-        transform: translateY(-1px);
+        opacity: 0.82;
+        transform: translateY(-2px);
     }
 
     &:focus-visible {
@@ -176,16 +176,6 @@
     background: var(--surface);
     border-radius: var(--radius);
     padding: 0.9rem 1rem;
-
-    &--overall {
-        grid-column: span 2;
-        border-color: rgba(var(--primary-rgb), 0.35);
-        background: rgba(var(--primary-rgb), 0.08);
-
-        .sa-score-num {
-            font-size: 2rem;
-        }
-    }
 }
 
 .sa-score-num {
@@ -224,11 +214,235 @@
 .sa-score.is-mid .sa-score-fill { background: var(--warn-text); }
 .sa-score.is-poor .sa-score-fill { background: var(--danger-text); }
 
+// --- Score overview: gauge + headline stats ---------------------------------------------
+.sa-overview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.4rem;
+}
+
+.sa-gauge {
+    --pct: 0;
+    --gauge-color: var(--primary);
+    width: 132px;
+    height: 132px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(var(--gauge-color) calc(var(--pct) * 1%), var(--bg) 0);
+
+    &.is-good { --gauge-color: var(--success-text); }
+    &.is-mid { --gauge-color: var(--warn-text); }
+    &.is-poor { --gauge-color: var(--danger-text); }
+}
+
+.sa-gauge-inner {
+    width: 102px;
+    height: 102px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.sa-gauge-num {
+    font-size: 2.1rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.sa-gauge-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+}
+
+.sa-headline-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    flex: 1;
+}
+
+.sa-headline-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 120px;
+    padding: 0.6rem 0;
+
+    &--error .sa-headline-num { color: var(--danger-text); }
+    &--warn .sa-headline-num { color: var(--warn-text); }
+    &--good .sa-headline-num { color: var(--success-text); }
+}
+
+.sa-headline-num {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.sa-headline-label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+// --- Issues overview (tabbed, flattened across all sections) ----------------------------
+.sa-issues-overview {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+}
+
+.sa-issues-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.sa-issues-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.sa-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.sa-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 0.35rem 0.85rem;
+    cursor: pointer;
+    transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+
+    &:hover {
+        color: var(--text);
+        border-color: var(--text-muted);
+    }
+
+    &.active {
+        background: var(--text);
+        border-color: var(--text);
+        color: var(--bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}
+
+.sa-tab-count {
+    font-size: 0.66rem;
+    opacity: 0.85;
+}
+
+.sa-issue-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.sa-issue-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    background: var(--bg);
+
+    & + & {
+        border-top: 1px solid var(--border);
+    }
+
+    &--error .sa-issue-bar { background: var(--danger-text); }
+    &--warn .sa-issue-bar { background: var(--warn-text); }
+}
+
+.sa-issue-bar {
+    width: 4px;
+    align-self: stretch;
+    border-radius: var(--radius-pill);
+    flex-shrink: 0;
+}
+
+.sa-issue-section {
+    flex-shrink: 0;
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--surface);
+    border-radius: var(--radius-pill);
+    padding: 0.15rem 0.55rem;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+}
+
+.sa-issue-msg {
+    color: var(--text);
+    flex: 1;
+}
+
+.sa-issues-empty {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--success-text);
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 0.75rem;
+}
+
 // --- Sections -------------------------------------------------------------------------
 .sa-section {
     border: 1px solid var(--border);
     background: var(--surface);
     border-radius: var(--radius);
+    overflow: hidden;
 }
 
 .sa-section-head {
@@ -515,21 +729,23 @@
     align-items: center;
     gap: 0.35rem;
     font-family: var(--font);
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: var(--primary);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text);
     background: transparent;
-    border: 1px solid var(--primary);
+    border: 1px solid var(--border);
     border-radius: var(--radius-pill);
     padding: 0.3rem 0.75rem;
     text-decoration: none;
     white-space: nowrap;
-    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 
     &:hover {
-        background: var(--primary);
-        color: #fff;
+        background: var(--text);
+        border-color: var(--text);
+        color: var(--bg);
     }
 
     &:focus-visible {
@@ -723,17 +939,124 @@
 
 // --- Empty state -----------------------------------------------------------------------------------
 .sa-empty {
-    border: 1px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    color: var(--text-muted);
-    font-size: 0.82rem;
-    line-height: 1.7;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
 
-    p {
-        margin: 0;
-        max-width: 680px;
+// --- How it works: 3 numbered steps -----------------------------------------------------
+.sa-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
     }
+}
+
+.sa-step-num {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--primary);
+    margin-bottom: 0.6rem;
+}
+
+.sa-step-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.4rem;
+}
+
+.sa-step-body {
+    font-size: 0.82rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+// --- Section headers (empty state) ------------------------------------------------------
+.sa-empty-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: -1.25rem;
+}
+
+.sa-empty-num {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary);
+}
+
+.sa-empty-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin: 0;
+}
+
+.sa-empty-lede {
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+    max-width: 68ch;
+    margin: 0;
+}
+
+// --- What gets checked: icon grid (collision-border, matches /brand principles) --------
+.sa-check-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+
+    @media (max-width: 900px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 560px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sa-check-card {
+    padding: 1.5rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transition: background var(--dur) var(--ease);
+
+    &:hover {
+        background: var(--bg-alt);
+    }
+}
+
+.sa-check-icon {
+    display: block;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    margin-bottom: 0.9rem;
+}
+
+.sa-check-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin: 0 0 0.4rem;
+}
+
+.sa-check-body {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin: 0;
 }
 
 // --- Print ------------------------------------------------------------------------------------------

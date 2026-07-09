@@ -162,8 +162,16 @@ export class StylePanelComponent {
         this.selection.updateTextProps(patch);
     }
 
+    // Font/Weight/Size/Text-color all prefer acting on the current text *selection* (like Bold
+    // already does) when there is one — only falling back to the whole box when there's
+    // nothing selected to target, e.g. setting the box's default before you've typed anything.
     setFont(event: Event): void {
-        this.applyText({ fontFamily: (event.target as HTMLSelectElement).value });
+        const family = (event.target as HTMLSelectElement).value;
+        if (this.textEditing.hasTextSelection()) {
+            this.textEditing.setFontFamily(family);
+            return;
+        }
+        this.applyText({ fontFamily: family });
         this.commit();
     }
 
@@ -172,11 +180,20 @@ export class StylePanelComponent {
         // Unlike the range slider (always a valid clamped number), the number input can be
         // blurred empty or mid-edit — ignore rather than writing NaN into the element.
         if (Number.isNaN(size)) return;
+        if (this.textEditing.hasTextSelection()) {
+            this.textEditing.setFontSize(size);
+            return;
+        }
         this.applyText({ fontSize: size } as Partial<TextElement>);
     }
 
     setFontWeight(event: Event): void {
-        this.applyText({ fontWeight: Number((event.target as HTMLSelectElement).value) } as Partial<TextElement>);
+        const weight = Number((event.target as HTMLSelectElement).value);
+        if (this.textEditing.hasTextSelection()) {
+            this.textEditing.setFontWeight(weight);
+            return;
+        }
+        this.applyText({ fontWeight: weight } as Partial<TextElement>);
         this.commit();
     }
 
@@ -225,6 +242,10 @@ export class StylePanelComponent {
     }
 
     setTextColor(color: string): void {
+        if (this.textEditing.hasTextSelection()) {
+            this.textEditing.setColor(color);
+            return;
+        }
         this.applyText({ color } as Partial<TextElement>);
         this.commit();
     }
@@ -235,7 +256,7 @@ export class StylePanelComponent {
     }
 
     // --- geometry inspector (X / Y / W / H / angle) ------------------------
-    setGeometry(field: 'x' | 'y' | 'width' | 'height' | 'rotation', event: Event): void {
+    setGeometry(field: 'x' | 'y' | 'width' | 'height' | 'rotation' | 'rotationX' | 'rotationY', event: Event): void {
         const raw = Number((event.target as HTMLInputElement).value);
         if (Number.isNaN(raw)) return;
         this.selection.setElementGeometry({ [field]: Math.round(raw) });
@@ -243,6 +264,10 @@ export class StylePanelComponent {
 
     round(v: number): number {
         return Math.round(v);
+    }
+
+    roundOr0(v: number | undefined): number {
+        return Math.round(v ?? 0);
     }
 
     // --- image-specific ----------------------------------------------------

@@ -111,6 +111,17 @@
     }
 }
 
+// Three rotation fields (Z / Tx / Ty) sharing one row.
+.wb-xy-row3 {
+    display: flex;
+    gap: 4px;
+
+    .wb-xy-field {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
 .wb-xy-key {
     color: var(--text-muted);
     font-size: 0.68rem;

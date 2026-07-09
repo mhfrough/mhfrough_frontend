@@ -60,6 +60,10 @@
     <app-layers-panel (closePanel)="layersOpen.set(false)" />
     }
 
+    @if (helpOpen()) {
+    <app-help-modal (closeModal)="helpOpen.set(false)" />
+    }
+
     <app-context-menu />
 
     <!-- Zoom controls -->
@@ -96,6 +100,10 @@
         <button type="button" class="wb-hud-btn" [class.active]="layersOpen()" (click)="layersOpen.set(!layersOpen())"
             aria-label="Toggle layers panel" title="Layers">
             <i class="bi bi-stack"></i>
+        </button>
+        <button type="button" class="wb-hud-btn" (click)="helpOpen.set(true)"
+            aria-label="Help and keyboard shortcuts" title="Help">
+            <i class="bi bi-question-lg"></i>
         </button>
     </div>
 

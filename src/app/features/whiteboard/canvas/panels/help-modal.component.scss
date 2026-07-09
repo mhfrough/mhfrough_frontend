@@ -1,0 +1,151 @@
+.wb-help-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: wb-help-fade-in 0.15s ease;
+}
+
+.wb-help-modal {
+    width: min(640px, calc(100vw - 2rem));
+    max-height: min(80vh, 640px);
+    // Column layout with a non-shrinking header: only .wb-help-body scrolls, so the title and
+    // close button stay put and reachable no matter how far down the shortcut list you've
+    // scrolled — previously the whole card (header included) scrolled as one block.
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-popover);
+    font-family: var(--font);
+    overflow: hidden;
+}
+
+.wb-help-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.wb-help-body {
+    overflow-y: auto;
+    padding: 1.25rem 1.5rem 1.5rem;
+}
+
+// Matches .ds-modal-title on the brand page (Feedback & Overlays section) exactly.
+.wb-help-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+}
+
+.wb-help-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+
+    &:hover {
+        background: var(--bg-alt);
+        color: var(--text);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}
+
+.wb-help-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+
+    @media (max-width: 560px) {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+.wb-help-col-title {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.75rem;
+}
+
+.wb-help-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.wb-help-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.wb-help-label {
+    font-size: 0.78rem;
+    color: var(--text);
+}
+
+.wb-help-keys {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.wb-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 0.35rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-size: 0.66rem;
+    font-style: normal;
+}
+
+@keyframes wb-help-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wb-help-overlay {
+        animation: none;
+    }
+}

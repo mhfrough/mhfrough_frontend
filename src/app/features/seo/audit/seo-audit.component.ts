@@ -1,7 +1,7 @@
 import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../../core/services/seo.service';
 import { SeoApiService } from '../seo-api.service';
 import { SeoAuditReport, Issue } from '../seo-report.types';
@@ -18,6 +18,18 @@ interface ScoreTile {
     value: number;
 }
 
+interface CheckCategory {
+    icon: string;
+    title: string;
+    body: string;
+}
+
+interface HowItWorksStep {
+    num: string;
+    title: string;
+    body: string;
+}
+
 @Component({
     selector: 'app-seo-audit',
     standalone: true,
@@ -29,6 +41,8 @@ export class SeoAuditComponent implements OnInit {
     private readonly seo = inject(SeoService);
     private readonly api = inject(SeoApiService);
     private readonly platformId = inject(PLATFORM_ID);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
 
     readonly url = signal('');
     readonly loading = signal(false);
@@ -60,12 +74,31 @@ export class SeoAuditComponent implements OnInit {
         { key: 'libraries', label: 'Library Vulnerabilities', icon: 'bi-bug' },
     ];
 
+    // --- Empty-state content (shown before the first run) ------------------
+
+    readonly howItWorks: HowItWorksStep[] = [
+        { num: '01', title: 'Paste a URL', body: 'Any public page — yours, a client’s, or a competitor’s.' },
+        { num: '02', title: 'We crawl & analyse', body: '19 checks run in one pass: markup, performance proxies, security, domain health and more.' },
+        { num: '03', title: 'Get a scored report', body: 'An overall score, every issue ranked by severity, and concrete before/after fixes.' },
+    ];
+
+    readonly checkCategories: CheckCategory[] = [
+        { icon: 'bi-gear', title: 'Technical & Crawlability', body: 'robots.txt, sitemap.xml, canonical tags, redirect chains, indexability and HTTP status.' },
+        { icon: 'bi-file-text', title: 'Content & On-Page', body: 'Titles, meta descriptions, heading hierarchy, readability and keyword usage.' },
+        { icon: 'bi-speedometer2', title: 'Performance', body: 'Page weight, TTFB, render-blocking scripts/styles and compression.' },
+        { icon: 'bi-universal-access', title: 'Accessibility & Mobile', body: 'Alt text, form labels, landmarks, viewport meta and responsive heuristics.' },
+        { icon: 'bi-shield-check', title: 'Security', body: 'HTTPS, HSTS, CSP, cookie flags and SSL certificate expiry.' },
+        { icon: 'bi-hdd-network', title: 'Domain & Network', body: 'DNS records, IP blacklist status and WHOIS registration expiry.' },
+        { icon: 'bi-phone-vibrate', title: 'Modern Web', body: 'PWA manifest, service worker detection and SSR/hydration heuristics.' },
+        { icon: 'bi-share', title: 'Social & Structured Data', body: 'Open Graph, Twitter Card previews and JSON-LD/microdata.' },
+        { icon: 'bi-bug', title: 'Code Health', body: 'Exposed source maps or config files, and known-vulnerable client libraries.' },
+    ];
+
     readonly scoreTiles = computed<ScoreTile[]>(() => {
         const r = this.report();
         if (!r) return [];
         const s = r.scores;
         return [
-            { label: 'Overall', value: s.overall },
             { label: 'SEO', value: s.seo },
             { label: 'Performance', value: s.performance },
             { label: 'Accessibility', value: s.accessibility },
@@ -75,6 +108,35 @@ export class SeoAuditComponent implements OnInit {
             { label: 'Content', value: s.content },
             { label: 'Mobile', value: s.mobile },
         ];
+    });
+
+    readonly overallScore = computed(() => this.report()?.scores.overall ?? 0);
+
+    /** Every section's issues flattened into one list, tagged with the section they came from. */
+    readonly allIssues = computed<{ level: Issue['level']; msg: string; section: string }[]>(() => {
+        const r = this.report();
+        if (!r) return [];
+        const out: { level: Issue['level']; msg: string; section: string }[] = [];
+        for (const s of this.sections) {
+            for (const i of this.sectionIssues(s.key)) out.push({ level: i.level, msg: i.msg, section: s.label });
+        }
+        return out;
+    });
+
+    readonly issueTotals = computed(() => {
+        const all = this.allIssues();
+        return {
+            error: all.filter((i) => i.level === 'error').length,
+            warn: all.filter((i) => i.level === 'warn').length,
+            good: all.filter((i) => i.level === 'good').length,
+        };
+    });
+
+    readonly issueFilter = signal<'all' | 'error' | 'warn'>('all');
+
+    readonly filteredIssues = computed(() => {
+        const f = this.issueFilter();
+        return this.allIssues().filter((i) => (f === 'all' ? i.level !== 'good' : i.level === f));
     });
 
     readonly ogRows = computed(() => this.toRows(this.report()?.social?.og));
@@ -89,6 +151,14 @@ export class SeoAuditComponent implements OnInit {
             url: '/seo',
             keywords: 'seo audit, website audit, technical seo, meta tag checker, accessibility audit, security headers',
         });
+
+        // Restore the last-audited URL from ?url= on load/reload (browser only —
+        // avoid firing a real audit request during SSR).
+        const qUrl = this.route.snapshot.queryParamMap.get('url');
+        if (qUrl && isPlatformBrowser(this.platformId)) {
+            this.url.set(qUrl);
+            this.run();
+        }
     }
 
     run(): void {
@@ -102,10 +172,20 @@ export class SeoAuditComponent implements OnInit {
         this.report.set(null);
         this.previewImgFailed.set(false);
 
+        if (isPlatformBrowser(this.platformId)) {
+            this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: { url },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });
+        }
+
         this.api.audit(url).subscribe({
             next: (res) => {
                 this.report.set(res);
                 this.loading.set(false);
+                this.issueFilter.set('all');
                 // Open every section by default so the full report reads top-to-bottom.
                 const all: Record<string, boolean> = {};
                 for (const s of this.sections) all[s.key] = true;
@@ -206,7 +286,7 @@ export class SeoAuditComponent implements OnInit {
         const r = this.report();
         if (!r || !isPlatformBrowser(this.platformId)) return;
         const e = this.escapeHtml;
-        const scoreRows = this.scoreTiles()
+        const scoreRows = [{ label: 'Overall', value: r.scores.overall }, ...this.scoreTiles()]
             .map((t) => `<tr><td>${e(t.label)}</td><td>${t.value}</td></tr>`)
             .join('');
         const issueRows = this.sections

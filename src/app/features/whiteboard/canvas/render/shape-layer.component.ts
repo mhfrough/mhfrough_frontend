@@ -43,6 +43,24 @@ export class ShapeLayerComponent {
         return dashArrayFor(style);
     }
 
+    /**
+     * CSS transform for a single element's `<g>`. Replaces the plain SVG `transform` attribute
+     * (which has no 3D functions) so shapes can carry the same optional X/Y tilt as the
+     * HTML-rendered layers. `translate` stays first in the chain so it composes with
+     * `transform-origin` the same way the old `translate(x,y) rotate(z,cx,cy)` attribute did —
+     * see elOrigin() below for the matching origin.
+     */
+    elTransform(el: WhiteboardElement): string {
+        const rx = el.rotationX ?? 0;
+        const ry = el.rotationY ?? 0;
+        const tilt = rx || ry ? `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) ` : '';
+        return `translate(${el.x}px, ${el.y}px) ${tilt}rotate(${el.rotation}deg)`;
+    }
+
+    elOrigin(el: WhiteboardElement): string {
+        return `${el.width / 2}px ${el.height / 2}px`;
+    }
+
     private memo(key: string, compute: () => string): string {
         const hit = this.geometryCache.get(key);
         if (hit !== undefined) return hit;

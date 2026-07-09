@@ -37,6 +37,7 @@ import { SelectionContextBarComponent } from './toolbar/selection-context-bar.co
 import { CollabBarComponent } from './toolbar/collab-bar.component';
 import { StylePanelComponent } from './panels/style-panel.component';
 import { LayersPanelComponent } from './panels/layers-panel.component';
+import { HelpModalComponent } from './panels/help-modal.component';
 import { ShapeLayerComponent } from './render/shape-layer.component';
 import { TextLayerComponent } from './render/text-layer.component';
 import { SelectionOverlayComponent } from './render/selection-overlay.component';
@@ -61,6 +62,7 @@ const RULER_SIZE = 24;
         SelectionOverlayComponent, SelectionContextBarComponent, StylePanelComponent,
         CollabBarComponent, CursorOverlayComponent, MinimapComponent, GuidesOverlayComponent,
         ImageLayerComponent, ImageCropOverlayComponent, LayersPanelComponent, ContextMenuComponent,
+        HelpModalComponent,
     ],
     providers: [
         ViewportService, SceneService, ToolService, DrawingService, SelectionService,
@@ -138,6 +140,7 @@ export class CanvasBoardComponent implements OnInit, OnDestroy {
     readonly isPanning = signal(false);
     /** Layers panel is hidden by default; toggled from the view HUD. */
     readonly layersOpen = signal(false);
+    readonly helpOpen = signal(false);
 
     readonly cursorClass = computed(() => {
         if (this.isPanning()) return 'grabbing';

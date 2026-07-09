@@ -1,0 +1,47 @@
+<div class="wb-help-overlay" role="dialog" aria-modal="true" aria-label="Help and keyboard shortcuts"
+    (click)="close()">
+    <div class="wb-help-modal" (click)="$event.stopPropagation()">
+        <div class="wb-help-head">
+            <h2 class="wb-help-title">Keyboard shortcuts</h2>
+            <button type="button" class="wb-help-close" (click)="close()" aria-label="Close help">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="wb-help-body">
+            <div class="wb-help-cols">
+                <section class="wb-help-col">
+                    <h3 class="wb-help-col-title">Tools</h3>
+                    <ul class="wb-help-list">
+                        @for (s of toolShortcuts; track s.label) {
+                        <li class="wb-help-row">
+                            <span class="wb-help-label">{{ s.label }}</span>
+                            <span class="wb-help-keys">
+                                @for (k of s.keys; track k) {
+                                <kbd class="wb-kbd">{{ k }}</kbd>
+                                }
+                            </span>
+                        </li>
+                        }
+                    </ul>
+                </section>
+
+                <section class="wb-help-col">
+                    <h3 class="wb-help-col-title">Editor</h3>
+                    <ul class="wb-help-list">
+                        @for (s of editorShortcuts; track s.label) {
+                        <li class="wb-help-row">
+                            <span class="wb-help-label">{{ s.label }}</span>
+                            <span class="wb-help-keys">
+                                @for (k of s.keys; track k) {
+                                <kbd class="wb-kbd">{{ k }}</kbd>
+                                }
+                            </span>
+                        </li>
+                        }
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>

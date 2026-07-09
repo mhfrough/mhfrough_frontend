@@ -1,7 +1,7 @@
 <svg class="wb-shapes-svg">
     <g [attr.transform]="groupTransform">
     @for (el of elements; track el.id) {
-    <g [attr.transform]="'translate(' + el.x + ',' + el.y + ') rotate(' + el.rotation + ',' + (el.width/2) + ',' + (el.height/2) + ')'"
+    <g [style.transform]="elTransform(el)" [style.transform-origin]="elOrigin(el)"
         [attr.opacity]="el.style.opacity">
 
         @switch (el.type) {

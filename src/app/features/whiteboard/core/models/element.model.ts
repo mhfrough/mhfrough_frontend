@@ -13,6 +13,10 @@ interface BaseElement {
     width: number;
     height: number;
     rotation: number;
+    /** 3D tilt around the horizontal axis, in degrees. Visual-only: rendering follows it, but hit-testing/export stay flat. */
+    rotationX?: number;
+    /** 3D tilt around the vertical axis, in degrees. Visual-only: rendering follows it, but hit-testing/export stay flat. */
+    rotationY?: number;
     style: ElementStyle;
     locked: boolean;
     groupId: string | null;

@@ -43,10 +43,34 @@
         </div>
     </div>
 
-    <!-- ─── Scores ────────────────────────────────────────────────────────── -->
+    <!-- ─── Score overview: gauge + critical/warning headline stats ───────── -->
+    <div class="sa-overview">
+        <div class="sa-gauge" [class]="scoreClass(overallScore())" [style.--pct]="overallScore()">
+            <div class="sa-gauge-inner">
+                <span class="sa-gauge-num">{{ overallScore() }}</span>
+                <span class="sa-gauge-label">Overall</span>
+            </div>
+        </div>
+        <div class="sa-headline-stats">
+            <div class="sa-headline-stat sa-headline-stat--error">
+                <span class="sa-headline-num">{{ issueTotals().error }}</span>
+                <span class="sa-headline-label">Critical issues</span>
+            </div>
+            <div class="sa-headline-stat sa-headline-stat--warn">
+                <span class="sa-headline-num">{{ issueTotals().warn }}</span>
+                <span class="sa-headline-label">Warnings</span>
+            </div>
+            <div class="sa-headline-stat sa-headline-stat--good">
+                <span class="sa-headline-num">{{ issueTotals().good }}</span>
+                <span class="sa-headline-label">Passed checks</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Secondary category scores ──────────────────────────────────────── -->
     <div class="sa-scores">
         @for (t of scoreTiles(); track t.label) {
-        <div class="sa-score" [class]="scoreClass(t.value)" [class.sa-score--overall]="t.label === 'Overall'">
+        <div class="sa-score" [class]="scoreClass(t.value)">
             <span class="sa-score-num">{{ t.value }}</span>
             <span class="sa-score-label">{{ t.label }}</span>
             <span class="sa-score-meter"><span class="sa-score-fill" [style.width.%]="t.value"></span></span>
@@ -54,7 +78,83 @@
         }
     </div>
 
-    <!-- ─── Sections ──────────────────────────────────────────────────────── -->
+    <!-- ─── Issues overview: tabbed, flattened across all sections ─────────── -->
+    <section class="sa-issues-overview">
+        <div class="sa-issues-head">
+            <h2 class="sa-issues-title">Issues Overview</h2>
+            <div class="sa-tabs">
+                <button type="button" class="sa-tab" [class.active]="issueFilter() === 'all'" (click)="issueFilter.set('all')">
+                    All Issues <span class="sa-tab-count">{{ issueTotals().error + issueTotals().warn }}</span>
+                </button>
+                <button type="button" class="sa-tab" [class.active]="issueFilter() === 'error'" (click)="issueFilter.set('error')">
+                    Critical <span class="sa-tab-count">{{ issueTotals().error }}</span>
+                </button>
+                <button type="button" class="sa-tab" [class.active]="issueFilter() === 'warn'" (click)="issueFilter.set('warn')">
+                    Warnings <span class="sa-tab-count">{{ issueTotals().warn }}</span>
+                </button>
+            </div>
+        </div>
+        @if (filteredIssues().length === 0) {
+        <p class="sa-issues-empty">
+            <i class="bi bi-check-circle"></i>
+            No {{ issueFilter() === 'error' ? 'critical issues' : issueFilter() === 'warn' ? 'warnings' : 'issues' }} found.
+        </p>
+        } @else {
+        <ul class="sa-issue-rows">
+            @for (i of filteredIssues(); track $index) {
+            <li class="sa-issue-row" [class]="'sa-issue-row--' + i.level">
+                <span class="sa-issue-bar"></span>
+                <span class="sa-issue-section">{{ i.section }}</span>
+                <span class="sa-issue-msg">{{ i.msg }}</span>
+            </li>
+            }
+        </ul>
+        }
+    </section>
+
+    <!-- ─── Recommendations ──────────────────────────────────────────────── -->
+    <section class="sa-section">
+        <button type="button" class="sa-section-head" (click)="toggle('recommendations')" [attr.aria-expanded]="isOpen('recommendations')">
+            <i class="bi bi-lightbulb"></i>
+            <span class="sa-section-title">Recommendations ({{ r.recommendations.length }})</span>
+            <i class="bi bi-chevron-down sa-chev" [class.open]="isOpen('recommendations')"></i>
+        </button>
+        @if (isOpen('recommendations')) {
+        <div class="sa-section-body">
+            @if (!r.recommendations.length) {
+            <p class="sa-sub">Nothing to fix — clean audit.</p>
+            }
+            @for (rec of r.recommendations; track rec.id) {
+            <article class="sa-rec" [class]="'sa-rec--' + rec.level">
+                <header class="sa-rec-head">
+                    <span class="sa-rec-priority">P{{ rec.priority }}</span>
+                    <h3 class="sa-rec-title">{{ rec.title }}</h3>
+                    <span class="sa-chip">{{ rec.category }}</span>
+                </header>
+                <div class="sa-rec-meta">
+                    <span class="sa-chip">impact: {{ rec.seoImpact }}</span>
+                    <span class="sa-chip">difficulty: {{ rec.difficulty }}</span>
+                    <span class="sa-chip">est. {{ rec.estimatedFixTime }}</span>
+                </div>
+                <p class="sa-rec-text">{{ rec.explanation }}</p>
+                <p class="sa-rec-why">{{ rec.whyItMatters }}</p>
+                @if (rec.codeBefore || rec.codeAfter) {
+                <div class="sa-rec-code">
+                    @if (rec.codeBefore) {
+                    <div><p class="sa-sub">Before</p><pre class="sa-pre">{{ rec.codeBefore }}</pre></div>
+                    }
+                    @if (rec.codeAfter) {
+                    <div><p class="sa-sub">After</p><pre class="sa-pre">{{ rec.codeAfter }}</pre></div>
+                    }
+                </div>
+                }
+            </article>
+            }
+        </div>
+        }
+    </section>
+
+    <!-- ─── Category detail (collapsed by default) ─────────────────────────── -->
     @for (s of sections; track s.key) {
     <section class="sa-section">
         <button type="button" class="sa-section-head" (click)="toggle(s.key)" [attr.aria-expanded]="isOpen(s.key)">
@@ -512,58 +612,51 @@
         }
     </section>
     }
-
-    <!-- ─── Recommendations ──────────────────────────────────────────────── -->
-    <section class="sa-section">
-        <button type="button" class="sa-section-head" (click)="toggle('recommendations')" [attr.aria-expanded]="isOpen('recommendations')">
-            <i class="bi bi-lightbulb"></i>
-            <span class="sa-section-title">Recommendations ({{ r.recommendations.length }})</span>
-            <i class="bi bi-chevron-down sa-chev" [class.open]="isOpen('recommendations')"></i>
-        </button>
-        @if (isOpen('recommendations')) {
-        <div class="sa-section-body">
-            @if (!r.recommendations.length) {
-            <p class="sa-sub">Nothing to fix — clean audit.</p>
-            }
-            @for (rec of r.recommendations; track rec.id) {
-            <article class="sa-rec" [class]="'sa-rec--' + rec.level">
-                <header class="sa-rec-head">
-                    <span class="sa-rec-priority">P{{ rec.priority }}</span>
-                    <h3 class="sa-rec-title">{{ rec.title }}</h3>
-                    <span class="sa-chip">{{ rec.category }}</span>
-                </header>
-                <div class="sa-rec-meta">
-                    <span class="sa-chip">impact: {{ rec.seoImpact }}</span>
-                    <span class="sa-chip">difficulty: {{ rec.difficulty }}</span>
-                    <span class="sa-chip">est. {{ rec.estimatedFixTime }}</span>
-                </div>
-                <p class="sa-rec-text">{{ rec.explanation }}</p>
-                <p class="sa-rec-why">{{ rec.whyItMatters }}</p>
-                @if (rec.codeBefore || rec.codeAfter) {
-                <div class="sa-rec-code">
-                    @if (rec.codeBefore) {
-                    <div><p class="sa-sub">Before</p><pre class="sa-pre">{{ rec.codeBefore }}</pre></div>
-                    }
-                    @if (rec.codeAfter) {
-                    <div><p class="sa-sub">After</p><pre class="sa-pre">{{ rec.codeAfter }}</pre></div>
-                    }
-                </div>
-                }
-            </article>
-            }
-        </div>
-        }
-    </section>
     }
 
     @if (!report() && !loading()) {
     <div class="sa-empty">
-        <p>Runs {{ sections.length }} checks in one pass: HTTP &amp; redirects, SSL, robots &amp; sitemap, meta tags,
-            headings, images, links, performance proxies, accessibility, structured data,
-            social previews, readability &amp; keywords, security headers, mobile readiness,
-            design tokens, technology detection, domain &amp; network health (DNS, IP blacklist,
-            WHOIS), build/deploy hygiene, PWA readiness, rendering (SSR/hydration) and client
-            library vulnerabilities.</p>
+
+        <!-- ─── How it works ────────────────────────────────────────────── -->
+        <div class="sa-steps">
+            @for (s of howItWorks; track s.num) {
+            <div class="sa-step">
+                <span class="sa-step-num">{{ s.num }}</span>
+                <h3 class="sa-step-title">{{ s.title }}</h3>
+                <p class="sa-step-body">{{ s.body }}</p>
+            </div>
+            }
+        </div>
+
+        <!-- ─── What gets checked ──────────────────────────────────────── -->
+        <div class="sa-empty-head">
+            <span class="sa-empty-num">{{ sections.length }} checks</span>
+            <h2 class="sa-empty-title">What gets checked</h2>
+        </div>
+        <div class="sa-check-grid">
+            @for (c of checkCategories; track c.title) {
+            <div class="sa-check-card">
+                <i class="bi sa-check-icon" [class]="c.icon"></i>
+                <h3 class="sa-check-title">{{ c.title }}</h3>
+                <p class="sa-check-body">{{ c.body }}</p>
+            </div>
+            }
+        </div>
+
+        <!-- ─── Why it matters ─────────────────────────────────────────── -->
+        <div class="sa-empty-head">
+            <span class="sa-empty-num">Why</span>
+            <h2 class="sa-empty-title">Why run an SEO audit</h2>
+        </div>
+        <p class="sa-empty-lede">
+            Search is still the main way people discover a new site, and small technical problems —
+            a missing canonical, an unoptimised image, a slow first byte — quietly cost rankings and
+            trust long before anyone files a bug report. A regular audit surfaces those problems in
+            priority order, so the first fixes you make are the ones that actually move the needle.
+        </p>
+        <p class="sa-empty-lede">
+            Want more on the subject? <a class="link-arrow" routerLink="/blog">Read the blog <i class="bi bi-arrow-right"></i></a>
+        </p>
     </div>
     }
 </div>

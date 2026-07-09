@@ -1,9 +1,33 @@
 <!-- ─── Whiteboard Header (own chrome, distinct from admin/main) ──────────── -->
 <header class="wb-header">
     <nav class="wb-nav">
-        <a class="wb-wordmark" routerLink="/whiteboard">
-            MHFrough<span class="wb-tag">/ whiteboard</span>
-        </a>
+        <div class="wb-nav-left">
+            <a class="wb-wordmark" routerLink="/">MHFrough</a>
+
+            <div class="wb-nav-dd" [class.open]="menuOpen()">
+                <button type="button" class="wb-nav-dd-trigger" (click)="toggleMenu($event)"
+                    [attr.aria-expanded]="menuOpen()" aria-haspopup="true" aria-label="Switch section">
+                    <span class="wb-tag">/ whiteboard</span>
+                    <i class="bi bi-chevron-down chev"></i>
+                </button>
+
+                @if (menuOpen()) {
+                <div class="wb-nav-dd-menu" role="menu" (click)="$event.stopPropagation()">
+                    <a class="wb-nav-dd-item" routerLink="/whiteboard" routerLinkActive="active"
+                        (click)="menuOpen.set(false)">
+                        <i class="bi bi-easel2"></i> Whiteboard
+                    </a>
+                    <a class="wb-nav-dd-item" routerLink="/seo" routerLinkActive="active" (click)="menuOpen.set(false)">
+                        <i class="bi bi-search"></i> SEO Audits
+                    </a>
+                    <a class="wb-nav-dd-item" routerLink="/tools" routerLinkActive="active" (click)="menuOpen.set(false)">
+                        <i class="bi bi-grid"></i> Tools
+                    </a>
+                </div>
+                }
+            </div>
+        </div>
+
         <a class="wb-back" routerLink="/">← Back to site</a>
     </nav>
 </header>

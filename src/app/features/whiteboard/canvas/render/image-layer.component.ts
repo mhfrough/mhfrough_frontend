@@ -23,6 +23,9 @@ export class ImageLayerComponent {
 
     imageTransform(el: ImageElement): string | null {
         const parts: string[] = [];
+        const rx = el.rotationX ?? 0;
+        const ry = el.rotationY ?? 0;
+        if (rx || ry) parts.push(`perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`);
         if (el.rotation !== 0) parts.push(`rotate(${el.rotation}deg)`);
         if (el.flipH) parts.push('scaleX(-1)');
         if (el.flipV) parts.push('scaleY(-1)');

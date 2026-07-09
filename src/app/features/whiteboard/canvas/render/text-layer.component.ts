@@ -6,7 +6,7 @@ import { SelectionService } from '../../core/services/selection.service';
 import { DrawingService } from '../../core/services/drawing.service';
 import { TextEditingService } from '../../core/services/text-editing.service';
 import { findLineContainer, firstTextNode, glyphMarkerLength, isChecklistLine } from '../../core/utils/checklist.util';
-import { linkifyPastedUrl, linkifyTokenBeforeCaret } from '../../core/utils/autolink.util';
+import { linkifyPastedUrl, linkifyTokenBeforeCaret, linkifyTrailingUrl } from '../../core/utils/autolink.util';
 
 const MIN_TEXT_HEIGHT = 40;
 const MIN_TEXT_WIDTH = 40;
@@ -73,6 +73,13 @@ export class TextLayerComponent {
 
     isSticky(el: WhiteboardElement): el is StickyElement {
         return el.type === 'sticky';
+    }
+
+    /** CSS 3D tilt for the optional X/Y controls (text/sticky have no Z-rotation UI today). */
+    tiltTransform(el: WhiteboardElement): string | null {
+        const rx = el.rotationX ?? 0;
+        const ry = el.rotationY ?? 0;
+        return rx || ry ? `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)` : null;
     }
 
     isEditing(id: string): boolean {
@@ -261,6 +268,10 @@ export class TextLayerComponent {
 
         const div = e.target as HTMLDivElement;
         const el = this.scene.getById(id);
+        // Catches a URL typed as the very last thing in the box, with no trailing space/Enter
+        // to have triggered onKeyDown's linkifyTokenBeforeCaret — e.g. type a link and just
+        // click away. Code Block still opts out.
+        if (!(el?.type === 'text' && el.kind === 'code')) linkifyTrailingUrl(div);
         // Same auto-fit as onInput — otherwise a fixed-size box snaps back to fit-content size
         // the instant you finish editing, undoing the whole point of fixed sizing right when
         // you'd actually see the result.
@@ -310,6 +321,18 @@ export class TextLayerComponent {
     }
 
     /**
+     * Shows a pointer cursor while hovering directly over a checklist glyph, so it reads as
+     * clickable — same idea as `tryToggleChecklistGlyph`'s hit-test, kept as a separate,
+     * read-only copy rather than sharing code with it, since that toggle logic has broken in
+     * subtle ways before and isn't worth the risk of coupling to a hover-only concern.
+     */
+    onPointerMove(id: string, e: PointerEvent): void {
+        const node = this.host.nativeElement.querySelector<HTMLElement>(`[data-edit-id="${id}"]`);
+        if (!node) return;
+        node.style.cursor = hitTestChecklistGlyph(node, e.clientX, e.clientY) ? 'pointer' : '';
+    }
+
+    /**
      * Hit-tests a click against a checklist glyph (☐/☑) at the very start of its line and, if
      * hit, flips it and strikes through the rest of that line. Works whether or not the box is
      * currently in edit mode, so checking off a task doesn't require entering edit mode first.
@@ -353,25 +376,19 @@ export class TextLayerComponent {
         const glyphNode = document.createTextNode(wasChecked ? '☐' : '☑');
         charRange.insertNode(glyphNode);
 
+        // Deterministically force the rest of the line to the *correct* struck state, rather
+        // than asking execCommand to "toggle" based on document.queryCommandState — that state
+        // read goes false for a *partially*-struck line (mixed formatting reads as "not
+        // struck" to the browser), so a line already left inconsistent by an earlier toggle
+        // could get toggled the wrong way again. Unwrap-then-rewrap always lands on the right
+        // answer regardless of whatever state the line was actually in beforehand.
+        setLineStrike(glyphNode, !wasChecked);
+
         const sel = window.getSelection();
         if (sel) {
-            // Walk forward from the glyph's own (fresh) position to the next block boundary —
-            // `lineContainer` may now be stale: inserting the glyph can add a new sibling next
-            // to it rather than a child inside it, when this was an unwrapped first line.
-            let last: Node = glyphNode;
-            let sib = glyphNode.nextSibling;
-            while (sib && sib.nodeName !== 'DIV' && sib.nodeName !== 'BR') {
-                last = sib;
-                sib = sib.nextSibling;
-            }
-            const lastOffset = last.nodeType === Node.TEXT_NODE ? (last as Text).length : last.childNodes.length;
-            // `setBaseAndExtent` repositions the selection atomically — unlike
-            // `removeAllRanges()` + `addRange()`, it never leaves the selection at zero
-            // ranges. Doing that while the box is focused/editing makes Chrome silently
-            // blur the contenteditable, which exits edit mode mid-click.
-            sel.setBaseAndExtent(glyphNode, 0, last, lastOffset);
-            const nowStruck = document.queryCommandState('strikeThrough');
-            if (wasChecked === nowStruck) document.execCommand('strikeThrough');
+            // `setBaseAndExtent` to a collapsed point — never leaves the selection at zero
+            // ranges (unlike removeAllRanges()), which is what makes Chrome silently blur the
+            // contenteditable and exit edit mode mid-click.
             sel.setBaseAndExtent(glyphNode, glyphNode.length, glyphNode, glyphNode.length);
         }
 
@@ -380,6 +397,58 @@ export class TextLayerComponent {
         this.lastGlyphToggleAt = Date.now();
         return true;
     }
+}
+
+/** Read-only: does (clientX, clientY) land on a checklist glyph's own character box? */
+function hitTestChecklistGlyph(root: HTMLElement, clientX: number, clientY: number): boolean {
+    const caret = caretPositionAt(clientX, clientY);
+    if (!caret) return false;
+    const lineContainer = findLineContainer(caret.node, caret.offset, root);
+    const lineText = lineContainer.textContent ?? '';
+    if (!isChecklistLine(lineText)) return false;
+    const startNode = firstTextNode(lineContainer);
+    if (!startNode || !startNode.length) return false;
+    const glyphRange = document.createRange();
+    glyphRange.setStart(startNode, 0);
+    glyphRange.setEnd(startNode, 1);
+    const rect = glyphRange.getBoundingClientRect();
+    const pad = 6;
+    return clientX >= rect.left - pad && clientX <= rect.right + pad
+        && clientY >= rect.top - pad && clientY <= rect.bottom + pad;
+}
+
+/** Every sibling of `glyphNode` up to (not including) the next block boundary — "the rest of the line". */
+function collectLineTail(glyphNode: Node): ChildNode[] {
+    const nodes: ChildNode[] = [];
+    let sib = glyphNode.nextSibling;
+    while (sib && sib.nodeName !== 'DIV' && sib.nodeName !== 'BR') {
+        nodes.push(sib);
+        sib = sib.nextSibling;
+    }
+    return nodes;
+}
+
+/**
+ * Forces the rest of the checklist line to exactly the requested struck state — always
+ * unwraps any existing `<s>`/`<strike>` first (discarding whatever mixed state was already
+ * there), then re-wraps in one fresh `<s>` if `struck` is true. Deterministic in both
+ * directions, unlike toggling off `document.queryCommandState`'s read of the current state.
+ */
+function setLineStrike(glyphNode: Node, struck: boolean): void {
+    for (const n of collectLineTail(glyphNode)) {
+        if (n.nodeType === Node.ELEMENT_NODE && /^(S|STRIKE)$/.test((n as Element).tagName)) {
+            const parent = n.parentNode;
+            if (!parent) continue;
+            while (n.firstChild) parent.insertBefore(n.firstChild, n);
+            parent.removeChild(n);
+        }
+    }
+    if (!struck) return;
+    const flat = collectLineTail(glyphNode);
+    if (flat.length === 0) return;
+    const s = document.createElement('s');
+    flat[0].parentNode!.insertBefore(s, flat[0]);
+    for (const n of flat) s.appendChild(n);
 }
 
 /** Cross-browser caret-from-point lookup (Chromium/WebKit + Firefox). */

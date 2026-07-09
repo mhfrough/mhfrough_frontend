@@ -5,19 +5,19 @@
     [attr.contenteditable]="isEditing(el.id)" spellcheck="false"
     [style.left.px]="el.x" [style.top.px]="el.y" [style.width.px]="el.width" [style.min-height.px]="el.height"
     [style.font-family]="el.fontFamily" [style.font-size.px]="el.fontSize" [style.font-weight]="el.fontWeight"
-    [style.text-align]="el.textAlign"
+    [style.text-align]="el.textAlign" [style.transform]="tiltTransform(el)"
     [style.color]="el.color" [style.background-color]="el.style.fillColor" [style.opacity]="el.style.opacity"
     (pointerdown)="onPointerDown(el.id, $event)" (pointerup)="onPointerUp(el.id, $event)" (click)="onLinkClick($event)"
-    (dblclick)="onDoubleClick(el.id, $event)"
+    (pointermove)="onPointerMove(el.id, $event)" (dblclick)="onDoubleClick(el.id, $event)"
     (input)="onInput(el.id, $event)" (keydown)="onKeyDown(el.id, $event)" (paste)="onPaste(el.id, $event)"
     (blur)="commitText(el.id, $event)" [innerHTML]="el.text"></div>
 }
 @if (isSticky(el)) {
 <div class="wb-sticky-el" [class.editing]="isEditing(el.id)" [style.left.px]="el.x" [style.top.px]="el.y"
     [style.width.px]="el.width" [style.height.px]="el.height" [style.background]="el.fill"
-    [style.opacity]="el.style.opacity"
+    [style.opacity]="el.style.opacity" [style.transform]="tiltTransform(el)"
     (pointerdown)="onPointerDown(el.id, $event)" (pointerup)="onPointerUp(el.id, $event)"
-    (dblclick)="onDoubleClick(el.id, $event)">
+    (pointermove)="onPointerMove(el.id, $event)" (dblclick)="onDoubleClick(el.id, $event)">
     <div class="wb-sticky-text" [class.editing]="isEditing(el.id)" [attr.data-edit-id]="el.id"
         [attr.contenteditable]="isEditing(el.id)" spellcheck="false"
         [style.font-family]="el.fontFamily" [style.font-size.px]="el.fontSize" [style.font-weight]="el.fontWeight"

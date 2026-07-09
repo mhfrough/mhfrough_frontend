@@ -27,6 +27,13 @@ test.describe('/seo audit page — visual redesign', () => {
         await page.evaluate(() => window.scrollTo(0, 400));
         await expect(header).toHaveClass(/scrolled/);
     });
+
+    test('empty state shows the how-it-works steps, check grid and blog link', async ({ page }) => {
+        await page.goto('/seo');
+        await expect(page.locator('.sa-step')).toHaveCount(3);
+        await expect(page.locator('.sa-check-card')).toHaveCount(9);
+        await expect(page.locator('a.link-arrow', { hasText: 'Read the blog' })).toHaveAttribute('href', '/blog');
+    });
 });
 
 test.describe('/seo audit page — full report', () => {
@@ -37,6 +44,12 @@ test.describe('/seo audit page — full report', () => {
 
         // The audit hits a real backend + real target URL — allow generous time.
         await expect(page.locator('.sa-scores')).toBeVisible({ timeout: 45_000 });
+        await expect(page.locator('.sa-gauge')).toBeVisible();
+        await expect(page.locator('.sa-issues-overview')).toBeVisible();
+
+        // Severity tabs filter the flattened issues list.
+        await page.locator('.sa-tab', { hasText: 'Critical' }).click();
+        await expect(page.locator('.sa-issue-row--warn')).toHaveCount(0);
 
         const expectedSections = [
             'Domain & Network',
@@ -46,12 +59,19 @@ test.describe('/seo audit page — full report', () => {
             'Library Vulnerabilities',
         ];
         for (const label of expectedSections) {
-            await expect(page.getByText(label, { exact: true })).toBeVisible();
+            await expect(page.locator('.sa-section-title', { hasText: label })).toBeVisible();
         }
 
-        // example.com has no sitemap/robots/favicon — the redirect CTA should appear.
+        // Sections are open by default — the redirect CTA (example.com has no
+        // robots.txt/sitemap) should already be visible in "Technical SEO".
         const ctas = page.locator('.sa-cta');
         expect(await ctas.count()).toBeGreaterThan(0);
         await expect(ctas.first()).toHaveAttribute('href', /\/tools\//);
+
+        // The audited URL is reflected into ?url= — reloading restores the report.
+        await expect(page).toHaveURL(/[?&]url=/);
+        await page.reload();
+        await expect(page.locator('.sa-url')).toHaveValue('https://example.com');
+        await expect(page.locator('.sa-scores')).toBeVisible({ timeout: 45_000 });
     });
 });
