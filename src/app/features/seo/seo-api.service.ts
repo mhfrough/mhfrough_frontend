@@ -10,7 +10,9 @@ export class SeoApiService {
     private readonly http = inject(HttpClient);
     private readonly base = `${environment.apiUrl}/seo-audit`;
 
-    audit(url: string): Observable<SeoAuditReport> {
-        return this.http.post<SeoAuditReport>(this.base, { url });
+    audit(url: string, keyword?: string): Observable<SeoAuditReport> {
+        const body: { url: string; keyword?: string } = { url };
+        if (keyword?.trim()) body.keyword = keyword.trim();
+        return this.http.post<SeoAuditReport>(this.base, body);
     }
 }

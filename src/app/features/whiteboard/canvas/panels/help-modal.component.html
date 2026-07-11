@@ -1,14 +1,31 @@
-<div class="wb-help-overlay" role="dialog" aria-modal="true" aria-label="Help and keyboard shortcuts"
+<div class="wb-help-overlay" role="dialog" aria-modal="true" aria-label="Help, documentation and feedback"
     (click)="close()">
     <div class="wb-help-modal" (click)="$event.stopPropagation()">
         <div class="wb-help-head">
-            <h2 class="wb-help-title">Keyboard shortcuts</h2>
+            <h2 class="wb-help-title">Help</h2>
             <button type="button" class="wb-help-close" (click)="close()" aria-label="Close help">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
 
+        <div class="wb-help-tabs" role="tablist" aria-label="Help sections">
+            <button type="button" class="wb-help-tab" role="tab" [class.is-active]="tab() === 'shortcuts'"
+                [attr.aria-selected]="tab() === 'shortcuts'" (click)="tab.set('shortcuts')">
+                Shortcuts
+            </button>
+            <button type="button" class="wb-help-tab" role="tab" [class.is-active]="tab() === 'guide'"
+                [attr.aria-selected]="tab() === 'guide'" (click)="tab.set('guide')">
+                Guide
+            </button>
+            <button type="button" class="wb-help-tab" role="tab" [class.is-active]="tab() === 'feedback'"
+                [attr.aria-selected]="tab() === 'feedback'" (click)="tab.set('feedback')">
+                Feedback
+            </button>
+        </div>
+
         <div class="wb-help-body">
+            <!-- ============================ SHORTCUTS ============================ -->
+            @if (tab() === 'shortcuts') {
             <div class="wb-help-cols">
                 <section class="wb-help-col">
                     <h3 class="wb-help-col-title">Tools</h3>
@@ -42,6 +59,177 @@
                     </ul>
                 </section>
             </div>
+            }
+
+            <!-- ============================== GUIDE ============================== -->
+            @if (tab() === 'guide') {
+            <article class="wb-guide">
+                <h3>Getting started</h3>
+                <p>
+                    The whiteboard is an infinite canvas for sketching ideas, diagrams, notes and plans.
+                    Pick a tool from the bottom toolbar (or press its shortcut key), then click-and-drag on
+                    the canvas to draw. Press <kbd class="wb-kbd">V</kbd> (or finish a shape) to return to the
+                    Selection tool. Everything you do is saved automatically — see
+                    <strong>Saving &amp; versions</strong> below.
+                </p>
+
+                <h3>Drawing &amp; shapes</h3>
+                <p>
+                    Rectangles, ellipses, diamonds, triangles, polygons and stars are drag-to-draw: press
+                    down where one corner should be and release at the opposite corner. Hold
+                    <kbd class="wb-kbd">Shift</kbd> while dragging to keep proportions square; the Circle and
+                    the Rounded Rectangle presets do the same thing without the modifier. Lines and arrows
+                    snap to 15° angles when <kbd class="wb-kbd">Shift</kbd> is held. Pencil, Brush and
+                    Highlighter draw freehand strokes. The pin button at the right end of the toolbar keeps
+                    the current tool active after each drawing, for placing many shapes in a row.
+                </p>
+
+                <h3>Selecting, moving &amp; styling</h3>
+                <p>
+                    With the Selection tool, click an element to select it, drag to move it, and use the
+                    handles to resize or rotate. <kbd class="wb-kbd">Shift</kbd>-click adds to the selection;
+                    dragging on empty canvas draws a selection box. The left-hand panel shows position, size,
+                    stroke, fill, stroke width, line style and opacity for whatever is selected — or the
+                    defaults for the next thing you draw. Right-click any element for duplicate, z-order,
+                    align, lock and delete actions. Group a multi-selection with
+                    <kbd class="wb-kbd">Ctrl</kbd>+<kbd class="wb-kbd">G</kbd>.
+                </p>
+
+                <h3>Text, sticky notes &amp; code blocks</h3>
+                <p>
+                    The Text tool places a text box with a single click; Sticky drops a classic note card;
+                    Code Block creates a monospace card for snippets. Double-click any of them later to edit.
+                    While editing, the style panel offers font, size, weight, bold/italic/underline, per-selection
+                    color, alignment and checklists — and typed or pasted URLs turn into real links
+                    (<kbd class="wb-kbd">Ctrl</kbd>+click to open). A text box left empty is discarded
+                    automatically when you click away.
+                </p>
+
+                <h3>AI writing assistant</h3>
+                <p>
+                    While editing text or a sticky note, a small <i class="bi bi-stars"></i> pill floats above
+                    the box with three actions: <strong>Improve</strong> rewrites for clarity,
+                    <strong>Shorten</strong> condenses, and <strong>Fix</strong> corrects spelling and grammar
+                    only. The rewrite replaces your text in place and a single
+                    <kbd class="wb-kbd">Ctrl</kbd>+<kbd class="wb-kbd">Z</kbd> brings the original back.
+                    (Requires AI assistance to be enabled on this site; if it isn't, the buttons say so.)
+                </p>
+
+                <h3>Images</h3>
+                <p>
+                    Use the Image tool, paste from the clipboard, or drag files straight onto the canvas
+                    (PNG, JPEG, WebP, GIF, SVG — up to 5&nbsp;MB each). Large photos are automatically
+                    downscaled and compressed for storage. Select an image to flip or crop it from the
+                    context toolbar.
+                </p>
+
+                <h3>Frames, layers &amp; navigation</h3>
+                <p>
+                    Frames (<kbd class="wb-kbd">F</kbd>) are labelled regions for organising a big board.
+                    The Layers panel (bottom-right) lists every element: drag to reorder stacking, rename
+                    with a double-click, and lock or hide individual items. Zoom with the mouse wheel, pan
+                    with <kbd class="wb-kbd">Space</kbd>+drag or the middle mouse button, and use the minimap
+                    to jump around a large board. Grid, snapping and rulers toggle from the bottom-right
+                    buttons; <kbd class="wb-kbd">Ctrl</kbd>+<kbd class="wb-kbd">0</kbd> resets the view.
+                </p>
+
+                <h3>Saving &amp; versions</h3>
+                <p>
+                    The board autosaves to this browser moments after every change — the indicator next to
+                    the top-left menus shows when. <strong>Versions</strong> lets you snapshot the current
+                    state with a label and restore or delete snapshots later (the 30 most recent are kept).
+                    When the site owner is signed in, the board also syncs to their account in the cloud;
+                    the indicator's icon shows which tier you're on. If local storage ever fills up, a red
+                    "Not saved" warning appears instead of silently losing work.
+                </p>
+
+                <h3>Export, import &amp; print</h3>
+                <p>
+                    <strong>Export</strong> offers PNG (opaque or transparent), JPEG, SVG, PDF (A4/A3/Letter,
+                    portrait or landscape), JSON of the whole board, and copy-to-clipboard as an image. With
+                    a selection active you can also export just the selected objects — individually or in one
+                    file. <strong>Import</strong> re-opens an exported board JSON (replace) or places an
+                    exported object onto the current board (add).
+                </p>
+
+                <h3>Live collaboration</h3>
+                <p>
+                    <strong>Go Live</strong> (top-right) starts a real-time session: share the link it puts in
+                    your address bar and anyone who opens it joins the same room — cursors, presence avatars
+                    and edits sync instantly. Concurrent edits merge per element (latest edit wins for the
+                    same element), and someone joining late never overwrites the room. Note that while peers
+                    are editing, your local undo history resets to keep everyone consistent.
+                </p>
+            </article>
+            }
+
+            <!-- ============================ FEEDBACK ============================= -->
+            @if (tab() === 'feedback') {
+            <div class="wb-feedback">
+                @if (fbSent()) {
+                <div class="wb-fb-done">
+                    <i class="bi bi-check-circle"></i>
+                    <h3>Thank you</h3>
+                    <p>
+                        @if (fbQueued()) {
+                        You're offline right now — your message is queued and will be sent automatically
+                        once you're back online.
+                        } @else {
+                        Your message has been sent. It goes straight to the site owner's inbox and every
+                        report genuinely helps make the whiteboard better.
+                        }
+                    </p>
+                    <button type="button" class="wb-fb-again" (click)="fbReset()">Send another</button>
+                </div>
+                } @else {
+                <p class="wb-fb-intro">
+                    Found a bug, missing a feature, or just have an idea? Tell me — this goes directly to my
+                    inbox, same as the site's contact page.
+                </p>
+
+                <div class="wb-fb-kinds" role="radiogroup" aria-label="Message type">
+                    @for (k of fbKinds; track k) {
+                    <label class="wb-fb-kind">
+                        <input type="radio" name="wb-fb-kind" [checked]="fbKind() === k" (change)="fbKind.set(k)" />
+                        {{ k }}
+                    </label>
+                    }
+                </div>
+
+                <div class="wb-fb-grid">
+                    <label class="wb-fb-field">
+                        <span class="wb-fb-label">Name</span>
+                        <input type="text" maxlength="100" autocomplete="name" placeholder="Your name"
+                            [value]="fbName()" (input)="fbName.set($any($event.target).value)" />
+                    </label>
+                    <label class="wb-fb-field">
+                        <span class="wb-fb-label">Email</span>
+                        <input type="email" maxlength="200" autocomplete="email" placeholder="you@example.com"
+                            [value]="fbEmail()" (input)="fbEmail.set($any($event.target).value)" />
+                    </label>
+                    <label class="wb-fb-field wb-fb-field--full">
+                        <span class="wb-fb-label">{{ fbKind() === 'Bug report' ? 'What happened?' : 'Your message' }}</span>
+                        <textarea rows="5" maxlength="2000"
+                            [attr.placeholder]="fbKind() === 'Bug report'
+                                ? 'Steps to reproduce, what went wrong, browser used…'
+                                : 'Tell me what you think, or what the whiteboard is missing…'"
+                            [value]="fbMessage()" (input)="fbMessage.set($any($event.target).value)"></textarea>
+                        <span class="wb-fb-count">{{ fbMessage().length }} / 2000</span>
+                    </label>
+                </div>
+
+                @if (fbError()) {
+                <p class="wb-fb-error" role="alert">{{ fbError() }}</p>
+                }
+
+                <div class="wb-fb-actions">
+                    <button type="button" class="wb-fb-send" [disabled]="fbSending()" (click)="submitFeedback()">
+                        @if (fbSending()) { Sending… } @else { Send {{ fbKind().toLowerCase() }} <i class="bi bi-arrow-right"></i> }
+                    </button>
+                </div>
+                }
+            </div>
+            }
         </div>
     </div>
 </div>

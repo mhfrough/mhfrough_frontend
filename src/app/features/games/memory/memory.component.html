@@ -1,0 +1,44 @@
+<div class="game-page">
+    <a class="game-back" routerLink="/games"><i class="bi bi-arrow-left"></i> Arcade</a>
+    <h1 class="game-title">Memory</h1>
+
+    <div class="device">
+        <div class="device-hud">
+            <span>Round <strong>{{ round() }}</strong></span>
+            <span>Best <strong>{{ highScore() }}</strong></span>
+        </div>
+
+        <div class="device-screen device-screen--grid">
+            <div class="pad-grid">
+                @for (pad of pads; track pad) {
+                <button
+                    class="pad"
+                    [class.pad--active]="activePad() === pad"
+                    [disabled]="status() !== 'input'"
+                    (click)="press(pad)"
+                    [attr.aria-label]="'Pad ' + (pad + 1)">
+                </button>
+                }
+            </div>
+
+            @if (status() === 'idle' && round() === 0) {
+            <div class="device-overlay">
+                <p>Press start</p>
+                <small>Watch, then repeat the sequence</small>
+            </div>
+            }
+            @if (status() === 'over') {
+            <div class="device-overlay">
+                <p>Wrong pad</p>
+                <small>Round {{ round() }} · Best {{ highScore() }}</small>
+            </div>
+            }
+        </div>
+
+        <div class="device-controls" style="justify-content:center;">
+            <button class="btn" (click)="start()">{{ status() === 'over' || round() > 0 ? 'Restart' : 'Start' }}</button>
+        </div>
+    </div>
+
+    <p class="game-hint">Watch the flashes, then tap them back in order</p>
+</div>

@@ -271,4 +271,8 @@ select.wb-tb-sel {
     color: var(--success-text);
     padding: 0 0.4rem;
     white-space: nowrap;
+
+    &.error {
+        color: var(--danger-text, #f87171);
+    }
 }

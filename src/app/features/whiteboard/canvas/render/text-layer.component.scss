@@ -87,3 +87,56 @@
         user-select: text;
     }
 }
+
+// AI writing assistant pill — floats just above the box being edited. Lives in world
+// coordinates (inside the zoomed layer), so it scales with the board like the box itself.
+.wb-ai-pill {
+    position: absolute;
+    transform: translateY(calc(-100% - 30px));
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.2rem 0.35rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-panel);
+    pointer-events: auto;
+    white-space: nowrap;
+    z-index: 5;
+
+    > .bi-stars {
+        color: var(--primary);
+        font-size: 0.75rem;
+        padding: 0 0.2rem;
+    }
+
+    button {
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        font-family: var(--font);
+        font-size: 0.68rem;
+        padding: 0.25rem 0.45rem;
+        border-radius: calc(var(--radius) - 2px);
+        cursor: pointer;
+        transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+
+        &:hover:not(:disabled) {
+            background: var(--bg-alt);
+            color: var(--primary);
+        }
+
+        &:disabled {
+            opacity: 0.55;
+            cursor: default;
+        }
+    }
+}
+
+.wb-ai-err {
+    font-family: var(--font);
+    font-size: 0.65rem;
+    color: var(--danger-text, #f87171);
+    padding: 0 0.3rem;
+}

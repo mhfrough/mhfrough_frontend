@@ -1,10 +1,14 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Output, inject, signal } from '@angular/core';
 import { TOOL_DEFS } from '../../core/models/tool.model';
+import { InquiriesService } from '../../../../core/services/inquiry-feedback.service';
 
 interface ShortcutRow {
     keys: string[];
     label: string;
 }
+
+type HelpTab = 'shortcuts' | 'guide' | 'feedback';
+type FeedbackKind = 'Suggestion' | 'Feedback' | 'Bug report';
 
 /** V, Shift+R, Ctrl+Z → [['V'], ['Shift', 'R'], ['Ctrl', 'Z']] for individual keycap rendering. */
 function splitKeys(shortcut: string): string[] {
@@ -49,8 +53,23 @@ const EDITOR_SHORTCUTS: ShortcutRow[] = [
 export class HelpModalComponent {
     @Output() readonly closeModal = new EventEmitter<void>();
 
+    private readonly inquiries = inject(InquiriesService);
+
     readonly toolShortcuts = TOOL_SHORTCUTS;
     readonly editorShortcuts = EDITOR_SHORTCUTS;
+
+    readonly tab = signal<HelpTab>('shortcuts');
+
+    // --- feedback form -------------------------------------------------------
+    readonly fbKinds: FeedbackKind[] = ['Suggestion', 'Feedback', 'Bug report'];
+    readonly fbKind = signal<FeedbackKind>('Feedback');
+    readonly fbName = signal('');
+    readonly fbEmail = signal('');
+    readonly fbMessage = signal('');
+    readonly fbSending = signal(false);
+    readonly fbSent = signal(false);
+    readonly fbQueued = signal(false);
+    readonly fbError = signal('');
 
     // Escape should just close this dialog — not also fall through to canvas-board's
     // window-level Escape handler, which cancels drawing and clears the canvas selection.
@@ -65,5 +84,53 @@ export class HelpModalComponent {
 
     close(): void {
         this.closeModal.emit();
+    }
+
+    /** Mirrors the contact page's CreateInquiryDto limits so validation fails here, not server-side. */
+    fbInvalidReason(): string | null {
+        if (this.fbName().trim().length < 2) return 'Please enter your name (2+ characters).';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.fbEmail().trim())) return 'Please enter a valid email address.';
+        if (this.fbMessage().trim().length < 10) return 'Please describe it in at least 10 characters.';
+        return null;
+    }
+
+    /**
+     * Goes through the same public inquiries API as the site's contact page, so whiteboard
+     * feedback shows up in the admin inbox alongside contact messages — the subject prefix
+     * is what tells them apart there.
+     */
+    submitFeedback(): void {
+        if (this.fbSending()) return;
+        const invalid = this.fbInvalidReason();
+        if (invalid) {
+            this.fbError.set(invalid);
+            return;
+        }
+        this.fbSending.set(true);
+        this.fbError.set('');
+        this.inquiries.submit({
+            name: this.fbName().trim(),
+            email: this.fbEmail().trim(),
+            subject: `Whiteboard ${this.fbKind().toLowerCase()}`,
+            message: this.fbMessage().trim().slice(0, 2000),
+        }).subscribe({
+            next: (res: any) => {
+                this.fbSending.set(false);
+                this.fbSent.set(true);
+                this.fbQueued.set(!!res?.queued);
+                this.fbMessage.set('');
+            },
+            error: () => {
+                this.fbSending.set(false);
+                this.fbError.set('Could not send right now — please try again in a minute.');
+            },
+        });
+    }
+
+    /** Back to the form after the thank-you screen (e.g. to report a second thing). */
+    fbReset(): void {
+        this.fbSent.set(false);
+        this.fbQueued.set(false);
+        this.fbError.set('');
     }
 }

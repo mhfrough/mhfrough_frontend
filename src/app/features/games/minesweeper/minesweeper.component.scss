@@ -1,0 +1,54 @@
+@use '../shared/game-shell';
+
+:host {
+  display: block;
+}
+
+.device-screen--grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.mine-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: 1px;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.cell {
+  background: #4a4a4a;
+  border: none;
+  color: #e8e8e8;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: clamp(0.5rem, 2.6vw, 0.85rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+
+  &--revealed {
+    background: #262626;
+    cursor: default;
+  }
+
+  &--mine {
+    background: #6b1f1f;
+  }
+
+  &[data-count="1"] { color: #a8a8a8; }
+  &[data-count="2"] { color: #c0c0c0; }
+  &[data-count="3"] { color: #d8d8d8; }
+  &[data-count="4"],
+  &[data-count="5"],
+  &[data-count="6"],
+  &[data-count="7"],
+  &[data-count="8"] { color: #f0f0f0; }
+}

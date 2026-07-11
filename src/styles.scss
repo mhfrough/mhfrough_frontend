@@ -723,7 +723,7 @@ body::before {
     .footer-col-title {
         font-family: var(--font-sans);
         font-size: 0.68rem;
-        font-weight: 500;
+        font-weight: 600;
         letter-spacing: 0.16em;
         text-transform: uppercase;
         color: var(--text-muted);
@@ -818,15 +818,19 @@ body::before {
     /* Multi-column top section: brand/bio + grouped link columns. */
     .footer-top {
         display: grid;
-        grid-template-columns: 1.7fr 1fr 1fr 1fr;
-        gap: 3rem;
+        grid-template-columns: 1.3fr 0.85fr 0.85fr 0.85fr 0.85fr;
+        gap: 1.5rem;
         padding-bottom: 2.5rem;
         margin-bottom: 1.5rem;
         border-bottom: 1px solid var(--border);
 
-        @media (max-width: 860px) {
-            grid-template-columns: 1fr 1fr;
+        @media (max-width: 1024px) {
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 2.5rem 2rem;
+        }
+
+        @media (max-width: 640px) {
+            grid-template-columns: 1fr 1fr;
         }
 
         @media (max-width: 480px) {
@@ -835,7 +839,7 @@ body::before {
     }
 
     .footer-brand-col {
-        @media (max-width: 860px) {
+        @media (max-width: 1024px) {
             grid-column: 1 / -1;
         }
 
@@ -1130,7 +1134,27 @@ body::before {
 }
 
 // --- Hero ---------------------------------------------------------------------
+// Full-bleed shell so the glyph-field canvas runs edge to edge while the hero
+// content stays centered at its usual max-width.
+.hero-shell {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    color: var(--text-muted); // the glyph field paints with currentColor
+    // Soften the field slightly before it meets the stats strip.
+    -webkit-mask-image: linear-gradient(to bottom, #000 75%, rgba(0, 0, 0, 0.35));
+    mask-image: linear-gradient(to bottom, #000 75%, rgba(0, 0, 0, 0.35));
+}
+
 .hero {
+    position: relative; // paints above the glyph-field canvas
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 4rem;

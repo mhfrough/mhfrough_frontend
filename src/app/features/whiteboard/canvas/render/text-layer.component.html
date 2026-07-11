@@ -25,4 +25,26 @@
         (blur)="commitText(el.id, $event)" [innerHTML]="el.text"></div>
 </div>
 }
+
+<!-- AI writing assistant: floats above whichever text/sticky box is being edited.
+     mousedown is swallowed so clicking a button never blurs the contenteditable
+     (same preventDefault trick the style panel's format buttons use). -->
+@if (isEditing(el.id)) {
+<div class="wb-ai-pill" role="toolbar" aria-label="AI writing assistant"
+    [style.left.px]="el.x" [style.top.px]="el.y"
+    (mousedown)="$event.preventDefault(); $event.stopPropagation()"
+    (pointerdown)="$event.stopPropagation()" (dblclick)="$event.stopPropagation()">
+    <i class="bi bi-stars" aria-hidden="true"></i>
+    <button type="button" [disabled]="aiBusy() !== null" (click)="improveWriting(el.id, 'improve')">
+        {{ aiBusy() === 'improve' ? 'Improving…' : 'Improve' }}
+    </button>
+    <button type="button" [disabled]="aiBusy() !== null" (click)="improveWriting(el.id, 'shorten')">
+        {{ aiBusy() === 'shorten' ? 'Shortening…' : 'Shorten' }}
+    </button>
+    <button type="button" [disabled]="aiBusy() !== null" (click)="improveWriting(el.id, 'fix')">
+        {{ aiBusy() === 'fix' ? 'Fixing…' : 'Fix' }}
+    </button>
+    @if (aiError()) { <span class="wb-ai-err" role="alert">AI unavailable</span> }
+</div>
+}
 }

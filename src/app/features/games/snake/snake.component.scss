@@ -1,0 +1,9 @@
+@use '../shared/game-shell';
+
+:host {
+  display: block;
+}
+
+.device-screen {
+  aspect-ratio: 1 / 1;
+}

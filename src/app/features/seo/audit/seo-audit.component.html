@@ -7,7 +7,8 @@
             One URL in — a full report out: technical SEO, meta &amp; headings, images, links,
             performance, accessibility, structured data, social previews, content quality,
             security headers, mobile readiness, design tokens, tech detection, domain &amp; network
-            health, PWA readiness, rendering and library vulnerabilities — with scored results and
+            health, PWA readiness, rendering and library vulnerabilities — plus optional
+            target-keyword placement analysis, a Google SERP preview, scored results and
             prioritised fixes.
         </p>
 
@@ -16,26 +17,73 @@
                 placeholder="https://example.com"
                 [ngModel]="url()" (ngModelChange)="url.set($event)"
                 (keyup.enter)="run()" />
+            <input class="sa-url sa-keyword" type="text" spellcheck="false" autocomplete="off"
+                placeholder="Target keyword (optional)" maxlength="80"
+                [ngModel]="keyword()" (ngModelChange)="keyword.set($event)"
+                (keyup.enter)="run()" />
             <button type="button" class="sa-run" (click)="run()" [disabled]="loading()">
                 <i class="bi bi-search"></i> {{ loading() ? 'Auditing…' : 'Run audit' }}
             </button>
         </div>
 
-        @if (loading()) {
-        <p class="sa-note">Fetching, parsing and checking resources — this can take 10–20 seconds.</p>
-        }
         @if (error(); as err) {
         <p class="sa-error"><i class="bi bi-x-circle"></i> {{ err }}</p>
         }
     </div>
 
+    <!-- ─── Live progress while the audit runs ───────────────────────────── -->
+    @if (loading()) {
+    <div class="sa-loader" role="status" aria-live="polite">
+        <div class="sa-loader-head">
+            <span class="sa-loader-spin" aria-hidden="true"></span>
+            <div class="sa-loader-status">
+                <span class="sa-loader-title">Auditing {{ url() }}</span>
+                <span class="sa-loader-sub">{{ loaderStages[loaderStageIdx()].label }}…</span>
+            </div>
+            <span class="sa-loader-timer">{{ loaderElapsed() }}s</span>
+        </div>
+        <div class="sa-loader-track"><div class="sa-loader-fill" [style.width.%]="loaderPct()"></div></div>
+        <ul class="sa-loader-stages">
+            @for (st of loaderStages; track st.label; let i = $index) {
+            <li class="sa-loader-stage" [class.is-done]="i < loaderStageIdx()" [class.is-active]="i === loaderStageIdx()">
+                <i class="bi" [class]="i < loaderStageIdx() ? 'bi-check2' : st.icon"></i>
+                <span>{{ st.label }}</span>
+            </li>
+            }
+        </ul>
+        <p class="sa-loader-note">
+            <i class="bi bi-info-circle"></i>
+            All {{ sections.length }} checks run in a single pass and usually land in 20–45 seconds.
+            Stage timings are estimates — the report appears the moment the crawler finishes.
+        </p>
+    </div>
+    }
+
     @if (report(); as r) {
+    <!-- ─── Saved-report banner (restored from this browser) ─────────────── -->
+    @if (restoredAt(); as at) {
+    <div class="sa-cached">
+        <i class="bi bi-clock-history"></i>
+        <span class="sa-cached-text">
+            Saved report from <strong>{{ at | date:'MMM d, y, h:mm a' }}</strong> — stored in this
+            browser so it survives reloads. The page may have changed since.
+        </span>
+        <button type="button" class="sa-cached-btn" (click)="run()" [disabled]="loading()">
+            <i class="bi bi-arrow-clockwise"></i> Get updated report
+        </button>
+    </div>
+    }
+
     <!-- ─── Meta strip + exports ─────────────────────────────────────────── -->
     <div class="sa-meta">
         <span class="sa-meta-item">{{ r.finalUrl }}</span>
         <span class="sa-meta-item">HTTP {{ r.technical.httpStatus }}</span>
         <span class="sa-meta-item">{{ r.durationMs }} ms</span>
         <div class="sa-exports">
+            <button type="button" class="sa-btn" (click)="copyShareLink()">
+                <i class="bi" [class]="shareCopied() ? 'bi-check2' : 'bi-link-45deg'"></i>
+                {{ shareCopied() ? 'Copied' : 'Share' }}
+            </button>
             <button type="button" class="sa-btn" (click)="exportJson()"><i class="bi bi-filetype-json"></i> JSON</button>
             <button type="button" class="sa-btn" (click)="exportCsv()"><i class="bi bi-filetype-csv"></i> CSV</button>
             <button type="button" class="sa-btn" (click)="exportHtml()"><i class="bi bi-filetype-html"></i> HTML</button>
@@ -45,24 +93,39 @@
 
     <!-- ─── Score overview: gauge + critical/warning headline stats ───────── -->
     <div class="sa-overview">
-        <div class="sa-gauge" [class]="scoreClass(overallScore())" [style.--pct]="overallScore()">
-            <div class="sa-gauge-inner">
-                <span class="sa-gauge-num">{{ overallScore() }}</span>
-                <span class="sa-gauge-label">Overall</span>
+        <div class="sa-gauge-wrap">
+            <div class="sa-gauge" [class]="scoreClass(overallScore())" [style.--pct]="overallScore()">
+                <div class="sa-gauge-inner">
+                    <span class="sa-gauge-num">{{ overallScore() }}</span>
+                    <span class="sa-gauge-label">Overall
+                        <span class="sa-info"><i class="bi bi-question-circle"></i><span class="sa-tip">{{ overallInfo }}</span></span>
+                    </span>
+                </div>
             </div>
+            @if (scoreDelta() !== null && scoreDelta() !== 0) {
+            <span class="sa-gauge-delta" [class.up]="scoreDelta()! > 0" [class.down]="scoreDelta()! < 0">
+                <i class="bi" [class]="scoreDelta()! > 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short'"></i>{{ scoreDelta()! > 0 ? '+' : '' }}{{ scoreDelta() }} vs last run
+            </span>
+            }
         </div>
         <div class="sa-headline-stats">
             <div class="sa-headline-stat sa-headline-stat--error">
                 <span class="sa-headline-num">{{ issueTotals().error }}</span>
-                <span class="sa-headline-label">Critical issues</span>
+                <span class="sa-headline-label">Critical issues
+                    <span class="sa-info"><i class="bi bi-question-circle"></i><span class="sa-tip">{{ headlineInfo.error }}</span></span>
+                </span>
             </div>
             <div class="sa-headline-stat sa-headline-stat--warn">
                 <span class="sa-headline-num">{{ issueTotals().warn }}</span>
-                <span class="sa-headline-label">Warnings</span>
+                <span class="sa-headline-label">Warnings
+                    <span class="sa-info"><i class="bi bi-question-circle"></i><span class="sa-tip">{{ headlineInfo.warn }}</span></span>
+                </span>
             </div>
             <div class="sa-headline-stat sa-headline-stat--good">
                 <span class="sa-headline-num">{{ issueTotals().good }}</span>
-                <span class="sa-headline-label">Passed checks</span>
+                <span class="sa-headline-label">Passed checks
+                    <span class="sa-info"><i class="bi bi-question-circle"></i><span class="sa-tip">{{ headlineInfo.good }}</span></span>
+                </span>
             </div>
         </div>
     </div>
@@ -71,11 +134,123 @@
     <div class="sa-scores">
         @for (t of scoreTiles(); track t.label) {
         <div class="sa-score" [class]="scoreClass(t.value)">
+            <span class="sa-info sa-info--right sa-score-info"><i class="bi bi-question-circle"></i><span class="sa-tip">{{ t.info }}</span></span>
             <span class="sa-score-num">{{ t.value }}</span>
             <span class="sa-score-label">{{ t.label }}</span>
             <span class="sa-score-meter"><span class="sa-score-fill" [style.width.%]="t.value"></span></span>
         </div>
         }
+    </div>
+
+    <!-- ─── Visual breakdown: score trend, severity mix, problem areas ──────── -->
+    <div class="sa-viz">
+        <div class="sa-viz-card">
+            <div class="sa-viz-head">
+                <span class="sa-viz-title"><i class="bi bi-graph-up"></i> Score trend</span>
+                <span class="sa-info sa-info--right"><i class="bi bi-question-circle"></i><span class="sa-tip">{{ trendInfo }}</span></span>
+            </div>
+            @if (trendPoints().length >= 2) {
+            <div class="sa-trend">
+                <svg class="sa-trend-svg" [attr.viewBox]="'0 0 ' + TREND_VW + ' ' + TREND_VH" preserveAspectRatio="none" aria-hidden="true">
+                    @for (gy of trendGridYs(); track $index) {
+                    <line class="sa-trend-grid" [attr.x1]="TREND_PAD" [attr.x2]="TREND_VW - TREND_PAD" [attr.y1]="gy" [attr.y2]="gy" />
+                    }
+                    <path class="sa-trend-area" [attr.d]="trendAreaPath()"></path>
+                    <path class="sa-trend-line" [attr.d]="trendLinePath()"></path>
+                    @for (p of trendPoints(); track $index; let i = $index) {
+                    <path class="sa-trend-dot" [class.is-hover]="trendHover() === i"
+                        [attr.d]="'M' + p.x + ',' + p.y + ' l0.01,0'" />
+                    }
+                    @for (p of trendPoints(); track $index; let i = $index) {
+                    <rect class="sa-trend-hit" [attr.x]="p.x - trendHitWidth() / 2" y="0"
+                        [attr.width]="trendHitWidth()" [attr.height]="TREND_VH"
+                        (mouseenter)="trendHover.set(i)" (mouseleave)="trendHover.set(null)" />
+                    }
+                </svg>
+                @if (trendHover() !== null) {
+                <div class="sa-trend-tip" [style.left.%]="(trendPoints()[trendHover()!].x / TREND_VW) * 100">
+                    <strong>{{ trendPoints()[trendHover()!].overall }}</strong>
+                    <span>{{ trendPoints()[trendHover()!].at | date:'MMM d, h:mm a' }}</span>
+                </div>
+                }
+            </div>
+            <div class="sa-trend-axis">
+                <span>{{ trendPoints()[0].at | date:'MMM d' }}</span>
+                <span>{{ historyRuns().length }} runs</span>
+                <span>{{ trendPoints()[trendPoints().length - 1].at | date:'MMM d' }}</span>
+            </div>
+            } @else {
+            <p class="sa-viz-empty">
+                <i class="bi bi-graph-up"></i>
+                First recorded run for this URL. Fix a few issues, re-audit, and your score
+                history will chart here — runs are remembered by this browser.
+            </p>
+            }
+        </div>
+
+        <div class="sa-viz-card">
+            <div class="sa-viz-head">
+                <span class="sa-viz-title"><i class="bi bi-pie-chart"></i> Check results</span>
+                <span class="sa-info sa-info--right"><i class="bi bi-question-circle"></i><span class="sa-tip">{{ donutInfo }}</span></span>
+            </div>
+            <div class="sa-donut-wrap">
+                <svg class="sa-donut" viewBox="0 0 42 42" role="img"
+                    [attr.aria-label]="issueTotals().error + ' critical, ' + issueTotals().warn + ' warnings, ' + issueTotals().good + ' passed of ' + totalChecks() + ' checks'">
+                    <circle class="sa-donut-ring" cx="21" cy="21" r="15.9155" />
+                    @for (seg of donutSegments(); track seg.key) {
+                    <circle class="sa-donut-seg" [class]="'sa-donut-seg--' + seg.key" cx="21" cy="21" r="15.9155"
+                        [attr.stroke-dasharray]="seg.dash" [attr.stroke-dashoffset]="seg.offset">
+                        <title>{{ seg.label }}: {{ seg.count }} ({{ seg.pct }}%)</title>
+                    </circle>
+                    }
+                    <text class="sa-donut-num" x="21" y="21.5">{{ totalChecks() }}</text>
+                    <text class="sa-donut-cap" x="21" y="27">checks</text>
+                </svg>
+                <ul class="sa-donut-legend">
+                    @for (seg of donutSegments(); track seg.key) {
+                    <li class="sa-donut-legend-row">
+                        <span class="sa-donut-swatch" [class]="'sa-donut-swatch--' + seg.key"></span>
+                        <span class="sa-donut-legend-label">{{ seg.label }}</span>
+                        <span class="sa-donut-legend-val">{{ seg.count }} <em>· {{ seg.pct }}%</em></span>
+                    </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div class="sa-viz-card sa-viz-card--bars">
+            <div class="sa-viz-head">
+                <span class="sa-viz-title"><i class="bi bi-bar-chart-steps"></i> Problem areas</span>
+                <span class="sa-info sa-info--right"><i class="bi bi-question-circle"></i><span class="sa-tip">{{ barsInfo }}</span></span>
+            </div>
+            @if (sectionBars().rows.length) {
+            <div class="sa-bars">
+                @for (b of sectionBars().rows; track b.key) {
+                <div class="sa-bar-row" [title]="b.error + ' critical · ' + b.warn + ' warning(s)'">
+                    <span class="sa-bar-label">{{ b.label }}</span>
+                    <div class="sa-bar-track">
+                        @if (b.error) {
+                        <span class="sa-bar-seg sa-bar-seg--error" [style.width.%]="(b.error / sectionBars().max) * 100"></span>
+                        }
+                        @if (b.warn) {
+                        <span class="sa-bar-seg sa-bar-seg--warn" [style.width.%]="(b.warn / sectionBars().max) * 100"></span>
+                        }
+                    </div>
+                    <span class="sa-bar-val">{{ b.total }}</span>
+                </div>
+                }
+            </div>
+            @if (sectionBars().more) {
+            <p class="sa-bars-more">+ {{ sectionBars().more }} more section(s) with minor issues — see Issues Overview below.</p>
+            }
+            <div class="sa-bars-legend">
+                <span><i class="sa-bars-swatch sa-bars-swatch--error"></i> Critical</span>
+                <span><i class="sa-bars-swatch sa-bars-swatch--warn"></i> Warnings</span>
+            </div>
+            } @else {
+            <p class="sa-viz-empty"><i class="bi bi-check-circle"></i> No section reported problems — clean sweep.</p>
+            }
+        </div>
     </div>
 
     <!-- ─── Issues overview: tabbed, flattened across all sections ─────────── -->
@@ -117,6 +292,7 @@
         <button type="button" class="sa-section-head" (click)="toggle('recommendations')" [attr.aria-expanded]="isOpen('recommendations')">
             <i class="bi bi-lightbulb"></i>
             <span class="sa-section-title">Recommendations ({{ r.recommendations.length }})</span>
+            <span class="sa-info sa-info--left" (click)="$event.stopPropagation()"><i class="bi bi-question-circle"></i><span class="sa-tip">{{ recommendationsInfo }}</span></span>
             <i class="bi bi-chevron-down sa-chev" [class.open]="isOpen('recommendations')"></i>
         </button>
         @if (isOpen('recommendations')) {
@@ -155,11 +331,12 @@
     </section>
 
     <!-- ─── Category detail (collapsed by default) ─────────────────────────── -->
-    @for (s of sections; track s.key) {
+    @for (s of visibleSections(); track s.key) {
     <section class="sa-section">
         <button type="button" class="sa-section-head" (click)="toggle(s.key)" [attr.aria-expanded]="isOpen(s.key)">
             <i class="bi" [class]="s.icon"></i>
             <span class="sa-section-title">{{ s.label }}</span>
+            <span class="sa-info sa-info--left" (click)="$event.stopPropagation()"><i class="bi bi-question-circle"></i><span class="sa-tip">{{ s.info }}</span></span>
             @if (issueCounts(sectionIssues(s.key)); as c) {
             <span class="sa-chips">
                 @if (c.good) {<span class="sa-chip sa-chip--good">{{ c.good }}</span>}
@@ -174,9 +351,31 @@
         <div class="sa-section-body">
             @switch (s.key) {
 
+            @case ('keyword') {
+            @if (r.keyword; as k) {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="!k.inTitle">{{ k.inTitle ? 'Yes' : 'No' }}</span><span class="sa-stat-label">In title</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="!k.inDescription">{{ k.inDescription ? 'Yes' : 'No' }}</span><span class="sa-stat-label">In description</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="!k.inH1">{{ k.inH1 ? 'Yes' : 'No' }}</span><span class="sa-stat-label">In H1</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ k.inHeadings }}</span><span class="sa-stat-label">Headings w/ keyword</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ k.inFirstParagraph ? 'Yes' : 'No' }}</span><span class="sa-stat-label">In first paragraph</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ k.inUrl ? 'Yes' : 'No' }}</span><span class="sa-stat-label">In URL</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ k.inImageAlts }}</span><span class="sa-stat-label">Image alts</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ k.inAnchorTexts }}</span><span class="sa-stat-label">Anchor texts</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ k.occurrences }}×</span><span class="sa-stat-label">Body occurrences</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ (k.density * 100).toFixed(2) }}%</span><span class="sa-stat-label">Density</span></div>
+            </div>
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> Analysing placement of "{{ k.keyword }}". A density of roughly 0.5–2.5% reads naturally; well above 3% starts to look like keyword stuffing.</p>
+            }
+            }
+
             @case ('technical') {
             <div class="sa-kv">
-                <div><dt>Status</dt><dd>HTTP {{ r.technical.httpStatus }} · {{ r.technical.https ? 'HTTPS' : 'HTTP (insecure)' }}</dd></div>
+                <div><dt>Status</dt><dd>HTTP {{ r.technical.httpStatus }} · {{ r.technical.https ? 'HTTPS' : 'HTTP (insecure)' }}@if (r.technical.httpRedirectsToHttps !== null) { · http→https redirect: {{ r.technical.httpRedirectsToHttps ? 'yes' : 'no' }}}</dd></div>
+                <div><dt>URL structure</dt><dd>{{ r.technical.urlStructure.length }} chars · depth {{ r.technical.urlStructure.pathDepth }} · {{ r.technical.urlStructure.queryParamCount }} query param(s){{ r.technical.urlStructure.hasUppercase ? ' · uppercase' : '' }}{{ r.technical.urlStructure.hasUnderscores ? ' · underscores' : '' }} · {{ r.technical.urlStructure.isClean ? 'clean' : 'could be cleaner' }}</dd></div>
+                @if (r.technical.custom404; as c404) {
+                <div><dt>404 handling</dt><dd>Nonexistent paths return HTTP {{ c404.status }}{{ c404.soft404 ? ' (soft-404 — should be 404)' : '' }}</dd></div>
+                }
                 @if (r.technical.ssl; as ssl) {
                 <div><dt>SSL</dt><dd>{{ ssl.valid ? 'Valid' : 'Invalid' }}@if (ssl.issuer) { · {{ ssl.issuer }}}@if (ssl.daysRemaining !== undefined) { · expires in {{ ssl.daysRemaining }} days}@if (ssl.error) { · {{ ssl.error }}}</dd></div>
                 }
@@ -218,6 +417,19 @@
             }
 
             @case ('html') {
+            @if (serp(); as g) {
+            <p class="sa-sub">Google result preview</p>
+            <div class="sa-serp">
+                <span class="sa-serp-breadcrumb">{{ g.breadcrumb }}</span>
+                <span class="sa-serp-title">{{ g.title }}</span>
+                <span class="sa-serp-desc">{{ g.description }}</span>
+                @if (g.titleTruncated || g.descTruncated) {
+                <span class="sa-serp-note"><i class="bi bi-scissors"></i>
+                    {{ g.titleTruncated && g.descTruncated ? 'Title and description are' : g.titleTruncated ? 'Title is' : 'Description is' }} long enough to be truncated by Google.
+                </span>
+                }
+            </div>
+            }
             <div class="sa-kv">
                 <div><dt>Title</dt><dd>{{ r.html.title || '— none —' }} <span class="sa-dim">({{ r.html.titleLength }} chars · ~{{ r.html.titlePixelWidth }}px)</span></dd></div>
                 <div><dt>Description</dt><dd>{{ r.html.description || '— none —' }} <span class="sa-dim">({{ r.html.descriptionLength }} chars · ~{{ r.html.descriptionPixelWidth }}px)</span></dd></div>
@@ -228,7 +440,16 @@
                 <div><dt>Author</dt><dd>{{ r.html.author || '—' }}</dd></div>
                 <div><dt>Generator</dt><dd>{{ r.html.generator || '—' }}</dd></div>
                 <div><dt>Favicon</dt><dd>{{ r.html.favicon || '— none —' }}@if (!r.html.favicon) { <a class="sa-cta" routerLink="/tools/favicon">Create one in Tools →</a>}</dd></div>
+                <div><dt>Doctype</dt><dd>{{ r.html.hasDoctype ? 'HTML5 doctype declared' : '— missing —' }}</dd></div>
+                <div><dt>Inline styles</dt><dd>{{ r.html.inlineStyleCount }} element(s) with a style attribute</dd></div>
+                @if (r.html.metaRefresh) {
+                <div><dt>Meta refresh</dt><dd>{{ r.html.metaRefresh }}</dd></div>
+                }
             </div>
+            @if (r.html.deprecatedTags.length) {
+            <p class="sa-sub">Deprecated tags</p>
+            <div class="sa-tagrow">@for (d of r.html.deprecatedTags; track d.tag) {<span class="sa-chip sa-chip--warn">&lt;{{ d.tag }}&gt; × {{ d.count }}</span>}</div>
+            }
             @if (r.html.duplicateTags.length) {
             <p class="sa-sub">Duplicate tags</p>
             <div class="sa-tagrow">@for (t of r.html.duplicateTags; track $index) {<span class="sa-chip sa-chip--warn">{{ t }}</span>}</div>
@@ -387,7 +608,12 @@
                 <div class="sa-stat"><span class="sa-stat-num">{{ r.content.listCount }}</span><span class="sa-stat-label">Lists</span></div>
                 <div class="sa-stat"><span class="sa-stat-num">{{ r.content.tableCount }}</span><span class="sa-stat-label">Tables</span></div>
                 <div class="sa-stat"><span class="sa-stat-num">{{ r.content.videoCount }}</span><span class="sa-stat-label">Videos</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.content.textHtmlRatio > 0 && r.content.textHtmlRatio < 0.1">{{ (r.content.textHtmlRatio * 100).toFixed(1) }}%</span><span class="sa-stat-label">Text / HTML</span></div>
             </div>
+            @if (r.content.exposedEmails.length) {
+            <p class="sa-sub">Exposed email addresses</p>
+            <div class="sa-tagrow">@for (e of r.content.exposedEmails; track e) {<span class="sa-chip sa-chip--warn">{{ e }}</span>}</div>
+            }
             @if (r.content.topKeywords.length) {
             <p class="sa-sub">Top keywords</p>
             <div class="sa-scroll"><table class="sa-table"><tbody>
@@ -474,9 +700,17 @@
             @if (r.technologies.all.length === 0) {
             <p class="sa-sub">No known frameworks or services detected.</p>
             } @else {
+            @if (r.technologies.languages.length) {
+            <p class="sa-sub">Languages / runtimes</p>
+            <div class="sa-tagrow">@for (t of r.technologies.languages; track $index) {<span class="sa-chip sa-chip--good">{{ t }}</span>}</div>
+            }
             @if (r.technologies.frameworks.length) {
             <p class="sa-sub">Frameworks</p>
             <div class="sa-tagrow">@for (t of r.technologies.frameworks; track $index) {<span class="sa-chip sa-chip--good">{{ t }}</span>}</div>
+            }
+            @if (r.technologies.jsLibraries.length) {
+            <p class="sa-sub">JS libraries</p>
+            <div class="sa-tagrow">@for (t of r.technologies.jsLibraries; track $index) {<span class="sa-chip">{{ t }}</span>}</div>
             }
             @if (r.technologies.cssFrameworks.length) {
             <p class="sa-sub">CSS</p>
@@ -495,12 +729,55 @@
             <div class="sa-tagrow">@for (t of r.technologies.infra; track $index) {<span class="sa-chip">{{ t }}</span>}</div>
             }
             }
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> {{ r.technologies.note }}</p>
+            }
+
+            @case ('hosting') {
+            <div class="sa-kv">
+                <div><dt>Provider</dt><dd>{{ r.hosting.provider || '— not fingerprinted —' }}</dd></div>
+                <div><dt>CDN</dt><dd>{{ r.hosting.cdn || '— none detected —' }}</dd></div>
+                <div><dt>DNS provider</dt><dd>{{ r.hosting.dnsProvider || '— unknown —' }}</dd></div>
+                @if (r.hosting.reverseDns) {
+                <div><dt>Reverse DNS</dt><dd>{{ r.hosting.reverseDns }}</dd></div>
+                }
+                @if (r.hosting.ipCountry) {
+                <div><dt>Server location</dt><dd>{{ r.hosting.ipCity ? r.hosting.ipCity + ', ' : '' }}{{ r.hosting.ipCountry }}</dd></div>
+                }
+                <div><dt>Server software</dt><dd>{{ r.hosting.serverSoftware || '— hidden —' }}</dd></div>
+                @if (r.hosting.poweredBy) {
+                <div><dt>X-Powered-By</dt><dd>{{ r.hosting.poweredBy }}</dd></div>
+                }
+            </div>
+            }
+
+            @case ('marketing') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.marketing.tags.length === 0">{{ r.marketing.tags.length }}</span><span class="sa-stat-label">Marketing tags</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.marketing.socialMeta.score < 60">{{ r.marketing.socialMeta.score }}%</span><span class="sa-stat-label">Share-card complete</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.marketing.hasNewsletterForm ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Email capture</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.marketing.hasRssFeed ? 'Yes' : 'No' }}</span><span class="sa-stat-label">RSS feed</span></div>
+            </div>
+            @if (r.marketing.tags.length) {
+            <p class="sa-sub">Detected tags & tools</p>
+            <div class="sa-tagrow">@for (t of r.marketing.tags; track t) {<span class="sa-chip sa-chip--good">{{ t }}</span>}</div>
+            }
+            @if (r.marketing.socialMeta.missing.length) {
+            <p class="sa-sub">Missing share-card tags</p>
+            <div class="sa-tagrow">@for (m of r.marketing.socialMeta.missing; track m) {<span class="sa-chip sa-chip--warn">{{ m }}</span>}</div>
+            }
+            @if (r.marketing.contactChannels.length) {
+            <p class="sa-sub">Contact channels</p>
+            <div class="sa-tagrow">@for (c of r.marketing.contactChannels; track c) {<span class="sa-chip">{{ c }}</span>}</div>
+            }
             }
 
             @case ('network') {
             <div class="sa-kv">
                 <div><dt>IP address</dt><dd>{{ r.network.ip || '— unresolved —' }}</dd></div>
                 <div><dt>Blacklist</dt><dd>{{ r.network.blacklistedCount }} of {{ r.network.blacklist.length }} zone(s) listed</dd></div>
+                @if (r.network.dns.mx.length) {
+                <div><dt>Email auth</dt><dd>SPF: {{ r.network.spfPresent ? 'present' : 'missing' }} · DMARC: {{ r.network.dmarcPresent ? 'present' : 'missing' }}</dd></div>
+                }
                 @if (r.network.whois; as w) {
                 <div><dt>Registrar</dt><dd>{{ w.registrar || '— unknown —' }}</dd></div>
                 <div><dt>Domain expiry</dt><dd>@if (w.error) { {{ w.error }} } @else if (w.expiryDate) { {{ w.expiryDate | date:'mediumDate' }}@if (w.daysRemaining !== null) { ({{ w.daysRemaining }} days)} } @else { — unknown — }</dd></div>
@@ -570,6 +847,123 @@
                 <div class="sa-stat"><span class="sa-stat-num">{{ r.rendering.initialContentChars }}</span><span class="sa-stat-label">Initial content chars</span></div>
             </div>
             <p class="sa-callout"><i class="bi bi-info-circle"></i> {{ r.rendering.note }}</p>
+            }
+
+            @case ('responsive') {
+            @if (!r.responsive.available) {
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> {{ r.responsive.note }}</p>
+            } @else {
+            @if (r.responsive.viewports.length) {
+            <div class="sa-devices">
+                @for (vp of r.responsive.viewports; track vp.name) {
+                <div class="sa-device" [class]="'sa-device--' + mockType(vp.width)" [class.is-broken]="vp.hasHorizontalScroll">
+                    <div class="sa-mock" [class]="'sa-mock--' + mockType(vp.width)">
+                        <div class="sa-mock-screen" [style.aspect-ratio]="vp.width + ' / ' + vp.height">
+                            @if (vp.screenshot) {
+                            <img [src]="vp.screenshot" [alt]="vp.name + ' screenshot'" loading="lazy" />
+                            } @else {
+                            <span class="sa-device-noshot"><i class="bi bi-image"></i></span>
+                            }
+                        </div>
+                        @if (mockType(vp.width) === 'laptop') {
+                        <span class="sa-mock-deck"></span>
+                        }
+                        @if (mockType(vp.width) === 'monitor') {
+                        <span class="sa-mock-neck"></span>
+                        <span class="sa-mock-foot"></span>
+                        }
+                    </div>
+                    <div class="sa-device-meta">
+                        <span class="sa-device-name">{{ vp.name }}</span>
+                        <span class="sa-device-size">{{ vp.width }} × {{ vp.height }}</span>
+                        <span class="sa-chip" [class]="vp.hasHorizontalScroll ? 'sa-chip--error' : 'sa-chip--good'">
+                            {{ vp.hasHorizontalScroll ? ('overflows: ' + vp.documentWidth + 'px') : 'fits' }}
+                        </span>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+            @if (r.responsive.consoleErrors.length) {
+            <p class="sa-sub">Console errors during render</p>
+            <ul class="sa-list sa-list--bad">@for (e of r.responsive.consoleErrors; track $index) {<li>{{ e }}</li>}</ul>
+            }
+            @if (r.responsive.failedRequests.length) {
+            <p class="sa-sub">Failed requests</p>
+            <ul class="sa-list sa-list--bad">@for (f of r.responsive.failedRequests; track $index) {<li>{{ f }}</li>}</ul>
+            }
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> {{ r.responsive.note }}</p>
+            }
+            }
+
+            @case ('browserCompat') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.browserCompat.chromiumOk === false">{{ r.browserCompat.chromiumOk === null ? '—' : (r.browserCompat.chromiumOk ? 'Yes' : 'No') }}</span><span class="sa-stat-label">Renders in Chromium</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.browserCompat.modernCssFeatures.length > 0">{{ r.browserCompat.modernCssFeatures.length }}</span><span class="sa-stat-label">Modern CSS risks</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.browserCompat.prefixOnlyProperties.length > 0">{{ r.browserCompat.prefixOnlyProperties.length }}</span><span class="sa-stat-label">Prefix-only props</span></div>
+            </div>
+            @if (r.browserCompat.modernCssFeatures.length) {
+            <p class="sa-sub">Modern CSS features in use</p>
+            <div class="sa-scroll"><table class="sa-table"><tbody>
+                @for (f of r.browserCompat.modernCssFeatures; track f.feature) {
+                <tr><th>{{ f.feature }}</th><td>{{ f.count }}×</td><td>{{ f.risk }}</td></tr>
+                }
+            </tbody></table></div>
+            }
+            @if (r.browserCompat.prefixOnlyProperties.length) {
+            <p class="sa-sub">Vendor-prefixed without fallback</p>
+            <div class="sa-tagrow">@for (p of r.browserCompat.prefixOnlyProperties; track p) {<span class="sa-chip sa-chip--warn">{{ p }}</span>}</div>
+            }
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> {{ r.browserCompat.note }}</p>
+            }
+
+            @case ('errorPage') {
+            <div class="sa-stats">
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="r.errorPage.soft404">{{ r.errorPage.probeStatus ?? '—' }}</span><span class="sa-stat-label">Probe status</span></div>
+                <div class="sa-stat"><span class="sa-stat-num" [class.sa-num--bad]="!r.errorPage.hasCustomPage">{{ r.errorPage.hasCustomPage ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Custom page</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.errorPage.hasTitle ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Has title</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.errorPage.mentionsNotFound ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Says "not found"</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ r.errorPage.hasNavLink ? 'Yes' : 'No' }}</span><span class="sa-stat-label">Way back home</span></div>
+                <div class="sa-stat"><span class="sa-stat-num">{{ kb(r.errorPage.contentLength) }}</span><span class="sa-stat-label">Page size</span></div>
+            </div>
+            }
+
+            @case ('socialPresence') {
+            @if (r.socialPresence.found.length) {
+            <p class="sa-sub">Profiles linked from the page</p>
+            <div class="sa-tagrow">
+                @for (f of r.socialPresence.found; track f.platform) {
+                <a class="sa-chip sa-chip--good sa-chip-link" [href]="f.url" target="_blank" rel="noopener noreferrer">{{ f.platform }}</a>
+                }
+            </div>
+            } @else {
+            <p class="sa-sub">No social profile links found on this page.</p>
+            }
+            @if (r.socialPresence.missing.length) {
+            <p class="sa-sub">Recommended but not linked</p>
+            <div class="sa-tagrow">@for (m of r.socialPresence.missing; track m) {<span class="sa-chip sa-chip--warn">{{ m }}</span>}</div>
+            }
+            @if (r.socialPresence.usernameChecks.length) {
+            <p class="sa-sub">Handle "&#64;{{ r.socialPresence.handle }}" across platforms</p>
+            <div class="sa-scroll"><table class="sa-table"><tbody>
+                @for (u of r.socialPresence.usernameChecks; track u.platform) {
+                <tr>
+                    <th>{{ u.platform }}</th>
+                    <td><a class="sa-cta" [href]="u.url" target="_blank" rel="noopener noreferrer">{{ u.url }}</a></td>
+                    <td><span class="sa-chip" [class]="u.status === 'available' ? 'sa-chip--good' : u.status === 'taken' ? 'sa-chip--warn' : ''">{{ u.status }}</span></td>
+                </tr>
+                }
+            </tbody></table></div>
+            }
+            @if (r.socialPresence.domainAlternatives.length) {
+            <p class="sa-sub">Alternative domains</p>
+            <div class="sa-tagrow">
+                @for (d of r.socialPresence.domainAlternatives; track d.domain) {
+                <span class="sa-chip" [class]="d.status === 'available' ? 'sa-chip--good' : d.status === 'registered' ? '' : 'sa-chip--warn'">{{ d.domain }} · {{ d.status }}</span>
+                }
+            </div>
+            }
+            <p class="sa-callout"><i class="bi bi-info-circle"></i> Availability is best-effort: platforms that block anonymous checks show "unknown", and DNS-based domain checks can miss reserved or parked names — verify with the registrar before buying.</p>
             }
 
             @case ('libraries') {

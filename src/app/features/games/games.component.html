@@ -1,0 +1,23 @@
+<div class="games-page">
+    <header class="games-hero">
+        <p class="games-eyebrow">Side Quest</p>
+        <h1 class="games-title">Arcade<span class="dot">.</span></h1>
+        <p class="games-lede">Two pocket-sized games, built with nothing but &lt;canvas&gt; and a monospace font. Pick a cartridge.</p>
+    </header>
+
+    <div class="cart-grid">
+        @for (game of games; track game.slug) {
+        <a class="cart" [routerLink]="['/games', game.slug]">
+            <div class="cart-screen">
+                <img [src]="'/games-thumbs/' + game.slug + '.png'" [alt]="game.title + ' gameplay preview'" loading="lazy">
+            </div>
+            <div class="cart-body">
+                <h2 class="cart-title">{{ game.title }}</h2>
+                <p class="cart-tagline">{{ game.tagline }}</p>
+                <span class="cart-keys">{{ game.keys }}</span>
+            </div>
+            <span class="cart-play">PLAY <i class="bi bi-arrow-right"></i></span>
+        </a>
+        }
+    </div>
+</div>

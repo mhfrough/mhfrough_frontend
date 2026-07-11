@@ -25,10 +25,30 @@ export interface RedirectHop {
     status: number;
 }
 
+/** Static shape-of-the-URL checks (length, depth, casing, separators). */
+export interface UrlStructureInfo {
+    length: number;
+    pathDepth: number;
+    hasUppercase: boolean;
+    hasUnderscores: boolean;
+    queryParamCount: number;
+    isClean: boolean;
+}
+
+/** Probe of a guaranteed-nonexistent path — detects soft-404 setups. */
+export interface Custom404Info {
+    status: number | null;
+    soft404: boolean;
+}
+
 export interface TechnicalSeo {
     httpStatus: number;
     redirectChain: RedirectHop[];
     https: boolean;
+    /** true = plain-HTTP request redirects to HTTPS; null = not tested (page isn't HTTPS). */
+    httpRedirectsToHttps: boolean | null;
+    urlStructure: UrlStructureInfo;
+    custom404: Custom404Info | null;
     ssl: SslInfo | null;
     canonical: string | null;
     canonicalMatchesUrl: boolean;
@@ -72,6 +92,10 @@ export interface HtmlAudit {
     descriptionPixelWidth: number;
     duplicateTags: string[];
     missingTags: string[];
+    hasDoctype: boolean;
+    deprecatedTags: { tag: string; count: number }[];
+    metaRefresh: string | null;
+    inlineStyleCount: number;
     issues: Issue[];
 }
 
@@ -213,6 +237,26 @@ export interface ContentAudit {
     listCount: number;
     tableCount: number;
     videoCount: number;
+    /** Visible text bytes ÷ total HTML bytes (0–1). Search guidance: aim above ~0.1. */
+    textHtmlRatio: number;
+    /** Plain-text email addresses found in the markup (spam-harvester bait). */
+    exposedEmails: string[];
+    issues: Issue[];
+}
+
+// --- 10b. Target-keyword analysis (only when the user supplies a keyword) -------
+export interface KeywordAudit {
+    keyword: string;
+    inTitle: boolean;
+    inDescription: boolean;
+    inH1: boolean;
+    inHeadings: number;
+    inFirstParagraph: boolean;
+    inUrl: boolean;
+    inImageAlts: number;
+    inAnchorTexts: number;
+    occurrences: number;
+    density: number;
     issues: Issue[];
 }
 
@@ -269,7 +313,46 @@ export interface TechnologiesAudit {
     cms: string[];
     analytics: string[];
     infra: string[];
+    /** Server-side languages/runtimes inferred from headers, cookies and URLs. */
+    languages: string[];
+    /** Client-side JS libraries (jQuery, Alpine, GSAP, …). */
+    jsLibraries: string[];
+    /** Detection caveats, e.g. TypeScript compiling away in shipped bundles. */
+    note: string;
     all: string[];
+}
+
+// --- 14b. Hosting & infrastructure ------------------------------------------------------
+export interface HostingAudit {
+    /** Best-guess hosting provider/platform (Vercel, AWS, Render, …). */
+    provider: string | null;
+    cdn: string | null;
+    dnsProvider: string | null;
+    reverseDns: string | null;
+    serverSoftware: string | null;
+    poweredBy: string | null;
+    ipCountry: string | null;
+    ipCity: string | null;
+    issues: Issue[];
+}
+
+// --- 14c. Marketing & analytics ----------------------------------------------------------
+export interface SocialMetaCompleteness {
+    present: string[];
+    missing: string[];
+    /** 0–100: share of the 9 recommended og:/twitter: tags present. */
+    score: number;
+}
+
+export interface MarketingAudit {
+    /** Analytics / pixel / chat / email tags detected on the page. */
+    tags: string[];
+    socialMeta: SocialMetaCompleteness;
+    hasNewsletterForm: boolean;
+    hasRssFeed: boolean;
+    /** mailto:, tel:, WhatsApp and contact-page links found. */
+    contactChannels: string[];
+    issues: Issue[];
 }
 
 // --- 15b. Domain & network -----------------------------------------------------------
@@ -299,6 +382,8 @@ export interface WhoisInfo {
 export interface NetworkAudit {
     ip: string | null;
     dns: DnsRecords;
+    spfPresent: boolean;
+    dmarcPresent: boolean;
     blacklist: BlacklistResult[];
     blacklistedCount: number;
     whois: WhoisInfo | null;
@@ -367,6 +452,87 @@ export interface LibrariesAudit {
     issues: Issue[];
 }
 
+// --- 15g. Error-page quality (extends the soft-404 probe) --------------------------------
+export interface ErrorPageAudit {
+    probeStatus: number | null;
+    soft404: boolean;
+    /** Looks like a designed page (title + copy + nav), not a bare server default. */
+    hasCustomPage: boolean;
+    hasTitle: boolean;
+    mentionsNotFound: boolean;
+    hasNavLink: boolean;
+    contentLength: number;
+    issues: Issue[];
+}
+
+// --- 15h. Responsive rendering (real Chromium via Playwright) ----------------------------
+export interface ViewportCheck {
+    name: string;
+    width: number;
+    height: number;
+    documentWidth: number;
+    hasHorizontalScroll: boolean;
+    /** Small JPEG thumbnail as a data URL; null when screenshots are disabled/failed. */
+    screenshot: string | null;
+}
+
+export interface ResponsiveAudit {
+    /** false = headless browser unavailable in this deployment. */
+    available: boolean;
+    viewports: ViewportCheck[];
+    consoleErrors: string[];
+    failedRequests: string[];
+    note: string;
+    issues: Issue[];
+}
+
+// --- 15i. Cross-browser compatibility (Chromium live + static CSS heuristics) ------------
+export interface CompatFeature {
+    feature: string;
+    count: number;
+    risk: string;
+}
+
+export interface BrowserCompatAudit {
+    /** Page loaded and rendered in headless Chromium; null = not tested. */
+    chromiumOk: boolean | null;
+    modernCssFeatures: CompatFeature[];
+    /** -webkit-/-moz- prefixed properties used without an unprefixed fallback. */
+    prefixOnlyProperties: string[];
+    note: string;
+    issues: Issue[];
+}
+
+// --- 15j. Social & brand presence ---------------------------------------------------------
+export interface SocialProfileLink {
+    platform: string;
+    url: string;
+}
+
+export type AvailabilityStatus = 'taken' | 'available' | 'unknown';
+
+export interface UsernameCheck {
+    platform: string;
+    url: string;
+    status: AvailabilityStatus;
+}
+
+export interface DomainAltCheck {
+    domain: string;
+    status: 'registered' | 'available' | 'unknown';
+}
+
+export interface SocialPresenceAudit {
+    /** Handle derived from the domain name, used for availability probes. */
+    handle: string;
+    found: SocialProfileLink[];
+    /** Recommended platforms with no link found on the page. */
+    missing: string[];
+    usernameChecks: UsernameCheck[];
+    domainAlternatives: DomainAltCheck[];
+    issues: Issue[];
+}
+
 // --- 15. Recommendations (deterministic rules engine, not a live LLM call) -----------
 export type SeoImpact = 'high' | 'medium' | 'low';
 export type Difficulty = 'easy' | 'medium' | 'hard';
@@ -416,6 +582,8 @@ export interface SeoAuditReport {
     structuredData: StructuredDataAudit;
     social: SocialAudit;
     content: ContentAudit;
+    /** Present only when the request included a target keyword. */
+    keyword: KeywordAudit | null;
     security: SecurityAudit;
     mobile: MobileAudit;
     design: DesignAudit;
@@ -425,6 +593,12 @@ export interface SeoAuditReport {
     pwa: PwaAudit;
     rendering: RenderingAudit;
     libraries: LibrariesAudit;
+    errorPage: ErrorPageAudit;
+    responsive: ResponsiveAudit;
+    browserCompat: BrowserCompatAudit;
+    socialPresence: SocialPresenceAudit;
+    hosting: HostingAudit;
+    marketing: MarketingAudit;
     recommendations: Recommendation[];
     scores: Scores;
 }

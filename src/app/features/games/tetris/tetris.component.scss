@@ -1,0 +1,59 @@
+@use '../shared/game-shell';
+
+:host {
+  display: block;
+}
+
+.device-screen--tetris {
+  aspect-ratio: 1 / 2;
+  max-height: 70vh;
+  margin: 0 auto;
+  padding: 2px;
+}
+
+.tetris-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(20, 1fr);
+  gap: 1px;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.tcell {
+  background: #262626;
+
+  &[data-shade="1"] { background: #d0d0d0; }
+  &[data-shade="2"] { background: #b8b8b8; }
+  &[data-shade="3"] { background: #a0a0a0; }
+  &[data-shade="4"] { background: #8c8c8c; }
+  &[data-shade="5"] { background: #787878; }
+  &[data-shade="6"] { background: #646464; }
+  &[data-shade="7"] { background: #565656; }
+}
+
+.tetris-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 2.2rem);
+  gap: 3px;
+  justify-content: center;
+
+  button {
+    width: 2.2rem;
+    height: 2.2rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+
+    &:active {
+      background: var(--text);
+      color: var(--bg);
+    }
+  }
+}

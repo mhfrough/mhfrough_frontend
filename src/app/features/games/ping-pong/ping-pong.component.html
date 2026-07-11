@@ -1,0 +1,66 @@
+<div class="game-page">
+    <a class="game-back" routerLink="/games"><i class="bi bi-arrow-left"></i> Arcade</a>
+    <h1 class="game-title">Ping Pong</h1>
+
+    <div class="device">
+        <div class="device-hud">
+            <span>{{ mode() === '2p' ? 'P1 (W/S)' : 'You' }} <strong>{{ leftScore() }}</strong></span>
+            <span>{{ mode() === '2p' ? 'P2 (↑/↓)' : 'CPU' }} <strong>{{ rightScore() }}</strong></span>
+        </div>
+
+        <div class="device-screen">
+            <canvas #canvas></canvas>
+
+            @if (status() === 'idle') {
+            <div class="device-overlay">
+                <p>Press start</p>
+                @if (mode() === '2p') {
+                <small>P1: W/S · P2: Arrow Up/Down · First to 7</small>
+                } @else {
+                <small>W/S or Arrows to move · First to 7</small>
+                }
+            </div>
+            }
+            @if (status() === 'paused') {
+            <div class="device-overlay">
+                <p>Paused</p>
+            </div>
+            }
+            @if (status() === 'over') {
+            <div class="device-overlay">
+                @if (mode() === '2p') {
+                <p>{{ winner() === 'left' ? 'Player 1 wins' : 'Player 2 wins' }}</p>
+                } @else {
+                <p>{{ winner() === 'left' ? 'You win' : 'CPU wins' }}</p>
+                }
+                <small>{{ leftScore() }} – {{ rightScore() }}</small>
+            </div>
+            }
+        </div>
+
+        <div class="device-controls">
+            <div class="vpad">
+                <button (pointerdown)="pressStart('up')" (pointerup)="pressEnd('up')" (pointerleave)="pressEnd('up')" aria-label="Up"><i class="bi bi-caret-up-fill"></i></button>
+                <button (pointerdown)="pressStart('down')" (pointerup)="pressEnd('down')" (pointerleave)="pressEnd('down')" aria-label="Down"><i class="bi bi-caret-down-fill"></i></button>
+            </div>
+
+            <div class="btn-row" style="display:flex; gap:.5rem;">
+                @if (status() === 'playing') {
+                <button class="btn" (click)="pause()">Pause</button>
+                } @else {
+                <button class="btn" (click)="start()">{{ status() === 'over' ? 'Rematch' : 'Start' }}</button>
+                }
+                <button class="btn" (click)="reset()">Reset</button>
+                <button class="btn" (click)="toggleMode()">{{ mode() === '1p' ? '2P' : '1P' }}</button>
+            </div>
+        </div>
+    </div>
+
+    <p class="game-hint">
+        @if (mode() === '2p') {
+        Player 1: W/S · Player 2: Arrow Up/Down · Space to pause · First to 7 wins
+        } @else {
+        W/S or Arrows to move · Space to pause · First to 7 wins
+        }
+    </p>
+</div>

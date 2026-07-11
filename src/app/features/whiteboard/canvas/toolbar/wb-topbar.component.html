@@ -118,7 +118,17 @@
     </div>
     <input #fileInput type="file" accept="application/json,.json" hidden (change)="onImport($event)" />
 
-    @if (persistence.lastSaved(); as ts) {
-    <span class="wb-tb-saved"><i class="bi bi-cloud-check"></i> Saved {{ ts | date:'HH:mm' }}</span>
+    @if (persistence.saveError(); as err) {
+    <span class="wb-tb-saved error" role="alert" [title]="err"><i class="bi bi-exclamation-triangle"></i> Not saved</span>
+    } @else if (persistence.lastSaved(); as ts) {
+    <span class="wb-tb-saved" [title]="cloudTitle()">
+        @switch (persistence.cloud()) {
+        @case ('synced') { <i class="bi bi-cloud-check"></i> }
+        @case ('syncing') { <i class="bi bi-cloud-arrow-up"></i> }
+        @case ('error') { <i class="bi bi-cloud-slash"></i> }
+        @default { <i class="bi bi-device-hdd"></i> }
+        }
+        Saved {{ ts | date:'HH:mm' }}
+    </span>
     }
 </div>

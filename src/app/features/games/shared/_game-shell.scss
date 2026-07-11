@@ -1,0 +1,210 @@
+// Shared "Nokia 3310" device chrome for the arcade mini-games.
+// Both snake.component.scss and ping-pong.component.scss @use this.
+
+.game-page {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    padding: 2rem 1rem 3rem;
+  }
+}
+
+.game-back {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
+.game-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin: 0 0 1.75rem;
+}
+
+// ─── Device frame ──────────────────────────────────────────────────────────
+.device {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+}
+
+.device-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 0.25rem 0.75rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+
+  strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+}
+
+.device-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #1c1c1c;
+  border: 3px solid #000;
+  overflow: hidden;
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+}
+
+.device-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(28, 28, 28, 0.94);
+  text-align: center;
+  padding: 1rem;
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #d0d0d0;
+    text-transform: uppercase;
+  }
+
+  small {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: #d0d0d0;
+    opacity: 0.75;
+  }
+}
+
+.device-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+// ─── Buttons ────────────────────────────────────────────────────────────────
+.btn {
+  font-family: var(--font);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.6rem 1.1rem;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+
+  &:hover {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+
+    &:hover {
+      background: transparent;
+      color: var(--text);
+    }
+  }
+}
+
+// ─── D-pad (touch controls) ────────────────────────────────────────────────
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 2.4rem);
+  grid-template-rows: repeat(3, 2.4rem);
+  gap: 2px;
+
+  button {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+
+    &:active {
+      background: var(--text);
+      color: var(--bg);
+    }
+  }
+}
+
+.dpad-up { grid-area: 1 / 2; }
+.dpad-left { grid-area: 2 / 1; }
+.dpad-right { grid-area: 2 / 3; }
+.dpad-down { grid-area: 3 / 2; }
+
+.vpad {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  button {
+    width: 2.6rem;
+    height: 2.6rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+
+    &:active {
+      background: var(--text);
+      color: var(--bg);
+    }
+  }
+}
+
+.game-hint {
+  margin-top: 1.5rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-align: center;
+}

@@ -11,13 +11,14 @@ import { PreconnectService } from '../../../core/services/preconnect.service';
 import { SeoService } from '../../../core/services/seo.service';
 import { ImgFallbackDirective } from '../../../shared/directives/img-fallback.directive';
 import { CountUpDirective } from '../../../shared/directives/count-up.directive';
+import { GlyphFieldDirective } from '../../../shared/directives/glyph-field.directive';
 import { ExternalUrlPipe } from '../../../shared/pipes/external-url.pipe';
 import { SERVICES, FAQS } from '../../../core/data/site-content';
 
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, RouterLink, NgOptimizedImage, ImgFallbackDirective, CountUpDirective, ExternalUrlPipe],
+    imports: [CommonModule, RouterLink, NgOptimizedImage, ImgFallbackDirective, CountUpDirective, GlyphFieldDirective, ExternalUrlPipe],
     templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {

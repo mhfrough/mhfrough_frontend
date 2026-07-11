@@ -19,8 +19,18 @@ export interface RemoteCursor {
     y: number;
 }
 
-/** Op payload relayed over the wire. Op-shaped so it can later carry CRDT/OT deltas. */
-export type SceneOp = { kind: 'snapshot'; elements: WhiteboardElement[] };
+/**
+ * Op payload relayed over the wire.
+ * - `upsert`/`delete`: element-level deltas, merged per element by `updatedAt`
+ *   (last-writer-wins per element — two people editing *different* elements never
+ *   stomp each other; same-element edits resolve to the newest).
+ * - `snapshot`: full scene, merged with the same per-element rule (never a blind
+ *   replace) — used to converge a late joiner.
+ */
+export type SceneOp =
+    | { kind: 'snapshot'; elements: WhiteboardElement[] }
+    | { kind: 'upsert'; elements: WhiteboardElement[] }
+    | { kind: 'delete'; ids: string[] };
 
 const CURSOR_COLORS = ['#6366f1', '#4ade80', '#f59e0b', '#f87171', '#818cf8', '#22c55e', '#d97706'];
 const NAMES = ['Falcon', 'Otter', 'Maple', 'Cobalt', 'Ember', 'Willow', 'Onyx', 'Cedar', 'Flint', 'Wren'];

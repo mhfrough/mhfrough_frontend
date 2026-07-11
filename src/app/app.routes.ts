@@ -318,6 +318,43 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/main/gallery/gallery.component').then(m => m.GalleryComponent),
             },
             {
+                path: 'games',
+                loadComponent: () => import('./features/games/games.component').then(m => m.GamesComponent),
+            },
+            {
+                path: 'games/snake',
+                loadComponent: () => import('./features/games/snake/snake.component').then(m => m.SnakeComponent),
+            },
+            {
+                path: 'games/ping-pong',
+                loadComponent: () => import('./features/games/ping-pong/ping-pong.component').then(m => m.PingPongComponent),
+            },
+            { path: 'games/pong-2p', redirectTo: 'games/ping-pong' },
+            {
+                path: 'games/2048',
+                loadComponent: () => import('./features/games/twenty48/twenty48.component').then(m => m.Twenty48Component),
+            },
+            {
+                path: 'games/memory',
+                loadComponent: () => import('./features/games/memory/memory.component').then(m => m.MemoryComponent),
+            },
+            {
+                path: 'games/minesweeper',
+                loadComponent: () => import('./features/games/minesweeper/minesweeper.component').then(m => m.MinesweeperComponent),
+            },
+            {
+                path: 'games/breakout',
+                loadComponent: () => import('./features/games/breakout/breakout.component').then(m => m.BreakoutComponent),
+            },
+            {
+                path: 'games/space-invaders',
+                loadComponent: () => import('./features/games/space-invaders/space-invaders.component').then(m => m.SpaceInvadersComponent),
+            },
+            {
+                path: 'games/tetris',
+                loadComponent: () => import('./features/games/tetris/tetris.component').then(m => m.TetrisComponent),
+            },
+            {
                 path: 'projects/:slug',
                 loadComponent: () => import('./features/main/projects/project-detail/project-detail.component').then(m => m.ProjectDetailComponent),
             },

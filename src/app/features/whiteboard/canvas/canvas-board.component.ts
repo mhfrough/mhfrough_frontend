@@ -19,6 +19,7 @@ import { SelectionService } from '../core/services/selection.service';
 import { SelectionInteractionService } from '../core/services/selection-interaction.service';
 import { HistoryService } from '../core/services/history.service';
 import { PersistenceService } from '../core/services/persistence.service';
+import { WhiteboardApiService } from '../core/services/whiteboard-api.service';
 import { ExportService } from '../core/services/export.service';
 import { CollaborationService } from '../core/services/collaboration.service';
 import { ImageService } from '../core/services/image.service';
@@ -68,6 +69,7 @@ const RULER_SIZE = 24;
         ViewportService, SceneService, ToolService, DrawingService, SelectionService,
         SelectionInteractionService, HistoryService, PersistenceService, ExportService,
         CollaborationService, GuidesService, ImageService, ImageOpsService, TextEditingService,
+        WhiteboardApiService,
     ],
     templateUrl: './canvas-board.component.html',
     styleUrl: './canvas-board.component.scss',

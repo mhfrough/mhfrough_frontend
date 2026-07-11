@@ -1,0 +1,52 @@
+<div class="game-page">
+    <a class="game-back" routerLink="/games"><i class="bi bi-arrow-left"></i> Arcade</a>
+    <h1 class="game-title">Minesweeper</h1>
+
+    <div class="device">
+        <div class="device-hud">
+            <span>Mines <strong>{{ minesLeft() }}</strong></span>
+            <span>Time <strong>{{ seconds() }}s</strong></span>
+        </div>
+
+        <div class="device-screen device-screen--grid">
+            <div class="mine-grid">
+                @for (row of grid(); track $index; let r = $index) {
+                    @for (cell of row; track $index; let c = $index) {
+                    <button
+                        class="cell"
+                        [class.cell--revealed]="cell.revealed"
+                        [class.cell--mine]="cell.revealed && cell.mine"
+                        [attr.data-count]="cell.revealed && !cell.mine ? cell.adjacent : null"
+                        (click)="reveal(r, c)"
+                        (contextmenu)="toggleFlag($event, r, c)">{{ cellLabel(cell) }}</button>
+                    }
+                }
+            </div>
+
+            @if (status() === 'idle') {
+            <div class="device-overlay">
+                <p>Clear the board</p>
+                <small>Tap to reveal · Right-click / long-press to flag</small>
+            </div>
+            }
+            @if (status() === 'won') {
+            <div class="device-overlay">
+                <p>Cleared</p>
+                <small>{{ seconds() }}s</small>
+            </div>
+            }
+            @if (status() === 'lost') {
+            <div class="device-overlay">
+                <p>Boom</p>
+                <small>Hit a mine</small>
+            </div>
+            }
+        </div>
+
+        <div class="device-controls" style="justify-content:center;">
+            <button class="btn" (click)="newGame()">New game</button>
+        </div>
+    </div>
+
+    <p class="game-hint">Left-click to reveal · Right-click to flag · 9×9, 10 mines</p>
+</div>

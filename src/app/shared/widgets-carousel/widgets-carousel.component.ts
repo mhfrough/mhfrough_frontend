@@ -15,8 +15,9 @@ type WidgetId = 'weather' | 'gold' | 'usd';
   standalone: true,
   imports: [WeatherWidgetComponent, GoldTolaWidgetComponent, UsdPkrWidgetComponent],
   template: `
-@if (visible() && isAdmin && current()) {
+@if (isAdmin) {
 <div class="widgets-carousel" aria-label="Live data widgets">
+  @if (visible() && current()) {
   <div class="carousel-track" [class.carousel-track--fading]="fading()">
     @switch (current()) {
       @case ('weather') {
@@ -30,6 +31,7 @@ type WidgetId = 'weather' | 'gold' | 'usd';
       }
     }
   </div>
+  }
 </div>
 }
     `,
@@ -39,6 +41,13 @@ type WidgetId = 'weather' | 'gold' | 'usd';
 .widgets-carousel {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  /* Reserve this width from first render (gated only on isAdmin, not on the
+     7s reveal delay or data being loaded) so the box never grows from 0 to
+     170px after mount — that jump is what shoves the centered nav-links
+     sideways. Reserving it up front means nav-links only ever measures
+     against a constant-width sibling. */
+  min-width: 170px;
 }
 
 .carousel-track {

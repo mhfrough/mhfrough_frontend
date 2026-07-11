@@ -10,6 +10,16 @@ const ACCEPTED_TYPES: ReadonlySet<string> = new Set([
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 /** Longest side of a freshly-placed image, in world units. */
 const MAX_PLACED_SIDE = 480;
+/**
+ * Rasters get downscaled/re-encoded before storage: the scene (data URLs included) is
+ * JSON.stringify'd into localStorage on every autosave, and that quota is ~5MB shared
+ * with the rest of the site — a single uncompressed phone photo would eat all of it.
+ */
+const MAX_STORED_SIDE = 1600;
+const RECOMPRESS_OVER_BYTES = 300 * 1024;
+const WEBP_QUALITY = 0.85;
+/** Formats kept verbatim: SVG (vector/text) and GIF (re-encoding drops animation). */
+const NO_RECOMPRESS: ReadonlySet<string> = new Set(['image/svg+xml', 'image/gif']);
 
 /** Turns picked / dropped / pasted image files into ImageElements on the scene. */
 @Injectable()
@@ -41,6 +51,11 @@ export class ImageService {
         try {
             src = await this.readAsDataUrl(file);
             img = await this.loadImage(src);
+            const compressed = this.compress(file, img, src);
+            if (compressed) {
+                src = compressed;
+                img = await this.loadImage(src);
+            }
         } catch {
             return false;
         }
@@ -75,6 +90,32 @@ export class ImageService {
         this.scene.addElement(el);
         this.history.commit();
         return true;
+    }
+
+    /**
+     * Downscale + re-encode a raster to WebP (alpha preserved) when it's large enough to
+     * matter. Returns null when the original should be kept (small file, SVG/GIF, or the
+     * re-encode came out bigger — possible for tiny PNGs / already-optimized WebP).
+     */
+    private compress(file: File, img: HTMLImageElement, originalSrc: string): string | null {
+        if (NO_RECOMPRESS.has(file.type)) return null;
+        const oversized = img.naturalWidth > MAX_STORED_SIDE || img.naturalHeight > MAX_STORED_SIDE;
+        if (!oversized && file.size <= RECOMPRESS_OVER_BYTES) return null;
+
+        const scale = Math.min(1, MAX_STORED_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        try {
+            const webp = canvas.toDataURL('image/webp', WEBP_QUALITY);
+            return webp.length < originalSrc.length ? webp : null;
+        } catch {
+            return null;
+        }
     }
 
     private readAsDataUrl(file: File): Promise<string> {

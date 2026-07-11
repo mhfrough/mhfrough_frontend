@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, ElementRef, Input, effect, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { StickyElement, TextElement, WhiteboardElement } from '../../core/models/element.model';
 import { SceneService } from '../../core/services/scene.service';
 import { HistoryService } from '../../core/services/history.service';
 import { SelectionService } from '../../core/services/selection.service';
 import { DrawingService } from '../../core/services/drawing.service';
 import { TextEditingService } from '../../core/services/text-editing.service';
+import { AiImproveMode, WhiteboardApiService } from '../../core/services/whiteboard-api.service';
 import { findLineContainer, firstTextNode, glyphMarkerLength, isChecklistLine } from '../../core/utils/checklist.util';
 import { linkifyPastedUrl, linkifyTokenBeforeCaret, linkifyTrailingUrl } from '../../core/utils/autolink.util';
 
@@ -49,12 +51,17 @@ export class TextLayerComponent {
      */
     private lastGlyphToggleAt = 0;
 
+    /** Which AI rewrite is in flight (null = idle) — drives the pill's disabled/label state. */
+    readonly aiBusy = signal<AiImproveMode | null>(null);
+    readonly aiError = signal(false);
+
     constructor(
         private readonly scene: SceneService,
         private readonly history: HistoryService,
         private readonly selection: SelectionService,
         private readonly drawing: DrawingService,
         private readonly textEditing: TextEditingService,
+        private readonly api: WhiteboardApiService,
         private readonly host: ElementRef<HTMLElement>,
     ) {
         // A freshly created text/sticky opens directly in edit mode.
@@ -255,6 +262,37 @@ export class TextLayerComponent {
         }
     }
 
+    /**
+     * "Improve the writing" — sends the box's plain text to the backend Gemini endpoint
+     * and swaps in the rewrite. The edit session stays open (the pill swallows mousedown,
+     * so the contenteditable never blurs) and the result is committed to history, so a
+     * single Ctrl+Z restores the original wording.
+     */
+    async improveWriting(id: string, mode: AiImproveMode): Promise<void> {
+        if (this.aiBusy()) return;
+        const div = this.host.nativeElement.querySelector<HTMLElement>(`[data-edit-id="${id}"]`);
+        if (!div) return;
+        const text = div.innerText.trim();
+        if (!text) return;
+
+        this.aiBusy.set(mode);
+        this.aiError.set(false);
+        try {
+            const res = await firstValueFrom(this.api.improveText(text, mode));
+            // innerText (not textContent) so the response's newlines become real line breaks.
+            div.innerText = res.text;
+            const el = this.scene.getById(id);
+            this.scene.updateElement(id, { text: div.innerHTML, ...(this.autoFitPatch(el, div) ?? {}) });
+            this.history.commit();
+            div.focus();
+        } catch {
+            this.aiError.set(true);
+            setTimeout(() => this.aiError.set(false), 3000);
+        } finally {
+            this.aiBusy.set(null);
+        }
+    }
+
     commitText(id: string, e: FocusEvent): void {
         // Font/Weight/Size, the Sizing and Align buttons, and the color pickers all need real
         // DOM focus to work (unlike Bold/Italic/etc, which dodge this with a mousedown
@@ -268,6 +306,17 @@ export class TextLayerComponent {
 
         const div = e.target as HTMLDivElement;
         const el = this.scene.getById(id);
+        // A text/code box committed with no actual text is invisible and unselectable by eye —
+        // it would just litter the document and the layers panel forever. Discard it instead
+        // (sticky notes stay: an empty sticky is still a visible card).
+        if (el?.type === 'text' && div.innerText.trim() === '') {
+            this.scene.removeElement(id);
+            this.history.commit();
+            this.textEditing.clear(id);
+            if (this.selection.isSelected(id)) this.selection.clear();
+            if (this.editingId() === id) this.editingId.set(null);
+            return;
+        }
         // Catches a URL typed as the very last thing in the box, with no trailing space/Enter
         // to have triggered onKeyDown's linkifyTokenBeforeCaret — e.g. type a link and just
         // click away. Code Block still opts out.

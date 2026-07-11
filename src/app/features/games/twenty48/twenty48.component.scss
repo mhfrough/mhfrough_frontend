@@ -1,0 +1,46 @@
+@use '../shared/game-shell';
+
+:host {
+  display: block;
+}
+
+.device-screen--grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  touch-action: none;
+}
+
+.grid-2048 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #262626;
+  color: transparent;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: clamp(0.75rem, 4vw, 1.3rem);
+  transition: background var(--dur-fast) var(--ease);
+
+  &[data-shade="1"] { background: #3a3a3a; color: #d0d0d0; }
+  &[data-shade="2"] { background: #464646; color: #d8d8d8; }
+  &[data-shade="3"] { background: #545454; color: #dedede; }
+  &[data-shade="4"] { background: #626262; color: #e4e4e4; }
+  &[data-shade="5"] { background: #717171; color: #eaeaea; }
+  &[data-shade="6"] { background: #808080; color: #f0f0f0; }
+  &[data-shade="7"] { background: #969696; color: #101010; }
+  &[data-shade="8"] { background: #ababab; color: #101010; }
+  &[data-shade="9"] { background: #c2c2c2; color: #101010; }
+  &[data-shade="10"] { background: #d8d8d8; color: #101010; }
+  &[data-shade="11"] { background: #f0f0f0; color: #101010; }
+}

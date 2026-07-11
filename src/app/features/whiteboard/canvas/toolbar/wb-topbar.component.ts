@@ -105,4 +105,13 @@ export class WbTopbarComponent {
         e.stopPropagation();
         this.persistence.deleteVersion(id);
     }
+
+    cloudTitle(): string {
+        switch (this.persistence.cloud()) {
+            case 'synced': return 'Saved locally and synced to your account';
+            case 'syncing': return 'Syncing to your account…';
+            case 'error': return 'Cloud sync failed — board is saved locally only';
+            default: return 'Saved locally in this browser';
+        }
+    }
 }
