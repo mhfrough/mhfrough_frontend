@@ -16,13 +16,14 @@ export class BlogsService extends OfflineResourceService {
 
     getAll() { return this.http.get<any[]>(this.base); }
 
-    getPublic(page: number, limit: number, q?: string, tag?: string): Observable<Paginated<any>> {
+    getPublic(page: number, limit: number, q?: string, tag?: string, category?: string): Observable<Paginated<any>> {
         const params: Record<string, any> = { page, limit };
         if (q) params['q'] = q;
         if (tag && tag !== 'all') params['tag'] = tag;
+        if (category && category !== 'all') params['category'] = category;
         return this.staleList<any>({
             store: 'blogs',
-            cacheable: page === 1 && !q && !tag,
+            cacheable: page === 1 && !q && !tag && !category,
             limit,
             fetch: () => this.http.get<Paginated<any>>(this.base, { params }),
         });
@@ -31,6 +32,7 @@ export class BlogsService extends OfflineResourceService {
     getAllAdmin() { return this.http.get<any[]>(`${this.base}/all`); }
     getOne(id: string) { return this.http.get<any>(`${this.base}/admin/${id}`); }
     getTags() { return this.http.get<string[]>(`${this.base}/tags`); }
+    getRelated(slug: string, limit = 3) { return this.http.get<any[]>(`${this.base}/${slug}/related`, { params: { limit } }); }
 
     getBySlug(slug: string): Observable<any> {
         return new Observable(subscriber => {

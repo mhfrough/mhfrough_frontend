@@ -6,6 +6,7 @@ import { BlogsService } from '../../../../core/services/blogs.service';
 import { RteToolbarComponent } from '../../../../shared/components/rte-toolbar/rte-toolbar.component';
 import { TagInputComponent } from '../../../../shared/components/tag-input/tag-input.component';
 import { ImgUploadComponent } from '../../../../shared/components/img-upload/img-upload.component';
+import { BLOG_CATEGORIES } from '../../../../core/constants/blog-category';
 
 @Component({
     selector: 'app-admin-blog-form',
@@ -27,6 +28,7 @@ export class AdminBlogFormComponent implements OnInit {
     readonly uploadError = signal<string | null>(null);
     readonly allTags = signal<string[]>([]);
     readonly formTags = signal<string[]>([]);
+    readonly categories = BLOG_CATEGORIES;
 
     ngOnInit() {
         this.service.getTags().subscribe({ next: t => this.allTags.set(t) });

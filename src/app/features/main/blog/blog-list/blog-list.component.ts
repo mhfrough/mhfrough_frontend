@@ -8,6 +8,7 @@ import { PreconnectService } from '../../../../core/services/preconnect.service'
 import { RealtimeService } from '../../../../core/services/realtime.service';
 import { Title } from '@angular/platform-browser';
 import { SeoService } from '../../../../core/services/seo.service';
+import { BLOG_CATEGORIES } from '../../../../core/constants/blog-category';
 
 @Component({
     selector: 'app-blog-list',
@@ -35,6 +36,8 @@ export class BlogListComponent implements OnInit, OnDestroy {
     readonly totalPages = signal(1);
     readonly allTags = signal<string[]>([]);
     readonly selectedTag = signal('all');
+    readonly categories = BLOG_CATEGORIES;
+    readonly selectedCategory = signal('all');
 
     private searchTimer?: ReturnType<typeof setTimeout>;
 
@@ -54,6 +57,7 @@ export class BlogListComponent implements OnInit, OnDestroy {
             this.currentPage(), this.pageSize(),
             this.searchQuery() || undefined,
             this.selectedTag() !== 'all' ? this.selectedTag() : undefined,
+            this.selectedCategory() !== 'all' ? this.selectedCategory() : undefined,
         ).subscribe({
             next: (res) => {
                 this.blogs.set(res.data);
@@ -84,6 +88,13 @@ export class BlogListComponent implements OnInit, OnDestroy {
         this.syncUrl();
     }
 
+    selectCategory(category: string) {
+        this.selectedCategory.set(category);
+        this.currentPage.set(1);
+        this.load();
+        this.syncUrl();
+    }
+
     onPageSizeChange(e: Event) {
         this.pageSize.set(+(e.target as HTMLSelectElement).value);
         this.currentPage.set(1);
@@ -101,9 +112,15 @@ export class BlogListComponent implements OnInit, OnDestroy {
         const q = this.searchQuery();
         const page = this.currentPage();
         const tag = this.selectedTag();
+        const category = this.selectedCategory();
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { q: q || null, page: page > 1 ? page : null, tag: tag !== 'all' ? tag : null },
+            queryParams: {
+                q: q || null,
+                page: page > 1 ? page : null,
+                tag: tag !== 'all' ? tag : null,
+                category: category !== 'all' ? category : null,
+            },
             queryParamsHandling: 'merge',
             replaceUrl: true,
         });
@@ -120,6 +137,7 @@ export class BlogListComponent implements OnInit, OnDestroy {
         if (p['q']) this.searchQuery.set(p['q']);
         if (p['page']) this.currentPage.set(+p['page']);
         if (p['tag']) this.selectedTag.set(p['tag']);
+        if (p['category']) this.selectedCategory.set(p['category']);
 
         this.service.getTags().subscribe({ next: t => this.allTags.set(t) });
         this.load();

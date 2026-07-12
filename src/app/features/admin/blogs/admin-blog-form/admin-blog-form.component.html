@@ -12,6 +12,8 @@
 } @else {
 <div class="admin-form-panel">
     <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+
+        <p class="admin-form-title">Basics</p>
         <div class="admin-form-grid">
             <div class="admin-form-field">
                 <label class="admin-form-label label-required">Title</label>
@@ -36,6 +38,8 @@
                 }
             </div>
         </div>
+
+        <p class="admin-form-title" style="margin-top:2rem">Content</p>
         <div class="admin-form-field">
             <label class="admin-form-label label-required">Excerpt</label>
             <textarea ngModel [ngModel]="editing()?.excerpt" name="excerpt" required rows="2"
@@ -58,11 +62,26 @@
             <span class="form-error">Content is required.</span>
             }
         </div>
+
+        <p class="admin-form-title" style="margin-top:2rem">Media &amp; Taxonomy</p>
+        <div class="admin-form-field">
+            <label class="admin-form-label label-optional">Cover Image</label>
+            <app-img-upload [previewUrl]="coverPreview()" [uploading]="uploading()" [uploadError]="uploadError()"
+                hint="JPEG, PNG, WebP, GIF, SVG · max 5 MB" (fileSelected)="onFileSelected($event)"
+                (cleared)="coverPreview.set(null)" />
+            <input ngModel [ngModel]="coverPreview() ?? ''" name="coverImage" class="admin-form-input"
+                placeholder="Or paste a URL directly" style="margin-top:0.5rem"
+                (ngModelChange)="coverPreview.set($event || null)">
+        </div>
         <div class="admin-form-grid">
             <div class="admin-form-field">
-                <label class="admin-form-label label-optional">Tags</label>
-                <app-tag-input [tags]="formTags()" [suggestions]="allTags()"
-                    (tagsChange)="formTags.set($event)"></app-tag-input>
+                <label class="admin-form-label label-optional">Category</label>
+                <select ngModel [ngModel]="editing()?.category ?? categories[0]" name="category"
+                    class="admin-form-input">
+                    @for (c of categories; track c) {
+                    <option [value]="c">{{ c }}</option>
+                    }
+                </select>
             </div>
             <div class="admin-form-field">
                 <label class="admin-form-label label-optional">Read Time (mins)</label>
@@ -75,14 +94,12 @@
             </div>
         </div>
         <div class="admin-form-field">
-            <label class="admin-form-label label-optional">Cover Image</label>
-            <app-img-upload [previewUrl]="coverPreview()" [uploading]="uploading()" [uploadError]="uploadError()"
-                hint="JPEG, PNG, WebP, GIF, SVG · max 5 MB" (fileSelected)="onFileSelected($event)"
-                (cleared)="coverPreview.set(null)" />
-            <input ngModel [ngModel]="coverPreview() ?? ''" name="coverImage" class="admin-form-input"
-                placeholder="Or paste a URL directly" style="margin-top:0.5rem"
-                (ngModelChange)="coverPreview.set($event || null)">
+            <label class="admin-form-label label-optional">Tags</label>
+            <app-tag-input [tags]="formTags()" [suggestions]="allTags()"
+                (tagsChange)="formTags.set($event)"></app-tag-input>
         </div>
+
+        <p class="admin-form-title" style="margin-top:2rem">Publish</p>
         <div class="admin-form-checks">
             <div class="admin-form-check checkbox-field">
                 <input ngModel [ngModel]="editing()?.isPublished ?? false" name="isPublished" type="checkbox" id="bpub">

@@ -172,9 +172,15 @@
         </div>
 
         <!-- Alt text -->
-        <div class="admin-modal-reason" style="margin-bottom:0">
+        <div class="admin-modal-reason">
             <input type="text" class="rte-modal-input" [value]="imageModal()!.alt"
                 (input)="setImageField('alt', $event)" placeholder="Alt text (optional)">
+        </div>
+
+        <!-- Caption -->
+        <div class="admin-modal-reason" style="margin-bottom:0">
+            <input type="text" class="rte-modal-input" [value]="imageModal()!.caption"
+                (input)="setImageField('caption', $event)" placeholder="Caption shown under the image (optional)">
         </div>
 
         <div class="admin-modal-actions">

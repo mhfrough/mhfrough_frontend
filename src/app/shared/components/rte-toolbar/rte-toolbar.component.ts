@@ -26,7 +26,7 @@ export class RteToolbarComponent {
     readonly colorAlignRight = signal(false);
     readonly bgAlignRight = signal(false);
     readonly linkModal = signal<{ url: string; text: string } | null>(null);
-    readonly imageModal = signal<{ url: string; alt: string } | null>(null);
+    readonly imageModal = signal<{ url: string; alt: string; caption: string } | null>(null);
 
     // ── Image upload state ─────────────────────────────────────────────────
     readonly imageUploading = signal(false);
@@ -165,10 +165,10 @@ export class RteToolbarComponent {
     openImageModal() {
         this.closeDropdowns();
         this.imagePreview.set(null);
-        this.imageModal.set({ url: '', alt: '' });
+        this.imageModal.set({ url: '', alt: '', caption: '' });
     }
 
-    setImageField(field: 'url' | 'alt', e: Event) {
+    setImageField(field: 'url' | 'alt' | 'caption', e: Event) {
         const val = (e.target as HTMLInputElement).value;
         this.imageModal.update(m => m ? { ...m, [field]: val } : null);
         // if the URL field is changed manually, sync the preview
@@ -233,7 +233,9 @@ export class RteToolbarComponent {
         this.imageModal.set(null);
         this.imagePreview.set(null);
         if (!m.url.trim() || !this.el) return;
-        const html = `<img src="${m.url}" alt="${m.alt || ''}" loading="lazy">`;
+        const img = `<img src="${m.url}" alt="${m.alt || ''}" loading="lazy">`;
+        const caption = m.caption.trim();
+        const html = caption ? `<figure>${img}<figcaption>${caption}</figcaption></figure>` : img;
         const pos = this.el.selectionEnd;
         this.el.setRangeText(html, pos, pos, 'end');
         this.el.focus();
