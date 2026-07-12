@@ -127,6 +127,7 @@
   background: transparent;
   color: var(--text);
   border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 0.6rem 1.1rem;
   cursor: pointer;
   transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);

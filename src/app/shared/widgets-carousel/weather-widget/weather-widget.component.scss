@@ -51,6 +51,13 @@
     min-width: 0;
     position: relative;
     height: 2.2rem; // fixed height to avoid layout shift
+
+    // Below this width there's no free header space to the right of
+    // nav-actions for the text to spill into — reserve real space instead
+    // so it doesn't get clipped by the viewport edge.
+    @media (max-width: 900px) {
+      min-width: 76px;
+    }
   }
 
   .weather-text {

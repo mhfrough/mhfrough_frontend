@@ -1,0 +1,16 @@
+<div class="game-page">
+    <a class="game-back" routerLink="/games"><i class="bi bi-arrow-left"></i> Arcade</a>
+    <h1 class="game-title">Tic-Tac-Toe</h1>
+    <div class="device">
+        <div class="device-hud"><span>You <strong>{{ playerWins() }}</strong></span><span>CPU <strong>{{ cpuWins() }}</strong></span></div>
+        <div class="device-screen device-screen--board">
+            <div class="board">
+                @for (cell of board(); track $index) {
+                <button class="cell" (click)="play($index)" [disabled]="!!cell || status() !== 'playing'">{{ cell }}</button>
+                }
+            </div>
+        </div>
+        <div class="device-controls"><span class="status">{{ message() }}</span><button class="btn" (click)="reset()">New game</button></div>
+    </div>
+    <p class="game-hint">You are X. Beat the CPU with three in a row.</p>
+</div>

@@ -355,6 +355,18 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/games/tetris/tetris.component').then(m => m.TetrisComponent),
             },
             {
+                path: 'games/tic-tac-toe',
+                loadComponent: () => import('./features/games/tic-tac-toe/tic-tac-toe.component').then(m => m.TicTacToeComponent),
+            },
+            {
+                path: 'games/rock-paper-scissors',
+                loadComponent: () => import('./features/games/rock-paper-scissors/rock-paper-scissors.component').then(m => m.RockPaperScissorsComponent),
+            },
+            {
+                path: 'games/number-hunt',
+                loadComponent: () => import('./features/games/number-hunt/number-hunt.component').then(m => m.NumberHuntComponent),
+            },
+            {
                 path: 'projects/:slug',
                 loadComponent: () => import('./features/main/projects/project-detail/project-detail.component').then(m => m.ProjectDetailComponent),
             },

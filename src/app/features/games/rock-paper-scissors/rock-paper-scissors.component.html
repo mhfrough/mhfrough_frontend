@@ -1,0 +1,11 @@
+<div class="game-page">
+    <a class="game-back" routerLink="/games"><i class="bi bi-arrow-left"></i> Arcade</a>
+    <h1 class="game-title">Rock Paper Scissors</h1>
+    <div class="device">
+        <div class="device-hud"><span>You <strong>{{ playerScore() }}</strong></span><span>CPU <strong>{{ cpuScore() }}</strong></span></div>
+        <div class="device-screen device-screen--round"><p class="versus">{{ playerChoice() ?? '?' }} <small>vs</small> {{ cpuChoice() ?? '?' }}</p><p class="result">{{ result() }}</p></div>
+        <div class="choice-controls">@for (choice of choices; track choice) { <button class="btn" (click)="play(choice)">{{ choice }}</button> }</div>
+        <div class="device-controls"><span></span><button class="btn" (click)="reset()">Reset</button></div>
+    </div>
+    <p class="game-hint">Rock beats scissors. Scissors beats paper. Paper beats rock.</p>
+</div>

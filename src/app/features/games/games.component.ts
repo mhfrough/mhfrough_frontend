@@ -28,12 +28,15 @@ export class GamesComponent implements OnInit {
         { slug: 'tetris', title: 'Tetris', tagline: 'Stack, rotate, clear lines. Don’t top out.', keys: 'ARROWS + SPACE' },
         { slug: 'minesweeper', title: 'Minesweeper', tagline: 'Clear the grid without hitting a mine.', keys: 'CLICK / RIGHT-CLICK' },
         { slug: 'memory', title: 'Memory', tagline: 'Watch the sequence, then repeat it back.', keys: 'CLICK / TAP' },
+        { slug: 'tic-tac-toe', title: 'Tic-Tac-Toe', tagline: 'Take on the CPU in the timeless three-in-a-row showdown.', keys: 'CLICK / TAP' },
+        { slug: 'rock-paper-scissors', title: 'Rock Paper Scissors', tagline: 'Pick a move, beat the CPU, settle the score.', keys: 'CLICK / TAP' },
+        { slug: 'number-hunt', title: 'Number Hunt', tagline: 'Track down the hidden number in the fewest guesses.', keys: 'KEYBOARD / TAP' },
     ];
 
     ngOnInit(): void {
         this.seo.update({
             title: 'Games | Mohammad Hamza',
-            description: 'Two tiny retro, Nokia-3310-style browser games built with canvas: Snake and Ping Pong.',
+            description: 'A collection of tiny retro, Nokia-3310-style browser games.',
             url: '/games',
         });
     }

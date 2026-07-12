@@ -9,7 +9,7 @@
         @for (game of games; track game.slug) {
         <a class="cart" [routerLink]="['/games', game.slug]">
             <div class="cart-screen">
-                <img [src]="'/games-thumbs/' + game.slug + '.png'" [alt]="game.title + ' gameplay preview'" loading="lazy">
+                <img [src]="'/games-thumbs/' + game.slug + '.webp'" [alt]="game.title + ' gameplay preview'" width="384" height="240" loading="lazy" decoding="async">
             </div>
             <div class="cart-body">
                 <h2 class="cart-title">{{ game.title }}</h2>

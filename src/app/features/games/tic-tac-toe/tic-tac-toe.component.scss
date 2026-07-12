@@ -1,0 +1,7 @@
+@use '../shared/game-shell';
+:host { display: block; }
+.device-screen--board { display: grid; place-items: center; padding: 1rem; }
+.board { display: grid; grid-template-columns: repeat(3, 1fr); width: min(100%, 270px); aspect-ratio: 1; gap: 4px; }
+.cell { border: 0; background: #333; color: #eee; cursor: pointer; font: 700 2.1rem/1 var(--font); }
+.cell:not(:disabled):hover { background: #4a4a4a; }
+.status { color: var(--text-muted); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; }

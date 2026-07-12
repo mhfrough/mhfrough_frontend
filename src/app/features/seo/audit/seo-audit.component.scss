@@ -442,7 +442,8 @@
     border: 1px solid var(--border);
     background: var(--surface);
     border-radius: var(--radius);
-    overflow: hidden;
+    // No overflow:hidden — --radius is 0 so there's nothing to clip, and hiding overflow
+    // here was chopping the .sa-tip tooltips and info popovers that live inside sections.
 }
 
 .sa-section-head {
@@ -1198,10 +1199,10 @@
     }
 }
 
-// Phone: rounded bezel + speaker notch.
+// Phone: chunky bezel, speaker notch, home-indicator bar — reads as a handset, not a rounded card.
 .sa-mock--phone .sa-mock-screen {
-    border: 3px solid var(--border);
-    border-radius: 1.4rem;
+    border: 8px solid var(--border);
+    border-radius: 1.6rem;
     padding-top: 0; // aspect handled inline
     box-shadow: 0 0 0 1px var(--bg);
 }
@@ -1209,33 +1210,48 @@
 .sa-mock--phone::after {
     content: '';
     position: absolute;
-    top: 9px;
+    top: 14px;
     left: 50%;
     transform: translateX(-50%);
-    width: 34%;
-    height: 7px;
-    border-radius: 4px;
-    background: var(--border);
+    width: 30%;
+    height: 5px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-alt);
     pointer-events: none;
+    z-index: 1;
 }
 
-// Tablet: squarer bezel + camera dot.
+.sa-mock--phone .sa-mock-home {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36%;
+    height: 3px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-alt);
+    pointer-events: none;
+    z-index: 1;
+}
+
+// Tablet: thick, even chassis bezel + camera dot — reads as a slab, not a phone.
 .sa-mock--tablet .sa-mock-screen {
-    border: 4px solid var(--border);
-    border-radius: 1rem;
+    border: 14px solid var(--border);
+    border-radius: 0.6rem;
 }
 
 .sa-mock--tablet::after {
     content: '';
     position: absolute;
-    top: 8px;
+    top: 6px;
     left: 50%;
     transform: translateX(-50%);
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: var(--text-muted);
+    background: var(--surface-alt);
     pointer-events: none;
+    z-index: 1;
 }
 
 // Laptop: thin bezel screen sitting on a wider keyboard deck.
@@ -1290,11 +1306,13 @@
 
     .sa-mock-deck,
     .sa-mock-neck,
-    .sa-mock-foot {
+    .sa-mock-foot,
+    .sa-mock-home {
         background: var(--danger-text);
     }
 
-    &.sa-device--phone .sa-mock::after {
+    &.sa-device--phone .sa-mock::after,
+    &.sa-device--tablet .sa-mock::after {
         background: var(--danger-text);
     }
 }
@@ -1318,7 +1336,7 @@
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--text);
+    color: var(--text-muted);
 }
 
 .sa-device-size {
@@ -1567,7 +1585,9 @@
 
 .sa-tip {
     position: absolute;
-    bottom: calc(100% + 0.45rem);
+    // Opens downward: most info icons sit at the top of their card/section, so popping
+    // upward pushed the tooltip past the viewport edge and got it visually chopped off.
+    top: calc(100% + 0.45rem);
     left: 50%;
     transform: translateX(-50%);
     width: max-content;

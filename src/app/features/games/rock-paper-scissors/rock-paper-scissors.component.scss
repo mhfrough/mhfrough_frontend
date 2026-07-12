@@ -1,0 +1,8 @@
+@use '../shared/game-shell';
+:host { display: block; }
+.device-screen--round { display: grid; place-content: center; text-align: center; gap: 1rem; }
+.versus { margin: 0; color: #eee; font: 700 1.55rem var(--font); text-transform: uppercase; }
+.versus small { color: #999; font-size: .68rem; margin: 0 .45rem; }
+.result { margin: 0; color: #bbb; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+.choice-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; padding-top: 1rem; }
+.choice-controls .btn { padding: .6rem .35rem; }

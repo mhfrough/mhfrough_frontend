@@ -1,0 +1,13 @@
+<div class="game-page">
+    <a class="game-back" routerLink="/games"><i class="bi bi-arrow-left"></i> Arcade</a>
+    <h1 class="game-title">Number Hunt</h1>
+    <div class="device">
+        <div class="device-hud"><span>Tries <strong>{{ attempts() }}</strong></span><span>Best <strong>{{ best() ?? '—' }}</strong></span></div>
+        <div class="device-screen device-screen--hunt">
+            <p>{{ message() }}</p>
+            <form (submit)="$event.preventDefault(); submit()"><input type="number" min="1" max="100" [(ngModel)]="guess" name="guess" aria-label="Your number guess" [disabled]="won()" autofocus><button class="btn" type="submit" [disabled]="won()">Guess</button></form>
+        </div>
+        <div class="device-controls"><span></span><button class="btn" (click)="reset()">New number</button></div>
+    </div>
+    <p class="game-hint">Find the secret number in as few attempts as possible.</p>
+</div>

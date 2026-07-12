@@ -865,6 +865,9 @@
                             <span class="sa-device-noshot"><i class="bi bi-image"></i></span>
                             }
                         </div>
+                        @if (mockType(vp.width) === 'phone') {
+                        <span class="sa-mock-home"></span>
+                        }
                         @if (mockType(vp.width) === 'laptop') {
                         <span class="sa-mock-deck"></span>
                         }
